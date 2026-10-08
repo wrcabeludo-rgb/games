@@ -5,8 +5,8 @@ config_version=5
 [application]
 
 config/name="Битва легенд"
-config/version="3.8"
-config/description="Пауза, настройки, вибрация"
+config/version="3.9"
+config/description="Новый интерфейс боя"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="res://icon.svg"

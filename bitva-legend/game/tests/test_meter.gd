@@ -32,9 +32,37 @@ func _test_super_vs_jab(chars: PackedStringArray, sup: int) -> bool:
 	return true
 
 
+## Суперприём поймал соперника в прыжке: тот не висит в воздухе весь ролик (баг 3.8).
+func _test_super_air_catch() -> bool:
+	var caught_in_air := 0
+	for jump_at in range(0, 40, 2):
+		for gap in [200, 260, 320]:
+			var sim := Sim.new(false, PackedStringArray(["ilya", "dracula"]))
+			sim.fighters[0].x = 900 * SUB
+			sim.fighters[1].x = (900 + gap) * SUB
+			sim.fighters[0].meter = Fighter.METER_MAX
+			var held_air := 0
+			for i in 300:
+				var inp := PackedInt32Array([0, 0])
+				if i == jump_at:
+					inp[1] = InputBits.UP
+				if i == 20:
+					inp[0] = SUPER
+				sim.step(inp)
+				var d := sim.fighters[1]
+				if d.state == S.THROWN and d.y > 0:
+					held_air += 1
+			if held_air > 0:
+				caught_in_air += 1
+			if held_air > 30:  # заморозка удара (12) + спуск; раньше висел весь ролик (100)
+				return false
+	return caught_in_air > 0
+
+
 func _init() -> void:
 	var ok := true
 	ok = _check("попадание: атакующему урон × 2, пропустившему — урон", _test_gain_hit()) and ok
+	ok = _check("суперприём поймал в прыжке: схваченный опускается на землю, не висит", _test_super_air_catch()) and ok
 	for who in [["dracula", "ilya"], ["ilya", "dracula"]]:
 		for sup in [0, 1]:
 			ok = _check("суперприём %s против ЛР в упор: никто не застревает в захвате" % who[sup],

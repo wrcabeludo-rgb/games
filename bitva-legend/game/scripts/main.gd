@@ -49,6 +49,7 @@ func _ready() -> void:
 	menu.sound.connect(func(n: String): sound.play(n))
 	menu.voice.connect(func(n: String): sound.say([n] as Array[String]))
 	menu.setup(arena.sprites)
+	hud.setup(arena.sprites)
 	menu.fight_requested.connect(_start_fight)
 	var start_screen := MenuView.Screen.TITLE
 	for arg in OS.get_cmdline_user_args():

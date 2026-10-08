@@ -26,3 +26,11 @@
 
 Громкость — константы в начале `sound_director.gd` (MUSIC_DB, SFX_DB, VOICE_DB).
 Позже: свои фразы героев (Илья, Дракула) — можно записать голосом или подобрать.
+
+## Шрифты (game/fonts/, лицензия SIL Open Font License — бесплатно, в том числе в коммерческой игре)
+| Файл | Где | Авторы |
+|---|---|---|
+| RuslanDisplay-Regular.ttf | заголовки: «БИТВА ЛЕГЕНД», «РАУНД», «НОКАУТ», имена бойцов, «ПАУЗА» | Oleg Snarsky, Denis Masharov, Vladimir Rabdu |
+| RussoOne-Regular.ttf | цифры и надписи интерфейса | Jovanny Lemonad |
+
+Тексты лицензий — рядом со шрифтами (OFL-*.txt).

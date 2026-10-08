@@ -11,16 +11,22 @@ const COLOR_HP_LOW := Color(0.92, 0.3, 0.18)
 const COLOR_TRAIL := Color(0.85, 0.12, 0.12)
 const COLOR_GOLD := Color(1, 0.85, 0.3)
 const HISTORY_ROWS := 14
-const BAR_Y := 30.0
+const BAR_Y := 26.0
 const BAR_H := 26.0
-const BAR_GAP := 70.0       # от центра экрана до внутреннего края полоски
-const BAR_MARGIN := 30.0    # от края экрана до внешнего края полоски
+const SLANT := 14.0         # скос внутреннего края полоски, px
+const MEDAL_X := 58.0       # центр медальона с портретом от края экрана
+const MEDAL_R := 34.0
+const TIMER_R := 44.0
+## Лица на портретах экрана выбора (select_1.png): область для медальона, px кадра.
+const FACES := {"ilya": Rect2(480, 25, 240, 240), "dracula": Rect2(650, 30, 220, 220)}
 const TRAIL_DELAY := 30     # «красный след» урона начинает убывать через столько кадров
 const TRAIL_SPEED := 6.0    # и тает со скоростью столько очков здоровья за кадр
 
 var show_inputs := false
 var paused := false          # открыта пауза — своя подсказка внизу не нужна
-var _font := SystemFont.new()
+var _font: Font = load("res://fonts/RussoOne-Regular.ttf")
+var _title_font: Font = load("res://fonts/RuslanDisplay-Regular.ttf")
+var _sprites: FighterSprites
 var _sim: Sim
 var _reader: InputReader
 var _ai: AiController
@@ -31,8 +37,11 @@ var _last_hp := [Fighter.MAX_HP, Fighter.MAX_HP]
 
 
 func _ready() -> void:
-	_font.font_names = PackedStringArray(["Segoe UI", "Arial", "DejaVu Sans", "Noto Sans"])
-	_font.font_weight = 600
+	pass
+
+
+func setup(sprites: FighterSprites) -> void:
+	_sprites = sprites
 
 
 func show_state(sim: Sim, reader: InputReader, ai: AiController) -> void:
@@ -76,71 +85,171 @@ func _draw() -> void:
 
 # --- Полоски здоровья ----------------------------------------------------
 
-## Полоска игрока: убывает к внешнему краю, как в Street Fighter.
+## Полоска игрока (скошенный прямоугольник): от медальона с портретом к таймеру.
+## Убывает к внешнему краю, как в Street Fighter.
 func _bar_rect(p: int) -> Rect2:
-	var w := size.x / 2.0 - BAR_GAP - BAR_MARGIN
-	var x := BAR_MARGIN if p == 0 else size.x / 2.0 + BAR_GAP
-	return Rect2(x, BAR_Y, w, BAR_H)
+	var x0 := MEDAL_X + MEDAL_R + 6.0
+	var w := size.x / 2.0 - TIMER_R - 14.0 - x0
+	return Rect2(x0 if p == 0 else size.x / 2.0 + TIMER_R + 14.0, BAR_Y, w, BAR_H)
+
+
+## Четырёхугольник со скосом: у игрока 1 скошен правый (внутренний) край, у игрока 2 — левый.
+func _slant(r: Rect2, right: bool, k := 1.0) -> PackedVector2Array:
+	var s := SLANT * k
+	if right:
+		return PackedVector2Array([r.position + Vector2(s, 0), Vector2(r.end.x, r.position.y), r.end,
+			Vector2(r.position.x, r.end.y)])
+	return PackedVector2Array([r.position, Vector2(r.end.x, r.position.y), r.end - Vector2(s, 0),
+		Vector2(r.position.x, r.end.y)])
+
+
+## Заливка градиентом сверху вниз.
+func _fill(pts: PackedVector2Array, top: Color, bottom: Color) -> void:
+	draw_polygon(pts, PackedColorArray([top, top, bottom, bottom]))
+
+
+## Часть полоски шириной w от внешнего края (с тем же скосом у внутреннего).
+func _bar_part(r: Rect2, w: float, right: bool) -> Rect2:
+	return Rect2(r.position.x if not right else r.end.x - w, r.position.y, w, r.size.y)
 
 
 func _draw_bar(p: int) -> void:
 	var f := _sim.fighters[p]
 	var r := _bar_rect(p)
 	var right := p == 1
-	draw_rect(r.grow(3), Color(0, 0, 0, 0.75))
-	draw_rect(r, Color(0.18, 0.16, 0.2))
-	var hp_w := r.size.x * f.hp / Fighter.MAX_HP
+	# Рамка: тёмная подложка, золотой кант.
+	var frame := _slant(r.grow(4), right, 1.4)
+	draw_colored_polygon(frame, Color(0.05, 0.03, 0.06, 0.92))
+	_fill(_slant(r, right), Color(0.16, 0.12, 0.16), Color(0.08, 0.06, 0.09))
+	# След урона: первые кадры — белая вспышка, потом красный.
 	var trail_w: float = r.size.x * _trail[p] / Fighter.MAX_HP
-	# Полоски прижаты к внешнему краю: у игрока 1 — к левому, у игрока 2 — к правому.
-	var trail_rect := Rect2(r.position.x if not right else r.end.x - trail_w, r.position.y, trail_w, r.size.y)
-	draw_rect(trail_rect, COLOR_TRAIL)
-	var low := f.hp < Fighter.MAX_HP / 4
-	var col := COLOR_HP_LOW if low else COLOR_HP
-	var hp_rect := Rect2(r.position.x if not right else r.end.x - hp_w, r.position.y, hp_w, r.size.y)
-	draw_rect(hp_rect, col)
-	draw_rect(Rect2(hp_rect.position, Vector2(hp_rect.size.x, 6)), col.lightened(0.35))
-	draw_rect(r.grow(3), COLOR_GOLD.darkened(0.3), false, 2)
-	# Имя под полоской, у внешнего края; победы в раундах — у внутреннего.
-	var name_x := r.position.x if not right else r.end.x
-	_text(Vector2(name_x, r.end.y + 26), f.data.name, 22, f.color().lightened(0.25), right)
-	var who := "Игрок %d · %s" % [p + 1, _reader.device_label(p)]
+	if trail_w > 1.0:
+		var fresh: bool = _trail_wait[p] > TRAIL_DELAY - 6
+		var tc := Color(1, 0.95, 0.85) if fresh else COLOR_TRAIL
+		_fill(_slant(_bar_part(r, trail_w, right), right), tc, tc.darkened(0.35))
+	# Здоровье: золото, на исходе — красное и пульсирует.
+	var hp_w := r.size.x * f.hp / Fighter.MAX_HP
+	if hp_w > 1.0:
+		var low := f.hp < Fighter.MAX_HP / 4
+		var top := COLOR_HP.lightened(0.25)
+		var bottom := COLOR_HP.darkened(0.25)
+		if low:
+			var pulse := 0.5 + 0.5 * sin(_sim.tick * 0.25)
+			top = COLOR_HP_LOW.lightened(0.2 + 0.25 * pulse)
+			bottom = COLOR_HP_LOW.darkened(0.3)
+		var hr := _bar_part(r, hp_w, right)
+		_fill(_slant(hr, right), top, bottom)
+		# Блик по верху полоски.
+		var gloss := Rect2(hr.position + Vector2(0, 2), Vector2(hr.size.x, 5))
+		draw_colored_polygon(_slant(gloss, right, 0.25), Color(1, 1, 1, 0.28))
+	_outline(frame, COLOR_GOLD.darkened(0.15), 2.0)
+	_draw_medal(p)
+	# Имя под полоской у медальона; победы в раундах — у таймера.
+	var name_x := r.position.x + 4 if not right else r.end.x - 4
+	_text(Vector2(name_x, r.end.y + 27), f.data.name, 21, COLOR_TEXT, right, false, 2, _title_font)
+	var tag := ""
 	if p == 1 and _ai.level != AiController.Level.OFF:
-		who = "ИИ · %s (F3 или Options — сменить)" % _ai.level_name()
-	_text(Vector2(name_x, r.end.y + 46), who, 13, COLOR_GOLD if who.begins_with("ИИ") else COLOR_DIM, right)
+		tag = "ИИ · " + _ai.level_name()
+	elif Settings.hints:
+		tag = "Игрок %d · %s" % [p + 1, _reader.device_label(p)]
+	if tag != "":
+		_text(Vector2(name_x, r.end.y + 46), tag, 13, COLOR_GOLD if tag.begins_with("ИИ") else COLOR_DIM, right)
 	for i in Sim.WINS_NEEDED:
-		var cx := r.end.x - 12 - i * 26 if not right else r.position.x + 12 + i * 26
-		var c := Vector2(cx, r.end.y + 18)
-		var won := i < _sim.wins[p]
-		draw_circle(c, 9, COLOR_GOLD if won else Color(0.15, 0.13, 0.17))
-		draw_arc(c, 9, 0, TAU, 20, COLOR_GOLD.darkened(0.3), 2)
+		var cx := r.end.x - 22 - i * 26 if not right else r.position.x + 22 + i * 26
+		_draw_gem(Vector2(cx, r.end.y + 17), i < _sim.wins[p])
 
 
-## Шкала силы: три секции под именем; полные секции светятся.
+## Медальон с портретом бойца у внешнего края полоски.
+func _draw_medal(p: int) -> void:
+	var f := _sim.fighters[p]
+	var c := Vector2(MEDAL_X if p == 0 else size.x - MEDAL_X, BAR_Y + BAR_H / 2.0 + 4)
+	draw_circle(c, MEDAL_R + 5, Color(0.05, 0.03, 0.06))
+	draw_circle(c, MEDAL_R, f.color().darkened(0.55))
+	var face := _face(f.id)
+	if not face.is_empty():
+		var tex: Texture2D = face[0]
+		var src: Rect2 = face[1]
+		# Круглая маска: портрет — веер треугольников с UV.
+		var pts := PackedVector2Array()
+		var uvs := PackedVector2Array()
+		var flip := -1.0 if p == 1 else 1.0
+		for i in 40:
+			var a := TAU * i / 40.0
+			var v := Vector2(cos(a), sin(a))
+			pts.append(c + v * MEDAL_R)
+			var uv := src.position + src.size * (Vector2(0.5 + 0.5 * v.x * flip, 0.5 + 0.5 * v.y))
+			uvs.append(uv / tex.get_size())
+		var cols := PackedColorArray()
+		cols.resize(pts.size())
+		cols.fill(Color.WHITE)
+		draw_polygon(pts, cols, uvs, tex)
+	# Кант медальона; когда шкала силы полна — светится.
+	var full := f.meter >= Fighter.METER_MAX
+	var ring := COLOR_GOLD if not full else COLOR_GOLD.lerp(Color.WHITE, 0.5 + 0.5 * sin(_sim.tick * 0.3))
+	draw_arc(c, MEDAL_R + 2, 0, TAU, 48, ring, 3.0, true)
+	draw_arc(c, MEDAL_R + 6, 0, TAU, 48, Color(0.05, 0.03, 0.06), 2.0, true)
+
+
+## Лицо бойца с портрета экрана выбора: [текстура, область] или пусто.
+func _face(id: String) -> Array:
+	if _sprites == null:
+		return []
+	var a := _sprites.anim(id, "select")
+	if a.is_empty() or not FACES.has(id):
+		return []
+	return [a.tex[0], FACES[id]]
+
+
+## Победа в раунде — золотой ромб, нет победы — пустой.
+func _draw_gem(c: Vector2, won: bool) -> void:
+	var r := 9.0
+	var pts := PackedVector2Array([c + Vector2(0, -r), c + Vector2(r, 0), c + Vector2(0, r), c + Vector2(-r, 0)])
+	draw_colored_polygon(pts, Color(0.05, 0.03, 0.06))
+	var inner := PackedVector2Array([c + Vector2(0, -r + 3), c + Vector2(r - 3, 0), c + Vector2(0, r - 3), c + Vector2(-r + 3, 0)])
+	if won:
+		draw_polygon(inner, PackedColorArray([COLOR_GOLD.lightened(0.4), COLOR_GOLD, COLOR_GOLD.darkened(0.3), COLOR_GOLD]))
+	_outline(pts, COLOR_GOLD.darkened(0.15), 1.5)
+
+
+func _outline(pts: PackedVector2Array, color: Color, width: float) -> void:
+	var loop := pts.duplicate()
+	loop.append(pts[0])
+	draw_polyline(loop, color, width, true)
+
+
+## Шкала силы: в нижнем углу, три скошенные секции; полные светятся, полная шкала — переливается.
 func _draw_meter(p: int) -> void:
 	var f := _sim.fighters[p]
-	var r := _bar_rect(p)
 	var right := p == 1
-	var w := 300.0
-	var box := Rect2(r.position.x if not right else r.end.x - w, r.end.y + 58, w, 12)
-	draw_rect(box.grow(2), Color(0, 0, 0, 0.75))
+	var w := 260.0
+	var y := size.y - 34.0
+	var x0 := 92.0 if not right else size.x - 92.0 - w
 	var full := f.meter / Fighter.METER_SECTION
+	# Число секций — в ромбе у края экрана.
+	var c := Vector2(54 if not right else size.x - 54, y + 7)
+	var d := PackedVector2Array([c + Vector2(0, -24), c + Vector2(24, 0), c + Vector2(0, 24), c + Vector2(-24, 0)])
+	draw_colored_polygon(d, Color(0.05, 0.03, 0.06, 0.92))
+	_outline(d, COLOR_GOLD.darkened(0.15), 2.0)
+	var num_col := Color(0.55, 0.8, 1.0) if full < 3 else COLOR_GOLD.lerp(Color.WHITE, 0.5 + 0.5 * sin(_sim.tick * 0.3))
+	_text(c + Vector2(0, 10), str(full), 26, num_col, false, true, 2)
 	var seg_w := w / 3.0
 	for i in 3:
 		var fill := clampf(float(f.meter - i * Fighter.METER_SECTION) / Fighter.METER_SECTION, 0.0, 1.0)
 		var idx := i if not right else 2 - i
-		var seg := Rect2(box.position.x + idx * seg_w, box.position.y, seg_w - 3, box.size.y)
-		draw_rect(seg, Color(0.12, 0.12, 0.2))
-		var fw := seg.size.x * fill
-		var col := Color(0.35, 0.65, 1.0) if fill >= 1.0 else Color(0.25, 0.4, 0.7)
-		if full == 3 and _sim.tick % 20 < 10:
-			col = Color(1, 0.85, 0.3)
-		draw_rect(Rect2(seg.position.x if not right else seg.end.x - fw, seg.position.y, fw, seg.size.y), col)
-	var label := "СИЛА %d" % full
-	if full >= 1:
-		label += " · спецприём + блок — усиленный"
-	if full == 3:
-		label += " · СУПЕР: блок + СР + СН"
-	_text(Vector2(box.position.x if not right else box.end.x, box.end.y + 16), label, 12, COLOR_GOLD if full == 3 else COLOR_DIM, right)
+		var seg := Rect2(x0 + idx * seg_w, y, seg_w - 6, 14)
+		var shape := _slant(seg.grow(2), right, 0.8)
+		draw_colored_polygon(shape, Color(0.05, 0.03, 0.06, 0.92))
+		_fill(_slant(seg, right, 0.6), Color(0.13, 0.13, 0.22), Color(0.07, 0.07, 0.12))
+		if fill > 0.0:
+			var top := Color(0.5, 0.78, 1.0) if fill >= 1.0 else Color(0.3, 0.45, 0.75)
+			if full == 3:
+				top = COLOR_GOLD.lerp(Color.WHITE, 0.4 + 0.4 * sin(_sim.tick * 0.3 + i))
+			var part := Rect2(seg.position.x if not right else seg.end.x - seg.size.x * fill, seg.position.y,
+				seg.size.x * fill, seg.size.y)
+			_fill(_slant(part, right, 0.6), top, top.darkened(0.4))
+		_outline(shape, COLOR_GOLD.darkened(0.35), 1.0)
+	var label := "СУПЕР ГОТОВ!" if full == 3 else "СИЛА"
+	_text(Vector2(x0 if not right else x0 + w, y - 6), label, 13, COLOR_GOLD if full == 3 else COLOR_DIM, right)
 
 
 ## Название суперприёма во время паузы и ролика.
@@ -149,22 +258,46 @@ func _draw_super_name() -> void:
 		var flash := f.state == Fighter.State.ATTACK and f.move_frame == 1 and _sim.hitstop > 0
 		if f.is_super() and (flash or f.state == Fighter.State.THROWING):
 			var y := size.y * 0.38
-			draw_rect(Rect2(0, y - 52, size.x, 70), Color(0, 0, 0, 0.45))
-			_text(Vector2(size.x / 2.0, y), f.move_data().name + "!", 54, f.color().lightened(0.4), false, true, 3)
+			_banner(y, 70)
+			_text(Vector2(size.x / 2.0, y), f.move_data().name + "!", 54, f.color().lightened(0.4), false, true, 3, _title_font)
 
 
+## Таймер — восьмиугольник с двойным золотым кантом.
 func _draw_timer() -> void:
-	var c := Vector2(size.x / 2.0, BAR_Y + BAR_H / 2.0)
-	var box := Rect2(c - Vector2(46, 34), Vector2(92, 68))
-	draw_rect(box, Color(0, 0, 0, 0.75))
-	draw_rect(box, COLOR_GOLD.darkened(0.3), false, 2)
+	var c := Vector2(size.x / 2.0, BAR_Y + BAR_H / 2.0 + 6)
+	var pts := PackedVector2Array()
+	var inner := PackedVector2Array()
+	for i in 8:
+		var a := TAU * (i + 0.5) / 8.0
+		pts.append(c + Vector2(cos(a), sin(a)) * TIMER_R)
+		inner.append(c + Vector2(cos(a), sin(a)) * (TIMER_R - 6))
+	draw_colored_polygon(pts, Color(0.05, 0.03, 0.06, 0.95))
+	draw_polygon(inner, PackedColorArray([Color(0.22, 0.12, 0.14), Color(0.22, 0.12, 0.14), Color(0.1, 0.05, 0.08),
+		Color(0.1, 0.05, 0.08), Color(0.1, 0.05, 0.08), Color(0.1, 0.05, 0.08), Color(0.22, 0.12, 0.14), Color(0.22, 0.12, 0.14)]))
+	_outline(pts, COLOR_GOLD.darkened(0.1), 2.5)
+	_outline(inner, COLOR_GOLD.darkened(0.5), 1.0)
 	if _sim.training:
-		_text(c + Vector2(0, 17), "∞", 46, COLOR_TEXT, false, true)
-		_text(c + Vector2(0, 62), "ТРЕНИРОВКА · F6 или R1 + тачпад — выйти", 14, COLOR_GOLD, false, true, 2)
+		_text(c + Vector2(0, 16), "∞", 44, COLOR_TEXT, false, true, 2)
+		_text(c + Vector2(0, TIMER_R + 26), "ТРЕНИРОВКА · F6 или R1 + тачпад — выйти", 14, COLOR_GOLD, false, true, 2)
 		return
 	var seconds := ceili(_sim.timer / 60.0)
 	var col := COLOR_HP_LOW if seconds <= 10 and _sim.phase == Sim.Phase.FIGHT else COLOR_TEXT
-	_text(c + Vector2(0, 17), "%02d" % seconds, 46, col, false, true)
+	_text(c + Vector2(0, 15), "%02d" % seconds, 40, col, false, true, 2)
+
+
+## Полоса-подложка под надписью, края растворяются.
+func _banner(y: float, h: float) -> void:
+	var clear := Color(0, 0, 0, 0)
+	var dark := Color(0, 0, 0, 0.5)
+	var top := y - h * 0.72
+	for half in 2:
+		var x0 := 0.0 if half == 0 else size.x / 2.0
+		var c0 := clear if half == 0 else dark
+		var c1 := dark if half == 0 else clear
+		draw_polygon(PackedVector2Array([Vector2(x0, top), Vector2(x0 + size.x / 2.0, top),
+			Vector2(x0 + size.x / 2.0, top + h), Vector2(x0, top + h)]), PackedColorArray([c0, c1, c1, c0]))
+	draw_line(Vector2(size.x * 0.2, top), Vector2(size.x * 0.8, top), Color(1, 0.85, 0.3, 0.5), 1.5)
+	draw_line(Vector2(size.x * 0.2, top + h), Vector2(size.x * 0.8, top + h), Color(1, 0.85, 0.3, 0.5), 1.5)
 
 
 # --- Объявления ----------------------------------------------------------
@@ -205,10 +338,10 @@ func _draw_announcement() -> void:
 	if big == "":
 		return
 	var y := size.y * 0.3
-	draw_rect(Rect2(0, y - 62, size.x, 84 + (40 if small != "" else 0)), Color(0, 0, 0, 0.35))
-	_text(Vector2(size.x / 2.0, y), big, 60, color, false, true, 3)
+	_banner(y + (12 if small != "" else 0), 92 + (40 if small != "" else 0))
+	_text(Vector2(size.x / 2.0, y), big, 64, color, false, true, 3, _title_font)
 	if small != "":
-		_text(Vector2(size.x / 2.0, y + 46), small, 24, COLOR_TEXT, false, true)
+		_text(Vector2(size.x / 2.0, y + 46), small, 22, COLOR_TEXT, false, true, 2)
 
 
 ## Счётчик комбо — на стороне атакующего, пока соперник оглушён.
@@ -217,8 +350,9 @@ func _draw_combo(p: int, right: bool) -> void:
 	if d.combo < 2 or not d.is_stunned():
 		return
 	var x := size.x * (0.75 if right else 0.25)
-	_text(Vector2(x, 200), "%d %s!" % [d.combo, _plural_hits(d.combo)], 40, COLOR_GOLD, false, true, 2)
-	_text(Vector2(x, 232), "урон %d" % d.combo_damage, 22, COLOR_TEXT, false, true, 2)
+	_text(Vector2(x, 210), str(d.combo), 64, COLOR_GOLD, false, true, 3)
+	_text(Vector2(x, 240), "%s!" % _plural_hits(d.combo), 26, COLOR_GOLD.lightened(0.3), false, true, 2, _title_font)
+	_text(Vector2(x, 266), "урон %d" % d.combo_damage, 18, COLOR_TEXT, false, true, 2)
 
 
 ## «ПАРИРОВАНИЕ!» на стороне парировавшего.
@@ -228,7 +362,7 @@ func _draw_parry(p: int, right: bool) -> void:
 	if _sim.sparks[base + 3] != 5 or age < 0 or age > 50:
 		return
 	var x := size.x * (0.75 if right else 0.25)
-	_text(Vector2(x, 270), "ПАРИРОВАНИЕ!", 34, Color(0.55, 0.85, 1.0), false, true, 2)
+	_text(Vector2(x, 300), "ПАРИРОВАНИЕ!", 32, Color(0.55, 0.85, 1.0), false, true, 2, _title_font)
 
 
 static func _plural_hits(n: int) -> String:
@@ -312,12 +446,16 @@ func _draw_arrow(c: Vector2, n: int, s: float, color: Color) -> void:
 	draw_colored_polygon(PackedVector2Array([tip + v * 3, tip - v * s * 0.6 + side, tip - v * s * 0.6 - side]), color)
 
 
+## Текст с тёмной обводкой (outline px) и тенью. font — по умолчанию Russo One.
 func _text(pos: Vector2, s: String, font_size: int, color: Color, align_right := false,
-		centered := false, shadow := 1) -> void:
-	var width := _font.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+		centered := false, outline := 1, font: Font = null) -> void:
+	var fnt: Font = font if font != null else _font
+	var width := fnt.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
 	if align_right:
 		pos.x -= width
 	elif centered:
 		pos.x -= width / 2.0
-	draw_string(_font, pos + Vector2(shadow, shadow), s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color(0, 0, 0, 0.7))
-	draw_string(_font, pos, s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)
+	var dark := Color(0.06, 0.02, 0.05, 0.9)
+	draw_string(fnt, pos + Vector2(outline + 1, outline + 2), s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color(0, 0, 0, 0.5))
+	draw_string_outline(fnt, pos, s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, outline * 2 + 2, dark)
+	draw_string(fnt, pos, s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)

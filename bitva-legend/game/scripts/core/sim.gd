@@ -213,8 +213,12 @@ func _process_grabs() -> void:
 		_hold_position(a, d)
 
 
+const HOLD_DROP := 40               # схваченный в прыжке (суперприём) опускается на землю, px за тик
+
+
 func _hold_position(a: Fighter, d: Fighter) -> void:
 	d.x = a.x + a.facing * (a.push_half() + d.push_half())
+	d.y = maxi(d.y - HOLD_DROP * SUB, 0)
 	d.x = clampi(d.x, d.push_half(), ARENA_WIDTH * SUB - d.push_half())
 
 

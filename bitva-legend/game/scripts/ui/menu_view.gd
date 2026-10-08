@@ -36,7 +36,8 @@ var picked_at := PackedInt32Array([0, 0])
 var vs_ai := false
 var ai_label := ""
 
-var _font := SystemFont.new()
+var _font: Font = load("res://fonts/RussoOne-Regular.ttf")
+var _title_font: Font = load("res://fonts/RuslanDisplay-Regular.ttf")
 var _sprites: FighterSprites
 var _title: Texture2D
 var _sky: Texture2D
@@ -46,8 +47,6 @@ var _ready_tick := -1
 
 
 func _ready() -> void:
-	_font.font_names = PackedStringArray(["Segoe UI", "Arial", "DejaVu Sans", "Noto Sans"])
-	_font.font_weight = 700
 	if ResourceLoader.exists("res://art/menu/title.png"):
 		_title = load("res://art/menu/title.png")
 	# Экран выбора — ночное небо арены (на заставке те же герои: рядом с портретами путались бы).
@@ -195,8 +194,7 @@ func _draw_title() -> void:
 	var cx := size.x / 2.0
 	# Название — внизу, на затемнении: вверху заставки лица героев и луна.
 	var y := size.y - 150 if _title != null else 190.0
-	_text_c(Vector2(cx + 4, y + 6), "БИТВА ЛЕГЕНД", 80, Color(0.25, 0.05, 0.05, 0.9))
-	_text_c(Vector2(cx, y), "БИТВА ЛЕГЕНД", 80, COLOR_GOLD)
+	_text_c(Vector2(cx, y), "БИТВА ЛЕГЕНД", 84, COLOR_GOLD, _title_font, 4)
 	_text_c(Vector2(cx, y + 38), "CLASH OF LEGENDS", 22, COLOR_TEXT)
 	if (tick / 30) % 2 == 0:
 		_text_c(Vector2(cx, size.y - 62), "Нажмите Enter или крест", 26, COLOR_TEXT)
@@ -206,7 +204,7 @@ func _draw_title() -> void:
 func _draw_select() -> void:
 	var cx := size.x / 2.0
 	draw_rect(Rect2(0, 0, size.x, 70), Color(0, 0, 0, 0.45))
-	_text_c(Vector2(cx, 48), "ВЫБОР БОЙЦА", 36, COLOR_GOLD)
+	_text_c(Vector2(cx, 50), "ВЫБОР БОЙЦА", 40, COLOR_GOLD, _title_font, 3)
 	for p in 2:
 		_draw_preview(p)
 	_draw_grid()
@@ -311,6 +309,11 @@ func _draw_preview(p: int) -> void:
 	draw_set_transform(Vector2.ZERO)
 
 
-func _text_c(pos: Vector2, s: String, font_size: int, color: Color) -> void:
-	var w := _font.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
-	draw_string(_font, pos - Vector2(w / 2.0, 0), s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)
+## Текст по центру с тёмной обводкой; font — по умолчанию Russo One.
+func _text_c(pos: Vector2, s: String, font_size: int, color: Color, font: Font = null, outline := 1) -> void:
+	var fnt: Font = font if font != null else _font
+	var w := fnt.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	var at := pos - Vector2(w / 2.0, 0)
+	if color.a > 0.95:
+		draw_string_outline(fnt, at, s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, outline * 2 + 2, Color(0.06, 0.02, 0.05, 0.9))
+	draw_string(fnt, at, s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)

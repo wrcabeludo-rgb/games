@@ -57,14 +57,13 @@ var ai_level := 0
 ## Открыто из меню (без боя): только страница настроек, «Назад» закрывает.
 var settings_only := false
 
-var _font := SystemFont.new()
+var _font: Font = load("res://fonts/RussoOne-Regular.ttf")
+var _title_font: Font = load("res://fonts/RuslanDisplay-Regular.ttf")
 var _prev := 0
 var _hold := 0
 
 
 func _ready() -> void:
-	_font.font_names = PackedStringArray(["Segoe UI", "Arial", "DejaVu Sans", "Noto Sans"])
-	_font.font_weight = 600
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	visible = false
 
@@ -248,8 +247,7 @@ func _draw() -> void:
 
 
 func _title(cx: float, s: String) -> void:
-	_text(Vector2(cx + 3, 133), s, 52, Color(0.25, 0.05, 0.05, 0.9), 0)
-	_text(Vector2(cx, 130), s, 52, COLOR_GOLD, 0)
+	_text(Vector2(cx, 130), s, 56, COLOR_GOLD, 0, _title_font)
 
 
 func _list(items: Array, cx: float, y0: float, values: bool) -> void:
@@ -300,8 +298,9 @@ func _draw_moves() -> void:
 
 
 ## align: -1 — по левому краю, 0 — по центру, 1 — по правому.
-func _text(pos: Vector2, s: String, font_size: int, color: Color, align: int) -> void:
-	var w := _font.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+func _text(pos: Vector2, s: String, font_size: int, color: Color, align: int, font: Font = null) -> void:
+	var fnt: Font = font if font != null else _font
+	var w := fnt.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
 	var x := pos.x - (w / 2.0 if align == 0 else (w if align == 1 else 0.0))
-	draw_string(_font, Vector2(x + 2, pos.y + 2), s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color(0, 0, 0, 0.7))
-	draw_string(_font, Vector2(x, pos.y), s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)
+	draw_string_outline(fnt, Vector2(x, pos.y), s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, 4, Color(0.06, 0.02, 0.05, 0.9))
+	draw_string(fnt, Vector2(x, pos.y), s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)
