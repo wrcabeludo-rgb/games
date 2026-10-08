@@ -144,5 +144,34 @@
   "pivot_y": "body",
   "hit": 4,
   "hit_end": 5
+ },
+ "get_up": {
+  "frames": 4,
+  "fit": "h:4:640",
+  "pivot_y": "bottom_center"
+ },
+ "fall": {
+  "part_frames": 4,
+  "fit": "inherit:get_up",
+  "pivot_y": "bottom_center",
+  "skip": [
+   1,
+   2,
+   3
+  ]
+ },
+ "throw": {
+  "frames": 4,
+  "fit": "inherit:get_up",
+  "hit": 1,
+  "hit_end": 1
+ },
+ "thrown": {
+  "frames": 4,
+  "fit": "inherit:get_up",
+  "pivot_y": "bottom_center",
+  "skip": [
+   3
+  ]
  }
 }

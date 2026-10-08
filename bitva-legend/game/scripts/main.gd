@@ -33,6 +33,9 @@ func _ready() -> void:
 			sim.wins[0] = int(arg.trim_prefix("--demo-wins="))
 		elif arg.begins_with("--demo="):
 			DemoInput.scenario = arg.trim_prefix("--demo=")
+		elif arg.begins_with("--chars="):
+			chars = PackedStringArray(arg.trim_prefix("--chars=").split(","))
+			sim = Sim.new(true, chars)
 		elif arg == "--training":
 			training = true
 			sim.set_training(true)

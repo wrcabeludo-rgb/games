@@ -12,6 +12,7 @@ const IDLE_CYCLE := 96      # стойка (дыхание)
 const WALK_CYCLE := 40      # шаг (полный цикл — два шага)
 const RUN_CYCLE := 26       # бег
 const BREATH_TICKS := 110  # один вдох-выдох в стойке (дыхание рисует игра, см. ArenaView._draw_breathing)
+const GET_UP_TICKS := 18   # вставание — последние столько тиков лежания
 const PING_PONG_MAX := 5    # до стольких кадров стойка идёт туда-обратно (1-2-3-2), больше — нарисован цикл
 
 ## id бойца → {анимация: {"tex": Array[Texture2D], "pivot": Array[Vector2]}}
@@ -98,6 +99,37 @@ func frame_for(f: Fighter, tick: int) -> Array:
 				if f.stun <= 4:
 					return _pick(anims[key], n - 1)
 				return _pick(anims[key], mini(f.state_frame / 4, n - 2))
+		Fighter.State.THROWING:
+			# Бросает: держит → поднял → швыряет (по ходу удержания).
+			if anims.has("throw") and f.move >= 0:
+				var n: int = anims.throw.tex.size()
+				var m := f.move_data()
+				var g: Dictionary = m.grab if m.has("grab") else m.get("cinema", {"hold": 30})
+				var hold: int = maxi(int(g.hold), 1)
+				var t := clampf(1.0 - float(f.stun) / hold, 0.0, 0.999)
+				return _pick(anims.throw, mini(1 + int(t * (n - 1)), n - 1))
+		Fighter.State.THROWN:
+			if anims.has("thrown"):
+				var n: int = anims.thrown.tex.size()
+				return _pick(anims.thrown, mini(f.state_frame / 10, n - 2))
+		Fighter.State.AIR_HIT:
+			if anims.has("fall"):
+				return _pick(anims.fall, 0)
+		Fighter.State.KNOCKDOWN:
+			# Удар о землю → подскок → лежит → встаёт (последние кадры).
+			var up := Fighter.KNOCKDOWN_TICKS - f.state_frame
+			if anims.has("get_up") and up <= GET_UP_TICKS:
+				var n: int = anims.get_up.tex.size()
+				return _pick(anims.get_up, clampi((GET_UP_TICKS - up) * n / GET_UP_TICKS, 0, n - 1))
+			if anims.has("fall"):
+				var n: int = anims.fall.tex.size()
+				var i := 1 if f.state_frame < 5 else (2 if f.state_frame < 10 else n - 2)
+				return _pick(anims.fall, mini(i, n - 1))
+		Fighter.State.DOWN:
+			if anims.has("fall"):
+				var n: int = anims.fall.tex.size()
+				var i := 1 if f.state_frame < 5 else (2 if f.state_frame < 10 else n - 2 + (tick / 40) % 2)
+				return _pick(anims.fall, mini(i, n - 1))
 		Fighter.State.PREJUMP:
 			if anims.has("jump"):
 				return _pick(anims.jump, 0)

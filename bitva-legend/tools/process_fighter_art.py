@@ -17,6 +17,8 @@
   grid: [столбцов, рядов] — лист сеткой (8 кадров = [4, 2], 12 = [4, 3]); порядок — слева направо, сверху вниз.
   reverse: true — проигрывать задом наперёд (шаг назад, нарисованный как шаг вперёд).
   hit / hit_end: номера ударных кадров (с 1) — показываются в активной фазе удара; до них — замах, после — возврат.
+  skip: [номера кадров с 1] — выбросить бракованные кадры.
+  pivot_y "bottom_center" — центр по ширине, низ кадра (лёжа, в полёте).
   part_frames: сколько кадров в каждой части (лист прислан частями <имя>_p1, <имя>_p2, …).
   pivot_y: "feet" (по умолчанию — задняя ступня стоит на месте), "body" (по центру фигуры — ходьба, бег)
            или "center" (кадры в воздухе).
@@ -142,6 +144,10 @@ def pivot(frame: Image.Image, mode: str, ref: dict):
     body — привязка по центру масс фигуры (ходьба, бег, отскок: ступни не стоят на месте),
            смещение до «центра на земле» — как в стойке;
     center — центр кадра (в воздухе)."""
+    if mode == "bottom_center":
+        a = np.asarray(frame.getchannel("A")) > 24
+        ys, xs = np.where(a)
+        return float((xs.min() + xs.max()) / 2), float(ys.max())
     if mode == "center":
         return centroid(frame)
     if mode == "body":
@@ -186,6 +192,9 @@ def main() -> int:
             frames = []
             for f in group:
                 frames += frames_of(chroma_key(Image.open(f)), opt.get("part_frames", 0), opt.get("grid"))
+        # Бракованные кадры (лишняя рука и т. п.) можно выбросить: "skip": [3] — номера с 1.
+        if opt.get("skip"):
+            frames = [f for i, f in enumerate(frames, 1) if i not in opt["skip"]]
         fit = opt.get("fit", "stand")
         if isinstance(fit, (int, float)):
             scale = float(fit)

@@ -178,17 +178,17 @@ static func _lift(y: float, feet_y: float, body_h: float) -> float:
 
 ## Боец-заглушка: тело, голова и «нос», показывающий, куда он смотрит.
 func _draw_fighter(f: Fighter) -> void:
+	if use_sprites and not f.is_intangible():
+		var fr := _sprites.frame_for(f, _sim.tick)
+		if not fr.is_empty():
+			_draw_sprite(f, fr[0], fr[1], fr.size() > 2 and fr[2])
+			return
 	if f.state == Fighter.State.DOWN:
 		_draw_down(f, true)
 		return
 	if f.state == Fighter.State.KNOCKDOWN and f.state_frame < Fighter.KNOCKDOWN_TICKS - 10:
 		_draw_down(f, false)
 		return
-	if use_sprites:
-		var fr := _sprites.frame_for(f, _sim.tick)
-		if not fr.is_empty():
-			_draw_sprite(f, fr[0], fr[1], fr.size() > 2 and fr[2])
-			return
 	if f.is_intangible():
 		_draw_mist(f)
 		return

@@ -96,6 +96,8 @@ Sprite sheet for a 2D fighting game: 3 animation frames of the SAME character in
 | ilya/hit_high, hit_low (4 кадра), arena/ravens (12 кадров) | ✅ в игре (3.4.6) |
 | ilya/st_sweep (8), j_hp (6) | ✅ в игре (3.4.8) |
 | ilya/st_round (8), j_hk (6), cr_hp — апперкот палицей (6) | ✅ в игре (3.4.9) |
+| ilya/throw, get_up, fall_p2 | ✅ в игре (3.4.10) |
+| ilya/fall_p1 (кадры 1–3), thrown (кадр 3) | ⚠ третья рука — выброшены (skip), ждём перегенерацию |
 
 
 Заметки: спрайт Ильи шире «тела» для столкновений и бьёт дальше хитбокса — хитбоксы и ширину
