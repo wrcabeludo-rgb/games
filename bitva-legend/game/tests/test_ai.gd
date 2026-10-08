@@ -36,17 +36,19 @@ func _test_deals_damage(level: LV) -> bool:
 	return sim.fighters[0].hp < Fighter.MAX_HP
 
 
-## Илья идёт вперёд и раз за разом бьёт ЛР; считаем урон по ИИ за 20 секунд.
-func _damage_taken(level: LV) -> int:
+## Илья на дистанции джеба раз за разом бьёт ЛР; считаем урон по ИИ за 20 секунд.
+func _damage_taken(level: LV, seed_value := 7) -> int:
 	var sim := Sim.new(false)
 	sim.fighters[0].x = 900 * SUB
 	sim.fighters[1].x = 1040 * SUB
-	var ai := _ai(level)
+	var ai := _ai(level, seed_value)
 	var total := 0
 	var last_hp := sim.fighters[1].hp
 	for i in 1200:
-		# «Вперёд» зажат всё время: повторные тапы «вперёд» — это парирование, оно бы мешало замеру.
-		var p1 := InputBits.RIGHT | (InputBits.LP if i % 24 == 0 else 0)
+		# Держит дистанцию джеба: вплотную ЛР стал бы броском (он проходит сквозь блок и мешал бы замеру).
+		# Подходит, только если далеко; «вперёд» зажат, пока подходит (повторные тапы — это парирование).
+		var gap := absi(sim.fighters[1].x - sim.fighters[0].x) / SUB
+		var p1 := (InputBits.RIGHT if gap > 190 else 0) | (InputBits.LP if i % 24 == 0 else 0)
 		sim.step(PackedInt32Array([p1, ai.get_input(sim, 1)]))
 		var hp := sim.fighters[1].hp
 		if hp < last_hp:
@@ -57,8 +59,14 @@ func _damage_taken(level: LV) -> int:
 	return total
 
 
+## Сумма по пяти прогонам: в одном бою случайность ИИ может перевесить разницу уровней.
 func _test_hard_blocks_more() -> bool:
-	return _damage_taken(LV.HARD) < _damage_taken(LV.EASY)
+	var easy := 0
+	var hard := 0
+	for s in [1, 2, 3, 4, 7]:
+		easy += _damage_taken(LV.EASY, s)
+		hard += _damage_taken(LV.HARD, s)
+	return hard < easy
 
 
 func _test_ai_vs_ai() -> bool:

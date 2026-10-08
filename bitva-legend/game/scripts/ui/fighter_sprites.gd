@@ -6,7 +6,9 @@ extends RefCounted
 
 const ART_DIR := "res://art/fighters/"
 const SCALE := 0.5          # кадры нарисованы для 1440p, игра считает в 720p
-const IDLE_TICKS := 9       # длительность кадра стойки, тиков
+const IDLE_TICKS := 12      # длительность кадра стойки, тиков (дыхание туда-обратно: 1-2-3-4-3-2)
+const WALK_TICKS := 6       # кадр ходьбы
+const RUN_TICKS := 4        # кадр бега
 
 ## id бойца → {анимация: {"tex": Array[Texture2D], "pivot": Array[Vector2]}}
 var _bank := {}
@@ -55,12 +57,39 @@ func frame_for(f: Fighter, tick: int) -> Array:
 			var name: String = Fighter.MOVES[f.move]
 			if anims.has(name):
 				return _pick(anims[name], _attack_index(f, anims[name].tex.size()))
+		Fighter.State.WALK_F:
+			if anims.has("walk_f"):
+				return _pick(anims.walk_f, (f.state_frame / WALK_TICKS) % anims.walk_f.tex.size())
+		Fighter.State.WALK_B:
+			# Шаг назад — кадры ходьбы в обратном порядке.
+			var key := "walk_b" if anims.has("walk_b") else "walk_f"
+			if anims.has(key):
+				var n: int = anims[key].tex.size()
+				return _pick(anims[key], n - 1 - (f.state_frame / WALK_TICKS) % n)
+		Fighter.State.RUN:
+			if anims.has("run"):
+				return _pick(anims.run, (f.state_frame / RUN_TICKS) % anims.run.tex.size())
+		Fighter.State.BACKDASH:
+			if anims.has("backdash"):
+				var n: int = anims.backdash.tex.size()
+				var moving: int = (f.data.backdash_v0 + f.data.backdash_decel - 1) / f.data.backdash_decel
+				var i := 0 if f.state_frame < 3 else (1 if f.state_frame < moving else n - 1)
+				return _pick(anims.backdash, mini(i, n - 1))
+	match f.state:
 		Fighter.State.STAND, Fighter.State.WALK_F, Fighter.State.WALK_B, Fighter.State.LAND, \
-				Fighter.State.RUN_STOP, Fighter.State.PREJUMP:
-			# Пока нет ходьбы — стойка (боец «скользит»; ходьба появится в 3.3).
+				Fighter.State.RUN_STOP, Fighter.State.PREJUMP, Fighter.State.RUN, Fighter.State.BACKDASH:
 			if anims.has("idle"):
-				return _pick(anims.idle, (tick / IDLE_TICKS) % anims.idle.tex.size())
+				return _pick(anims.idle, _ping_pong(tick / IDLE_TICKS, anims.idle.tex.size()))
 	return []
+
+
+## 0,1,2,3,2,1,0,1… — дыхание без рывка с последнего кадра на первый.
+static func _ping_pong(i: int, n: int) -> int:
+	if n <= 2:
+		return i % n
+	var period := 2 * n - 2
+	var k := i % period
+	return k if k < n else period - k
 
 
 static func _pick(anim: Dictionary, i: int) -> Array:

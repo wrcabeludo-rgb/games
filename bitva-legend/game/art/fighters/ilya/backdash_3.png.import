@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cferpuw6rlpi8"
-path="res://.godot/imported/st_lp_3.png-914a2e561518860d14f1b307b88fbadf.ctex"
+uid="uid://bp0gph45a07ai"
+path="res://.godot/imported/backdash_3.png-0a7b8c029b634a1ac444a831b7e90246.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/fighters/ilya/st_lp_3.png"
-dest_files=["res://.godot/imported/st_lp_3.png-914a2e561518860d14f1b307b88fbadf.ctex"]
+source_file="res://art/fighters/ilya/backdash_3.png"
+dest_files=["res://.godot/imported/backdash_3.png-0a7b8c029b634a1ac444a831b7e90246.ctex"]
 
 [params]
 

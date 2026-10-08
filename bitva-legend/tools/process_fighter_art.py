@@ -13,7 +13,8 @@
   fit: "stand"        — масштаб по высоте кадров (боец стоит во весь рост): высота = росту бойца;
        "inherit:<лист>" — тот же масштаб, что у другого листа (холсты одной высоты, боец того же размера);
        число           — масштаб вручную.
-  pivot_y: "feet" (по умолчанию — низ ступней) или "center" (кадры в воздухе).
+  pivot_y: "feet" (по умолчанию — задняя ступня стоит на месте), "body" (по центру фигуры — ходьба, бег)
+           или "center" (кадры в воздухе).
 """
 import json
 import sys
@@ -32,17 +33,70 @@ FEET_BAND = 0.06   # опорная точка по x — центр непро�
 
 
 def frames_of(sheet: Image.Image, expected: int):
-    """Кадры листа: по пустому месту между ними; если нейросеть слепила кадры — равными долями."""
+    """Кадры листа: по пустому месту между ними. Если нейросеть нарисовала кадры вплотную —
+    режем по самым «тонким» столбцам возле равных долей и чистим чужие обрезки."""
     frames = list(split_objects(sheet, min_gap=10))
-    if expected and len(frames) != expected:
-        print(f"    нашлось кадров {len(frames)}, ждали {expected} — режу на равные доли")
-        w = sheet.width / expected
-        frames = []
-        for i in range(expected):
-            cell = sheet.crop((round(i * w), 0, round((i + 1) * w), sheet.height))
-            box = cell.getchannel("A").point(lambda a: 255 if a > 8 else 0).getbbox()
-            frames.append(cell.crop(box) if box else cell)
-    return frames
+    if not expected or len(frames) == expected:
+        return frames
+    print(f"    кадры касаются друг друга ({len(frames)} вместо {expected}) — режу по тонким местам")
+    alpha = np.asarray(sheet.getchannel("A")) > 24
+    cols = alpha.sum(axis=0).astype(np.float32)
+    w = sheet.width / expected
+    cuts = [0]
+    for i in range(1, expected):
+        lo, hi = int(i * w - w * 0.2), int(i * w + w * 0.2)
+        cuts.append(lo + int(np.argmin(cols[lo:hi])))
+    cuts.append(sheet.width)
+    out = []
+    for i in range(expected):
+        cell = sheet.crop((cuts[i], 0, cuts[i + 1], sheet.height))
+        cell = _keep_main(cell)
+        box = cell.getchannel("A").point(lambda v: 255 if v > 8 else 0).getbbox()
+        out.append(cell.crop(box) if box else cell)
+    return out
+
+
+def _keep_main(cell: Image.Image, step: int = 4) -> Image.Image:
+    """Оставить в клетке только главный объект (самое большое связное пятно и всё, что к нему примыкает);
+    обрезки соседних кадров — убрать. Поиск — по уменьшенной в step раз маске."""
+    a = np.asarray(cell.getchannel("A")) > 24
+    small = a[::step, ::step]
+    h, w = small.shape
+    label = np.zeros((h, w), dtype=np.int32)
+    sizes = [0]
+    for y0 in range(h):
+        for x0 in range(w):
+            if not small[y0, x0] or label[y0, x0]:
+                continue
+            n = len(sizes)
+            stack = [(y0, x0)]
+            label[y0, x0] = n
+            size = 0
+            while stack:
+                y, x = stack.pop()
+                size += 1
+                for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, -1), (1, -1), (-1, 1)):
+                    yy, xx = y + dy, x + dx
+                    if 0 <= yy < h and 0 <= xx < w and small[yy, xx] and not label[yy, xx]:
+                        label[yy, xx] = n
+                        stack.append((yy, xx))
+            sizes.append(size)
+    if len(sizes) <= 2:
+        return cell
+    main = int(np.argmax(sizes))
+    # Мелкие отдельные пятна рядом с главным (линии скорости, кончик плаща) оставляем, если они
+    # не у края клетки — у края это обрезки соседей.
+    keep = label == main
+    for n in range(1, len(sizes)):
+        if n == main:
+            continue
+        ys, xs = np.where(label == n)
+        if xs.min() > 1 and xs.max() < w - 2:
+            keep |= label == n
+    mask = np.kron(keep, np.ones((step, step), dtype=bool))[: a.shape[0], : a.shape[1]]
+    arr = np.asarray(cell).copy()
+    arr[..., 3] = np.where(mask, arr[..., 3], 0)
+    return Image.fromarray(arr, "RGBA")
 
 
 def feet(frame: Image.Image):
@@ -56,16 +110,26 @@ def feet(frame: Image.Image):
     return float(np.percentile(band, 2)), float(band.mean()), float(bottom)
 
 
-def pivot(frame: Image.Image, mode: str, center_offset: float):
-    """Опорная точка = центр бойца на земле. На земле кадры привязаны к задней ступне
-    (она стоит на месте, пока боец бьёт), центр — на center_offset правее её (по стойке).
-    В воздухе — центр кадра."""
+def centroid(frame: Image.Image):
+    a = np.asarray(frame.getchannel("A")) > 24
+    ys, xs = np.where(a)
+    return float(xs.mean()), float(ys.mean())
+
+
+def pivot(frame: Image.Image, mode: str, ref: dict):
+    """Опорная точка = центр бойца на земле.
+    feet — кадры привязаны к задней ступне (она стоит на месте, пока боец бьёт), центр — правее её
+           на столько же, сколько в стойке;
+    body — привязка по центру масс фигуры (ходьба, бег, отскок: ступни не стоят на месте),
+           смещение до «центра на земле» — как в стойке;
+    center — центр кадра (в воздухе)."""
     if mode == "center":
-        a = np.asarray(frame.getchannel("A")) > 24
-        ys, xs = np.where(a)
-        return float(xs.mean()), float(ys.mean())
+        return centroid(frame)
+    if mode == "body":
+        cx, cy = centroid(frame)
+        return cx + ref["body_dx"], cy + ref["body_dy"]
     rear, _, bottom = feet(frame)
-    return rear + center_offset, bottom
+    return rear + ref["center_offset"], bottom
 
 
 def main() -> int:
@@ -82,7 +146,7 @@ def main() -> int:
                     and not p.stem.startswith("model"))
     # Сначала стойка (по ней — центр бойца), потом листы с собственным масштабом, потом наследующие.
     sheets.sort(key=lambda p: (p.stem != "idle", str(cfg.get(p.stem, {}).get("fit", "stand")).startswith("inherit")))
-    center_offset = None  # от задней ступни до центра бойца (по первому кадру стойки), px
+    ref = None  # по первому кадру стойки: от задней ступни и от центра масс до центра бойца на земле
     scales = {}       # масштаб листа
     heights = {}      # высота исходного листа — для наследования масштаба
     for p in sheets:
@@ -107,10 +171,11 @@ def main() -> int:
         for i, f in enumerate(frames, 1):
             f = f.resize((max(1, round(f.width * scale)), max(1, round(f.height * scale))), Image.LANCZOS)
             f = sharpen(f)
-            if center_offset is None:
-                rear, mid, _ = feet(f)
-                center_offset = mid - rear
-            px, py = pivot(f, opt.get("pivot_y", "feet"), center_offset)
+            if ref is None:
+                rear, mid, bottom = feet(f)
+                cx, cy = centroid(f)
+                ref = {"center_offset": mid - rear, "body_dx": mid - cx, "body_dy": bottom - cy}
+            px, py = pivot(f, opt.get("pivot_y", "feet"), ref)
             f.save(out / f"{name}_{i}.png", optimize=True)
             meta["frames"].append({"file": f"{name}_{i}.png", "pivot": [round(px), round(py)],
                                    "size": [f.width, f.height]})

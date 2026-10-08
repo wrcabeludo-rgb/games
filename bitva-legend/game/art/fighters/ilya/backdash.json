@@ -1,0 +1,37 @@
+{
+ "frames": [
+  {
+   "file": "backdash_1.png",
+   "pivot": [
+    193,
+    580
+   ],
+   "size": [
+    431,
+    523
+   ]
+  },
+  {
+   "file": "backdash_2.png",
+   "pivot": [
+    189,
+    540
+   ],
+   "size": [
+    387,
+    486
+   ]
+  },
+  {
+   "file": "backdash_3.png",
+   "pivot": [
+    207,
+    572
+   ],
+   "size": [
+    401,
+    514
+   ]
+  }
+ ]
+}

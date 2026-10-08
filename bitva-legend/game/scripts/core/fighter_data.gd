@@ -73,7 +73,8 @@ const CHARACTERS := {
 		],
 		"moves": {
 			# Кулаки и ноги Ильи медленнее, зато палица (сильные удары рукой) бьёт далеко.
-			"st_lp": {"startup": 5, "active": 3, "recovery": 8, "damage": 40, "hitstun": 15, "hitstop": 8, "push": 700, "box": [40, 180, 90, 40]},
+			# Хитбокс джеба — по спрайту: кулак достаёт на ~210 px от центра.
+			"st_lp": {"startup": 5, "active": 3, "recovery": 8, "damage": 40, "hitstun": 15, "hitstop": 8, "push": 700, "box": [60, 175, 150, 45]},
 			"st_lk": {"startup": 7, "active": 3, "recovery": 11, "damage": 50, "hitstun": 16, "hitstop": 8, "push": 800, "box": [40, 85, 105, 40]},
 			"st_hp": {"startup": 12, "active": 4, "recovery": 20, "damage": 110, "hitstun": 22, "hitstop": 13, "push": 1100, "box": [40, 120, 155, 140]},
 			"st_hk": {"startup": 10, "active": 4, "recovery": 18, "damage": 90, "hitstun": 20, "hitstop": 11, "push": 1000, "box": [45, 140, 130, 45]},

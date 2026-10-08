@@ -13,10 +13,12 @@ const LEVEL_NAMES := ["выкл", "лёгкий", "средний", "сложн�
 ##   anti_air — шанс сбить прыжок
 ##   think    — пауза между решениями, тиков [мин, макс]
 ##   punish   — шанс наказать удар в восстановлении
+##   wary     — шанс за тик заранее поднять блок, когда стоит в досягаемости джеба соперника
+##              (быстрые удары не успеть «увидеть» — опытный игрок вблизи держит блок)
 const LEVELS := {
-	Level.EASY: {"reaction": 24, "block": 0.25, "anti_air": 0.15, "think": [30, 55], "punish": 0.1},
-	Level.MEDIUM: {"reaction": 15, "block": 0.55, "anti_air": 0.45, "think": [14, 30], "punish": 0.45},
-	Level.HARD: {"reaction": 9, "block": 0.85, "anti_air": 0.8, "think": [6, 16], "punish": 0.85},
+	Level.EASY: {"reaction": 24, "block": 0.25, "anti_air": 0.15, "think": [30, 55], "punish": 0.1, "wary": 0.0},
+	Level.MEDIUM: {"reaction": 15, "block": 0.55, "anti_air": 0.45, "think": [14, 30], "punish": 0.45, "wary": 0.04},
+	Level.HARD: {"reaction": 9, "block": 0.85, "anti_air": 0.8, "think": [6, 16], "punish": 0.85, "wary": 0.12},
 }
 
 const NEAR := 190       # близко: лёгкие удары и броски вплотную, px
@@ -45,6 +47,12 @@ func reset() -> void:
 	_seen.clear()
 	_cooldown = 30
 	_guarding = 0
+
+
+## Докуда достаёт лёгкий удар рукой соперника (между центрами бойцов), px.
+static func _jab_reach(op: Fighter, me: Fighter) -> int:
+	var box: Array = op.data.moves.st_lp.box
+	return box[0] + box[2] + me.data.push_half + 10
 
 
 func level_name() -> String:
@@ -77,6 +85,12 @@ func get_input(sim: Sim, p: int) -> int:
 		_guarding = 12
 		return InputBits.BLOCK | (InputBits.DOWN if seen.low else 0)
 
+	# Вблизи от соперника — иногда заранее в блок.
+	if me.is_grounded_actionable() and _plan.is_empty() and dist < _jab_reach(op, me) \
+			and _rng.randf() < cfg.wary:
+		_guarding = 10
+		return InputBits.BLOCK
+
 	# Сбить прыжок ударом снизу (у обоих бойцов вниз + СР бьёт вверх).
 	if me.is_grounded_actionable() and op.is_airborne() and op.state == Fighter.State.AIR \
 			and op.vy < 0 and dist < 230 and _cooldown <= 0:
@@ -95,7 +109,7 @@ func get_input(sim: Sim, p: int) -> int:
 	if _plan.is_empty():
 		_cooldown -= 1
 		if _cooldown <= 0 and me.is_grounded_actionable():
-			_decide(dist, fwd, back)
+			_decide(dist, fwd, back, cfg, dist < _jab_reach(op, me))
 			_cooldown = _rng.randi_range(cfg.think[0], cfg.think[1])
 		elif me.is_grounded_actionable() and dist > MID:
 			return fwd  # между решениями подходит ближе
@@ -104,8 +118,12 @@ func get_input(sim: Sim, p: int) -> int:
 
 
 ## Новое решение в зависимости от дистанции.
-func _decide(dist: int, fwd: int, back: int) -> void:
+func _decide(dist: int, fwd: int, back: int, cfg: Dictionary, in_jab_range: bool) -> void:
 	var r := _rng.randf()
+	# В досягаемости джеба соперника опытный ИИ чаще встаёт в блок, чем лезет с медленным ударом.
+	if in_jab_range and _rng.randf() < cfg.wary * 5.0:
+		_plan = [[InputBits.BLOCK, _rng.randi_range(15, 28)]]
+		return
 	if dist > MID:
 		if r < 0.45:
 			_plan = [[fwd, _rng.randi_range(15, 35)]]

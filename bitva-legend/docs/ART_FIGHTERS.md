@@ -68,9 +68,20 @@ Sprite sheet for a 2D fighting game: 3 animation frames of the SAME character in
 |---|---|
 | ilya/model, dracula/model | ✅ получены (3.2) — референсы для всех листов |
 | ilya/idle, ilya/st_lp | ✅ в игре (3.2). Кадры привязаны к задней ступне: на джебе Илья делает выпад вперёд |
+| ilya/walk_f, ilya/walk_b, ilya/run, ilya/backdash | ✅ в игре (3.3). Шаг назад — второй лист ходьбы в обратном порядке |
+| ilya/idle (6 кадров, спокойнее) | ⏳ ждём — промпт ниже |
+| ilya/crouch, jump, block, block_low | ⏳ ждём |
 
 Заметки: спрайт Ильи шире «тела» для столкновений и бьёт дальше хитбокса — хитбоксы и ширину
 подгоним под спрайты в 3.4, когда будут все удары. F7 в игре — переключить спрайты/заглушки.
+
+## Илья — стойка, 6 кадров, спокойное дыхание (`ilya/idle`, замена)
+
+16:9, максимальное разрешение, референс — модельный лист Ильи (и прошлая стойка — для позы).
+
+```
+Sprite sheet for a 2D fighting game: 6 animation frames of the SAME character in one horizontal row, left to right, evenly spaced with wide empty magenta space between the frames, no frame touches another or the image edge. The character is ILYA MUROMETS exactly as in the attached model sheet: cartoon giant bogatyr with a huge barrel chest, broad shoulders, short sturdy legs, thick light-brown beard to the belt, pointed conical steel shishak helmet with a chainmail aventail, short-sleeved chainmail shirt over a long crimson-red kaftan with golden ornamental trim, leather bracers with bronze studs, wide brown belt with a big round bronze buckle, baggy dark-blue trousers, red leather boots with upturned toes, massive spiked iron mace. Strict side view facing RIGHT, full body visible, both feet planted on ONE flat horizontal ground line at exactly the same place in every frame, the same size in every frame. Pose in ALL frames: calm confident fighting stance — knees slightly bent, feet apart, the front (right) fist raised in front of the chin, the mace held in the rear hand resting on his shoulder. Animation: SLOW CALM BREATHING LOOP of a relaxed, self-assured giant (not nervous). All 6 frames are the SAME drawing traced over and over: the same outline, the same pose, the same folds, the same details — the ONLY change is a very small, smooth rise and fall of the chest, shoulders, arms and mace by a few pixels. Frame 1: lowest point (fully exhaled). Frame 2: slightly higher. Frame 3: higher. Frame 4: highest point (fully inhaled). Frame 5: slightly lower. Frame 6: lower, almost back to frame 1. Head, helmet, legs and feet stay perfectly still. HD hand-painted cartoon style like modern 2D fighting games (Skullgirls, BlazBlue), bold clean dark-plum outline (#24141F), cel shading with 2–3 tones and soft gradients, crisp sharp details. Warm key light from the upper left, cool pale-blue rim light on the right side. Background: perfectly flat solid magenta #FF00FF, no gradient, no floor, no cast shadow. Do not use pink, magenta or purple on the character. NO text, NO frame numbers, NO watermark, NO borders.
+```
 
 ## Полный список анимаций (промпты — по партиям в следующих подэтапах)
 

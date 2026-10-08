@@ -27,6 +27,7 @@ func _init() -> void:
 	ok = _check("у стены отбрасывает атакующего", _test_wall_pushback()) and ok
 	ok = _check("удар по оглушённому — комбо 2", _test_combo()) and ok
 	ok = _check("попадание в воздухе → отброс и приземление", _test_air_hit()) and ok
+	ok = _check("джеб Ильи достаёт, докуда кулак на спрайте (190 px), но не дальше (300 px)", _test_jab_reach()) and ok
 	print("ИТОГ: " + ("все тесты пройдены" if ok else "есть ошибки"))
 	quit(0 if ok else 1)
 
@@ -168,3 +169,15 @@ func _test_air_hit() -> bool:
 		if flew and d.state == S.STAND:
 			break
 	return flew and d.state == S.STAND and d.hp == 1000 - 100
+
+
+func _test_jab_reach() -> bool:
+	var near := _sim_at(900, 1090)
+	near.step(PackedInt32Array([LP, 0]))
+	for t in 20:
+		near.step(PackedInt32Array([0, 0]))
+	var far := _sim_at(900, 1200)
+	far.step(PackedInt32Array([LP, 0]))
+	for t in 20:
+		far.step(PackedInt32Array([0, 0]))
+	return near.fighters[1].hp == 1000 - 40 and far.fighters[1].hp == 1000

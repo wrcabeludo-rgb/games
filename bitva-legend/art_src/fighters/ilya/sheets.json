@@ -1,1 +1,8 @@
-{"idle": {"frames": 4}, "st_lp": {"frames": 3}}
+{
+ "idle": {"frames": 4},
+ "st_lp": {"frames": 3},
+ "walk_f": {"frames": 6, "pivot_y": "body"},
+ "walk_b": {"frames": 6, "pivot_y": "body"},
+ "run": {"frames": 6, "fit": "inherit:walk_f", "pivot_y": "body"},
+ "backdash": {"frames": 3, "fit": "inherit:idle", "pivot_y": "body"}
+}
