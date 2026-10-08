@@ -129,6 +129,9 @@ func _draw_fighter(f: Fighter) -> void:
 	if f.state == Fighter.State.DOWN:
 		_draw_down(f)
 		return
+	if f.is_intangible():
+		_draw_mist(f)
+		return
 	var base := to_screen(float(f.x) / Sim.SUB, float(f.y) / Sim.SUB)
 	var h: float = f.data.height
 	var w: float = f.data.push_half * 2.0
@@ -187,6 +190,24 @@ func _draw_fighter(f: Fighter) -> void:
 	var head := Vector2(base.x, base.y - h + head_r) + shift * 1.1
 	draw_circle(head, head_r, color.lightened(0.15))
 	draw_arc(head, head_r, 0, TAU, 32, color.darkened(0.45), 3)
+	if f.has_armor():
+		# Броня тарана — оранжевое свечение.
+		var glow := PackedVector2Array(body)
+		glow.append(body[0])
+		draw_polyline(glow, Color(1, 0.6, 0.15, 0.85), 6)
+	if f.is_countering():
+		# Гипнотический взгляд — фиолетовая аура и горящие глаза.
+		draw_arc(head, head_r + 10, 0, TAU, 32, Color(0.7, 0.3, 1.0, 0.6), 4)
+		draw_circle(head + Vector2(float(f.facing) * head_r * 0.4, -head_r * 0.25), head_r * 0.22, Color(0.85, 0.4, 1.0))
+	if f.hypnotized:
+		# Загипнотизирован — спираль над головой.
+		var c := head + Vector2(0, -head_r - 26)
+		var prev := c
+		for i in 24:
+			var a := i * 0.55 + _sim.tick * 0.25
+			var pt := c + Vector2.from_angle(a) * (i * 0.9)
+			draw_line(prev, pt, Color(0.75, 0.4, 1.0), 2.5)
+			prev = pt
 	# Нос и глаз со стороны взгляда.
 	var nose := PackedVector2Array([
 		head + Vector2(dir * head_r * 0.8, -head_r * 0.15),
@@ -245,7 +266,8 @@ func _draw_attack(f: Fighter, shoulder: Vector2, hip: Vector2, color: Color) -> 
 	var limb_color := color.darkened(0.3)
 	draw_line(origin, end, limb_color, 18.0 if is_kick else 14.0)
 	draw_circle(end, 10.0 if is_kick else 9.0, limb_color.darkened(0.2))
-	if button == 2 and f.id == "ilya" and not _sim.has_projectile(_sim.fighters.find(f)):
+	var with_mace: bool = button == 2 or Fighter.MOVES[f.move] == "sp_ff_l"
+	if with_mace and f.id == "ilya" and not _sim.has_projectile(_sim.fighters.find(f)):
 		# Палица.
 		draw_circle(end, 24, Color(0.36, 0.3, 0.26))
 		for i in 6:
@@ -303,6 +325,16 @@ func _draw_guard(f: Fighter, shoulder: Vector2, body_h: float, dir: float, color
 		16, Color(0.45, 0.75, 1.0, glow), 6)
 
 
+## Туманный рывок: вместо тела — клубы тумана.
+func _draw_mist(f: Fighter) -> void:
+	var base := to_screen(float(f.x) / Sim.SUB, float(f.y) / Sim.SUB)
+	var h: float = f.data.height
+	for i in 7:
+		var a := _sim.tick * 0.2 + i * 0.9
+		var c := base + Vector2(cos(a) * 30, -h * (0.15 + 0.11 * i))
+		draw_circle(c, 26 - i * 1.5, Color(0.55, 0.45, 0.65, 0.35))
+
+
 ## Поза броска снаряда: замах назад-вверх, затем рука вперёд.
 func _draw_throw(f: Fighter, shoulder: Vector2, color: Color) -> void:
 	var m := f.move_data()
@@ -325,7 +357,17 @@ func _draw_projectile(pr: PackedInt32Array) -> void:
 	var c := to_screen(float(pr[Sim.Proj.X]) / Sim.SUB, float(pr[Sim.Proj.Y]) / Sim.SUB)
 	var age := pr[Sim.Proj.AGE]
 	var dir := signf(float(pr[Sim.Proj.VX]))
-	if pr[Sim.Proj.KIND] == 0:
+	if pr[Sim.Proj.KIND] == 2:
+		# Волна от удара оземь: бегущие по земле камни и пыль.
+		var hw := float(pr[Sim.Proj.HW]) / Sim.SUB
+		var ground := to_screen(float(pr[Sim.Proj.X]) / Sim.SUB, 0)
+		for i in 5:
+			var ox := (i - 2) * hw * 0.4
+			var hgt := 18.0 + 14.0 * absf(sin(age * 0.6 + i))
+			var rock := PackedVector2Array([ground + Vector2(ox - 10, 0), ground + Vector2(ox, -hgt), ground + Vector2(ox + 10, 0)])
+			draw_colored_polygon(rock, Color(0.5, 0.42, 0.34))
+		draw_circle(ground + Vector2(-dir * hw * 0.7, -8), 12, Color(0.75, 0.68, 0.55, 0.5))
+	elif pr[Sim.Proj.KIND] == 0:
 		var a := age * 0.35 * dir
 		var handle := Vector2.from_angle(a) * 34
 		draw_line(c - handle, c, Color(0.45, 0.32, 0.2), 9)
@@ -358,6 +400,19 @@ func _draw_spark(p: int) -> void:
 	var heavy := kind == 1
 	var c := to_screen(float(_sim.sparks[base + 1]) / Sim.SUB, float(_sim.sparks[base + 2]) / Sim.SUB)
 	var k := 1.0 - age / 14.0
+	if kind == 3:
+		# Удар в броню — оранжевое кольцо.
+		draw_arc(c, 20.0 + age * 3.0, 0, TAU, 24, Color(1, 0.6, 0.15, k), 5)
+		return
+	if kind == 4:
+		# Контратака — фиолетовая спираль.
+		var prev := c
+		for i in 30:
+			var a := i * 0.5 + age * 0.3
+			var pt := c + Vector2.from_angle(a) * (i * (1.5 + age * 0.2))
+			draw_line(prev, pt, Color(0.75, 0.4, 1.0, k), 3)
+			prev = pt
+		return
 	if kind == 2:
 		# Блок — голубые расходящиеся дуги.
 		for i in 3:

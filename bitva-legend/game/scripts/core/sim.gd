@@ -27,7 +27,9 @@ const ATTACK_MASK := InputBits.LP | InputBits.LK | InputBits.HP | InputBits.HK
 
 ## Поля снаряда (PackedInt32Array): владелец, позиция, скорость, гравитация, размер,
 ## урон и прочее из данных спецприёма, вид для отрисовки, возраст.
-enum Proj { OWNER, X, Y, VX, VY, GRAV, HW, HH, DMG, STUN, STOP, PUSH, CHIP, KIND, AGE, SIZE }
+enum Proj { OWNER, X, Y, VX, VY, GRAV, HW, HH, DMG, STUN, STOP, PUSH, CHIP, KIND, AGE, LOW, LIFE, SIZE }
+const ARMOR_HITSTOP := 6            # короткая заморозка, когда удар принят бронёй
+const COUNTER_HITSTOP := 24         # драматичная пауза при удачной контратаке
 const PROJ_MARGIN := 150            # снаряд исчезает за краем арены на столько пикселей
 
 var tick := 0
@@ -38,7 +40,8 @@ var fighters: Array[Fighter] = []
 ## Заморозка после попадания: пока > 0, бойцы стоят, но нажатия запоминаются.
 var hitstop := 0
 var hitstop_total := 0              # длительность текущей заморозки (для тряски камеры)
-## Последнее попадание каждого игрока (для искр): [тик, x, y, вид: 0 лёгкий, 1 сильный, 2 блок].
+## Последнее попадание каждого игрока (для искр): [тик, x, y, вид]:
+## 0 лёгкий, 1 сильный, 2 блок, 3 удар в броню, 4 контратака-гипноз.
 var sparks := PackedInt32Array([-999, 0, 0, 0, -999, 0, 0, 0])
 
 var phase := Phase.INTRO
@@ -120,6 +123,7 @@ func _combat_step(inp: PackedInt32Array, hits: bool) -> void:
 	_resolve_push()
 	_limit_separation(prev_x)
 	_clamp_walls()
+	_teleports()
 	_move_projectiles()
 	_spawn_projectiles()
 	if hits:
@@ -159,7 +163,25 @@ func _spawn_projectiles() -> void:
 		pr[Proj.CHIP] = d.chip
 		pr[Proj.KIND] = d.kind
 		pr[Proj.AGE] = 0
+		pr[Proj.LOW] = 1 if d.get("level", "high") == "low" else 0
+		pr[Proj.LIFE] = d.get("life", 0)
 		projectiles.append(pr)
+
+
+## Туманный рывок: появляется за спиной соперника и разворачивается к нему.
+func _teleports() -> void:
+	for p in PLAYERS:
+		var f := fighters[p]
+		if f.teleport_request == 0:
+			continue
+		f.teleport_request = 0
+		var other := fighters[1 - p]
+		var dir := signi(other.x - f.x)
+		if dir == 0:
+			dir = f.facing
+		f.x = other.x + dir * f.move_data().teleport.offset * SUB
+		f.x = clampi(f.x, f.push_half(), ARENA_WIDTH * SUB - f.push_half())
+		f.facing = -dir
 
 
 func _move_projectiles() -> void:
@@ -171,7 +193,8 @@ func _move_projectiles() -> void:
 		pr[Proj.AGE] += 1
 		var out := pr[Proj.X] < -PROJ_MARGIN * SUB or pr[Proj.X] > (ARENA_WIDTH + PROJ_MARGIN) * SUB
 		var landed := pr[Proj.Y] <= 0
-		if not out and not landed:
+		var expired := pr[Proj.LIFE] > 0 and pr[Proj.AGE] >= pr[Proj.LIFE]
+		if not out and not landed and not expired:
 			alive.append(pr)
 	projectiles = alive
 
@@ -204,7 +227,7 @@ func _check_projectiles() -> void:
 		for hurt in d.hurtboxes():
 			if _overlap(box, hurt):
 				var m := {"damage": pr[Proj.DMG], "hitstun": pr[Proj.STUN], "hitstop": pr[Proj.STOP],
-					"push": pr[Proj.PUSH], "chip": pr[Proj.CHIP], "level": "high"}
+					"push": pr[Proj.PUSH], "chip": pr[Proj.CHIP], "level": "low" if pr[Proj.LOW] else "high"}
 				_apply_hit(p, m, signi(pr[Proj.VX]), pr[Proj.X], pr[Proj.Y])
 				removed[i] = true
 				break
@@ -320,12 +343,28 @@ func _check_hits() -> void:
 		a.mark_hit()
 		# Искра — в точке, где хитбокс заходит в тело соперника.
 		var spark_x := (maxi(hb[0], d.x - d.push_half()) + mini(hb[1], d.x + d.push_half())) / 2
-		_apply_hit(p, m, a.facing, spark_x, (hb[2] + hb[3]) / 2)
+		_apply_hit(p, m, a.facing, spark_x, (hb[2] + hb[3]) / 2, true)
 
 
 ## Попадание или блок от игрока p (удар или снаряд); direction — куда отбрасывать.
-func _apply_hit(p: int, m: Dictionary, direction: int, spark_x: int, spark_y: int) -> void:
+## melee — удар рукой или ногой (его можно поймать контратакой).
+func _apply_hit(p: int, m: Dictionary, direction: int, spark_x: int, spark_y: int, melee := false) -> void:
 	var d := fighters[1 - p]
+	if melee and d.is_countering():
+		# Гипнотический взгляд: атакующий застывает, защитник свободен.
+		fighters[p].take_hypnosis(d.move_data().counter.stun)
+		d.counter_success()
+		hitstop = COUNTER_HITSTOP
+		hitstop_total = COUNTER_HITSTOP
+		_set_spark(1 - p, d.x + d.facing * 40 * SUB, d.y + d.data.height * SUB * 85 / 100, 4)
+		return
+	if d.has_armor():
+		d.absorb_hit(m, direction)
+		if ARMOR_HITSTOP > hitstop:
+			hitstop = ARMOR_HITSTOP
+			hitstop_total = ARMOR_HITSTOP
+		_set_spark(p, spark_x, spark_y, 3)
+		return
 	var blocked := d.try_block(m)
 	var stop: int = m.hitstop
 	if blocked:
@@ -366,7 +405,7 @@ func _record_history(p: int, bits: int) -> void:
 func _resolve_push() -> void:
 	var a := fighters[0]
 	var b := fighters[1]
-	if a.is_rising() or b.is_rising():
+	if a.is_rising() or b.is_rising() or a.is_intangible() or b.is_intangible():
 		return
 	var vertical := a.y < b.y + b.push_height() and b.y < a.y + a.push_height()
 	if not vertical:

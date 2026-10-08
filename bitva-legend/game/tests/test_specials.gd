@@ -14,11 +14,11 @@ const BL := InputBits.BLOCK
 func _init() -> void:
 	var ok := true
 	ok = _check("назад, вперёд + ЛР → снаряд Дракулы (лёгкий)", _test_recognized()) and ok
-	ok = _check("сильная кнопка → сильная версия", _test_heavy_version()) and ok
+	ok = _check("у мышей одна версия: и СР даёт тот же приём", _test_heavy_version()) and ok
 	ok = _check("снаряд появляется на 12-м кадре", _test_spawn_frame()) and ok
 	ok = _check("мыши попадают издалека: урон 60", _test_hits()) and ok
 	ok = _check("в блоке — 6 урона сквозь блок", _test_chip()) and ok
-	ok = _check("сильные мыши пролетают над присевшим, лёгкие — нет", _test_duck()) and ok
+	ok = _check("мыши бьют и присевшего", _test_duck()) and ok
 	ok = _check("пока снаряд летит, второй не выпустить (выходит обычный удар)", _test_one_projectile()) and ok
 	ok = _check("встречные снаряды гасят друг друга", _test_clash()) and ok
 	ok = _check("палица падает на землю и исчезает", _test_mace_lands()) and ok
@@ -68,7 +68,7 @@ func _test_recognized() -> bool:
 func _test_heavy_version() -> bool:
 	var sim := _sim_at(600, 1100)
 	_drac_fireball(sim, HP)
-	return _move_name(sim.fighters[1]) == "sp_proj_h"
+	return _move_name(sim.fighters[1]) == "sp_proj_l"
 
 
 func _test_spawn_frame() -> bool:
@@ -105,7 +105,7 @@ func _duck_damage(button: int) -> int:
 
 
 func _test_duck() -> bool:
-	return _duck_damage(HP) == 0 and _duck_damage(LP) == 60
+	return _duck_damage(HP) == 60 and _duck_damage(LP) == 60
 
 
 func _test_one_projectile() -> bool:
@@ -119,12 +119,21 @@ func _test_one_projectile() -> bool:
 
 
 func _test_clash() -> bool:
-	var sim := _sim_at(700, 1300)
-	# Илья: назад (влево), вперёд (вправо) + ЛР; Дракула: назад (вправо), вперёд (влево) + СР.
-	_run(sim, L, R, 2)
-	_run(sim, R | LP, L | HP)
-	_run(sim, 0, 0, 120)
-	return sim.fighters[0].hp == 1000 and sim.fighters[1].hp == 1000 and sim.projectiles.is_empty()
+	var sim := _sim_at(300, 1700)
+	# Два встречных снаряда на одной высоте посреди арены.
+	for p in 2:
+		var pr := PackedInt32Array()
+		pr.resize(Sim.Proj.SIZE)
+		pr[Sim.Proj.OWNER] = p
+		pr[Sim.Proj.X] = (900 if p == 0 else 1100) * SUB
+		pr[Sim.Proj.Y] = 150 * SUB
+		pr[Sim.Proj.VX] = 800 if p == 0 else -800
+		pr[Sim.Proj.HW] = 30 * SUB
+		pr[Sim.Proj.HH] = 20 * SUB
+		pr[Sim.Proj.DMG] = 50
+		sim.projectiles.append(pr)
+	_run(sim, 0, 0, 30)
+	return sim.projectiles.is_empty() and sim.fighters[0].hp == 1000 and sim.fighters[1].hp == 1000
 
 
 func _test_mace_lands() -> bool:

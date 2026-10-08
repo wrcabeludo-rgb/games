@@ -1,21 +1,30 @@
 class_name DemoInput
 extends RefCounted
-## Записанный сценарий ввода для отладочных скриншотов и проверок без геймпада.
-## После вступления оба бойца одновременно бросают снаряды: Илья — палицу, Дракула — мышей.
+## Записанные сценарии ввода для отладочных скриншотов (выбор: «-- --demo=имя»).
 
-## Шаги: [биты игрока 1, биты игрока 2, сколько тиков держать].
-const STEPS := [
-	[0, 0, 80],
-	[InputBits.LEFT, InputBits.RIGHT, 2],
-	[InputBits.RIGHT | InputBits.HP, InputBits.LEFT | InputBits.LP, 1],
-	[0, 0, 600],
-]
+const R := InputBits.RIGHT
+const L := InputBits.LEFT
+const D := InputBits.DOWN
+
+## Шаги: [биты игрока 1, биты игрока 2, сколько тиков держать]. Первые 80 тиков — вступление.
+const SCENARIOS := {
+	# Оба бросают снаряды.
+	"projectiles": [[0, 0, 80], [L, R, 2], [R | InputBits.HP, L | InputBits.LP, 1], [0, 0, 600]],
+	# Илья бьёт оземь, Дракула стоит в верхнем блоке — волна его пробивает.
+	"wave": [[0, 0, 80], [R, 0, 40], [D, InputBits.BLOCK, 2], [0, InputBits.BLOCK, 2], [D | InputBits.LK, InputBits.BLOCK, 1], [0, InputBits.BLOCK, 600]],
+	# Дракула уходит в туман и появляется за спиной.
+	"mist": [[0, 0, 80], [R, L, 40], [0, D, 2], [0, 0, 2], [0, D | InputBits.LK, 1], [0, 0, 600]],
+	# Илья идёт тараном, Дракула ловит его гипнотическим взглядом.
+	"counter": [[0, 0, 80], [R, 0, 60], [0, 0, 4], [R, L, 2], [0, 0, 2], [R | InputBits.LP, L | InputBits.LP, 1], [0, 0, 600]],
+}
 const LENGTH := 112
+
+static var scenario := "projectiles"
 
 
 static func frame(tick: int) -> PackedInt32Array:
 	var t := 0
-	for s in STEPS:
+	for s in SCENARIOS[scenario]:
 		t += s[2]
 		if tick < t:
 			return PackedInt32Array([s[0], s[1]])

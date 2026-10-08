@@ -14,13 +14,18 @@ extends RefCounted
 ##   box      — хитбокс [вперёд от центра, высота низа над ногами, ширина, высота], px
 ##   level    — high (по умолчанию), low (надо блокировать сидя), overhead (стоя) — для блока в 1.5
 ##
-## Спецприёмы: sp_<имя>_l — лёгкая версия, sp_<имя>_h — сильная.
+## Спецприёмы: sp_proj — «назад, вперёд», sp_dd — «вниз, вниз», sp_ff — «вперёд, вперёд».
+##   У приёма одна версия (_l). Только у палицы versions: 2 — лёгкая (ЛР) и сильная (СР, _h).
 ##   proj — снаряд, выпускается на кадре startup:
 ##     x, y   — откуда вылетает (вперёд от центра, высота), px
 ##     vx, vy — скорость (вперёд, вверх), субпиксели за тик; gravity — гравитация
 ##     w, h   — размер хитбокса снаряда, px;  kind — вид для отрисовки (0 палица, 1 мыши)
 ##     damage, hitstun, hitstop, push — как у ударов; chip — урон сквозь блок
 ##   buttons — какими кнопками вызывается: punch (руки: ЛР/СР), kick (ноги: ЛН/СН), any
+##   proj.level — high или low (волна по земле); proj.life — сколько тиков живёт (0 — пока не улетит)
+##   lunge   — рывок вперёд в активной фазе, субпиксели за тик;  armor — сколько ударов выдерживает
+##   teleport — туман: invul_from — с какого кадра неуязвим, offset — на сколько px за спину соперника
+##   counter — контратака в активной фазе: stun — сколько тиков атакующий загипнотизирован
 
 const CHARACTERS := {
 	"ilya": {
@@ -59,8 +64,12 @@ const CHARACTERS := {
 			"j_hp": {"startup": 9, "active": 5, "damage": 100, "hitstun": 22, "hitstop": 13, "push": 800, "box": [25, -15, 125, 95], "level": "overhead"},
 			"j_hk": {"startup": 8, "active": 6, "damage": 90, "hitstun": 20, "hitstop": 11, "push": 800, "box": [30, 15, 125, 50], "level": "overhead"},
 			# Бросок палицы (только руками): летит по дуге и падает. Медленный, но мощный.
-			"sp_proj_l": {"buttons": "punch", "startup": 16, "active": 1, "recovery": 20, "proj": {"x": 60, "y": 200, "vx": 650, "vy": 1100, "gravity": 70, "w": 54, "h": 54, "kind": 0, "damage": 90, "hitstun": 22, "hitstop": 12, "push": 900, "chip": 9}},
+			"sp_proj_l": {"buttons": "punch", "versions": 2, "startup": 16, "active": 1, "recovery": 20, "proj": {"x": 60, "y": 200, "vx": 650, "vy": 1100, "gravity": 70, "w": 54, "h": 54, "kind": 0, "damage": 90, "hitstun": 22, "hitstop": 12, "push": 900, "chip": 9}},
 			"sp_proj_h": {"buttons": "punch", "startup": 20, "active": 1, "recovery": 22, "proj": {"x": 60, "y": 200, "vx": 950, "vy": 900, "gravity": 70, "w": 54, "h": 54, "kind": 0, "damage": 110, "hitstun": 24, "hitstop": 13, "push": 1000, "chip": 11}},
+			# Удар оземь (вниз, вниз + нога): волна по земле, низкий удар — блокировать сидя или перепрыгнуть.
+			"sp_dd_l": {"buttons": "kick", "startup": 18, "active": 1, "recovery": 24, "proj": {"x": 70, "y": 22, "vx": 900, "vy": 0, "gravity": 0, "w": 70, "h": 44, "kind": 2, "level": "low", "life": 34, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 900, "chip": 8}},
+			# Богатырский таран с палицей (вперёд, вперёд + рука): рывок вперёд, выдерживает один удар.
+			"sp_ff_l": {"buttons": "punch", "startup": 10, "active": 16, "recovery": 20, "lunge": 900, "armor": 1, "damage": 100, "hitstun": 24, "hitstop": 13, "push": 1400, "chip": 10, "box": [30, 60, 110, 200]},
 		},
 	},
 	"dracula": {
@@ -98,10 +107,12 @@ const CHARACTERS := {
 			"j_lk": {"startup": 5, "active": 7, "damage": 35, "hitstun": 15, "hitstop": 7, "push": 550, "box": [25, 10, 85, 45], "level": "overhead"},
 			"j_hp": {"startup": 7, "active": 4, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 750, "box": [25, 0, 105, 80], "level": "overhead"},
 			"j_hk": {"startup": 7, "active": 5, "damage": 75, "hitstun": 19, "hitstop": 10, "push": 750, "box": [25, 20, 115, 45], "level": "overhead"},
-			# Стая летучих мышей: летит прямо. Лёгкая — на уровне груди, сильная — быстрее,
-			# но на уровне головы: под ней можно присесть.
-			"sp_proj_l": {"buttons": "punch", "startup": 12, "active": 1, "recovery": 22, "proj": {"x": 50, "y": 150, "vx": 800, "vy": 0, "gravity": 0, "w": 68, "h": 44, "kind": 1, "damage": 60, "hitstun": 18, "hitstop": 9, "push": 700, "chip": 6}},
-			"sp_proj_h": {"buttons": "punch", "startup": 14, "active": 1, "recovery": 24, "proj": {"x": 50, "y": 225, "vx": 1200, "vy": 0, "gravity": 0, "w": 68, "h": 44, "kind": 1, "damage": 70, "hitstun": 19, "hitstop": 10, "push": 750, "chip": 7}},
+			# Стая летучих мышей (назад, вперёд + рука): летит прямо на уровне груди, бьёт и сидящего.
+			"sp_proj_l": {"buttons": "punch", "startup": 12, "active": 1, "recovery": 22, "proj": {"x": 50, "y": 150, "vx": 1000, "vy": 0, "gravity": 0, "w": 68, "h": 44, "kind": 1, "damage": 60, "hitstun": 18, "hitstop": 9, "push": 700, "chip": 6}},
+			# Туманный рывок (вниз, вниз + нога): растворяется в тумане и появляется за спиной соперника.
+			"sp_dd_l": {"buttons": "kick", "startup": 16, "active": 1, "recovery": 14, "teleport": {"invul_from": 4, "offset": 110}},
+			# Гипнотический взгляд (вперёд, вперёд + рука): если соперник ударит в окно — застынет.
+			"sp_ff_l": {"buttons": "punch", "startup": 4, "active": 16, "recovery": 18, "counter": {"stun": 55}},
 		},
 	},
 }

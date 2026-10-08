@@ -18,10 +18,14 @@ const MOVES := [
 	"cr_lp", "cr_lk", "cr_hp", "cr_hk",
 	"j_lp", "j_lk", "j_hp", "j_hk",
 	"sp_proj_l", "sp_proj_h",
+	"sp_dd_l", "sp_dd_h",
+	"sp_ff_l", "sp_ff_h",
 ]
 ## Спецприёмы: номер → ввод. Удар по номеру: SPECIAL_BASE + номер * 2 + сила (0 лёгкий, 1 сильный).
 const SPECIAL_BASE := 12
-const SPECIAL_PROJ := 0     # «назад, вперёд + удар» — снаряд
+const SPECIAL_PROJ := 0     # «назад, вперёд + удар»
+const SPECIAL_DD := 1       # «вниз, вниз + удар»
+const SPECIAL_FF := 2       # «вперёд, вперёд + удар»
 ## Коды нажатий направлений (относительно взгляда бойца).
 const TAP_BACK := 1
 const TAP_FWD := 2
@@ -84,6 +88,10 @@ var special_timer := TAP_TIMER_MAX
 var projectile_alive := false
 ## Удар дошёл до кадра выпуска снаряда — симуляция создаст снаряд в этот же тик.
 var spawn_request := 0
+## Туманный рывок дошёл до кадра появления — симуляция переставит бойца за спину сопернику.
+var teleport_request := 0
+var armor := 0              # сколько ударов ещё выдержит броня текущего приёма
+var hypnotized := 0         # 1 — оглушён гипнозом (для отрисовки)
 
 
 func _init(char_id: String, start_x_px: int, start_facing: int) -> void:
@@ -101,7 +109,7 @@ func save() -> PackedInt32Array:
 	])
 	s.append_array(btn_timers)
 	s.append_array(tap_log)
-	s.append_array(PackedInt32Array([special_buf, special_strength, special_timer]))
+	s.append_array(PackedInt32Array([special_buf, special_strength, special_timer, armor, hypnotized]))
 	return s
 
 
@@ -115,6 +123,7 @@ func load(s: PackedInt32Array) -> void:
 	btn_timers = s.slice(23, 27)
 	tap_log = s.slice(27, 33)
 	special_buf = s[33]; special_strength = s[34]; special_timer = s[35]
+	armor = s[36]; hypnotized = s[37]
 
 
 # --- Вопросы о состоянии --------------------------------------------------
@@ -139,6 +148,27 @@ func is_stunned() -> bool:
 func is_crouching() -> bool:
 	return state == State.CROUCH or (state == State.ATTACK and move >= 4 and move <= 7) \
 		or ((state == State.HITSTUN or state == State.BLOCK or state == State.BLOCKSTUN) and low_pose == 1)
+
+
+## Туманный рывок: в тумане боец неуязвим и проходит сквозь соперника.
+func is_intangible() -> bool:
+	if move < 0 or state != State.ATTACK:
+		return false
+	var m := move_data()
+	return m.has("teleport") and move_frame >= m.teleport.invul_from and move_frame < m.startup
+
+
+## Гипнотический взгляд: окно контратаки.
+func is_countering() -> bool:
+	if move < 0 or state != State.ATTACK:
+		return false
+	var m := move_data()
+	return m.has("counter") and move_frame >= m.startup and move_frame < m.startup + m.active
+
+
+## Броня держит удары в подготовке и активной фазе приёма.
+func has_armor() -> bool:
+	return armor > 0 and state == State.ATTACK and move >= 0 and move_phase() <= 1
 
 
 func move_data() -> Dictionary:
@@ -188,6 +218,8 @@ func hitbox() -> PackedInt32Array:
 
 ## Уязвимые зоны: тело и, во время удара, вытянутая рука или нога.
 func hurtboxes() -> Array[PackedInt32Array]:
+	if is_intangible():
+		return []
 	var half: int = data.push_half * HURT_WIDTH_RATIO / 100 * SUB
 	var h: int = data.crouch_height * SUB if is_crouching() else data.height * SUB
 	if state == State.AIR:
@@ -269,6 +301,33 @@ func take_block(m: Dictionary, attacker_facing: int) -> void:
 	state_frame = 0
 
 
+## Удар пришёлся в броню: урон проходит, но приём не прерывается.
+func absorb_hit(m: Dictionary, attacker_facing: int) -> void:
+	if hp <= m.damage:
+		take_hit(m, attacker_facing)
+		return
+	hp -= m.damage
+	armor -= 1
+
+
+## Атаковал в гипнотический взгляд — застыл.
+func take_hypnosis(frames: int) -> void:
+	move = -1
+	stun = frames
+	pushback = 0
+	low_pose = 0
+	hypnotized = 1
+	vx = 0
+	_set_state(State.HITSTUN)
+	state_frame = 0
+
+
+## Контратака сработала — Дракула сразу свободен.
+func counter_success() -> void:
+	move = -1
+	_set_state(State.STAND)
+
+
 func mark_hit() -> void:
 	has_hit = 1
 
@@ -328,17 +387,27 @@ func _check_special(button: int) -> void:
 	if tap_log[0] == TAP_FWD and tap_log[2] == TAP_BACK and tap_log[1] <= BUTTON_WINDOW \
 			and tap_log[3] - tap_log[1] <= TAP_WINDOW:
 		_queue_special(SPECIAL_PROJ, button)
+	elif tap_log[0] == TAP_FWD and tap_log[2] == TAP_FWD and tap_log[1] <= BUTTON_WINDOW \
+			and tap_log[3] - tap_log[1] <= TAP_WINDOW:
+		_queue_special(SPECIAL_FF, button)
+	elif tap_log[0] == TAP_DOWN and tap_log[2] == TAP_DOWN and tap_log[1] <= BUTTON_WINDOW \
+			and tap_log[3] - tap_log[1] <= TAP_WINDOW:
+		_queue_special(SPECIAL_DD, button)
 
 
 ## Спецприём узнан по направлениям; проверяем, подходит ли кнопка (руки, ноги или любая).
 func _queue_special(special: int, button: int) -> void:
-	var m: Dictionary = data.moves[MOVES[SPECIAL_BASE + special * 2]]
+	var key: String = MOVES[SPECIAL_BASE + special * 2]
+	if not data.moves.has(key):
+		return
+	var m: Dictionary = data.moves[key]
 	var kind: String = m.get("buttons", "any")
 	var is_punch := button == 0 or button == 2
 	if (kind == "punch" and not is_punch) or (kind == "kick" and is_punch):
 		return
 	special_buf = special
-	special_strength = 1 if button >= 2 else 0
+	# У большинства приёмов одна версия; у палицы — лёгкая и сильная.
+	special_strength = (1 if button >= 2 else 0) if m.get("versions", 1) == 2 else 0
 	special_timer = 0
 
 
@@ -346,7 +415,8 @@ func _queue_special(special: int, button: int) -> void:
 func _special_ready() -> bool:
 	if special_buf < 0 or special_timer > BUFFER:
 		return false
-	if special_buf == SPECIAL_PROJ and projectile_alive:
+	var m: Dictionary = data.moves[MOVES[SPECIAL_BASE + special_buf * 2]]
+	if m.has("proj") and projectile_alive:
 		return false
 	return true
 
@@ -356,6 +426,7 @@ func _start_special() -> void:
 		if btn_timers[i] <= BUFFER:
 			_consume_button(i)  # чтобы вслед не вышел ещё и обычный удар
 	move = SPECIAL_BASE + special_buf * 2 + special_strength
+	armor = move_data().get("armor", 0)
 	special_buf = -1
 	special_timer = TAP_TIMER_MAX
 	move_frame = 1
@@ -427,6 +498,11 @@ func step(bits: int) -> void:
 			var m := move_data()
 			if m.has("proj") and move_frame == m.startup:
 				spawn_request = 1
+			if m.has("teleport") and move_frame == m.startup:
+				teleport_request = 1
+			# Рывок вперёд в активной фазе (таран), пока не попал.
+			if m.has("lunge") and has_hit == 0 and move_frame >= m.startup and move_frame < m.startup + m.active:
+				x += m.lunge * facing
 			if move_frame > m.startup + m.active - 1 + m.recovery:
 				move = -1
 				_set_state(State.STAND)
@@ -448,6 +524,7 @@ func step(bits: int) -> void:
 			if stun <= 0:
 				pushback = 0
 				combo = 0
+				hypnotized = 0
 				_set_state(State.STAND)
 				_ground_control(inp)
 		_:
