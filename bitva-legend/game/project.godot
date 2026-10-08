@@ -5,8 +5,8 @@ config_version=5
 [application]
 
 config/name="Битва легенд"
-config/version="2.6.1"
-config/description="парирование"
+config/version="2.7"
+config/description="тренировка"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="res://icon.svg"

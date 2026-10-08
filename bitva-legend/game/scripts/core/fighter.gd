@@ -123,6 +123,8 @@ var knock_on_land := 0      # приземлится — будет лежать
 var parry_timer := TAP_TIMER_MAX  # тиков с последней засчитанной попытки парирования
 var parry_cool := 0         # тиков до следующей возможной попытки
 var staggered := 0          # 1 — ошеломлён парированием (для отрисовки)
+## Выставляет симуляция перед тиком: ниже этого здоровья не опустить (в тренировке — 1, нокаута нет).
+var min_hp := 0
 ## Удары текущей строки (номера в MOVES), -1 — пусто.
 var chain := PackedInt32Array([-1, -1, -1, -1])
 var juggle := 0             # сколько раз добит в воздухе за этот полёт
@@ -396,7 +398,7 @@ func take_hit(m: Dictionary, attacker_facing: int) -> void:
 	combo = combo + 1 if in_combo else 1
 	var dmg := scaled_damage(m.damage, combo)
 	combo_damage = combo_damage + dmg if in_combo else dmg
-	hp = maxi(hp - dmg, 0)
+	hp = maxi(hp - dmg, min_hp)
 	var was_crouching := is_crouching()
 	var juggled := state == State.AIR_HIT
 	move = -1
@@ -456,7 +458,7 @@ func become_thrown() -> void:
 func take_throw(grab: Dictionary, direction: int) -> void:
 	var dmg: int = scaled_damage(grab.damage, combo + 1) if grab.get("scaled", 0) else grab.damage
 	combo = 0
-	hp = maxi(hp - dmg, 0)
+	hp = maxi(hp - dmg, min_hp)
 	if hp == 0:
 		vx = KO_VX * direction
 		vy = KO_VY

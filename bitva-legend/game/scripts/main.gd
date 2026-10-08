@@ -8,6 +8,8 @@ var sim := Sim.new(true, chars)
 var reader := InputReader.new()
 ## ИИ за игрока 2: F3 или Options на геймпаде игрока 1 переключает уровень.
 var ai := AiController.new(20261008)
+## Тренировка: F6 или тачпад с зажатым R1.
+var training := false
 ## Отладка: «-- --screenshot=путь.png [--shot-at=тик] [--debug] [--demo-hp=N] [--demo-wins=N]»
 ## подаёт записанный ввод, сохраняет кадр на заданном тике и выходит.
 var _screenshot_path := ""
@@ -31,6 +33,9 @@ func _ready() -> void:
 			sim.wins[0] = int(arg.trim_prefix("--demo-wins="))
 		elif arg.begins_with("--demo="):
 			DemoInput.scenario = arg.trim_prefix("--demo=")
+		elif arg == "--training":
+			training = true
+			sim.set_training(true)
 		elif arg.begins_with("--demo-meter="):
 			for f in sim.fighters:
 				f.meter = int(arg.trim_prefix("--demo-meter="))
@@ -67,8 +72,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		ai.next_level()
 		return
 	if pad != null and pad.pressed and pad.button_index == JOY_BUTTON_TOUCHPAD:
-		chars = PackedStringArray([chars[1], chars[0]])
-		_reset()
+		var r1 := Input.is_joy_button_pressed(pad.device, JOY_BUTTON_RIGHT_SHOULDER) \
+			or Input.get_joy_axis(pad.device, JOY_AXIS_TRIGGER_RIGHT) >= 0.5
+		if r1:
+			_toggle_training()
+		else:
+			chars = PackedStringArray([chars[1], chars[0]])
+			_reset()
 		return
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
@@ -80,6 +90,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			arena.show_debug = not arena.show_debug
 		KEY_F3:
 			ai.next_level()
+		KEY_F6:
+			_toggle_training()
 		KEY_F4:
 			_cycle_char(0)
 		KEY_F5:
@@ -94,7 +106,14 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _reset() -> void:
 	sim = Sim.new(true, chars)
+	if training:
+		sim.set_training(true)
 	ai.reset()
+
+
+func _toggle_training() -> void:
+	training = not training
+	_reset()
 
 
 func _cycle_char(p: int) -> void:

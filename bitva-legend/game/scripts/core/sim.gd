@@ -33,6 +33,9 @@ const THROW_HITSTOP := 12
 const ARMOR_HITSTOP := 6            # короткая заморозка, когда удар принят бронёй
 const COUNTER_HITSTOP := 24         # драматичная пауза при удачной контратаке
 const PROJ_MARGIN := 150            # снаряд исчезает за краем арены на столько пикселей
+## Тренировка (2.7): без таймера и раундов, нокаута нет, здоровье восстанавливается
+## через REFILL_DELAY тиков после конца комбо, шкала всегда полная.
+const REFILL_DELAY := 45
 const PARRY_HITSTOP := 16          # парирование: короткая пауза с синей вспышкой
 const PARRY_METER := 60
 const SUPER_FLASH := 30             # суперприём: пауза с затемнением перед ударом
@@ -62,6 +65,8 @@ var round_winner := -1              # -1 ещё нет, 0/1 — игрок, 2 �
 var end_reason := EndReason.NONE
 var prev_inputs := PackedInt32Array([0, 0])
 var projectiles: Array[PackedInt32Array] = []
+var training := false
+var refill_wait := PackedInt32Array([0, 0])
 
 
 ## Персонажи игроков (id из FighterData). Можно выбрать одинаковых.
@@ -112,9 +117,12 @@ func step(frame_inputs: PackedInt32Array) -> void:
 		Phase.FIGHT:
 			var frozen := hitstop > 0
 			_combat_step(inputs, true)
-			if not frozen:
-				timer = maxi(timer - 1, 0)
-			_check_round_end()
+			if training:
+				_training_upkeep()
+			else:
+				if not frozen:
+					timer = maxi(timer - 1, 0)
+				_check_round_end()
 		Phase.ROUND_END:
 			_combat_step(idle, false)
 			if phase_frame >= ROUND_END_TICKS:
@@ -137,6 +145,8 @@ func _combat_step(inp: PackedInt32Array, hits: bool) -> void:
 		hitstop -= 1
 		return
 	var prev_x := PackedInt32Array([fighters[0].x, fighters[1].x])
+	for f in fighters:
+		f.min_hp = 1 if training else 0
 	for p in PLAYERS:
 		fighters[p].projectile_alive = has_projectile(p)
 		fighters[p].throw_ok = hits and _can_throw(p)
@@ -345,6 +355,37 @@ func _check_projectiles() -> void:
 		if not removed.has(i):
 			alive.append(projectiles[i])
 	projectiles = alive
+
+
+## Включить/выключить тренировку: бой начинается заново, сразу без вступления.
+func set_training(on: bool) -> void:
+	training = on
+	round_num = 1
+	wins = PackedInt32Array([0, 0])
+	_reset_fighters(false)
+	timer = ROUND_TICKS
+	round_winner = -1
+	end_reason = EndReason.NONE
+	refill_wait = PackedInt32Array([0, 0])
+	_set_phase(Phase.FIGHT)
+	if on:
+		for f in fighters:
+			f.meter = Fighter.METER_MAX
+
+
+## Тренировка: шкала полная, здоровье восстанавливается, когда боец пришёл в себя после комбо.
+func _training_upkeep() -> void:
+	for p in PLAYERS:
+		var f := fighters[p]
+		f.meter = Fighter.METER_MAX
+		var recovered := not (f.is_stunned() or f.is_untouchable() or f.state == Fighter.State.BLOCKSTUN)
+		if f.hp < Fighter.MAX_HP and recovered:
+			refill_wait[p] += 1
+			if refill_wait[p] >= REFILL_DELAY:
+				f.hp = Fighter.MAX_HP
+				refill_wait[p] = 0
+		else:
+			refill_wait[p] = 0
 
 
 func _check_round_end() -> void:
@@ -619,7 +660,8 @@ func save_state() -> Dictionary:
 		"hitstop_total": hitstop_total,
 		"sparks": sparks.duplicate(),
 		"match": PackedInt32Array([phase, phase_frame, round_num, wins[0], wins[1], timer,
-			round_winner, end_reason, prev_inputs[0], prev_inputs[1]]),
+			round_winner, end_reason, prev_inputs[0], prev_inputs[1],
+			1 if training else 0, refill_wait[0], refill_wait[1]]),
 		"projectiles": projectiles.duplicate(true),
 	}
 
@@ -638,6 +680,8 @@ func load_state(state: Dictionary) -> void:
 	wins = PackedInt32Array([m[3], m[4]]); timer = m[5]
 	round_winner = m[6]; end_reason = m[7] as EndReason
 	prev_inputs = PackedInt32Array([m[8], m[9]])
+	training = m[10] == 1
+	refill_wait = PackedInt32Array([m[11], m[12]])
 	projectiles.clear()
 	for pr in state.projectiles:
 		projectiles.append((pr as PackedInt32Array).duplicate())
@@ -652,7 +696,8 @@ func checksum() -> int:
 	h = _mix(h, hitstop_total)
 	for v in sparks:
 		h = _mix(h, v)
-	for v in [phase, phase_frame, round_num, wins[0], wins[1], timer, round_winner, end_reason]:
+	for v in [phase, phase_frame, round_num, wins[0], wins[1], timer, round_winner, end_reason,
+			1 if training else 0, refill_wait[0], refill_wait[1]]:
 		h = _mix(h, v)
 	for pr in projectiles:
 		for v in pr:

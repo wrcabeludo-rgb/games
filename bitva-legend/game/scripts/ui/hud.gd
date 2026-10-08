@@ -157,6 +157,10 @@ func _draw_timer() -> void:
 	var box := Rect2(c - Vector2(46, 34), Vector2(92, 68))
 	draw_rect(box, Color(0, 0, 0, 0.75))
 	draw_rect(box, COLOR_GOLD.darkened(0.3), false, 2)
+	if _sim.training:
+		_text(c + Vector2(0, 17), "∞", 46, COLOR_TEXT, false, true)
+		_text(c + Vector2(0, 62), "ТРЕНИРОВКА · F6 или R1 + тачпад — выйти", 14, COLOR_GOLD, false, true, 2)
+		return
 	var seconds := ceili(_sim.timer / 60.0)
 	var col := COLOR_HP_LOW if seconds <= 10 and _sim.phase == Sim.Phase.FIGHT else COLOR_TEXT
 	_text(c + Vector2(0, 17), "%02d" % seconds, 46, col, false, true)
@@ -244,7 +248,7 @@ func _draw_pad_notice() -> void:
 func _draw_footer() -> void:
 	var version: String = ProjectSettings.get_setting("application/config/version")
 	var stage: String = ProjectSettings.get_setting("application/config/description")
-	var hint := "R1/L — блок · F3/Options — ИИ · F4/F5 или тачпад — бойцы · F1 — ввод · F2 — хитбоксы · R/Create — новый матч · F11 · Esc"
+	var hint := "R1/L — блок · F3/Options — ИИ · F4/F5 или тачпад — бойцы · F6 или R1+тачпад — тренировка · F1 — ввод · F2 — хитбоксы · R/Create — новый матч · F11 · Esc"
 	draw_rect(Rect2(0, size.y - 92, size.x, 62), Color(0, 0, 0, 0.35))  # подложка под подсказки
 	draw_rect(Rect2(0, size.y - 30, size.x, 30), COLOR_SHADE)
 	_text(Vector2(size.x / 2.0, size.y - 10), hint, 13, COLOR_TEXT, false, true)
