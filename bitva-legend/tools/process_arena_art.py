@@ -32,6 +32,7 @@ SKY_SIZE = (1980, 1080)
 STRIP_WIDTH = {"mountains": 5400, "forest": 6000, "ground": 4000, "foreground": 4432}
 MOON_SIZE = 320
 STONE_HEIGHT = 300
+STITCH_OVERLAP = {"ground": 0.12, "mountains": 0.06}  # перетекание соседних панелей сплошных полос
 CLOUD_MAX_WIDTH = 720
 RAVEN_HEIGHT = 220
 
@@ -252,14 +253,23 @@ def align_by_eye(frames):
     return out
 
 
-def stitch(panels):
-    """Панели одной полосы — встык слева направо, низом (линией земли) на одном уровне."""
+def stitch(panels, overlap: float = 0.0):
+    """Панели одной полосы — встык слева направо, низом (линией земли) на одном уровне.
+    overlap > 0 — соседние панели заходят друг на друга на эту долю ширины и плавно перетекают
+    (для сплошных полос вроде земли: иначе на стыке виден шов по цвету и свету)."""
     parts = [p.crop(p.getchannel("A").point(lambda a: 255 if a > 8 else 0).getbbox() or (0, 0, p.width, p.height))
              for p in panels]
     height = max(p.height for p in parts)
-    out = Image.new("RGBA", (sum(p.width for p in parts), height), (0, 0, 0, 0))
+    lap = [round(min(a.width, b.width) * overlap) for a, b in zip(parts, parts[1:])]
+    out = Image.new("RGBA", (sum(p.width for p in parts) - sum(lap), height), (0, 0, 0, 0))
     x = 0
-    for p in parts:
+    for i, p in enumerate(parts):
+        if i > 0 and lap[i - 1] > 0:
+            x -= lap[i - 1]
+            a = np.asarray(p).astype(np.float32)
+            ramp = np.linspace(0.0, 1.0, lap[i - 1], dtype=np.float32)
+            a[:, :lap[i - 1], 3] *= ramp[None, :]
+            p = Image.fromarray(a.astype(np.uint8), "RGBA")
         out.alpha_composite(p, (x, height - p.height))
         x += p.width
     return out
@@ -288,7 +298,7 @@ def main() -> int:
         # Полосу можно прислать панелями name_1, name_2, … (слева направо) — склеим в одну.
         panels = [q for i in range(1, 7) if (q := find(src, f"{name}_{i}"))]
         if panels:
-            strip = stitch([chroma_key(Image.open(q)) for q in panels])
+            strip = stitch([chroma_key(Image.open(q)) for q in panels], STITCH_OVERLAP.get(name, 0.0))
         elif p := find(src, name):
             strip = chroma_key(Image.open(p))
         else:

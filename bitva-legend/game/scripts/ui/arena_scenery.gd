@@ -21,6 +21,7 @@ const K_FOG := 0.8
 const K_GROUND := 1.0
 const K_FRONT := 1.3
 
+const GROUND_WIDE := 1.3      # земля из трёх панелей: ширина рисунка — столько ширин арены
 const GROUND_SQUASH := 0.8  # картинку земли сжимаем по высоте
 const GROUND_RISE := 148.0  # бойцы стоят на дороге: полоса травы и кустов — выше их ступней, px
 const FOREST_HEIGHT := 270.0  # высота полосы леса на экране, px (ширина — по пропорциям картинки)
@@ -330,8 +331,14 @@ func _draw_ground(c: CanvasItem) -> void:
 	if _tex.has("ground"):
 		var tex: Texture2D = _tex.ground
 		# Дорога сжата по высоте (вид сбоку, земля «уходит» вдаль); бойцы стоят чуть ниже травы.
+		# Земля из панелей шире арены: рисуем в своих пропорциях по центру, края уходят за кадр
+		# (перекрёсток — посередине). Старая земля одной картинкой — сжата по высоте.
+		var w := arena_w
 		var h := arena_w * tex.get_height() / tex.get_width() * GROUND_SQUASH
-		c.draw_texture_rect(tex, Rect2(x0, ground_y - GROUND_RISE, arena_w, h), false)
+		if float(tex.get_width()) / tex.get_height() > 6.0:
+			w = arena_w * GROUND_WIDE
+			h = w * tex.get_height() / tex.get_width()
+		c.draw_texture_rect(tex, Rect2(x0 + (arena_w - w) / 2.0, ground_y - GROUND_RISE, w, h), false)
 		# Ниже картинки — та же тёмная земля до края экрана.
 		var bottom := ground_y - GROUND_RISE + h - 2
 		if bottom < view.y:
