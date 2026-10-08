@@ -303,7 +303,7 @@ func read_input(bits: int, aging: bool) -> Dictionary:
 	for i in 4:
 		if (bits & ATTACK_BITS[i]) != 0 and (prev_bits & ATTACK_BITS[i]) == 0:
 			btn_timers[i] = 0
-			_check_special(1 if i >= 2 else 0)
+			_check_special(i)
 	prev_bits = bits
 	return {
 		"fwd": (bits & fwd_bit) != 0, "back": (bits & back_bit) != 0,
@@ -324,12 +324,22 @@ func _push_tap(code: int) -> void:
 ## Нажата кнопка удара: не завершает ли она ввод спецприёма?
 ## «Назад, вперёд + удар»: вперёд не раньше BUTTON_WINDOW тиков до кнопки,
 ## назад — не раньше TAP_WINDOW тиков до «вперёд».
-func _check_special(strength: int) -> void:
+func _check_special(button: int) -> void:
 	if tap_log[0] == TAP_FWD and tap_log[2] == TAP_BACK and tap_log[1] <= BUTTON_WINDOW \
 			and tap_log[3] - tap_log[1] <= TAP_WINDOW:
-		special_buf = SPECIAL_PROJ
-		special_strength = strength
-		special_timer = 0
+		_queue_special(SPECIAL_PROJ, button)
+
+
+## Спецприём узнан по направлениям; проверяем, подходит ли кнопка (руки, ноги или любая).
+func _queue_special(special: int, button: int) -> void:
+	var m: Dictionary = data.moves[MOVES[SPECIAL_BASE + special * 2]]
+	var kind: String = m.get("buttons", "any")
+	var is_punch := button == 0 or button == 2
+	if (kind == "punch" and not is_punch) or (kind == "kick" and is_punch):
+		return
+	special_buf = special
+	special_strength = 1 if button >= 2 else 0
+	special_timer = 0
 
 
 ## Готов ли спецприём из буфера к исполнению (и разрешён ли он сейчас).

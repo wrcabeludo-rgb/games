@@ -25,6 +25,8 @@ func _init() -> void:
 	ok = _check("вперёд, назад + удар — обычный удар", _test_wrong_order()) and ok
 	ok = _check("слишком медленный ввод — обычный удар", _test_too_slow()) and ok
 	ok = _check("урон сквозь блок может добить", _test_chip_ko()) and ok
+	ok = _check("палица — только руками: назад, вперёд + ЛН — обычный удар ногой", _test_mace_punch_only()) and ok
+	ok = _check("назад, вперёд + СР у Ильи — сильная палица", _test_mace_heavy_punch()) and ok
 	print("ИТОГ: " + ("все тесты пройдены" if ok else "есть ошибки"))
 	quit(0 if ok else 1)
 
@@ -156,3 +158,20 @@ func _test_chip_ko() -> bool:
 	_drac_fireball(sim, LP, BL)
 	_run(sim, BL, 0, 90)
 	return sim.fighters[0].hp == 0 and sim.phase == Sim.Phase.ROUND_END
+
+
+func _test_mace_punch_only() -> bool:
+	var sim := _sim_at(600, 1100)
+	var f := sim.fighters[0]
+	_run(sim, L, 0, 2)
+	_run(sim, R | InputBits.LK, 0)
+	_run(sim, 0, 0, 30)
+	return sim.projectiles.is_empty() and sim.fighters[1].hp == 1000 \
+		and (f.move < 0 or _move_name(f) == "st_lk")
+
+
+func _test_mace_heavy_punch() -> bool:
+	var sim := _sim_at(600, 1100)
+	_run(sim, L, 0, 2)
+	_run(sim, R | HP, 0)
+	return _move_name(sim.fighters[0]) == "sp_proj_h"
