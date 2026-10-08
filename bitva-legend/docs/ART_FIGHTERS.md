@@ -97,7 +97,11 @@ Sprite sheet for a 2D fighting game: 3 animation frames of the SAME character in
 | ilya/st_sweep (8), j_hp (6) | ✅ в игре (3.4.8) |
 | ilya/st_round (8), j_hk (6), cr_hp — апперкот палицей (6) | ✅ в игре (3.4.9) |
 | ilya/throw, get_up, fall_p2 | ✅ в игре (3.4.10) |
-| ilya/fall_p1 (кадры 1–3), thrown (кадр 3) | ⚠ третья рука — выброшены (skip), ждём перегенерацию |
+| ilya/fall (новые кадры 1–2), thrown (новый кадр 3) | ✅ в игре (3.5): по одному кадру на картинку, без третьей руки |
+| dracula/model (v2), idle, walk_f, walk_b, run, crouch, jump | ✅ в игре (3.5) |
+| dracula/backdash, block, block_low | ⏳ ждём |
+
+Единый масштаб проверяется `python3 tools/measure_scale.py <боец>`: голова из стойки ищется на каждом кадре; медиана по листу должна быть ≈ 1.0 (±5%).
 
 
 Заметки: спрайт Ильи шире «тела» для столкновений и бьёт дальше хитбокса — хитбоксы и ширину

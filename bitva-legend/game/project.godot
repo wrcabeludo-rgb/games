@@ -5,8 +5,8 @@ config_version=5
 [application]
 
 config/name="Битва легенд"
-config/version="3.4.10"
-config/description="плавные анимации, ветер"
+config/version="3.5"
+config/description="Дракула: база"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="res://icon.svg"

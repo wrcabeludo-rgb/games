@@ -21,10 +21,17 @@ def gray(img: Image.Image) -> np.ndarray:
     return np.asarray(bg.convert("L")).astype(np.float32)
 
 
+WHO = "ilya"
+
+
 def head_box(img: Image.Image):
+    """Опорная точка головы: у Ильи — верх бороды, у Дракулы — верх бледного лица."""
     a = np.asarray(img.convert("RGBA")).astype(int)
     r, g, b, al = a[..., 0], a[..., 1], a[..., 2], a[..., 3]
-    beard = (r > 140) & (g > 70) & (g < 140) & (b < 70) & (r - g > 50) & (al > 200)
+    if WHO == "dracula":
+        beard = (r > 190) & (g > 170) & (b > 140) & (r - b < 60) & (r - b > 5) & (al > 200)
+    else:
+        beard = (r > 140) & (g > 70) & (g < 140) & (b < 70) & (r - g > 50) & (al > 200)
     ys, xs = np.where(beard)
     if len(ys) < 50:
         return None
@@ -52,6 +59,8 @@ def template(who: str):
     m = json.loads((ROOT / who / "idle.json").read_text())
     im = Image.open(ROOT / who / m["frames"][0]["file"])
     cx, top = head_box(im)
+    if WHO == "dracula":
+        return gray(im.crop((cx - 70, top - 40, cx + 60, top + 90)))
     return gray(im.crop((cx - 100, top - 100, cx + 60, top + 30)))
 
 
@@ -75,6 +84,7 @@ def scale_of(path: Path, tpl: np.ndarray):
 
 if __name__ == "__main__":
     who = sys.argv[1] if len(sys.argv) > 1 else "ilya"
+    WHO = who
     tpl = template(who)
     names = sys.argv[2:] or sorted(p.stem for p in (ROOT / who).glob("*.json"))
     for a in names:

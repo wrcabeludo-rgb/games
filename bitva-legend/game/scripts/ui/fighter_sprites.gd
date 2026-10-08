@@ -170,6 +170,9 @@ func frame_for(f: Fighter, tick: int) -> Array:
 				if n <= PING_PONG_MAX:
 					return _pick(anims.idle, _ping_pong(tick * (2 * n - 2) / IDLE_CYCLE, n))
 				return _pick(anims.idle, _cycle(tick, IDLE_CYCLE, n))
+	# Для состояния ещё нет кадров (лист не нарисован) — стойка, а не заглушка из фигур.
+	if anims.has("idle"):
+		return _pick(anims.idle, 0)
 	return []
 
 
