@@ -11,6 +11,9 @@ var _sim: Sim
 var _cam_x := 0.0
 var _shake := Vector2.ZERO
 var _scenery := ArenaScenery.new()
+var _sprites := FighterSprites.new()
+## Спрайты бойцов (где они уже есть); F7 — переключить на заглушки и обратно.
+var use_sprites := true
 
 
 func _ready() -> void:
@@ -129,6 +132,22 @@ func _draw_shadow(f: Fighter) -> void:
 	draw_set_transform(Vector2.ZERO)
 
 
+## Кадр спрайта: опорная точка (центр бойца на земле) — в позиции бойца; смотрит влево — отражаем.
+func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2) -> void:
+	var base := to_screen(float(f.x) / Sim.SUB, float(f.y) / Sim.SUB)
+	var tint := Color(0.75, 0.85, 1.0) if f.alt else Color.WHITE
+	if f.is_stunned() and _sim.hitstop > 0:
+		tint = Color(1.0, 0.75, 0.7)  # получил удар — краснеет на время заморозки
+	draw_set_transform(base, 0, Vector2(FighterSprites.SCALE * f.facing, FighterSprites.SCALE))
+	draw_texture(tex, -pivot, tint)
+	draw_set_transform(Vector2.ZERO)
+	if f.staggered:
+		var head := base + Vector2(0, -float(f.data.height) - 10)
+		for i in 3:
+			var a := _sim.tick * 0.2 + TAU * i / 3.0
+			draw_circle(head + Vector2(cos(a) * 40, sin(a) * 8), 6, Color(1, 0.9, 0.3))
+
+
 ## Боец-заглушка: тело, голова и «нос», показывающий, куда он смотрит.
 func _draw_fighter(f: Fighter) -> void:
 	if f.state == Fighter.State.DOWN:
@@ -137,6 +156,11 @@ func _draw_fighter(f: Fighter) -> void:
 	if f.state == Fighter.State.KNOCKDOWN and f.state_frame < Fighter.KNOCKDOWN_TICKS - 10:
 		_draw_down(f, false)
 		return
+	if use_sprites:
+		var fr := _sprites.frame_for(f, _sim.tick)
+		if not fr.is_empty():
+			_draw_sprite(f, fr[0], fr[1])
+			return
 	if f.is_intangible():
 		_draw_mist(f)
 		return

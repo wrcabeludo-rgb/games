@@ -62,6 +62,16 @@ Sprite sheet for a 2D fighting game: 4 animation frames of the SAME character in
 Sprite sheet for a 2D fighting game: 3 animation frames of the SAME character in one horizontal row, left to right, evenly spaced with clear empty magenta space between the frames, no frame touches another or the image edge. The character is ILYA MUROMETS exactly as in the attached model sheet: cartoon giant bogatyr with huge barrel chest, broad shoulders, short sturdy legs, thick light-brown beard to the belt, pointed conical steel shishak helmet with chainmail aventail, chainmail over a long crimson-red kaftan with golden trim, wide brown belt with a round bronze buckle, baggy dark-blue trousers, red boots with upturned toes, massive spiked iron mace. Strict side view facing RIGHT, full body visible, both feet planted on ONE flat horizontal ground line at the same height in every frame, the same size in every frame. Animation: QUICK STRAIGHT JAB with the front (right) fist — the mace stays in the rear hand resting on his shoulder in all frames. Frame 1 (wind-up): the front fist pulled slightly back, shoulders twisting, weight shifting. Frame 2 (hit): the front arm fully extended straight forward to the right at shoulder height, big fist punching forward, body leaning into the punch, beard swinging forward, a few short speed lines behind the fist. Frame 3 (recovery): the arm half retracted back toward the guard. Feet stay planted in the same place in all frames. HD hand-painted cartoon style like modern 2D fighting games (Skullgirls, BlazBlue), bold clean dark-plum outline (#24141F), cel shading with 2–3 tones and soft gradients, crisp sharp details, dynamic and punchy. Warm key light from the upper left, cool pale-blue rim light on the right side. Background: perfectly flat solid magenta #FF00FF, no gradient, no floor, no cast shadow. Do not use pink, magenta or purple on the character. NO text, NO frame numbers, NO watermark, NO borders.
 ```
 
+## Статус
+
+| Лист | Статус |
+|---|---|
+| ilya/model, dracula/model | ✅ получены (3.2) — референсы для всех листов |
+| ilya/idle, ilya/st_lp | ✅ в игре (3.2). Кадры привязаны к задней ступне: на джебе Илья делает выпад вперёд |
+
+Заметки: спрайт Ильи шире «тела» для столкновений и бьёт дальше хитбокса — хитбоксы и ширину
+подгоним под спрайты в 3.4, когда будут все удары. F7 в игре — переключить спрайты/заглушки.
+
 ## Полный список анимаций (промпты — по партиям в следующих подэтапах)
 
 Ключевые кадры; промежуточные дорабатывает игра. Одинаково для обоих бойцов, кроме приёмов.

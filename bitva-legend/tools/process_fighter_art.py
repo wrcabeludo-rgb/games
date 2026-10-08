@@ -45,17 +45,27 @@ def frames_of(sheet: Image.Image, expected: int):
     return frames
 
 
-def pivot(frame: Image.Image, mode: str):
-    """Опорная точка: x — центр ступней (или всего кадра), y — низ ступней (или центр)."""
+def feet(frame: Image.Image):
+    """Задняя ступня (левый край ступней — боец смотрит вправо), центр ступней и низ ступней."""
     a = np.asarray(frame.getchannel("A")) > 24
     ys, xs = np.where(a)
     if len(xs) == 0:
-        return frame.width / 2, frame.height
-    if mode == "center":
-        return float(xs.mean()), float(ys.mean())
+        return frame.width / 2, frame.width / 2, frame.height
     bottom = ys.max()
-    band = ys >= bottom - max(2, int(frame.height * FEET_BAND))
-    return float(xs[band].mean()), float(bottom)
+    band = xs[ys >= bottom - max(2, int(frame.height * FEET_BAND))]
+    return float(np.percentile(band, 2)), float(band.mean()), float(bottom)
+
+
+def pivot(frame: Image.Image, mode: str, center_offset: float):
+    """Опорная точка = центр бойца на земле. На земле кадры привязаны к задней ступне
+    (она стоит на месте, пока боец бьёт), центр — на center_offset правее её (по стойке).
+    В воздухе — центр кадра."""
+    if mode == "center":
+        a = np.asarray(frame.getchannel("A")) > 24
+        ys, xs = np.where(a)
+        return float(xs.mean()), float(ys.mean())
+    rear, _, bottom = feet(frame)
+    return rear + center_offset, bottom
 
 
 def main() -> int:
@@ -70,8 +80,9 @@ def main() -> int:
     cfg = json.loads(cfg_path.read_text()) if cfg_path.exists() else {}
     sheets = sorted(p for p in src.iterdir() if p.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp")
                     and not p.stem.startswith("model"))
-    # Сначала листы с собственным масштабом, потом наследующие.
-    sheets.sort(key=lambda p: str(cfg.get(p.stem, {}).get("fit", "stand")).startswith("inherit"))
+    # Сначала стойка (по ней — центр бойца), потом листы с собственным масштабом, потом наследующие.
+    sheets.sort(key=lambda p: (p.stem != "idle", str(cfg.get(p.stem, {}).get("fit", "stand")).startswith("inherit")))
+    center_offset = None  # от задней ступни до центра бойца (по первому кадру стойки), px
     scales = {}       # масштаб листа
     heights = {}      # высота исходного листа — для наследования масштаба
     for p in sheets:
@@ -96,7 +107,10 @@ def main() -> int:
         for i, f in enumerate(frames, 1):
             f = f.resize((max(1, round(f.width * scale)), max(1, round(f.height * scale))), Image.LANCZOS)
             f = sharpen(f)
-            px, py = pivot(f, opt.get("pivot_y", "feet"))
+            if center_offset is None:
+                rear, mid, _ = feet(f)
+                center_offset = mid - rear
+            px, py = pivot(f, opt.get("pivot_y", "feet"), center_offset)
             f.save(out / f"{name}_{i}.png", optimize=True)
             meta["frames"].append({"file": f"{name}_{i}.png", "pivot": [round(px), round(py)],
                                    "size": [f.width, f.height]})

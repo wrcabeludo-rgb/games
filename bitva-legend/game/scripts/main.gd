@@ -90,6 +90,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			arena.show_debug = not arena.show_debug
 		KEY_F3:
 			_cycle_ai()
+		KEY_F7:
+			arena.use_sprites = not arena.use_sprites
+			reader.notify("Спрайты бойцов: " + ("включены" if arena.use_sprites else "выключены (заглушки)"))
 		KEY_F6:
 			_toggle_training()
 		KEY_F4:
