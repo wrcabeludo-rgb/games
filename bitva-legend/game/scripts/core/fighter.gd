@@ -5,11 +5,11 @@ extends RefCounted
 
 enum State {
 	STAND, WALK_F, WALK_B, CROUCH, PREJUMP, AIR, LAND, RUN, RUN_STOP, BACKDASH,
-	ATTACK, HITSTUN, AIR_HIT, BLOCK, BLOCKSTUN,
+	ATTACK, HITSTUN, AIR_HIT, BLOCK, BLOCKSTUN, DOWN,
 }
 const STATE_NAMES := [
 	"стойка", "шаг вперёд", "шаг назад", "присед", "подготовка прыжка", "в воздухе",
-	"приземление", "бег", "торможение", "отскок", "удар", "оглушён", "отброшен", "блок", "в блоке",
+	"приземление", "бег", "торможение", "отскок", "удар", "оглушён", "отброшен", "блок", "в блоке", "повержен",
 ]
 
 ## Удары по номерам: 0–3 стоя, 4–7 в приседе, 8–11 в прыжке; внутри — ЛР, ЛН, СР, СН.
@@ -32,6 +32,9 @@ const AIR_HIT_VX := 350     # отброс при попадании в возд
 const AIR_HIT_VY := 1100
 const AIR_HIT_LANDING := 14 # приземление после отброса дольше обычного
 const MAX_HP := 1000
+const KO_VX := 520          # нокаут: отлёт назад и вверх
+const KO_VY := 1500
+const DOWN_HEIGHT := 50     # высота лежащего бойца, px
 const BLOCK_PUSH := 130     # в блоке отбрасывает сильнее, чем при попадании, %
 const BLOCKSTUN_LESS := 2   # в блоке оглушение короче, чем при попадании, на столько тиков
 
@@ -142,6 +145,8 @@ func push_half() -> int:
 
 ## Высота «тела» для столкновений в текущем состоянии.
 func push_height() -> int:
+	if state == State.DOWN:
+		return DOWN_HEIGHT * SUB
 	if is_crouching():
 		return data.crouch_height * SUB
 	if is_airborne():
@@ -190,6 +195,14 @@ func take_hit(m: Dictionary, attacker_facing: int) -> void:
 	hp = maxi(hp - m.damage, 0)
 	var was_crouching := is_crouching()
 	move = -1
+	if hp == 0:
+		# Нокаут: отлетает в любом положении и падает.
+		vx = KO_VX * attacker_facing
+		vy = KO_VY
+		y = maxi(y, 1)
+		_set_state(State.AIR_HIT)
+		state_frame = 0
+		return
 	if is_airborne():
 		vx = AIR_HIT_VX * attacker_facing
 		vy = AIR_HIT_VY
@@ -288,7 +301,13 @@ func step(bits: int) -> void:
 			y += vy
 			vy -= data.gravity
 			if y <= 0:
-				_land(AIR_HIT_LANDING)
+				if hp == 0:
+					y = 0
+					vx = 0
+					vy = 0
+					_set_state(State.DOWN)
+				else:
+					_land(AIR_HIT_LANDING)
 		State.LAND:
 			if state_frame >= landing_frames:
 				_set_state(State.STAND)
@@ -308,6 +327,8 @@ func step(bits: int) -> void:
 			x += vx
 			if speed == 0 and state_frame >= _backdash_moving_frames() + data.backdash_recovery:
 				_set_state(State.STAND)
+		State.DOWN:
+			pass
 		State.ATTACK:
 			move_frame += 1
 			var m := move_data()

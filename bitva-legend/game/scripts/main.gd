@@ -4,8 +4,8 @@ extends Node
 
 var sim := Sim.new()
 var reader := InputReader.new()
-## Отладка: «-- --screenshot=путь.png [--shot-at=тик]» подаёт записанный ввод,
-## сохраняет кадр на заданном тике и выходит.
+## Отладка: «-- --screenshot=путь.png [--shot-at=тик] [--debug] [--demo-hp=N] [--demo-wins=N]»
+## подаёт записанный ввод, сохраняет кадр на заданном тике и выходит.
 var _screenshot_path := ""
 var _shot_at := DemoInput.LENGTH
 
@@ -21,6 +21,10 @@ func _ready() -> void:
 			_shot_at = int(arg.trim_prefix("--shot-at="))
 		elif arg == "--debug":
 			arena.show_debug = true
+		elif arg.begins_with("--demo-hp="):
+			sim.fighters[1].hp = int(arg.trim_prefix("--demo-hp="))
+		elif arg.begins_with("--demo-wins="):
+			sim.wins[0] = int(arg.trim_prefix("--demo-wins="))
 
 
 func _physics_process(_delta: float) -> void:

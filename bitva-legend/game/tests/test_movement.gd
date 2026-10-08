@@ -33,14 +33,14 @@ func _run(sim: Sim, p1: int, p2: int, ticks: int) -> void:
 
 
 func _test_walk() -> bool:
-	var sim := Sim.new()
+	var sim := Sim.new(false)
 	var x0 := sim.fighters[0].x
 	_run(sim, R, 0, 30)
 	return sim.fighters[0].x - x0 == 30 * 260 and sim.fighters[0].state == Fighter.State.WALK_F
 
 
 func _test_walk_back() -> bool:
-	var sim := Sim.new()
+	var sim := Sim.new(false)
 	var x0 := sim.fighters[0].x
 	_run(sim, L, 0, 30)
 	var back := x0 - sim.fighters[0].x
@@ -48,7 +48,7 @@ func _test_walk_back() -> bool:
 
 
 func _test_jump() -> bool:
-	var sim := Sim.new()
+	var sim := Sim.new(false)
 	var f := sim.fighters[0]
 	var apex := 0
 	_run(sim, U, 0, 1)
@@ -62,7 +62,7 @@ func _test_jump() -> bool:
 
 
 func _test_crouch() -> bool:
-	var sim := Sim.new()
+	var sim := Sim.new(false)
 	_run(sim, D, 0, 10)
 	var crouching := sim.fighters[0].state == Fighter.State.CROUCH
 	_run(sim, 0, 0, 1)
@@ -70,7 +70,7 @@ func _test_crouch() -> bool:
 
 
 func _test_push() -> bool:
-	var sim := Sim.new()
+	var sim := Sim.new(false)
 	_run(sim, R, 0, 300)
 	var a := sim.fighters[0]
 	var b := sim.fighters[1]
@@ -78,7 +78,7 @@ func _test_push() -> bool:
 
 
 func _test_crossup() -> bool:
-	var sim := Sim.new()
+	var sim := Sim.new(false)
 	var ilya := sim.fighters[0]
 	var drac := sim.fighters[1]
 	ilya.x = 900 * SUB
@@ -90,14 +90,14 @@ func _test_crossup() -> bool:
 
 
 func _test_wall() -> bool:
-	var sim := Sim.new()
+	var sim := Sim.new(false)
 	_run(sim, L, L, 1200)  # Дракула идёт следом и прижимает Илью к стене
 	var a := sim.fighters[0]
 	return a.x == a.push_half()
 
 
 func _test_separation() -> bool:
-	var sim := Sim.new()
+	var sim := Sim.new(false)
 	var max_sep := 0
 	for i in 600:
 		sim.step(PackedInt32Array([L, R]))

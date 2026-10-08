@@ -35,7 +35,7 @@ func _play(sim: Sim, seq: Array) -> void:
 
 
 func _test_run() -> bool:
-	var sim := Sim.new()
+	var sim := Sim.new(false)
 	var f := sim.fighters[0]
 	f.x = 300 * SUB  # подальше от соперника
 	_play(sim, [[R, 2], [0, 2], [R, 1]])
@@ -45,14 +45,14 @@ func _test_run() -> bool:
 
 
 func _test_slow_tap() -> bool:
-	var sim := Sim.new()
+	var sim := Sim.new(false)
 	var f := sim.fighters[0]
 	_play(sim, [[R, 2], [0, 20], [R, 3]])
 	return f.state == S.WALK_F
 
 
 func _test_run_stop() -> bool:
-	var sim := Sim.new()
+	var sim := Sim.new(false)
 	var f := sim.fighters[0]
 	f.x = 300 * SUB
 	_play(sim, [[R, 2], [0, 2], [R, 15], [0, 1]])
@@ -62,7 +62,7 @@ func _test_run_stop() -> bool:
 
 
 func _test_backdash() -> bool:
-	var sim := Sim.new()
+	var sim := Sim.new(false)
 	var f := sim.fighters[0]
 	var x0 := f.x
 	_play(sim, [[L, 2], [0, 2], [L, 1]])
@@ -73,14 +73,14 @@ func _test_backdash() -> bool:
 
 
 func _test_backdash_commit() -> bool:
-	var sim := Sim.new()
+	var sim := Sim.new(false)
 	var f := sim.fighters[0]
 	_play(sim, [[L, 2], [0, 2], [L, 1], [R, 10]])
 	return f.state == S.BACKDASH and f.vx < 0
 
 
 func _jump_distance(run_first: bool) -> int:
-	var sim := Sim.new()
+	var sim := Sim.new(false)
 	var f := sim.fighters[0]
 	f.x = 200 * SUB
 	sim.fighters[1].x = 1800 * SUB
@@ -100,7 +100,7 @@ func _test_run_jump() -> bool:
 
 
 func _test_run_side_switch() -> bool:
-	var sim := Sim.new()
+	var sim := Sim.new(false)
 	var f := sim.fighters[0]
 	_play(sim, [[R, 2], [0, 2], [R, 3]])
 	sim.fighters[1].x = f.x - 300 * SUB  # соперник внезапно оказался сзади

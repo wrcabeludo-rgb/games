@@ -37,7 +37,7 @@ func _update_camera() -> void:
 	# Тряска на попадании: сильнее в начале заморозки, знак меняется каждый тик.
 	_shake = Vector2.ZERO
 	if _sim.hitstop > 0 and _sim.hitstop_total > 0:
-		var amp := 2.0 + _sim.hitstop_total * 0.6
+		var amp := minf(2.0 + _sim.hitstop_total * 0.6, 12.0)
 		var k := float(_sim.hitstop) / _sim.hitstop_total
 		var sgn := 1.0 if _sim.tick % 2 == 0 else -1.0
 		_shake = Vector2(sgn * amp * k, -sgn * amp * k * 0.5)
@@ -124,6 +124,9 @@ func _draw_shadow(f: Fighter) -> void:
 
 ## Боец-заглушка: тело, голова и «нос», показывающий, куда он смотрит.
 func _draw_fighter(f: Fighter) -> void:
+	if f.state == Fighter.State.DOWN:
+		_draw_down(f)
+		return
 	var base := to_screen(float(f.x) / Sim.SUB, float(f.y) / Sim.SUB)
 	var h: float = f.data.height
 	var w: float = f.data.push_half * 2.0
@@ -196,6 +199,14 @@ func _draw_fighter(f: Fighter) -> void:
 		_draw_attack(f, shoulder, Vector2(base.x + dir * w * 0.15, base.y - body_h * 0.45), color)
 	elif f.state == Fighter.State.BLOCK or f.state == Fighter.State.BLOCKSTUN:
 		_draw_guard(f, shoulder, body_h, dir, color)
+	elif _is_celebrating(f):
+		# Победная поза: рука вверх, у Ильи — с палицей.
+		var hand := shoulder + Vector2(dir * 48, -body_h * 0.5)
+		draw_line(shoulder, hand, color.darkened(0.3), 12)
+		if f.id == "ilya":
+			draw_circle(hand + Vector2(0, -20), 24, Color(0.36, 0.3, 0.26))
+		else:
+			draw_circle(hand, 9, color.darkened(0.45))
 	else:
 		# Рука вперёд — тоже подсказка, куда смотрит боец.
 		draw_line(shoulder, shoulder + Vector2(dir * w * 0.55, body_h * 0.2), color.darkened(0.3), 10)
@@ -241,6 +252,37 @@ func _draw_attack(f: Fighter, shoulder: Vector2, hip: Vector2, color: Color) -> 
 		for i in 3:
 			var side := v.orthogonal() * (i - 1) * 8.0
 			draw_line(end + side, end + side + v * 22, Color(0.95, 0.9, 0.85), 3)
+
+
+## Победитель раунда празднует через секунду после конца раунда.
+func _is_celebrating(f: Fighter) -> bool:
+	var ph := _sim.phase
+	if ph != Sim.Phase.ROUND_END and ph != Sim.Phase.MATCH_END:
+		return false
+	if _sim.phase_frame < 50 and ph == Sim.Phase.ROUND_END:
+		return false
+	var w := _sim.round_winner if ph == Sim.Phase.ROUND_END else _sim.match_winner()
+	return w >= 0 and w < 2 and _sim.fighters[w] == f and f.is_grounded_actionable()
+
+
+## Поверженный боец лежит на земле.
+func _draw_down(f: Fighter) -> void:
+	var base := to_screen(float(f.x) / Sim.SUB, 0)
+	var length: float = f.data.height * 0.8
+	var thick: float = Fighter.DOWN_HEIGHT * 0.8
+	var head_side := -float(f.facing)
+	var color: Color = f.data.color.darkened(0.15)
+	var body := Rect2(base.x - length / 2.0, base.y - thick, length, thick)
+	draw_rect(body, color)
+	draw_rect(body, color.darkened(0.45), false, 3)
+	var head := Vector2(base.x + head_side * (length / 2.0 + 18), base.y - 24)
+	draw_circle(head, 24, color.lightened(0.15))
+	draw_arc(head, 24, 0, TAU, 24, color.darkened(0.45), 3)
+	# Звёздочки над головой.
+	for i in 3:
+		var a := _sim.tick * 0.12 + TAU * i / 3.0
+		var star := head + Vector2(cos(a) * 30, -36 + sin(a) * 8)
+		draw_circle(star, 5, Color(1, 0.9, 0.4))
 
 
 ## Блок: скрещённые руки перед собой и полупрозрачный щит.

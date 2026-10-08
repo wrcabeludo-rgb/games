@@ -38,7 +38,7 @@ func _check(name: String, passed: bool) -> bool:
 
 ## Новый бой с бойцами на заданных позициях (в пикселях).
 func _sim_at(ilya_px: int, drac_px: int) -> Sim:
-	var sim := Sim.new()
+	var sim := Sim.new(false)
 	sim.fighters[0].x = ilya_px * SUB
 	sim.fighters[1].x = drac_px * SUB
 	return sim

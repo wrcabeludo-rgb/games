@@ -14,6 +14,17 @@ const START_GAP := 440              # расстояние между бойца
 const MAX_SEPARATION := 1100        # дальше не разойтись: оба должны помещаться в кадр
 const SUB := Fighter.SUB
 
+## Фазы матча.
+enum Phase { INTRO, FIGHT, ROUND_END, MATCH_END }
+enum EndReason { NONE, KO, TIME, DOUBLE_KO }
+const INTRO_TICKS := 80             # «РАУНД N» — бойцы ещё не двигаются
+const ROUND_TICKS := 60 * 60        # таймер раунда: 60 секунд
+const ROUND_END_TICKS := 200        # пауза после конца раунда
+const REMATCH_DELAY := 60           # после конца матча кнопки работают не сразу
+const KO_FREEZE := 40               # драматичная заморозка на нокауте
+const WINS_NEEDED := 2
+const ATTACK_MASK := InputBits.LP | InputBits.LK | InputBits.HP | InputBits.HK
+
 var tick := 0
 var inputs := PackedInt32Array([0, 0])
 ## История ввода по игрокам: записи [биты, сколько тиков удерживались], новые — первыми.
@@ -25,43 +36,152 @@ var hitstop_total := 0              # длительность текущей з
 ## Последнее попадание каждого игрока (для искр): [тик, x, y, вид: 0 лёгкий, 1 сильный, 2 блок].
 var sparks := PackedInt32Array([-999, 0, 0, 0, -999, 0, 0, 0])
 
+var phase := Phase.INTRO
+var phase_frame := 0
+var round_num := 1
+var wins := PackedInt32Array([0, 0])
+var timer := ROUND_TICKS
+var round_winner := -1              # -1 ещё нет, 0/1 — игрок, 2 — ничья
+var end_reason := EndReason.NONE
+var prev_inputs := PackedInt32Array([0, 0])
 
-func _init() -> void:
-	reset_round()
+
+## with_intro = false — сразу бой (для тестов и тренировки).
+func _init(with_intro := true) -> void:
+	_reset_fighters()
+	if not with_intro:
+		phase = Phase.FIGHT
 
 
 @warning_ignore("integer_division")
-func reset_round() -> void:
+func _reset_fighters() -> void:
 	var center := ARENA_WIDTH / 2
 	fighters = [
 		Fighter.new("ilya", center - START_GAP / 2, 1),
 		Fighter.new("dracula", center + START_GAP / 2, -1),
 	]
+	hitstop = 0
+	hitstop_total = 0
 
 
 func step(frame_inputs: PackedInt32Array) -> void:
 	for p in PLAYERS:
 		var bits := InputBits.clean_socd(frame_inputs[p])
+		prev_inputs[p] = inputs[p]
 		inputs[p] = bits
 		_record_history(p, bits)
 
+	var idle := PackedInt32Array([0, 0])
+	phase_frame += 1
+	match phase:
+		Phase.INTRO:
+			_combat_step(idle, false)
+			if phase_frame >= INTRO_TICKS:
+				_set_phase(Phase.FIGHT)
+		Phase.FIGHT:
+			var frozen := hitstop > 0
+			_combat_step(inputs, true)
+			if not frozen:
+				timer = maxi(timer - 1, 0)
+			_check_round_end()
+		Phase.ROUND_END:
+			_combat_step(idle, false)
+			if phase_frame >= ROUND_END_TICKS:
+				if wins[0] >= WINS_NEEDED or wins[1] >= WINS_NEEDED:
+					_set_phase(Phase.MATCH_END)
+				else:
+					_next_round()
+		Phase.MATCH_END:
+			_combat_step(idle, false)
+			if phase_frame >= REMATCH_DELAY and _any_attack_pressed():
+				_new_match()
+	tick += 1
+
+
+## Один тик боя. hits = false — удары не попадают (вне фазы боя).
+func _combat_step(inp: PackedInt32Array, hits: bool) -> void:
 	if hitstop > 0:
 		for p in PLAYERS:
-			fighters[p].read_input(inputs[p], false)
+			fighters[p].read_input(inp[p], false)
 		hitstop -= 1
-		tick += 1
 		return
-
 	var prev_x := PackedInt32Array([fighters[0].x, fighters[1].x])
 	for p in PLAYERS:
-		fighters[p].step(inputs[p])
+		fighters[p].step(inp[p])
 	_wall_pushback()
 	_resolve_push()
 	_limit_separation(prev_x)
 	_clamp_walls()
-	_check_hits()
+	if hits:
+		_check_hits()
 	_update_facing()
-	tick += 1
+
+
+func _check_round_end() -> void:
+	var ko0 := fighters[0].hp == 0
+	var ko1 := fighters[1].hp == 0
+	if ko0 or ko1:
+		if ko0 and ko1:
+			_end_round(2, EndReason.DOUBLE_KO)
+		else:
+			_end_round(1 if ko0 else 0, EndReason.KO)
+		hitstop = KO_FREEZE
+		hitstop_total = KO_FREEZE
+	elif timer == 0:
+		var h0 := fighters[0].hp
+		var h1 := fighters[1].hp
+		_end_round(2 if h0 == h1 else (0 if h0 > h1 else 1), EndReason.TIME)
+
+
+func _end_round(winner: int, reason: EndReason) -> void:
+	round_winner = winner
+	end_reason = reason
+	if winner == 2:
+		wins[0] += 1
+		wins[1] += 1
+	else:
+		wins[winner] += 1
+	_set_phase(Phase.ROUND_END)
+
+
+func _next_round() -> void:
+	round_num += 1
+	_start_round()
+
+
+func _new_match() -> void:
+	round_num = 1
+	wins = PackedInt32Array([0, 0])
+	_start_round()
+
+
+func _start_round() -> void:
+	_reset_fighters()
+	timer = ROUND_TICKS
+	round_winner = -1
+	end_reason = EndReason.NONE
+	_set_phase(Phase.INTRO)
+
+
+func _set_phase(p: Phase) -> void:
+	phase = p
+	phase_frame = 0
+
+
+func _any_attack_pressed() -> bool:
+	for p in PLAYERS:
+		if (inputs[p] & ATTACK_MASK & ~prev_inputs[p]) != 0:
+			return true
+	return false
+
+
+## Победитель матча: 0/1, 2 — ничья, -1 — матч не окончен.
+func match_winner() -> int:
+	if phase != Phase.MATCH_END:
+		return -1
+	if wins[0] == wins[1]:
+		return 2
+	return 0 if wins[0] > wins[1] else 1
 
 
 ## Отбросило в стену — значит, отбрасывает самого атакующего (как в Street Fighter).
@@ -84,7 +204,7 @@ func _check_hits() -> void:
 	for p in PLAYERS:
 		var a := fighters[p]
 		var d := fighters[1 - p]
-		if not a.is_active() or d.state == Fighter.State.AIR_HIT:
+		if not a.is_active() or d.state == Fighter.State.AIR_HIT or d.state == Fighter.State.DOWN:
 			continue
 		var hb := a.hitbox()
 		for hurt in d.hurtboxes():
@@ -212,6 +332,8 @@ func save_state() -> Dictionary:
 		"hitstop": hitstop,
 		"hitstop_total": hitstop_total,
 		"sparks": sparks.duplicate(),
+		"match": PackedInt32Array([phase, phase_frame, round_num, wins[0], wins[1], timer,
+			round_winner, end_reason, prev_inputs[0], prev_inputs[1]]),
 	}
 
 
@@ -224,6 +346,11 @@ func load_state(state: Dictionary) -> void:
 	hitstop = state.hitstop
 	hitstop_total = state.hitstop_total
 	sparks = state.sparks.duplicate()
+	var m: PackedInt32Array = state.match
+	phase = m[0] as Phase; phase_frame = m[1]; round_num = m[2]
+	wins = PackedInt32Array([m[3], m[4]]); timer = m[5]
+	round_winner = m[6]; end_reason = m[7] as EndReason
+	prev_inputs = PackedInt32Array([m[8], m[9]])
 
 
 ## Контрольная сумма состояния (FNV-1a по целым числам).
@@ -234,6 +361,8 @@ func checksum() -> int:
 	h = _mix(h, hitstop)
 	h = _mix(h, hitstop_total)
 	for v in sparks:
+		h = _mix(h, v)
+	for v in [phase, phase_frame, round_num, wins[0], wins[1], timer, round_winner, end_reason]:
 		h = _mix(h, v)
 	for p in PLAYERS:
 		h = _mix(h, inputs[p])
