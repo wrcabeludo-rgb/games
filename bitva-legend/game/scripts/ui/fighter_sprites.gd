@@ -121,12 +121,13 @@ static func _pick(anim: Dictionary, i: int) -> Array:
 	return [anim.tex[i], anim.pivot[i]]
 
 
-## Ключевые кадры удара: до «ударного» кадра — подготовка, «ударный» (2-й) — активная фаза, после — возврат.
+## Ключевые кадры удара: до «ударного» кадра — подготовка, «ударный» — активная фаза, после — возврат.
+## Ударный кадр: 2-й из 3, 3-й из 4 (два кадра замаха) — предпоследний.
 static func _attack_index(f: Fighter, n: int) -> int:
 	if n <= 1:
 		return 0
 	var m := f.move_data()
-	var hit := 1
+	var hit := 1 if n <= 3 else n - 2
 	match f.move_phase():
 		0:
 			return clampi(f.move_frame * hit / maxi(m.startup, 1), 0, hit - 1)

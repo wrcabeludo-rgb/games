@@ -144,7 +144,7 @@ def main() -> int:
     cfg_path = src / "sheets.json"
     cfg = json.loads(cfg_path.read_text()) if cfg_path.exists() else {}
     sheets = sorted(p for p in src.iterdir() if p.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp")
-                    and not p.stem.startswith("model"))
+                    and not p.stem.startswith(("model", "old_")))
     # Сначала стойка (по ней — центр бойца), потом листы с собственным масштабом, потом наследующие.
     sheets.sort(key=lambda p: (p.stem != "idle", str(cfg.get(p.stem, {}).get("fit", "stand")).startswith("inherit")))
     ref = None  # по первому кадру стойки: от задней ступни и от центра масс до центра бойца на земле

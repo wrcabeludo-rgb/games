@@ -21,8 +21,8 @@ const K_FOG := 0.8
 const K_GROUND := 1.0
 const K_FRONT := 1.3
 
-const GROUND_SQUASH := 0.6  # картинку земли сжимаем по высоте
-const GROUND_RISE := 36.0   # трава на краю дороги выше линии, где стоят бойцы, px
+const GROUND_SQUASH := 0.8  # картинку земли сжимаем по высоте
+const GROUND_RISE := 128.0  # бойцы стоят на дороге: полоса травы и кустов — выше их ступней, px
 const FOREST_HEIGHT := 270.0  # высота полосы леса на экране, px (ширина — по пропорциям картинки)
 const STONE_SINK := 16.0    # камень утоплен в землю, px
 const FRONT_RISE := 95.0    # передний план поднимается над линией земли, px
@@ -330,6 +330,10 @@ func _draw_ground(c: CanvasItem) -> void:
 		# Дорога сжата по высоте (вид сбоку, земля «уходит» вдаль); бойцы стоят чуть ниже травы.
 		var h := arena_w * tex.get_height() / tex.get_width() * GROUND_SQUASH
 		c.draw_texture_rect(tex, Rect2(x0, ground_y - GROUND_RISE, arena_w, h), false)
+		# Ниже картинки — та же тёмная земля до края экрана.
+		var bottom := ground_y - GROUND_RISE + h - 2
+		if bottom < view.y:
+			c.draw_rect(Rect2(0, bottom, view.x, view.y - bottom + 1), Color(0.15, 0.12, 0.1))
 		return
 	c.draw_rect(Rect2(0, ground_y, view.x, view.y - ground_y), Color(0.2, 0.17, 0.16))
 	c.draw_line(Vector2(0, ground_y), Vector2(view.x, ground_y), Color(0.32, 0.28, 0.26), 3)

@@ -1,12 +1,53 @@
 {
- "idle": {"frames": 4},
- "st_lp": {"frames": 3},
- "walk_f": {"frames": 6, "pivot_y": "body"},
- "walk_b": {"frames": 6, "pivot_y": "body"},
- "run": {"frames": 6, "fit": 1.33, "pivot_y": "body"},
- "backdash": {"frames": 3, "fit": "inherit:idle", "pivot_y": "body"},
- "crouch": {"frames": 2, "fit": "h:2:440"},
- "block": {"frames": 2, "fit": "h:1:560"},
- "block_low": {"frames": 2, "fit": "h:1:440"},
- "jump": {"frames": 5, "fit": "h:1:440", "pivot_y": "body"}
+ "idle": {
+  "frames": 6
+ },
+ "st_lp": {
+  "frames": 3
+ },
+ "walk_f": {
+  "frames": 6,
+  "pivot_y": "body"
+ },
+ "walk_b": {
+  "frames": 6,
+  "pivot_y": "body"
+ },
+ "run": {
+  "frames": 6,
+  "fit": 1.33,
+  "pivot_y": "body"
+ },
+ "backdash": {
+  "frames": 3,
+  "fit": "inherit:idle",
+  "pivot_y": "body"
+ },
+ "crouch": {
+  "frames": 2,
+  "fit": "h:2:440"
+ },
+ "block": {
+  "frames": 2,
+  "fit": "h:1:560"
+ },
+ "block_low": {
+  "frames": 2,
+  "fit": "h:1:440"
+ },
+ "jump": {
+  "frames": 5,
+  "fit": "h:1:440",
+  "pivot_y": "body"
+ },
+ "st_lk": {
+  "frames": 3
+ },
+ "st_hp": {
+  "frames": 4,
+  "fit": "h:4:600"
+ },
+ "st_hk": {
+  "frames": 4
+ }
 }
