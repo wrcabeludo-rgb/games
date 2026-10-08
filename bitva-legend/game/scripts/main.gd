@@ -31,6 +31,9 @@ func _ready() -> void:
 			sim.wins[0] = int(arg.trim_prefix("--demo-wins="))
 		elif arg.begins_with("--demo="):
 			DemoInput.scenario = arg.trim_prefix("--demo=")
+		elif arg.begins_with("--demo-meter="):
+			for f in sim.fighters:
+				f.meter = int(arg.trim_prefix("--demo-meter="))
 		elif arg.begins_with("--demo-ai="):
 			ai.level = int(arg.trim_prefix("--demo-ai=")) as AiController.Level
 

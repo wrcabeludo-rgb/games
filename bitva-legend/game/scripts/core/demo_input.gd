@@ -26,6 +26,10 @@ const SCENARIOS := {
 	"string": [[0, 0, 80], [R, 0, 115], [InputBits.LP, 0, 1], [0, 0, 6], [InputBits.LP, 0, 1], [0, 0, 6], [InputBits.HP, 0, 1], [0, 0, 600]],
 	# Апперкот Ильи и таран по подброшенному Дракуле.
 	"juggle": [[0, 0, 80], [R, 0, 115], [D | InputBits.HP, 0, 1], [0, 0, 9], [R, 0, 2], [0, 0, 1], [R | InputBits.LP, 0, 1], [0, 0, 600]],
+	# Суперприём Ильи (с --demo-meter=3000): блок + СР + СН.
+	"super": [[0, 0, 80], [R, 0, 100], [InputBits.BLOCK | InputBits.HP | InputBits.HK, 0, 1], [0, 0, 600]],
+	# Усиленные мыши Дракулы (с --demo-meter=1000): назад, вперёд + ЛР с зажатым блоком.
+	"ex": [[0, 0, 80], [0, R, 2], [0, 0, 2], [0, L | InputBits.LP | InputBits.BLOCK, 1], [0, 0, 600]],
 }
 const LENGTH := 112
 

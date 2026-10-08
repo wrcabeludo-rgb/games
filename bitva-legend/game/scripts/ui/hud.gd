@@ -64,7 +64,9 @@ func _draw() -> void:
 		if show_inputs:
 			_draw_history(p, Vector2(size.x - 40.0 if p == 1 else 40.0, 150), p == 1)
 		_draw_combo(p, p == 1)
+		_draw_meter(p)
 	_draw_timer()
+	_draw_super_name()
 	_draw_announcement()
 	_draw_footer()
 	_draw_pad_notice()
@@ -109,6 +111,44 @@ func _draw_bar(p: int) -> void:
 		var won := i < _sim.wins[p]
 		draw_circle(c, 9, COLOR_GOLD if won else Color(0.15, 0.13, 0.17))
 		draw_arc(c, 9, 0, TAU, 20, COLOR_GOLD.darkened(0.3), 2)
+
+
+## Шкала силы: три секции под именем; полные секции светятся.
+func _draw_meter(p: int) -> void:
+	var f := _sim.fighters[p]
+	var r := _bar_rect(p)
+	var right := p == 1
+	var w := 300.0
+	var box := Rect2(r.position.x if not right else r.end.x - w, r.end.y + 58, w, 12)
+	draw_rect(box.grow(2), Color(0, 0, 0, 0.75))
+	var full := f.meter / Fighter.METER_SECTION
+	var seg_w := w / 3.0
+	for i in 3:
+		var fill := clampf(float(f.meter - i * Fighter.METER_SECTION) / Fighter.METER_SECTION, 0.0, 1.0)
+		var idx := i if not right else 2 - i
+		var seg := Rect2(box.position.x + idx * seg_w, box.position.y, seg_w - 3, box.size.y)
+		draw_rect(seg, Color(0.12, 0.12, 0.2))
+		var fw := seg.size.x * fill
+		var col := Color(0.35, 0.65, 1.0) if fill >= 1.0 else Color(0.25, 0.4, 0.7)
+		if full == 3 and _sim.tick % 20 < 10:
+			col = Color(1, 0.85, 0.3)
+		draw_rect(Rect2(seg.position.x if not right else seg.end.x - fw, seg.position.y, fw, seg.size.y), col)
+	var label := "СИЛА %d" % full
+	if full >= 1:
+		label += " · спецприём + блок — усиленный"
+	if full == 3:
+		label += " · СУПЕР: блок + СР + СН"
+	_text(Vector2(box.position.x if not right else box.end.x, box.end.y + 16), label, 12, COLOR_GOLD if full == 3 else COLOR_DIM, right)
+
+
+## Название суперприёма во время паузы и ролика.
+func _draw_super_name() -> void:
+	for f in _sim.fighters:
+		var flash := f.state == Fighter.State.ATTACK and f.move_frame == 1 and _sim.hitstop > 0
+		if f.is_super() and (flash or f.state == Fighter.State.THROWING):
+			var y := size.y * 0.38
+			draw_rect(Rect2(0, y - 52, size.x, 70), Color(0, 0, 0, 0.45))
+			_text(Vector2(size.x / 2.0, y), f.move_data().name + "!", 54, f.color().lightened(0.4), false, true, 3)
 
 
 func _draw_timer() -> void:

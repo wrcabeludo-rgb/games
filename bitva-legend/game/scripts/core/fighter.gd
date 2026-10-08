@@ -22,11 +22,12 @@ const MOVES := [
 	"sp_dd_l", "sp_dd_h",
 	"sp_ff_l", "sp_ff_h",
 	"sp_bb_l", "sp_bb_h",
-	"st_sweep", "st_round", "throw",
+	"st_sweep", "st_round", "throw", "super",
 ]
 const MOVE_SWEEP := 20      # назад + ЛН — подсечка
 const MOVE_ROUND := 21      # назад + СН — удар ногой с разворота
 const MOVE_THROW := 22      # ЛР вплотную — бросок
+const MOVE_SUPER := 23      # блок + СР + СН — суперприём (вся шкала)
 ## Спецприёмы: номер → ввод. Удар по номеру: SPECIAL_BASE + номер * 2 + сила (0 лёгкий, 1 сильный).
 const SPECIAL_BASE := 12
 const SPECIAL_PROJ := 0     # «назад, вперёд + удар»
@@ -72,6 +73,9 @@ const JUGGLE_MAX := 3       # сколько ударов можно добав�
 const JUGGLE_DECAY := 250   # каждый удар в воздухе подбрасывает слабее
 const JUGGLE_MIN_VY := 500
 const BUTTON_OF := {"lp": 0, "lk": 1, "hp": 2, "hk": 3}
+## Шкала силы (2.5): 3 секции.
+const METER_SECTION := 1000
+const METER_MAX := 3 * METER_SECTION
 var id := ""
 var data: Dictionary
 var x := 0
@@ -116,6 +120,14 @@ var knock_on_land := 0      # приземлится — будет лежать
 var chain := PackedInt32Array([-1, -1, -1, -1])
 var juggle := 0             # сколько раз добит в воздухе за этот полёт
 var combo_damage := 0       # урон текущего комбо (для счётчика)
+var meter := 0              # шкала силы, 0…METER_MAX
+var ex := 0                 # 1 — текущий спецприём усиленный
+var special_ex := 0         # спецприём введён с зажатым блоком
+var super_timer := TAP_TIMER_MAX  # тиков с ввода суперприёма
+## Удар дошёл до первого кадра суперприёма — симуляция включит затемнение и паузу.
+var flash_request := 0
+## Усиленные версии спецприёмов (данные приёма + поле "ex"); не состояние — считаются из данных.
+var ex_moves := {}
 ## Выставляет симуляция перед тиком: соперник вплотную и его можно бросить (ЛР станет броском).
 var throw_ok := false
 ## Удар дошёл до кадра захвата — симуляция проверит, схвачен ли соперник.
@@ -129,6 +141,9 @@ var alt := false
 func _init(char_id: String, start_x_px: int, start_facing: int) -> void:
 	id = char_id
 	data = FighterData.get_data(char_id)
+	for key in data.moves:
+		if data.moves[key].has("ex"):
+			ex_moves[key] = _merged(data.moves[key], data.moves[key].ex)
 	x = start_x_px * SUB
 	facing = start_facing
 
@@ -143,7 +158,7 @@ func save() -> PackedInt32Array:
 	s.append_array(tap_log)
 	s.append_array(PackedInt32Array([special_buf, special_strength, special_timer, armor, hypnotized, knock_on_land]))
 	s.append_array(chain)
-	s.append_array(PackedInt32Array([juggle, combo_damage]))
+	s.append_array(PackedInt32Array([juggle, combo_damage, meter, ex, special_ex, super_timer]))
 	return s
 
 
@@ -160,6 +175,7 @@ func load(s: PackedInt32Array) -> void:
 	armor = s[36]; hypnotized = s[37]; knock_on_land = s[38]
 	chain = s.slice(39, 43)
 	juggle = s[43]; combo_damage = s[44]
+	meter = s[45]; ex = s[46]; special_ex = s[47]; super_timer = s[48]
 
 
 # --- Вопросы о состоянии --------------------------------------------------
@@ -240,7 +256,32 @@ func has_armor() -> bool:
 
 
 func move_data() -> Dictionary:
-	return data.moves[MOVES[move]] if move >= 0 else {}
+	if move < 0:
+		return {}
+	var key: String = MOVES[move]
+	if ex and ex_moves.has(key):
+		return ex_moves[key]
+	return data.moves[key]
+
+
+## Данные приёма с заменой полей (вложенные словари — тоже по полям).
+static func _merged(base: Dictionary, over: Dictionary) -> Dictionary:
+	var out := base.duplicate(true)
+	out.erase("ex")
+	for k in over:
+		if out.has(k) and out[k] is Dictionary and over[k] is Dictionary:
+			out[k] = _merged(out[k], over[k])
+		else:
+			out[k] = over[k]
+	return out
+
+
+func add_meter(amount: int) -> void:
+	meter = clampi(meter + amount, 0, METER_MAX)
+
+
+func is_super() -> bool:
+	return move == MOVE_SUPER
 
 
 ## Удар сейчас в активной фазе (может попасть).
@@ -379,8 +420,9 @@ func become_thrown() -> void:
 
 ## Бросок завершён: урон и полёт в сторону direction, потом лежит.
 func take_throw(grab: Dictionary, direction: int) -> void:
+	var dmg: int = scaled_damage(grab.damage, combo + 1) if grab.get("scaled", 0) else grab.damage
 	combo = 0
-	hp = maxi(hp - grab.damage, 0)
+	hp = maxi(hp - dmg, 0)
 	if hp == 0:
 		vx = KO_VX * direction
 		vy = KO_VY
@@ -476,6 +518,7 @@ func read_input(bits: int, aging: bool) -> Dictionary:
 		fwd_tap_timer = mini(fwd_tap_timer + 1, TAP_TIMER_MAX)
 		back_tap_timer = mini(back_tap_timer + 1, TAP_TIMER_MAX)
 		special_timer = mini(special_timer + 1, TAP_TIMER_MAX)
+		super_timer = mini(super_timer + 1, TAP_TIMER_MAX)
 		for i in 4:
 			btn_timers[i] = mini(btn_timers[i] + 1, TAP_TIMER_MAX)
 		for i in 3:
@@ -497,7 +540,12 @@ func read_input(bits: int, aging: bool) -> Dictionary:
 			btn_timers[i] = 0
 			if i == 0:
 				tech_press = 1
+			special_ex = 1 if bits & InputBits.BLOCK else 0
 			_check_special(i)
+	# Суперприём: блок + СР + СН (вторая из сильных нажата, пока первая держится).
+	var heavy := InputBits.HP | InputBits.HK
+	if (bits & InputBits.BLOCK) and (bits & heavy) == heavy and (prev_bits & heavy) != heavy:
+		super_timer = 0
 	prev_bits = bits
 	return {
 		"fwd": (bits & fwd_bit) != 0, "back": (bits & back_bit) != 0,
@@ -550,6 +598,22 @@ func _queue_special(special: int, button: int) -> void:
 
 
 ## Готов ли спецприём из буфера к исполнению (и разрешён ли он сейчас).
+func _super_ready() -> bool:
+	return super_timer <= BUFFER and meter >= METER_MAX and data.moves.has("super")
+
+
+func _start_super() -> void:
+	for i in 4:
+		_consume_button(i)
+	super_timer = TAP_TIMER_MAX
+	special_buf = -1
+	meter -= METER_MAX
+	move = MOVE_SUPER
+	chain = PackedInt32Array([-1, -1, -1, -1])
+	_begin_move()
+	flash_request = 1
+
+
 func _special_ready() -> bool:
 	if special_buf < 0 or special_timer > BUFFER:
 		return false
@@ -564,6 +628,10 @@ func _start_special() -> void:
 		if btn_timers[i] <= BUFFER:
 			_consume_button(i)  # чтобы вслед не вышел ещё и обычный удар
 	move = SPECIAL_BASE + special_buf * 2 + special_strength
+	# Усиленный: спецприём введён с зажатым блоком и есть секция шкалы.
+	ex = 1 if special_ex and meter >= METER_SECTION and ex_moves.has(MOVES[move]) else 0
+	if ex:
+		meter -= METER_SECTION
 	armor = move_data().get("armor", 0)
 	special_buf = -1
 	special_timer = TAP_TIMER_MAX
@@ -716,7 +784,9 @@ func _land(frames: int) -> void:
 
 func _ground_control(inp: Dictionary) -> void:
 	var b := _buffered_button()
-	if _special_ready():
+	if _super_ready():
+		_start_super()
+	elif _special_ready():
 		_start_special()
 	elif b >= 0:
 		_start_attack(b, inp.down, inp.back)
@@ -770,6 +840,7 @@ func _start_attack(button: int, crouching: bool, back := false) -> void:
 
 
 func _begin_move() -> void:
+	ex = 0
 	move_frame = 1  # тик нажатия — первый кадр удара (как во фреймдате Street Fighter)
 	has_hit = 0
 	vx = 0
@@ -787,8 +858,15 @@ func _is_ground_normal() -> bool:
 func _try_cancel() -> bool:
 	if not _is_ground_normal():
 		return false
+	# Блок + СР + СН нажаты не совсем одновременно: сильный удар в первые кадры превращается в суперприём.
+	if move_frame <= 3 and _super_ready():
+		_start_super()
+		return true
 	var m := move_data()
 	var after: int = move_frame - (m.startup + m.active - 1)  # > 0 — уже восстановление
+	if has_hit and after <= CANCEL_LATE and _super_ready():
+		_start_super()
+		return true
 	if has_hit and after <= CANCEL_LATE and _special_ready():
 		_start_special()
 		return true
@@ -830,7 +908,9 @@ func _next_in_string(button: int, n: int) -> int:
 ## Из бега можно сразу ударить.
 func _run_control(inp: Dictionary) -> void:
 	var b := _buffered_button()
-	if _special_ready():
+	if _super_ready():
+		_start_super()
+	elif _special_ready():
 		_start_special()
 	elif b >= 0:
 		_start_attack(b, inp.down, inp.back)

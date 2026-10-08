@@ -33,6 +33,11 @@ const THROW_HITSTOP := 12
 const ARMOR_HITSTOP := 6            # короткая заморозка, когда удар принят бронёй
 const COUNTER_HITSTOP := 24         # драматичная пауза при удачной контратаке
 const PROJ_MARGIN := 150            # снаряд исчезает за краем арены на столько пикселей
+const SUPER_FLASH := 30             # суперприём: пауза с затемнением перед ударом
+## Шкала силы: за попадание атакующему — урон × 2, за блок — урон; пропустившему удар — урон.
+const METER_HIT := 2
+const METER_BLOCK := 1
+const METER_TAKEN := 1
 
 var tick := 0
 var inputs := PackedInt32Array([0, 0])
@@ -64,19 +69,25 @@ var chars := PackedStringArray(["ilya", "dracula"])
 ## with_intro = false — сразу бой (для тестов и тренировки).
 func _init(with_intro := true, characters := PackedStringArray(["ilya", "dracula"])) -> void:
 	chars = characters
-	_reset_fighters()
+	_reset_fighters(false)
 	if not with_intro:
 		phase = Phase.FIGHT
 
 
 @warning_ignore("integer_division")
-func _reset_fighters() -> void:
+func _reset_fighters(keep_meter := true) -> void:
+	var meters := PackedInt32Array([0, 0])
+	if keep_meter:
+		meters = PackedInt32Array([fighters[0].meter, fighters[1].meter])
 	var center := ARENA_WIDTH / 2
 	fighters = [
 		Fighter.new(chars[0], center - START_GAP / 2, 1),
 		Fighter.new(chars[1], center + START_GAP / 2, -1),
 	]
 	fighters[1].alt = chars[0] == chars[1]
+	# Шкала силы переходит в следующий раунд (новый матч — с нуля).
+	fighters[0].meter = meters[0]
+	fighters[1].meter = meters[1]
 	hitstop = 0
 	hitstop_total = 0
 	projectiles = []
@@ -128,6 +139,7 @@ func _combat_step(inp: PackedInt32Array, hits: bool) -> void:
 		fighters[p].projectile_alive = has_projectile(p)
 		fighters[p].throw_ok = hits and _can_throw(p)
 		fighters[p].step(inp[p])
+	_super_flash()
 	_wall_pushback()
 	_resolve_push()
 	_limit_separation(prev_x)
@@ -143,6 +155,15 @@ func _combat_step(inp: PackedInt32Array, hits: bool) -> void:
 	_update_facing()
 	for f in fighters:
 		f.tech_press = 0
+
+
+## Начало суперприёма: всё замирает, экран темнеет (рисует отрисовка по SUPER_FLASH).
+func _super_flash() -> void:
+	for f in fighters:
+		if f.flash_request:
+			f.flash_request = 0
+			hitstop = maxi(hitstop, SUPER_FLASH)
+			hitstop_total = 0  # без тряски
 
 
 func _throw_gap(a: Fighter, d: Fighter) -> int:
@@ -191,7 +212,8 @@ func _hold_throws() -> void:
 		if a.state != Fighter.State.THROWING:
 			continue
 		var d := fighters[1 - p]
-		var g: Dictionary = a.move_data().grab
+		var m := a.move_data()
+		var g: Dictionary = m.grab if m.has("grab") else m.cinema
 		_hold_position(a, d)
 		if g.tech and d.tech_press and d.state_frame <= TECH_WINDOW:
 			a.throw_break(-a.facing)
@@ -204,6 +226,9 @@ func _hold_throws() -> void:
 		if a.stun > 0:
 			continue
 		d.take_throw(g, a.facing)
+		if not g.has("scaled"):
+			a.add_meter(g.damage * METER_HIT)
+			d.add_meter(g.damage * METER_TAKEN)
 		if g.has("heal"):
 			a.hp = mini(a.hp + g.heal, Fighter.MAX_HP)
 		a.finish_throw(g.recovery)
@@ -356,6 +381,8 @@ func _new_match() -> void:
 	round_num = 1
 	wins = PackedInt32Array([0, 0])
 	_start_round()
+	for f in fighters:
+		f.meter = 0
 
 
 func _start_round() -> void:
@@ -447,11 +474,27 @@ func _apply_hit(p: int, m: Dictionary, direction: int, spark_x: int, spark_y: in
 		return
 	var blocked := d.try_block(m)
 	var stop: int = m.hitstop
+	var a := fighters[p]
 	if blocked:
 		d.take_block(m, direction)
 		stop = maxi(m.hitstop * 2 / 3, 4)  # блок «легче» попадания
+		if not a.is_super():
+			a.add_meter(m.damage * METER_BLOCK)
+	elif m.has("cinema") and melee:
+		# Суперприём попал: ролик — соперник схвачен, серия ударов, в конце урон (_hold_throws).
+		if not d.is_stunned():
+			d.combo = 0
+		a.stun = m.cinema.hold
+		a.vx = 0
+		a.state = Fighter.State.THROWING
+		a.state_frame = 0
+		d.become_thrown()
+		_hold_position(a, d)
 	else:
 		d.take_hit(m, direction)
+		if not a.is_super():
+			a.add_meter(m.damage * METER_HIT)
+			d.add_meter(m.damage * METER_TAKEN)
 	if stop > hitstop:
 		hitstop = stop
 		hitstop_total = stop

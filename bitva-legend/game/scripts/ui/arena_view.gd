@@ -54,6 +54,7 @@ func _draw() -> void:
 	_draw_sky()
 	_draw_hills()
 	_draw_ground()
+	_draw_super_backdrop()
 	for f in _sim.fighters:
 		_draw_shadow(f)
 	for f in _sim.fighters:
@@ -113,6 +114,55 @@ func _draw_ground() -> void:
 	for wall_x in [0.0, float(Sim.ARENA_WIDTH)]:
 		var w := to_screen(wall_x, 0)
 		draw_rect(Rect2(w.x - 12, 0, 24, GROUND_Y), Color(0.05, 0.05, 0.07))
+
+
+## Суперприём: затемнение; у Ильи — молнии с неба, у Дракулы — кровавая луна.
+func _draw_super_backdrop() -> void:
+	for p in Sim.PLAYERS:
+		var f := _sim.fighters[p]
+		if not f.is_super():
+			continue
+		var flash := f.state == Fighter.State.ATTACK and f.move_frame == 1 and _sim.hitstop > 0
+		var cinema := f.state == Fighter.State.THROWING
+		if not flash and not cinema:
+			continue
+		draw_rect(Rect2(Vector2.ZERO, size), Color(0.02, 0.0, 0.05, 0.6 if cinema else 0.45))
+		var foe := _sim.fighters[1 - p]
+		var foe_top := to_screen(float(foe.x) / Sim.SUB, float(foe.y) / Sim.SUB + foe.data.height * 0.6)
+		if f.id == "dracula":
+			var moon := Vector2(size.x * 0.5, 170)
+			draw_circle(moon, 120, Color(0.65, 0.05, 0.08, 0.9))
+			draw_circle(moon + Vector2(-30, -20), 26, Color(0.5, 0.03, 0.06, 0.8))
+			draw_circle(moon + Vector2(40, 30), 16, Color(0.5, 0.03, 0.06, 0.8))
+		else:
+			draw_circle(Vector2(size.x * 0.5, -60), 260, Color(1, 0.9, 0.5, 0.25))
+		if not cinema:
+			continue
+		var t := f.state_frame
+		# Серия ударов: вспышка каждые 10 тиков, в конце — самая большая.
+		var beat := t % 10
+		var k := 1.0 - beat / 10.0
+		if f.id == "ilya" and beat < 4:
+			# Молния бьёт в соперника.
+			var pts := PackedVector2Array([Vector2(foe_top.x + 40, 0)])
+			var seg := 7
+			for i in range(1, seg + 1):
+				var jitter := 28.0 * sin(t * 1.7 + i * 2.3)
+				pts.append(Vector2(foe_top.x + jitter * (1.0 - float(i) / seg), foe_top.y * i / seg))
+			draw_polyline(pts, Color(0.85, 0.9, 1.0), 6)
+			draw_polyline(pts, Color(1, 1, 1), 2)
+		elif f.id == "dracula":
+			# Стая кружит вокруг соперника.
+			for i in 7:
+				var a := t * 0.25 + TAU * i / 7.0
+				var b := foe_top + Vector2(cos(a) * 90, sin(a) * 50)
+				var ink := Color(0.1, 0.02, 0.06)
+				for side in [-1.0, 1.0]:
+					draw_colored_polygon(PackedVector2Array([b, b + Vector2(side * 18, -8), b + Vector2(side * 7, 6)]), ink)
+		var r := (40.0 + 30.0 * k) * (1.6 if t > 80 else 1.0)
+		for i in 10:
+			var a := TAU * i / 10.0 + t * 0.2
+			draw_line(foe_top, foe_top + Vector2.from_angle(a) * r * (1.0 if i % 2 == 0 else 0.55), Color(1, 0.95, 0.6, k), 4)
 
 
 func _draw_shadow(f: Fighter) -> void:
@@ -198,6 +248,11 @@ func _draw_fighter(f: Fighter) -> void:
 	var head := Vector2(base.x, base.y - h + head_r) + shift * 1.1
 	draw_circle(head, head_r, color.lightened(0.15))
 	draw_arc(head, head_r, 0, TAU, 32, color.darkened(0.45), 3)
+	if f.ex and f.state == Fighter.State.ATTACK and f.move >= Fighter.SPECIAL_BASE and f.move < Fighter.MOVE_SWEEP:
+		# Усиленный спецприём — золотое сияние.
+		var aura := PackedVector2Array(body)
+		aura.append(body[0])
+		draw_polyline(aura, Color(1, 0.85, 0.3, 0.6 + 0.3 * sin(_sim.tick * 0.6)), 8)
 	if f.has_armor():
 		# Броня тарана — оранжевое свечение.
 		var glow := PackedVector2Array(body)
@@ -258,6 +313,17 @@ func _draw_fighter(f: Fighter) -> void:
 ## Рука или нога во время удара: замах, удар до края хитбокса, возврат.
 func _draw_attack(f: Fighter, shoulder: Vector2, hip: Vector2, color: Color) -> void:
 	var m := f.move_data()
+	if f.state == Fighter.State.THROWING and m.has("cinema"):
+		# Ролик суперприёма: удары один за другим.
+		var t := f.state_frame
+		var dir := float(f.facing)
+		var reach := shoulder + Vector2(dir * (75.0 + 30.0 * sin(t * 0.9)), -20.0 + 40.0 * cos(t * 0.9))
+		draw_line(shoulder, reach, color.darkened(0.3), 15)
+		if f.id == "ilya":
+			draw_circle(reach, 30, Color(0.36, 0.3, 0.26))
+		else:
+			_draw_claws(reach, (reach - shoulder).normalized())
+		return
 	if m.has("grab"):
 		# Захват: руки тянутся вперёд.
 		var reach := shoulder + Vector2(float(f.facing) * (40.0 + 6.0 * f.move_frame), 10)
@@ -270,7 +336,7 @@ func _draw_attack(f: Fighter, shoulder: Vector2, hip: Vector2, color: Color) -> 
 	var b: Array = m.box
 	var dir := float(f.facing)
 	var button: int = f.move % 4
-	var is_kick: bool = button == 1 or button == 3 or m.get("kick", 0) == 1
+	var is_kick: bool = (button == 1 or button == 3 or m.get("kick", 0) == 1) and not f.is_super()
 	var origin := hip if is_kick else shoulder
 	var tip := to_screen(float(f.x) / Sim.SUB + dir * (b[0] + b[2] * 0.85), float(f.y) / Sim.SUB + b[1] + b[3] / 2.0)
 	if m.get("uppercut", 0):
@@ -292,19 +358,21 @@ func _draw_attack(f: Fighter, shoulder: Vector2, hip: Vector2, color: Color) -> 
 	var limb_color := color.darkened(0.3)
 	draw_line(origin, end, limb_color, 18.0 if is_kick else 14.0)
 	draw_circle(end, 10.0 if is_kick else 9.0, limb_color.darkened(0.2))
-	var with_mace: bool = button == 2 or Fighter.MOVES[f.move] == "sp_ff_l"
+	var with_mace: bool = button == 2 or Fighter.MOVES[f.move] == "sp_ff_l" or f.is_super()
 	if with_mace and f.id == "ilya" and not _sim.has_projectile(_sim.fighters.find(f)):
 		# Палица.
 		draw_circle(end, 24, Color(0.36, 0.3, 0.26))
 		for i in 6:
 			var a := TAU * i / 6.0
 			draw_line(end + Vector2.from_angle(a) * 20, end + Vector2.from_angle(a) * 32, Color(0.25, 0.2, 0.18), 5)
-	elif button == 2 and f.id == "dracula":
-		# Когти.
-		var v := (end - origin).normalized()
-		for i in 3:
-			var side := v.orthogonal() * (i - 1) * 8.0
-			draw_line(end + side, end + side + v * 22, Color(0.95, 0.9, 0.85), 3)
+	elif (button == 2 or f.is_super()) and f.id == "dracula":
+		_draw_claws(end, (end - origin).normalized())
+
+
+func _draw_claws(end: Vector2, v: Vector2) -> void:
+	for i in 3:
+		var side := v.orthogonal() * (i - 1) * 8.0
+		draw_line(end + side, end + side + v * 22, Color(0.95, 0.9, 0.85), 3)
 
 
 ## Победитель раунда празднует через секунду после конца раунда.
@@ -383,7 +451,12 @@ func _draw_projectile(pr: PackedInt32Array) -> void:
 	var c := to_screen(float(pr[Sim.Proj.X]) / Sim.SUB, float(pr[Sim.Proj.Y]) / Sim.SUB)
 	var age := pr[Sim.Proj.AGE]
 	var dir := signf(float(pr[Sim.Proj.VX]))
-	if pr[Sim.Proj.KIND] == 2:
+	# Виды 3–5 — усиленные версии 0–2: то же, но с сиянием.
+	var kind := pr[Sim.Proj.KIND] % 3
+	if pr[Sim.Proj.KIND] >= 3:
+		var glow_at := c if kind != 2 else to_screen(float(pr[Sim.Proj.X]) / Sim.SUB, 20)
+		draw_circle(glow_at, float(pr[Sim.Proj.HW]) / Sim.SUB * 1.3, Color(1, 0.8, 0.3, 0.35))
+	if kind == 2:
 		# Волна от удара оземь: бегущие по земле камни и пыль.
 		var hw := float(pr[Sim.Proj.HW]) / Sim.SUB
 		var ground := to_screen(float(pr[Sim.Proj.X]) / Sim.SUB, 0)
@@ -393,7 +466,7 @@ func _draw_projectile(pr: PackedInt32Array) -> void:
 			var rock := PackedVector2Array([ground + Vector2(ox - 10, 0), ground + Vector2(ox, -hgt), ground + Vector2(ox + 10, 0)])
 			draw_colored_polygon(rock, Color(0.5, 0.42, 0.34))
 		draw_circle(ground + Vector2(-dir * hw * 0.7, -8), 12, Color(0.75, 0.68, 0.55, 0.5))
-	elif pr[Sim.Proj.KIND] == 0:
+	elif kind == 0:
 		var a := age * 0.35 * dir
 		var handle := Vector2.from_angle(a) * 34
 		draw_line(c - handle, c, Color(0.45, 0.32, 0.2), 9)
