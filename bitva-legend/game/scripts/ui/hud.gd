@@ -55,7 +55,7 @@ func show_state(sim: Sim, reader: InputReader, ai: AiController) -> void:
 func _update_trails() -> void:
 	for p in Sim.PLAYERS:
 		var hp := _sim.fighters[p].hp
-		if hp > _last_hp[p] or hp >= _trail[p]:
+		if hp > _last_hp[p] or hp >= _trail[p] or hp == _sim.fighters[p].max_hp:
 			_trail[p] = float(hp)  # новый раунд или лечение
 		elif hp < _last_hp[p]:
 			_trail_wait[p] = TRAIL_DELAY
@@ -123,15 +123,15 @@ func _draw_bar(p: int) -> void:
 	draw_colored_polygon(frame, Color(0.05, 0.03, 0.06, 0.92))
 	_fill(_slant(r, right), Color(0.16, 0.12, 0.16), Color(0.08, 0.06, 0.09))
 	# След урона: первые кадры — белая вспышка, потом красный.
-	var trail_w: float = r.size.x * _trail[p] / Fighter.MAX_HP
+	var trail_w: float = r.size.x * _trail[p] / f.max_hp
 	if trail_w > 1.0:
 		var fresh: bool = _trail_wait[p] > TRAIL_DELAY - 6
 		var tc := Color(1, 0.95, 0.85) if fresh else COLOR_TRAIL
 		_fill(_slant(_bar_part(r, trail_w, right), right), tc, tc.darkened(0.35))
 	# Здоровье: золото, на исходе — красное и пульсирует.
-	var hp_w := r.size.x * f.hp / Fighter.MAX_HP
+	var hp_w := r.size.x * f.hp / f.max_hp
 	if hp_w > 1.0:
-		var low := f.hp < Fighter.MAX_HP / 4
+		var low := f.hp < f.max_hp / 4
 		var top := COLOR_HP.lightened(0.25)
 		var bottom := COLOR_HP.darkened(0.25)
 		if low:
@@ -312,7 +312,12 @@ func _draw_announcement() -> void:
 	var color := COLOR_GOLD
 	match _sim.phase:
 		Sim.Phase.INTRO:
-			big = "ФИНАЛЬНЫЙ РАУНД" if _sim.wins[0] == 1 and _sim.wins[1] == 1 else Loc.t("РАУНД %d") % _sim.round_num
+			if _sim.last_bout:
+				big = "ПОСЛЕДНИЙ БОЙ"
+			elif _sim.wins[0] == 1 and _sim.wins[1] == 1:
+				big = "ФИНАЛЬНЫЙ РАУНД"
+			else:
+				big = Loc.t("РАУНД %d") % _sim.round_num
 		Sim.Phase.FIGHT:
 			if _sim.phase_frame < 45:
 				big = "БОЙ!"
@@ -330,6 +335,14 @@ func _draw_announcement() -> void:
 			if _sim.phase_frame > 60:
 				small = "НИЧЬЯ" if _sim.round_winner == 2 \
 					else Loc.t("Раунд за: %s") % Loc.t(_sim.fighters[_sim.round_winner].data.name)
+		Sim.Phase.FINISH:
+			big = "ДОБИВАЙ!"
+			color = Color(1, 0.3, 0.2)
+			small = Loc.t("Вперёд, назад + СР вплотную · %d") % ceili((Sim.FINISH_TICKS - _sim.phase_frame) / 60.0)
+		Sim.Phase.FINISHER:
+			if _sim.phase_frame > 20:
+				big = "ДОБИВАНИЕ!"
+				color = COLOR_GOLD
 		Sim.Phase.MATCH_END:
 			var w := _sim.match_winner()
 			big = "НИЧЬЯ" if w == 2 else Loc.t("%s ПОБЕЖДАЕТ!") % Loc.t(_sim.fighters[w].data.name)

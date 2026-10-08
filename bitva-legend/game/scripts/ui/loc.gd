@@ -27,6 +27,12 @@ const EN := {
 	# Бой
 	"РАУНД %d": "ROUND %d",
 	"ФИНАЛЬНЫЙ РАУНД": "FINAL ROUND",
+	"ПОСЛЕДНИЙ БОЙ": "LAST BOUT",
+	"ДОБИВАЙ!": "FINISH IT!",
+	"Вперёд, назад + СР вплотную · %d": "Forward, back + HP up close · %d",
+	"ДОБИВАНИЕ!": "FINISHER!",
+	"Добивание (после решающего нокаута)": "Finisher (after the deciding K.O.)",
+	"Вперёд, назад + СР вплотную": "Forward, back + HP up close",
 	"БОЙ!": "FIGHT!",
 	"НОКАУТ!": "K.O.!",
 	"ДВОЙНОЙ НОКАУТ!": "DOUBLE K.O.!",

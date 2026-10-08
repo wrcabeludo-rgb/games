@@ -163,7 +163,7 @@ func _on_phase(sim: Sim, vs_ai: bool) -> void:
 			if sim.round_num == 1 and sim.wins[0] == 0 and sim.wins[1] == 0:
 				new_match()
 			var last := sim.wins[0] == Sim.WINS_NEEDED - 1 and sim.wins[1] == Sim.WINS_NEEDED - 1
-			say(["final_round" if last or sim.round_num > 3 else "round_%d" % sim.round_num] as Array[String])
+			say(["final_round" if last or sim.last_bout or sim.round_num > 3 else "round_%d" % sim.round_num] as Array[String])
 		Sim.Phase.FIGHT:
 			if sim.training:
 				return
@@ -173,6 +173,9 @@ func _on_phase(sim: Sim, vs_ai: bool) -> void:
 				say(["time"] as Array[String])
 			elif sim.end_reason == Sim.EndReason.KO:
 				play("hit_heavy", 0.7, 3.0)
+		Sim.Phase.FINISHER:
+			play("super")
+			play("hit_heavy", 0.6, 4.0)
 		Sim.Phase.MATCH_END:
 			var w := sim.match_winner()
 			if w == 2:

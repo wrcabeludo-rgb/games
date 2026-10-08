@@ -14,6 +14,7 @@ const BL := InputBits.BLOCK
 
 
 func _init() -> void:
+	Fighter.test_max_hp = 1000
 	var ok := true
 	ok = _check("стоячий блок держит ЛР: урона нет, оглушение в блоке", _test_block_basic()) and ok
 	ok = _check("после блока, пока держишь кнопку, — снова блок", _test_block_return()) and ok

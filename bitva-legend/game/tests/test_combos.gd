@@ -14,6 +14,7 @@ const BL := InputBits.BLOCK
 
 
 func _init() -> void:
+	Fighter.test_max_hp = 1000
 	var ok := true
 	ok = _check("затухание урона: 100% → 90% → … не меньше 30%", _test_scaling()) and ok
 	ok = _check("строка Ильи ЛР, ЛР, СР — три удара подряд, урон с затуханием", _test_ilya_string()) and ok

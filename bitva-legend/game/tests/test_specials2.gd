@@ -13,6 +13,7 @@ const BL := InputBits.BLOCK
 
 
 func _init() -> void:
+	Fighter.test_max_hp = 1000
 	var ok := true
 	ok = _check("вниз, вниз + ЛН → удар оземь Ильи", _test_stomp_recognized()) and ok
 	ok = _check("вниз, вниз + рука — обычный удар в приседе", _test_stomp_punch()) and ok

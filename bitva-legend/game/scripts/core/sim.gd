@@ -15,7 +15,7 @@ const MAX_SEPARATION := 1100        # дальше не разойтись: об
 const SUB := Fighter.SUB
 
 ## Фазы матча.
-enum Phase { INTRO, FIGHT, ROUND_END, MATCH_END }
+enum Phase { INTRO, FIGHT, ROUND_END, MATCH_END, FINISH, FINISHER }
 enum EndReason { NONE, KO, TIME, DOUBLE_KO }
 const INTRO_TICKS := 80             # «РАУНД N» — бойцы ещё не двигаются
 const ROUND_TICKS := 60 * 60        # таймер раунда: 60 секунд
@@ -23,6 +23,13 @@ const ROUND_END_TICKS := 200        # пауза после конца раун�
 const REMATCH_DELAY := 60           # после конца матча кнопки работают не сразу
 const KO_FREEZE := 40               # драматичная заморозка на нокауте
 const WINS_NEEDED := 2
+## Добивание: после решающего нокаута проигравший встаёт оглушённым, у победителя есть время
+## ввести «вперёд, назад + СР» вплотную. Сами добивания — заглушка, будут переписаны.
+const FINISH_DELAY := 110           # тиков после нокаута до «ДОБИВАЙ!»
+const FINISH_TICKS := 180           # время на команду
+const FINISH_STEP := 20             # между нажатиями команды — не дольше
+const FINISH_RANGE := 280           # вплотную: не дальше, px между бойцами
+const FINISHER_TICKS := 160         # ролик добивания
 const ATTACK_MASK := InputBits.LP | InputBits.LK | InputBits.HP | InputBits.HK
 
 ## Поля снаряда (PackedInt32Array): владелец, позиция, скорость, гравитация, размер,
@@ -66,6 +73,12 @@ var end_reason := EndReason.NONE
 var prev_inputs := PackedInt32Array([0, 0])
 var projectiles: Array[PackedInt32Array] = []
 var training := false
+## Ничья в решающем раунде (1:1): следующий — «Последний бой», пока кто-то не победит.
+var last_bout := false
+## Добивание: этап ввода команды (0 — ждём «вперёд», 1 — «назад», 2 — СР), сколько ждать, было ли.
+var finish_step := 0
+var finish_wait := 0
+var finished := false
 var refill_wait := PackedInt32Array([0, 0])
 
 
@@ -130,6 +143,24 @@ func step(frame_inputs: PackedInt32Array) -> void:
 					_set_phase(Phase.MATCH_END)
 				else:
 					_next_round()
+			elif phase_frame == FINISH_DELAY and _finish_allowed():
+				_start_finish()
+		Phase.FINISH:
+			var w := round_winner
+			var inp := PackedInt32Array([0, 0])
+			inp[w] = inputs[w]
+			_combat_step(inp, false)
+			if _finish_input(w):
+				_start_finisher(w)
+			elif phase_frame >= FINISH_TICKS:
+				fighters[1 - w].finisher_launch(0)  # не добил — падает
+				fighters[1 - w].vx = 0
+				fighters[1 - w].vy = 0
+				_set_phase(Phase.MATCH_END)
+		Phase.FINISHER:
+			_combat_step(PackedInt32Array([0, 0]), false)
+			if phase_frame >= FINISHER_TICKS:
+				_set_phase(Phase.MATCH_END)
 		Phase.MATCH_END:
 			_combat_step(idle, false)
 			if phase_frame >= REMATCH_DELAY and _any_attack_pressed():
@@ -247,7 +278,7 @@ func _hold_throws() -> void:
 			a.add_meter(g.damage * METER_HIT)
 			d.add_meter(g.damage * METER_TAKEN)
 		if g.has("heal"):
-			a.hp = mini(a.hp + g.heal, Fighter.MAX_HP)
+			a.hp = mini(a.hp + g.heal, a.max_hp)
 		a.finish_throw(g.recovery)
 		hitstop = THROW_HITSTOP
 		hitstop_total = THROW_HITSTOP
@@ -392,10 +423,10 @@ func _training_upkeep() -> void:
 		var f := fighters[p]
 		f.meter = Fighter.METER_MAX
 		var recovered := not (f.is_stunned() or f.is_untouchable() or f.state == Fighter.State.BLOCKSTUN)
-		if f.hp < Fighter.MAX_HP and recovered:
+		if f.hp < f.max_hp and recovered:
 			refill_wait[p] += 1
 			if refill_wait[p] >= REFILL_DELAY:
-				f.hp = Fighter.MAX_HP
+				f.hp = f.max_hp
 				refill_wait[p] = 0
 		else:
 			refill_wait[p] = 0
@@ -412,15 +443,18 @@ func _check_round_end() -> void:
 		hitstop = KO_FREEZE
 		hitstop_total = KO_FREEZE
 	elif timer == 0:
-		var h0 := fighters[0].hp
-		var h1 := fighters[1].hp
+		# Здоровье у бойцов разное — сравниваем долю от полного.
+		var h0 := fighters[0].hp * fighters[1].max_hp
+		var h1 := fighters[1].hp * fighters[0].max_hp
 		_end_round(2 if h0 == h1 else (0 if h0 > h1 else 1), EndReason.TIME)
 
 
 func _end_round(winner: int, reason: EndReason) -> void:
 	round_winner = winner
 	end_reason = reason
-	if winner == 2:
+	if winner == 2 and wins[0] == WINS_NEEDED - 1 and wins[1] == WINS_NEEDED - 1:
+		last_bout = true  # без ничьей в матче: следующий раунд — «Последний бой»
+	elif winner == 2:
 		wins[0] += 1
 		wins[1] += 1
 	else:
@@ -435,6 +469,8 @@ func _next_round() -> void:
 
 func _new_match() -> void:
 	round_num = 1
+	last_bout = false
+	finished = false
 	wins = PackedInt32Array([0, 0])
 	_start_round()
 	for f in fighters:
@@ -447,6 +483,52 @@ func _start_round() -> void:
 	round_winner = -1
 	end_reason = EndReason.NONE
 	_set_phase(Phase.INTRO)
+
+
+## Добивание возможно: нокаут решил матч.
+func _finish_allowed() -> bool:
+	return not training and end_reason == EndReason.KO and round_winner < 2 \
+		and wins[round_winner] >= WINS_NEEDED
+
+
+func _start_finish() -> void:
+	finish_step = 0
+	finish_wait = 0
+	var w := fighters[round_winner]
+	w.hp = maxi(w.hp, 1)
+	fighters[1 - round_winner].daze(FINISH_TICKS + FINISHER_TICKS)
+	_set_phase(Phase.FINISH)
+
+
+## «Вперёд, назад + СР» вплотную; направления — относительно взгляда победителя.
+func _finish_input(w: int) -> bool:
+	var a := fighters[w]
+	var press := inputs[w] & ~prev_inputs[w]
+	var fwd := InputBits.RIGHT if a.facing > 0 else InputBits.LEFT
+	var back := InputBits.LEFT if a.facing > 0 else InputBits.RIGHT
+	if finish_wait > 0:
+		finish_wait -= 1
+		if finish_wait == 0:
+			finish_step = 0
+	if press & fwd:
+		finish_step = 1
+		finish_wait = FINISH_STEP
+	elif press & back and finish_step == 1:
+		finish_step = 2
+		finish_wait = FINISH_STEP
+	elif press & InputBits.HP and finish_step == 2:
+		finish_step = 0
+		return absi(a.x - fighters[1 - w].x) <= FINISH_RANGE * SUB
+	return false
+
+
+func _start_finisher(w: int) -> void:
+	finished = true
+	fighters[1 - w].finisher_launch(fighters[w].facing)
+	hitstop = SUPER_FLASH
+	hitstop_total = 0
+	_set_spark(w, fighters[1 - w].x, fighters[1 - w].data.height * SUB / 2, 1)
+	_set_phase(Phase.FINISHER)
 
 
 func _set_phase(p: Phase) -> void:
@@ -678,7 +760,8 @@ func save_state() -> Dictionary:
 		"sparks": sparks.duplicate(),
 		"match": PackedInt32Array([phase, phase_frame, round_num, wins[0], wins[1], timer,
 			round_winner, end_reason, prev_inputs[0], prev_inputs[1],
-			1 if training else 0, refill_wait[0], refill_wait[1]]),
+			1 if training else 0, refill_wait[0], refill_wait[1],
+			1 if last_bout else 0, finish_step, finish_wait, 1 if finished else 0]),
 		"projectiles": projectiles.duplicate(true),
 	}
 
@@ -699,6 +782,7 @@ func load_state(state: Dictionary) -> void:
 	prev_inputs = PackedInt32Array([m[8], m[9]])
 	training = m[10] == 1
 	refill_wait = PackedInt32Array([m[11], m[12]])
+	last_bout = m[13] == 1; finish_step = m[14]; finish_wait = m[15]; finished = m[16] == 1
 	projectiles.clear()
 	for pr in state.projectiles:
 		projectiles.append((pr as PackedInt32Array).duplicate())
@@ -714,7 +798,8 @@ func checksum() -> int:
 	for v in sparks:
 		h = _mix(h, v)
 	for v in [phase, phase_frame, round_num, wins[0], wins[1], timer, round_winner, end_reason,
-			1 if training else 0, refill_wait[0], refill_wait[1]]:
+			1 if training else 0, refill_wait[0], refill_wait[1],
+			1 if last_bout else 0, finish_step, finish_wait, 1 if finished else 0]:
 		h = _mix(h, v)
 	for pr in projectiles:
 		for v in pr:

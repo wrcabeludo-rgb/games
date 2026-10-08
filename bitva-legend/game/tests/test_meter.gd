@@ -60,6 +60,7 @@ func _test_super_air_catch() -> bool:
 
 
 func _init() -> void:
+	Fighter.test_max_hp = 1000
 	var ok := true
 	ok = _check("попадание: атакующему урон × 2, пропустившему — урон", _test_gain_hit()) and ok
 	ok = _check("суперприём поймал в прыжке: схваченный опускается на землю, не висит", _test_super_air_catch()) and ok

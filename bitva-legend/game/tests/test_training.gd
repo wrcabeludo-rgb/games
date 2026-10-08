@@ -54,8 +54,8 @@ func _test_refill() -> bool:
 	var hurt := false
 	for t in 200:
 		sim.step(PackedInt32Array([0, 0]))
-		hurt = hurt or sim.fighters[1].hp < Fighter.MAX_HP
-	return hurt and sim.fighters[1].hp == Fighter.MAX_HP
+		hurt = hurt or sim.fighters[1].hp < sim.fighters[1].max_hp
+	return hurt and sim.fighters[1].hp == sim.fighters[1].max_hp
 
 
 func _test_no_refill_in_combo() -> bool:

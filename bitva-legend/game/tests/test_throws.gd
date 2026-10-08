@@ -15,6 +15,7 @@ const BL := InputBits.BLOCK
 
 
 func _init() -> void:
+	Fighter.test_max_hp = 1000
 	var ok := true
 	ok = _check("назад + ЛН — подсечка: пробивает стоячий блок, сбивает с ног", _test_sweep()) and ok
 	ok = _check("сбитый с ног неуязвим и встаёт", _test_knockdown_invul()) and ok

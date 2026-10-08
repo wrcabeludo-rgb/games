@@ -14,6 +14,7 @@ const HK := InputBits.HK
 
 
 func _init() -> void:
+	Fighter.test_max_hp = 1000
 	var ok := true
 	ok = _check("ЛР Ильи попадает ровно на 5-м тике, урон 40", _test_startup_and_damage()) and ok
 	ok = _check("промах издалека: урона нет, возврат в стойку", _test_whiff()) and ok

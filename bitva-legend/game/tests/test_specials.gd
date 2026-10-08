@@ -12,6 +12,7 @@ const BL := InputBits.BLOCK
 
 
 func _init() -> void:
+	Fighter.test_max_hp = 1000
 	var ok := true
 	ok = _check("назад, вперёд + ЛР → снаряд Дракулы (лёгкий)", _test_recognized()) and ok
 	ok = _check("у мышей одна версия: и СР даёт тот же приём", _test_heavy_version()) and ok

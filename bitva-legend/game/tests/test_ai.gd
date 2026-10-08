@@ -33,7 +33,7 @@ func _test_deals_damage(level: LV) -> bool:
 	var ai := _ai(level)
 	for i in 1800:
 		sim.step(PackedInt32Array([0, ai.get_input(sim, 1)]))
-	return sim.fighters[0].hp < Fighter.MAX_HP
+	return sim.fighters[0].hp < sim.fighters[0].max_hp
 
 
 ## Илья на дистанции джеба раз за разом бьёт ЛР; считаем урон по ИИ за 20 секунд.

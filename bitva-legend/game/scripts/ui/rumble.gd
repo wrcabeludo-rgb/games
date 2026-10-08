@@ -55,7 +55,8 @@ func update(sim: Sim, reader: InputReader) -> void:
 			_pulse(p, SUPER, reader)
 		_last_flash = sim.tick
 	if sim.phase != _last_phase:
-		if sim.phase == Sim.Phase.ROUND_END and sim.end_reason == Sim.EndReason.KO:
+		if (sim.phase == Sim.Phase.ROUND_END and sim.end_reason == Sim.EndReason.KO) \
+				or sim.phase == Sim.Phase.FINISHER:
 			for p in 2:
 				_pulse(p, KO, reader)
 		_last_phase = sim.phase

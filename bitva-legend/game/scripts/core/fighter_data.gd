@@ -48,6 +48,7 @@ const CHARACTERS := {
 	"ilya": {
 		"name": "ИЛЬЯ МУРОМЕЦ",
 		"color": Color(0.85, 0.66, 0.32),
+		"max_hp": 1100,         # тяжеловес держит удар
 		"height": 300,          # рост стоя
 		"crouch_height": 190,   # рост в приседе
 		"push_half": 55,        # половина ширины «тела» для столкновений
@@ -107,6 +108,7 @@ const CHARACTERS := {
 	"dracula": {
 		"name": "ДРАКУЛА",
 		"color": Color(0.72, 0.16, 0.24),
+		"max_hp": 950,          # лечится укусом и суперприёмом
 		"height": 310,
 		"crouch_height": 190,
 		"push_half": 40,

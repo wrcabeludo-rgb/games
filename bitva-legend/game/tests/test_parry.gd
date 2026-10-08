@@ -13,6 +13,7 @@ const BL := InputBits.BLOCK
 
 
 func _init() -> void:
+	Fighter.test_max_hp = 1000
 	var ok := true
 	ok = _check("тап «вперёд» в момент удара — парирование: урона нет, атакующий ошеломлён", _test_parry_basic()) and ok
 	ok = _check("окно — до 6 кадров до удара: раньше — уже поздно", _test_window()) and ok

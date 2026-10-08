@@ -97,6 +97,9 @@ var run_speed := 0
 var run_dir := 0            # направление бега по арене: 1 вправо, -1 влево
 var from_run := 0           # 1, если прыжок начат с разбега
 var hp := MAX_HP
+var max_hp := MAX_HP        # у каждого бойца своё (FighterData "max_hp")
+## Тесты урона: у всех бойцов одинаковое здоровье (они проверяют арифметику урона, а не запас здоровья).
+static var test_max_hp := 0
 var move := -1              # текущий удар (номер в MOVES) или -1
 var move_frame := 0         # тик текущего удара, начиная с 1
 var has_hit := 0            # удар уже попал (каждый удар попадает один раз)
@@ -155,6 +158,8 @@ func _init(char_id: String, start_x_px: int, start_facing: int) -> void:
 			ex_moves[key] = _merged(data.moves[key], data.moves[key].ex)
 	x = start_x_px * SUB
 	facing = start_facing
+	max_hp = test_max_hp if test_max_hp > 0 else data.get("max_hp", MAX_HP)
+	hp = max_hp
 
 
 func save() -> PackedInt32Array:
@@ -313,6 +318,9 @@ static func _merged(base: Dictionary, over: Dictionary) -> Dictionary:
 
 
 func add_meter(amount: int) -> void:
+	# Помощь проигрывающему: при здоровье ниже 30% шкала копится в полтора раза быстрее.
+	if amount > 0 and hp * 10 < max_hp * 3:
+		amount = amount * 3 / 2
 	meter = clampi(meter + amount, 0, METER_MAX)
 
 
@@ -452,6 +460,27 @@ func become_thrown() -> void:
 	vx = 0
 	_set_state(State.THROWN)
 	state_frame = 0
+
+
+## Добивание: проигравший стоит оглушённым (звёзды над головой), пока победитель вводит команду.
+func daze(ticks: int) -> void:
+	move = -1
+	x = clampi(x, push_half(), Sim.ARENA_WIDTH * SUB - push_half())
+	y = 0
+	vx = 0
+	vy = 0
+	pushback = 0
+	low_pose = 0
+	staggered = 1
+	stun = ticks
+	_set_state(State.HITSTUN)
+	state_frame = 0
+
+
+## Добивание: улетает «за горизонт» (заглушка, пока нет своих анимаций).
+func finisher_launch(direction: int) -> void:
+	staggered = 0
+	_launch_knockdown([700, 3400], direction)
 
 
 ## Отпустили из захвата без броска: в воздухе — падает, на земле — сразу свободен.
