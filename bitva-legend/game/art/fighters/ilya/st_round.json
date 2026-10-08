@@ -1,0 +1,94 @@
+{
+ "frames": [
+  {
+   "file": "st_round_1.png",
+   "pivot": [
+    216,
+    578
+   ],
+   "size": [
+    486,
+    580
+   ]
+  },
+  {
+   "file": "st_round_2.png",
+   "pivot": [
+    250,
+    590
+   ],
+   "size": [
+    450,
+    591
+   ]
+  },
+  {
+   "file": "st_round_3.png",
+   "pivot": [
+    344,
+    621
+   ],
+   "size": [
+    442,
+    623
+   ]
+  },
+  {
+   "file": "st_round_4.png",
+   "pivot": [
+    479,
+    609
+   ],
+   "size": [
+    758,
+    610
+   ]
+  },
+  {
+   "file": "st_round_5.png",
+   "pivot": [
+    463,
+    630
+   ],
+   "size": [
+    721,
+    631
+   ]
+  },
+  {
+   "file": "st_round_6.png",
+   "pivot": [
+    418,
+    596
+   ],
+   "size": [
+    664,
+    597
+   ]
+  },
+  {
+   "file": "st_round_7.png",
+   "pivot": [
+    481,
+    587
+   ],
+   "size": [
+    706,
+    588
+   ]
+  },
+  {
+   "file": "st_round_8.png",
+   "pivot": [
+    207,
+    584
+   ],
+   "size": [
+    477,
+    585
+   ]
+  }
+ ],
+ "hit": 5,
+ "hit_end": 6
+}

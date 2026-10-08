@@ -68,8 +68,14 @@
   "fit": "h:1:440"
  },
  "cr_hp": {
-  "frames": 4,
-  "fit": "h:4:400"
+  "frames": 6,
+  "grid": [
+   3,
+   2
+  ],
+  "fit": "h:4:610",
+  "hit": 4,
+  "hit_end": 5
  },
  "cr_hk": {
   "frames": 4,
@@ -108,6 +114,27 @@
   "hit_end": 6
  },
  "j_hp": {
+  "frames": 6,
+  "grid": [
+   3,
+   2
+  ],
+  "fit": "h:1:470",
+  "pivot_y": "body",
+  "hit": 4,
+  "hit_end": 5
+ },
+ "st_round": {
+  "frames": 8,
+  "grid": [
+   4,
+   2
+  ],
+  "fit": "h:1:580",
+  "hit": 5,
+  "hit_end": 6
+ },
+ "j_hk": {
   "frames": 6,
   "grid": [
    3,
