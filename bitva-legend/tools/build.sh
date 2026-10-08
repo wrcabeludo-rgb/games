@@ -13,12 +13,17 @@ echo "== Импорт ресурсов"
 "$GODOT" --headless --path "$GAME" --import >/dev/null 2>&1 || true
 
 echo "== Автотесты"
-"$GODOT" --headless --path "$GAME" --script res://tests/test_determinism.gd
+for test in "$GAME"/tests/test_*.gd; do
+	echo "-- $(basename "$test")"
+	"$GODOT" --headless --path "$GAME" --script "res://tests/$(basename "$test")" 2>&1 | grep -E "OK|FAIL|ИТОГ|ERROR"
+	"$GODOT" --headless --path "$GAME" --script "res://tests/$(basename "$test")" >/dev/null 2>&1 \
+		|| { echo "Тесты не пройдены, сборка остановлена"; exit 1; }
+done
 
 echo "== Прогон игры без экрана (поиск ошибок скриптов)"
 LOG="$(mktemp)"
 "$GODOT" --headless --path "$GAME" --quit-after 300 >"$LOG" 2>&1 || true
-if grep -E "SCRIPT ERROR|Parse Error|Compile Error" "$LOG"; then
+if grep -E "SCRIPT ERROR|Parse Error|Compile Error|^ERROR" "$LOG"; then
 	echo "Найдены ошибки скриптов, сборка остановлена"
 	exit 1
 fi

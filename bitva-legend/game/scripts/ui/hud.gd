@@ -1,0 +1,85 @@
+class_name Hud
+extends Control
+## Интерфейс поверх арены: имена бойцов, история ввода (F1), подсказки.
+
+const VERSION := "1.2"
+const COLOR_TEXT := Color(0.95, 0.95, 0.97)
+const COLOR_DIM := Color(0.75, 0.75, 0.8)
+const COLOR_SHADE := Color(0, 0, 0, 0.45)
+const HISTORY_ROWS := 16
+
+var show_inputs := true
+var _font := SystemFont.new()
+var _sim: Sim
+var _reader: InputReader
+
+
+func _ready() -> void:
+	_font.font_names = PackedStringArray(["Segoe UI", "Arial", "DejaVu Sans", "Noto Sans"])
+
+
+func show_state(sim: Sim, reader: InputReader) -> void:
+	_sim = sim
+	_reader = reader
+	queue_redraw()
+
+
+func _draw() -> void:
+	if _sim == null:
+		return
+	var w := size.x
+	for p in Sim.PLAYERS:
+		var f := _sim.fighters[p]
+		var right := p == 1
+		var x := w - 40.0 if right else 40.0
+		_text(Vector2(x, 44), f.data.name, 26, f.data.color.lightened(0.2), right)
+		_text(Vector2(x, 68), "Игрок %d · %s" % [p + 1, _reader.device_label(p)], 14, COLOR_DIM, right)
+		if show_inputs:
+			_draw_history(p, Vector2(x, 100), right)
+	_text(Vector2(w / 2.0, 30), "БИТВА ЛЕГЕНД · сборка %s · движение" % VERSION, 15, COLOR_DIM, false, true)
+	_text(Vector2(w / 2.0, 50), "%d FPS" % Engine.get_frames_per_second(), 13, COLOR_DIM, false, true)
+	var hint := "F1 — история ввода · F2 — отладка · R или Create — сброс · F11 — полный экран · Esc — выход"
+	draw_rect(Rect2(0, size.y - 34, w, 34), COLOR_SHADE)
+	_text(Vector2(w / 2.0, size.y - 12), hint, 14, COLOR_TEXT, false, true)
+
+
+## Колонка истории ввода. Направления показаны относительно экрана.
+func _draw_history(p: int, origin: Vector2, right: bool) -> void:
+	var h: Array = _sim.history[p]
+	var dir := -1.0 if right else 1.0
+	var accent: Color = _sim.fighters[p].data.color.lightened(0.3)
+	draw_rect(Rect2(origin.x - (150 if right else 0), origin.y - 6, 150, HISTORY_ROWS * 20 + 10), COLOR_SHADE)
+	for i in mini(h.size(), HISTORY_ROWS):
+		var bits: int = h[i][0]
+		var frames: int = h[i][1]
+		var y := origin.y + 10 + i * 20
+		var color := COLOR_TEXT if i == 0 else COLOR_DIM
+		var col := origin.x + dir * 10
+		_text(Vector2(col, y + 5), str(frames), 14, color, right)
+		_draw_arrow(Vector2(origin.x + dir * 58, y), InputBits.numpad(bits), 7, accent if i == 0 else COLOR_DIM)
+		var names := PackedStringArray()
+		for pair in InputBits.BUTTON_LABELS:
+			if bits & pair[0]:
+				names.append(pair[1])
+		_text(Vector2(origin.x + dir * 78, y + 5), " ".join(names), 14, color, right)
+
+
+func _draw_arrow(c: Vector2, n: int, s: float, color: Color) -> void:
+	if n == 5:
+		draw_circle(c, 3, color)
+		return
+	var v := InputBits.numpad_vector(n)
+	var tip := c + v * s
+	draw_line(c - v * s, tip, color, 2)
+	var side := v.orthogonal() * s * 0.5
+	draw_colored_polygon(PackedVector2Array([tip + v * 3, tip - v * s * 0.6 + side, tip - v * s * 0.6 - side]), color)
+
+
+func _text(pos: Vector2, s: String, font_size: int, color: Color, align_right := false, centered := false) -> void:
+	var width := _font.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	if align_right:
+		pos.x -= width
+	elif centered:
+		pos.x -= width / 2.0
+	draw_string(_font, pos + Vector2(1, 1), s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color(0, 0, 0, 0.6))
+	draw_string(_font, pos, s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)

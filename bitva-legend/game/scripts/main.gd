@@ -1,19 +1,26 @@
 extends Node
 ## Главный цикл: каждый тик (60 в секунду) читает ввод, продвигает симуляцию
-## и просит интерфейс перерисоваться. Логика боя живёт только в Sim.
+## и просит отрисовку обновиться. Логика боя живёт только в Sim.
 
 var sim := Sim.new()
 var reader := InputReader.new()
-## Отладка: «-- --screenshot=путь.png» подаёт сценарий ввода, сохраняет кадр и выходит.
+## Отладка: «-- --screenshot=путь.png [--shot-at=тик]» подаёт записанный ввод,
+## сохраняет кадр на заданном тике и выходит.
 var _screenshot_path := ""
+var _shot_at := DemoInput.LENGTH
 
-@onready var display: InputDisplay = $InputDisplay
+@onready var arena: ArenaView = $ArenaView
+@onready var hud: Hud = $Hud
 
 
 func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--screenshot="):
 			_screenshot_path = arg.trim_prefix("--screenshot=")
+		elif arg.begins_with("--shot-at="):
+			_shot_at = int(arg.trim_prefix("--shot-at="))
+		elif arg == "--debug":
+			arena.show_debug = true
 
 
 func _physics_process(_delta: float) -> void:
@@ -21,8 +28,9 @@ func _physics_process(_delta: float) -> void:
 	if _screenshot_path != "":
 		frame = DemoInput.frame(sim.tick)
 	sim.step(frame)
-	display.show_state(sim, reader)
-	if _screenshot_path != "" and sim.tick == DemoInput.LENGTH:
+	arena.show_state(sim)
+	hud.show_state(sim, reader)
+	if _screenshot_path != "" and sim.tick == _shot_at:
 		_save_screenshot.call_deferred()
 
 
@@ -33,13 +41,28 @@ func _save_screenshot() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	var pad := event as InputEventJoypadButton
+	if pad != null and pad.pressed and pad.button_index == JOY_BUTTON_BACK:
+		_reset()
+		return
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
 		return
-	if key.physical_keycode == KEY_F11:
-		_toggle_fullscreen()
-	elif key.physical_keycode == KEY_ESCAPE:
-		get_tree().quit()
+	match key.physical_keycode:
+		KEY_F1:
+			hud.show_inputs = not hud.show_inputs
+		KEY_F2:
+			arena.show_debug = not arena.show_debug
+		KEY_R:
+			_reset()
+		KEY_F11:
+			_toggle_fullscreen()
+		KEY_ESCAPE:
+			get_tree().quit()
+
+
+func _reset() -> void:
+	sim = Sim.new()
 
 
 func _toggle_fullscreen() -> void:
