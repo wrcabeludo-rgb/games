@@ -69,7 +69,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_reset()
 		return
 	if pad != null and pad.pressed and pad.button_index == JOY_BUTTON_START:
-		ai.next_level()
+		_cycle_ai()
 		return
 	if pad != null and pad.pressed and pad.button_index == JOY_BUTTON_TOUCHPAD:
 		var r1 := Input.is_joy_button_pressed(pad.device, JOY_BUTTON_RIGHT_SHOULDER) \
@@ -89,7 +89,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_F2:
 			arena.show_debug = not arena.show_debug
 		KEY_F3:
-			ai.next_level()
+			_cycle_ai()
 		KEY_F6:
 			_toggle_training()
 		KEY_F4:
@@ -113,7 +113,16 @@ func _reset() -> void:
 
 func _toggle_training() -> void:
 	training = not training
+	# Манекен в тренировке — ИИ: если был выключен, включаем средний.
+	if training and ai.level == AiController.Level.OFF:
+		ai.level = AiController.Level.MEDIUM
 	_reset()
+	reader.notify("ТРЕНИРОВКА · соперник — ИИ (%s), F3 или Options — сменить" % ai.level_name() if training else "Тренировка выключена — обычный бой")
+
+
+func _cycle_ai() -> void:
+	ai.next_level()
+	reader.notify("ИИ соперника: %s" % ai.level_name())
 
 
 func _cycle_char(p: int) -> void:

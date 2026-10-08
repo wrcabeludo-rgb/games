@@ -23,6 +23,7 @@ const K_FRONT := 1.3
 
 const GROUND_SQUASH := 0.6  # картинку земли сжимаем по высоте
 const GROUND_RISE := 36.0   # трава на краю дороги выше линии, где стоят бойцы, px
+const FOREST_HEIGHT := 270.0  # высота полосы леса на экране, px (ширина — по пропорциям картинки)
 const STONE_SINK := 16.0    # камень утоплен в землю, px
 const FRONT_RISE := 95.0    # передний план поднимается над линией земли, px
 
@@ -268,7 +269,12 @@ func _draw_forest(c: CanvasItem) -> void:
 	var w := layer_w(k)
 	if _tex.has("forest"):
 		# Нижняя часть леса уходит за землю; чуть приглушён, чтобы бойцы читались.
-		_draw_strip(c, _tex.forest, k, ground_y + 40, Color(0.82, 0.8, 0.88))
+		# Лес из панелей шире слоя: рисуем заданной высоты по центру слоя, края уходят за кадр.
+		var tex: Texture2D = _tex.forest
+		var fh := FOREST_HEIGHT
+		var fw := fh * tex.get_width() / tex.get_height()
+		var fx := layer_x(k) + (layer_w(k) - fw) / 2.0
+		c.draw_texture_rect(tex, Rect2(fx, ground_y + 30 - fh, fw, fh), false, Color(0.82, 0.8, 0.88))
 		return
 	var i := 0
 	var x := 30.0

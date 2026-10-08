@@ -28,7 +28,8 @@ EDGE_PX = 10       # ширина полосы у краёв, где убира�
 # Ширина слоёв в пикселях 1080p (= ширина слоя в игре × 1.5, см. ArenaScenery.layer_w).
 SKY_SIZE = (1980, 1080)
 # Полосы — в двойном разрешении 720p (= 1440p): на большом мониторе во весь экран не мылятся.
-STRIP_WIDTH = {"mountains": 2704, "forest": 2992, "ground": 4000, "foreground": 4432}
+# Лес шире слоя: в игре он рисуется крупнее, края уходят за кадр (см. ArenaScenery.FOREST_HEIGHT).
+STRIP_WIDTH = {"mountains": 2704, "forest": 6000, "ground": 4000, "foreground": 4432}
 MOON_SIZE = 320
 STONE_HEIGHT = 300
 CLOUD_MAX_WIDTH = 720

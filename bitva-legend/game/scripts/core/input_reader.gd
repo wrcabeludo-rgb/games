@@ -51,6 +51,12 @@ func _init() -> void:
 	Input.joy_connection_changed.connect(_on_joy_changed)
 
 
+## Крупная плашка по центру экрана на 4 секунды (геймпады, смена ИИ, тренировка).
+func notify(text: String) -> void:
+	pad_notice = text
+	pad_notice_ms = Time.get_ticks_msec()
+
+
 func _on_joy_changed(device: int, connected: bool) -> void:
 	if not connected:
 		pad_drops += 1

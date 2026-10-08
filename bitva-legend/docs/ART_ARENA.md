@@ -7,6 +7,8 @@
 
 ## Как генерировать
 
+**Правило:** у каждого спрайта — свой полный промпт целиком, без шаблонов и подстановок.
+
 1. **Сначала небо (слой 1).** Когда оно понравится, прикладывайте его **референсом** ко всем следующим
    генерациям с припиской: *«Match the art style, palette and lighting of the attached image.»*
    Так все слои будут в одном стиле.
@@ -77,20 +79,25 @@ Sprite sheet of a flight animation cycle: the SAME cartoon raven drawn 6 times i
 Wide horizontal strip of trees for a 2D fighting game parallax layer (middle distance, behind the fighters). Generate in 4K. HD hand-painted cartoon style, clean dark-plum outlines (#24141F), cel shading with soft gradients, CRISP SHARP details: clearly defined leaf clusters, bark texture and branch silhouettes, no blur, no soft focus, no depth of field, no painterly smudging, medium-low contrast so the fighters in front stay readable. Strict side view, all tree trunks stand on one flat horizontal ground line at the very bottom edge. The trees span the FULL width edge to edge, tallest trees reach about 70% of the image height, with gaps between groups. LEFT half: warm Russian birch grove and a mighty old oak at sunset — white birch trunks with black marks, golden-green foliage (#6E8B3D, #F2B45A). RIGHT half: twisted leafless gothic trees with crooked claw-like branches, dark violet bark (#2A1838) with cold moonlight rim light (#E8E4D8). In the middle the birches gradually turn into dead trees. Everything around the trees is perfectly flat solid magenta #FF00FF (no sky, no ground, no gradient, no shadow). Do not use pink or purple on the trees. NO characters, NO animals, NO text, NO watermark, NO frame.
 ```
 
-### 6б. Лес тремя панелями — `forest_1`, `forest_2`, `forest_3` (16:9, 4K) — для чёткости
+### 6б. Лес тремя панелями — `forest_1`, `forest_2`, `forest_3` (максимальное разрешение) ✅ в игре с 2.7.1
 
-Одна картинка 21:9 даёт ~2000 px на всю арену — на большом мониторе во весь экран это мыло.
-Три панели склеиваются в полосу ~6000 px. Генерировать с референсом неба и текущего леса.
-Общий промпт + описание панели:
+Одна картинка на всю арену даёт мыло на большом мониторе. Три панели склеиваются в полосу ~5900 px;
+в игре лес рисуется крупно, края полосы уходят за кадр (в центре — дуб). Генерировать с референсом неба и леса.
 
+**forest_1**
 ```
-Panel {N} of 3 of a wide side-scrolling forest strip for a 2D fighting game background (the three panels will be placed side by side, left to right). Generate at the maximum resolution (4K). HD hand-painted cartoon style, clean dark-plum outlines (#24141F), cel shading with soft gradients. CRISP SHARP high-detail rendering: every leaf cluster, bark crack and branch tip clearly defined, no blur, no soft focus, no depth of field, no haze, no painterly smudging. Strict side view, no perspective. All tree trunks stand on ONE flat horizontal ground line at the very bottom edge of the image, the tallest trees reach about 60% of the image height, the same tree scale as the attached reference. Trees and bushes must NOT touch or be cut by the left and right image edges — leave about 3% of empty space on both sides. {PANEL}. Everything around the trees is perfectly flat solid magenta #FF00FF (no sky, no ground plane, no gradient, no shadow). Do not use pink or purple on the trees. NO characters, NO animals, NO text, NO watermark, NO frame.
+Panel 1 of 3 of a wide side-scrolling forest strip for a 2D fighting game background (the three panels will be placed side by side, left to right). Generate at the maximum resolution (4K). HD hand-painted cartoon style, clean dark-plum outlines (#24141F), cel shading with soft gradients. CRISP SHARP high-detail rendering: every leaf cluster, bark crack and branch tip clearly defined, no blur, no soft focus, no depth of field, no haze, no painterly smudging. Strict side view, no perspective. All tree trunks stand on ONE flat horizontal ground line at the very bottom edge of the image, the tallest trees reach about 60% of the image height, the same tree scale as the attached reference. Trees and bushes must NOT touch or be cut by the left and right image edges — leave about 3% of empty space on both sides. Warm Russian birch grove at golden sunset: white birch trunks with black marks, golden-green foliage (#6E8B3D, #F2B45A), small fir trees and golden bushes between them. Everything around the trees is perfectly flat solid magenta #FF00FF (no sky, no ground plane, no gradient, no shadow). Do not use pink or purple on the trees. NO characters, NO animals, NO text, NO watermark, NO frame.
 ```
 
-Вместо `{N}` и `{PANEL}`:
-1. `forest_1`: **N = 1**, PANEL = *Warm Russian birch grove at golden sunset: white birch trunks with black marks, golden-green foliage (#6E8B3D, #F2B45A), small fir trees and golden bushes between them.*
-2. `forest_2`: **N = 2**, PANEL = *A mighty ancient oak in the center with a huge rounded crown, a few birches around it; on the right side of the panel the birches start to lose leaves and turn grey.*
-3. `forest_3`: **N = 3**, PANEL = *Gothic Carpathian dead forest at night: twisted leafless trees with crooked claw-like branches, broken stumps, dark violet bark (#2A1838) with cold moonlight rim light (#E8E4D8).*
+**forest_2**
+```
+Panel 2 of 3 of a wide side-scrolling forest strip for a 2D fighting game background (the three panels will be placed side by side, left to right). Generate at the maximum resolution (4K). HD hand-painted cartoon style, clean dark-plum outlines (#24141F), cel shading with soft gradients. CRISP SHARP high-detail rendering: every leaf cluster, bark crack and branch tip clearly defined, no blur, no soft focus, no depth of field, no haze, no painterly smudging. Strict side view, no perspective. All tree trunks stand on ONE flat horizontal ground line at the very bottom edge of the image, the tallest trees reach about 60% of the image height, the same tree scale as the attached reference. Trees and bushes must NOT touch or be cut by the left and right image edges — leave about 3% of empty space on both sides. A mighty ancient oak in the center with a huge rounded crown, a few birches around it; on the right side of the panel the birches start to lose leaves and turn grey. Everything around the trees is perfectly flat solid magenta #FF00FF (no sky, no ground plane, no gradient, no shadow). Do not use pink or purple on the trees. NO characters, NO animals, NO text, NO watermark, NO frame.
+```
+
+**forest_3**
+```
+Panel 3 of 3 of a wide side-scrolling forest strip for a 2D fighting game background (the three panels will be placed side by side, left to right). Generate at the maximum resolution (4K). HD hand-painted cartoon style, clean dark-plum outlines (#24141F), cel shading with soft gradients. CRISP SHARP high-detail rendering: every leaf cluster, bark crack and branch tip clearly defined, no blur, no soft focus, no depth of field, no haze, no painterly smudging. Strict side view, no perspective. All tree trunks stand on ONE flat horizontal ground line at the very bottom edge of the image, the tallest trees reach about 60% of the image height, the same tree scale as the attached reference. Trees and bushes must NOT touch or be cut by the left and right image edges — leave about 3% of empty space on both sides. Gothic Carpathian dead forest at night: twisted leafless trees with crooked claw-like branches, broken stumps, dark violet bark (#2A1838) with cold moonlight rim light (#E8E4D8). Everything around the trees is perfectly flat solid magenta #FF00FF (no sky, no ground plane, no gradient, no shadow). Do not use pink or purple on the trees. NO characters, NO animals, NO text, NO watermark, NO frame.
+```
 
 ### 7. Камень на перепутье — `stone` (3:4)
 
