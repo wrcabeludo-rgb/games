@@ -1,0 +1,48 @@
+{
+ "frames": [
+  {
+   "file": "hit_high_1.png",
+   "pivot": [
+    200,
+    529
+   ],
+   "size": [
+    438,
+    530
+   ]
+  },
+  {
+   "file": "hit_high_2.png",
+   "pivot": [
+    264,
+    488
+   ],
+   "size": [
+    474,
+    489
+   ]
+  },
+  {
+   "file": "hit_high_3.png",
+   "pivot": [
+    323,
+    463
+   ],
+   "size": [
+    521,
+    464
+   ]
+  },
+  {
+   "file": "hit_high_4.png",
+   "pivot": [
+    194,
+    511
+   ],
+   "size": [
+    362,
+    512
+   ]
+  }
+ ]
+}

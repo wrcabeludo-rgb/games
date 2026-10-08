@@ -20,9 +20,13 @@ var _shot_at := DemoInput.LENGTH
 @onready var menu: MenuView = $MenuView
 ## Меню (стартовый экран, выбор бойцов) или бой. С отладочными ключами игра сразу начинает бой.
 var in_menu := true
+var sound := SoundDirector.new()
 
 
 func _ready() -> void:
+	add_child(sound)
+	menu.sound.connect(func(n: String): sound.play(n))
+	menu.voice.connect(func(n: String): sound.say([n] as Array[String]))
 	menu.setup(arena.sprites)
 	menu.fight_requested.connect(_start_fight)
 	var start_screen := MenuView.Screen.TITLE
@@ -82,6 +86,7 @@ func _physics_process(_delta: float) -> void:
 	if ai.level != AiController.Level.OFF:
 		frame[1] = ai.get_input(sim, 1)
 	sim.step(frame)
+	sound.update(sim, ai.level != AiController.Level.OFF)
 	arena.show_state(sim)
 	hud.show_state(sim, reader, ai)
 	if _screenshot_path != "" and sim.tick == _shot_at:
@@ -164,6 +169,7 @@ func _open_menu(screen: MenuView.Screen) -> void:
 	hud.visible = false
 	menu.cursor = PackedInt32Array([MenuView.ROSTER.find(chars[0]), MenuView.ROSTER.find(chars[1])])
 	menu.open(screen)
+	sound.menu()
 
 
 func _start_fight(picked: PackedStringArray) -> void:

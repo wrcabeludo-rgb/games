@@ -1,0 +1,94 @@
+{
+ "frames": [
+  {
+   "file": "st_sweep_1.png",
+   "pivot": [
+    181,
+    432
+   ],
+   "size": [
+    447,
+    433
+   ]
+  },
+  {
+   "file": "st_sweep_2.png",
+   "pivot": [
+    307,
+    337
+   ],
+   "size": [
+    452,
+    338
+   ]
+  },
+  {
+   "file": "st_sweep_3.png",
+   "pivot": [
+    237,
+    321
+   ],
+   "size": [
+    462,
+    322
+   ]
+  },
+  {
+   "file": "st_sweep_4.png",
+   "pivot": [
+    208,
+    318
+   ],
+   "size": [
+    582,
+    319
+   ]
+  },
+  {
+   "file": "st_sweep_5.png",
+   "pivot": [
+    191,
+    291
+   ],
+   "size": [
+    515,
+    292
+   ]
+  },
+  {
+   "file": "st_sweep_6.png",
+   "pivot": [
+    172,
+    291
+   ],
+   "size": [
+    443,
+    292
+   ]
+  },
+  {
+   "file": "st_sweep_7.png",
+   "pivot": [
+    180,
+    295
+   ],
+   "size": [
+    360,
+    296
+   ]
+  },
+  {
+   "file": "st_sweep_8.png",
+   "pivot": [
+    238,
+    396
+   ],
+   "size": [
+    461,
+    397
+   ]
+  }
+ ],
+ "hit": 5,
+ "hit_end": 6
+}

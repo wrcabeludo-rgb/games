@@ -5,7 +5,8 @@ extends Control
 ## Пока арта нет — рисуются заглушки: градиент, луна, стойка бойца.
 
 signal fight_requested(chars: PackedStringArray)
-signal quit_requested
+signal sound(name: String)        # звук интерфейса: ui_move, ui_confirm, ui_back
+signal voice(name: String)        # фраза диктора
 
 enum Screen { TITLE, SELECT }
 
@@ -70,7 +71,9 @@ func step(bits: PackedInt32Array) -> void:
 	if tick > 1:
 		if screen == Screen.TITLE:
 			if (press[0] | press[1]) & (CONFIRM | InputBits.HP):
+				sound.emit("ui_confirm")
 				open(Screen.SELECT)
+				voice.emit("choose_your_character")
 		else:
 			_step_select(press)
 	queue_redraw()
@@ -97,10 +100,13 @@ func _step_select(press: PackedInt32Array) -> void:
 			c = c + 1 if c % COLS < COLS - 1 else c - COLS + 1
 		elif press[p] & (InputBits.UP | InputBits.DOWN):
 			c = (c + COLS) % ROSTER.size()
+		if c != cursor[who]:
+			sound.emit("ui_move")
 		cursor[who] = c
 		if press[p] & CONFIRM and ROSTER[c] != "":
 			picked[who] = true
 			picked_at[who] = tick
+			sound.emit("ui_confirm")
 	if picked[0] and picked[1]:
 		_ready_tick = tick
 
@@ -115,6 +121,7 @@ func _chooser(p: int) -> int:
 
 
 func _back(p: int) -> void:
+	sound.emit("ui_back")
 	if vs_ai and p == 0 and picked[0]:
 		picked[1 if picked[1] else 0] = false
 	elif picked[p]:
@@ -213,15 +220,17 @@ func _draw_grid() -> void:
 ## Лицо бойца в клетке сетки: верх портрета (или стойки, пока портрета нет).
 func _draw_face(id: String, r: Rect2) -> void:
 	var a := _sprites.anim(id, "select")
-	if a.is_empty():
+	var portrait := not a.is_empty()
+	if not portrait:
 		a = _sprites.anim(id, "idle")
 	if a.is_empty():
 		_text_c(r.get_center(), FighterData.get_data(id).name, 12, COLOR_TEXT)
 		return
 	var tex: Texture2D = a.tex[0]
 	var ts := tex.get_size()
-	var side := ts.x * 0.62
-	var src := Rect2((ts.x - side) * 0.55, 0, side, side)
+	# Портрет по пояс, лицом к игроку: лицо — верх по центру. Стойка (пока портрета нет) — голова справа.
+	var side := minf(ts.x, ts.y * 0.5) if portrait else ts.x * 0.62
+	var src := Rect2((ts.x - side) * (0.5 if portrait else 0.55), 0, side, side)
 	draw_texture_rect_region(tex, r.grow(-4), src)
 
 
@@ -237,20 +246,25 @@ func _draw_preview(p: int) -> void:
 	if id == "":
 		return
 	var face := 1.0 if p == 0 else -1.0
+	var waist := Vector2(x, size.y)       # портрет по пояс — низ кадра у нижнего края экрана
 	var since := tick - picked_at[p]
 	var win := _sprites.anim(id, "select_win")
 	if picked[p] and not win.is_empty():
 		var n: int = win.tex.size()
 		var i := mini(since * n / WIN_TICKS, n - 1)
-		draw_set_transform(feet, 0, Vector2(PORTRAIT_SCALE * face, PORTRAIT_SCALE))
+		draw_set_transform(waist, 0, Vector2(PORTRAIT_SCALE, PORTRAIT_SCALE))
 		draw_texture(win.tex[i], -win.pivot[i])
 		draw_set_transform(Vector2.ZERO)
 		return
 	var a := _sprites.anim(id, "select")
 	var k := PORTRAIT_SCALE
+	var at := waist
 	if a.is_empty():
-		a = _sprites.anim(id, "idle")  # портрета ещё нет — стойка покрупнее
+		a = _sprites.anim(id, "idle")  # портрета ещё нет — стойка покрупнее, второй игрок — зеркально
 		k = 0.62
+		at = feet
+	else:
+		face = 1.0                       # портрет смотрит в камеру — не отражаем
 	if a.is_empty():
 		return
 	# Выбран, а анимации радости нет — подпрыгивает.
@@ -259,7 +273,7 @@ func _draw_preview(p: int) -> void:
 		hop = sin(PI * since / 30.0) * 40.0
 	var tex: Texture2D = a.tex[0]
 	var phase := 0.5 - 0.5 * cos(TAU * float(tick) / FighterSprites.BREATH_TICKS)
-	draw_set_transform(feet - Vector2(0, hop), 0, Vector2(k * face, k))
+	draw_set_transform(at - Vector2(0, hop), 0, Vector2(k * face, k))
 	FighterSprites.draw_breathing(self, tex, a.pivot[0], Color.WHITE, tex.get_height() * 0.9, phase, 8.0)
 	draw_set_transform(Vector2.ZERO)
 

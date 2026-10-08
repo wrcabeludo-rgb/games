@@ -18,7 +18,7 @@ const LEVEL_NAMES := ["выкл", "лёгкий", "средний", "сложн�
 const LEVELS := {
 	Level.EASY: {"reaction": 24, "block": 0.25, "anti_air": 0.15, "think": [30, 55], "punish": 0.1, "wary": 0.0},
 	Level.MEDIUM: {"reaction": 15, "block": 0.55, "anti_air": 0.45, "think": [14, 30], "punish": 0.45, "wary": 0.04},
-	Level.HARD: {"reaction": 9, "block": 0.85, "anti_air": 0.8, "think": [6, 16], "punish": 0.85, "wary": 0.12},
+	Level.HARD: {"reaction": 9, "block": 0.85, "anti_air": 0.8, "think": [6, 16], "punish": 0.85, "wary": 0.16},
 }
 
 const NEAR := 190       # близко: лёгкие удары и броски вплотную, px
