@@ -6,9 +6,12 @@ extends RefCounted
 
 const ART_DIR := "res://art/fighters/"
 const SCALE := 0.5          # кадры нарисованы для 1440p, игра считает в 720p
-const IDLE_TICKS := 12      # длительность кадра стойки, тиков (дыхание туда-обратно: 1-2-3-4-3-2)
-const WALK_TICKS := 6       # кадр ходьбы
-const RUN_TICKS := 4        # кадр бега
+## Длительность цикла анимации, тиков: сколько бы кадров ни нарисовали (4 или 12),
+## цикл идёт с той же скоростью — больше кадров = плавнее.
+const IDLE_CYCLE := 96      # стойка (дыхание)
+const WALK_CYCLE := 40      # шаг (полный цикл — два шага)
+const RUN_CYCLE := 26       # бег
+const PING_PONG_MAX := 5    # до стольких кадров стойка идёт туда-обратно (1-2-3-2), больше — нарисован цикл
 
 ## id бойца → {анимация: {"tex": Array[Texture2D], "pivot": Array[Vector2]}}
 var _bank := {}
@@ -39,7 +42,12 @@ static func _load_character(id: String) -> Dictionary:
 			tex.append(load(path))
 			pivots.append(Vector2(fr.pivot[0], fr.pivot[1]))
 		if not tex.is_empty():
-			out[file.get_basename()] = {"tex": tex, "pivot": pivots}
+			# Ударные кадры (с 0); по умолчанию — 2-й из 3, предпоследний из 4+.
+			var n := tex.size()
+			var hit: int = int(meta.get("hit", 2 if n <= 3 else n - 1)) - 1
+			var hit_end: int = int(meta.get("hit_end", hit + 1)) - 1
+			out[file.get_basename()] = {"tex": tex, "pivot": pivots, "hit": clampi(hit, 0, n - 1),
+				"hit_end": clampi(hit_end, hit, n - 1), "reverse": bool(meta.get("reverse", false))}
 	return out
 
 
@@ -56,19 +64,22 @@ func frame_for(f: Fighter, tick: int) -> Array:
 		Fighter.State.ATTACK:
 			var name: String = Fighter.MOVES[f.move]
 			if anims.has(name):
-				return _pick(anims[name], _attack_index(f, anims[name].tex.size()))
+				return _pick(anims[name], _attack_index(f, anims[name]))
 		Fighter.State.WALK_F:
 			if anims.has("walk_f"):
-				return _pick(anims.walk_f, (f.state_frame / WALK_TICKS) % anims.walk_f.tex.size())
+				return _pick(anims.walk_f, _cycle(f.state_frame, WALK_CYCLE, anims.walk_f.tex.size()))
 		Fighter.State.WALK_B:
 			# Шаг назад — кадры ходьбы в обратном порядке.
 			var key := "walk_b" if anims.has("walk_b") else "walk_f"
 			if anims.has(key):
 				var n: int = anims[key].tex.size()
-				return _pick(anims[key], n - 1 - (f.state_frame / WALK_TICKS) % n)
+				# Лист шага вперёд (или помеченный reverse) — задом наперёд.
+				var i := _cycle(f.state_frame, WALK_CYCLE, n)
+				var reverse: bool = key == "walk_f" or anims[key].reverse
+				return _pick(anims[key], n - 1 - i if reverse else i)
 		Fighter.State.RUN:
 			if anims.has("run"):
-				return _pick(anims.run, (f.state_frame / RUN_TICKS) % anims.run.tex.size())
+				return _pick(anims.run, _cycle(f.state_frame, RUN_CYCLE, anims.run.tex.size()))
 		Fighter.State.CROUCH:
 			if anims.has("crouch"):
 				return _pick(anims.crouch, 0 if f.state_frame < 3 else anims.crouch.tex.size() - 1)
@@ -104,8 +115,16 @@ func frame_for(f: Fighter, tick: int) -> Array:
 		Fighter.State.STAND, Fighter.State.WALK_F, Fighter.State.WALK_B, Fighter.State.LAND, \
 				Fighter.State.RUN_STOP, Fighter.State.PREJUMP, Fighter.State.RUN, Fighter.State.BACKDASH:
 			if anims.has("idle"):
-				return _pick(anims.idle, _ping_pong(tick / IDLE_TICKS, anims.idle.tex.size()))
+				var n: int = anims.idle.tex.size()
+				if n <= PING_PONG_MAX:
+					return _pick(anims.idle, _ping_pong(tick * (2 * n - 2) / IDLE_CYCLE, n))
+				return _pick(anims.idle, _cycle(tick, IDLE_CYCLE, n))
 	return []
+
+
+## Кадр цикла длиной cycle тиков из n кадров.
+static func _cycle(t: int, cycle: int, n: int) -> int:
+	return (t % cycle) * n / cycle
 
 
 ## 0,1,2,3,2,1,0,1… — дыхание без рывка с последнего кадра на первый.
@@ -121,22 +140,26 @@ static func _pick(anim: Dictionary, i: int) -> Array:
 	return [anim.tex[i], anim.pivot[i]]
 
 
-## Ключевые кадры удара: до «ударного» кадра — подготовка, «ударный» — активная фаза, после — возврат.
-## Ударный кадр: 2-й из 3, 3-й из 4 (два кадра замаха) — предпоследний.
-static func _attack_index(f: Fighter, n: int) -> int:
+## Кадр удара по фазе: замах — кадры до ударных, активная фаза — ударные (hit…hit_end), возврат — остальные.
+static func _attack_index(f: Fighter, anim: Dictionary) -> int:
+	var n: int = anim.tex.size()
 	if n <= 1:
 		return 0
 	var m := f.move_data()
-	var hit := 1 if n <= 3 else n - 2
+	var hit: int = anim.hit
+	var hit_end: int = anim.hit_end
 	match f.move_phase():
 		0:
-			return clampi(f.move_frame * hit / maxi(m.startup, 1), 0, hit - 1)
+			if hit <= 0:
+				return 0
+			return clampi((f.move_frame - 1) * hit / maxi(m.startup - 1, 1), 0, hit - 1)
 		1:
-			return hit
+			var span := hit_end - hit + 1
+			return hit + clampi((f.move_frame - m.startup) * span / maxi(m.active, 1), 0, span - 1)
 		_:
-			var rest := n - 1 - hit
+			var rest := n - 1 - hit_end
 			if rest <= 0:
-				return hit
+				return hit_end
 			var rec: int = maxi(m.get("recovery", 1), 1)
 			var t: int = f.move_frame - m.startup - m.active
-			return hit + 1 + clampi(t * rest / rec, 0, rest - 1)
+			return hit_end + 1 + clampi(t * rest / rec, 0, rest - 1)

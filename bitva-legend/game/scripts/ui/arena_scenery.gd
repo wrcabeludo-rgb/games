@@ -111,7 +111,7 @@ func draw_front(c: CanvasItem) -> void:
 		var tex: Texture2D = _tex.foreground
 		# Верх растений чуть выше линии земли: кончики травы перед ногами бойцов, остальное ниже.
 		var h := w * tex.get_height() / tex.get_width()
-		c.draw_texture_rect(tex, Rect2(x0, ground_y - FRONT_RISE, w, h), false, Color(0.78, 0.76, 0.8))
+		_draw_swaying(c, tex, Rect2(x0, ground_y - FRONT_RISE, w, h), Color(0.78, 0.76, 0.8), 7.0, 1.9)
 		return
 	var i := 0
 	var x := 0.0
@@ -274,7 +274,7 @@ func _draw_forest(c: CanvasItem) -> void:
 		var fh := FOREST_HEIGHT
 		var fw := fh * tex.get_width() / tex.get_height()
 		var fx := layer_x(k) + (layer_w(k) - fw) / 2.0
-		c.draw_texture_rect(tex, Rect2(fx, ground_y + 30 - fh, fw, fh), false, Color(0.82, 0.8, 0.88))
+		_draw_swaying(c, tex, Rect2(fx, ground_y + 30 - fh, fw, fh), Color(0.82, 0.8, 0.88), 5.0, 1.1)
 		return
 	var i := 0
 	var x := 30.0
@@ -374,3 +374,37 @@ func _draw_strip(c: CanvasItem, tex: Texture2D, k: float, bottom_y: float, tint 
 	var w := layer_w(k)
 	var h := w * tex.get_height() / tex.get_width()
 	c.draw_texture_rect(tex, Rect2(layer_x(k), bottom_y - h, w, h), false, tint)
+
+
+## Слой на ветру: картинка натянута на сетку, верх сетки качается сильнее низа (низ стоит на месте),
+## волна бежит вдоль слоя, иногда налетает порыв. Рисуется только видимая часть.
+func _draw_swaying(c: CanvasItem, tex: Texture2D, rect: Rect2, tint: Color, amp: float, speed: float) -> void:
+	const COLS_PER_SCREEN := 24
+	const ROWS := 6
+	var step := view.x / COLS_PER_SCREEN
+	var first := maxi(int(floor((0.0 - rect.position.x) / step)) - 1, 0)
+	var last := mini(int(ceil((view.x - rect.position.x) / step)) + 1, int(ceil(rect.size.x / step)))
+	var gust := 1.0 + 0.6 * maxf(sin(t * 0.37), 0.0)
+	var colors := PackedColorArray([tint, tint, tint, tint])
+	for i in range(first, last):
+		var u0 := minf(i * step / rect.size.x, 1.0)
+		var u1 := minf((i + 1) * step / rect.size.x, 1.0)
+		for j in ROWS:
+			var v0 := float(j) / ROWS
+			var v1 := float(j + 1) / ROWS
+			var pts := PackedVector2Array([
+				_sway_point(rect, u0, v0, amp * gust, speed),
+				_sway_point(rect, u1, v0, amp * gust, speed),
+				_sway_point(rect, u1, v1, amp * gust, speed),
+				_sway_point(rect, u0, v1, amp * gust, speed),
+			])
+			var uvs := PackedVector2Array([Vector2(u0, v0), Vector2(u1, v0), Vector2(u1, v1), Vector2(u0, v1)])
+			c.draw_polygon(pts, colors, uvs, tex)
+
+
+func _sway_point(rect: Rect2, u: float, v: float, amp: float, speed: float) -> Vector2:
+	var p := rect.position + Vector2(u * rect.size.x, v * rect.size.y)
+	var lift := (1.0 - v) * (1.0 - v)  # верх качается, низ (корни) неподвижен
+	var wx := u * rect.size.x
+	var dx := amp * lift * (sin(t * speed + wx * 0.006) + 0.35 * sin(t * speed * 2.3 + wx * 0.017))
+	return p + Vector2(dx, 0)

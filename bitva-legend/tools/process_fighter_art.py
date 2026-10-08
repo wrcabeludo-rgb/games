@@ -14,6 +14,9 @@
        "inherit:<лист>" — тот же масштаб, что у другого листа (холсты одной высоты, боец того же размера);
        "h:<кадр>:<px>"   — кадр № <кадр> высотой <px> (1440p): для приседа, блока, прыжка;
        число           — масштаб вручную.
+  grid: [столбцов, рядов] — лист сеткой (8 кадров = [4, 2], 12 = [4, 3]); порядок — слева направо, сверху вниз.
+  reverse: true — проигрывать задом наперёд (шаг назад, нарисованный как шаг вперёд).
+  hit / hit_end: номера ударных кадров (с 1) — показываются в активной фазе удара; до них — замах, после — возврат.
   pivot_y: "feet" (по умолчанию — задняя ступня стоит на месте), "body" (по центру фигуры — ходьба, бег)
            или "center" (кадры в воздухе).
 """
@@ -33,27 +36,40 @@ HEIGHT = {"ilya": 600, "dracula": 540}
 FEET_BAND = 0.06   # опорная точка по x — центр непрозрачных пикселей в нижних 6% кадра
 
 
-def frames_of(sheet: Image.Image, expected: int):
-    """Кадры листа: по пустому месту между ними. Если нейросеть нарисовала кадры вплотную —
-    режем по самым «тонким» столбцам возле равных долей и чистим чужие обрезки."""
+def frames_of(sheet: Image.Image, expected: int, grid=None):
+    """Кадры листа (слева направо, сверху вниз): по пустому месту между ними. Если нейросеть нарисовала
+    кадры вплотную — режем каждый ряд по самым «тонким» столбцам возле равных долей и чистим чужие обрезки.
+    grid = [столбцов, рядов] — для листов сеткой (8 кадров = 4 × 2, 12 = 4 × 3)."""
     frames = list(split_objects(sheet, min_gap=10))
     if not expected or len(frames) == expected:
         return frames
-    print(f"    кадры касаются друг друга ({len(frames)} вместо {expected}) — режу по тонким местам")
-    alpha = np.asarray(sheet.getchannel("A")) > 24
-    cols = alpha.sum(axis=0).astype(np.float32)
-    w = sheet.width / expected
-    cuts = [0]
-    for i in range(1, expected):
-        lo, hi = int(i * w - w * 0.2), int(i * w + w * 0.2)
-        cuts.append(lo + int(np.argmin(cols[lo:hi])))
-    cuts.append(sheet.width)
+    cols, rows = grid if grid else (expected, 1)
+    print(f"    кадры касаются друг друга ({len(frames)} вместо {expected}) — режу сеткой {cols}×{rows} по тонким местам")
+    alpha_rows = np.asarray(sheet.getchannel("A")) > 24
+    lines = alpha_rows.sum(axis=1).astype(np.float32)
+    hstep = sheet.height / rows
+    ycuts = [0]
+    for r in range(1, rows):
+        lo, hi = int(r * hstep - hstep * 0.2), int(r * hstep + hstep * 0.2)
+        ycuts.append(lo + int(np.argmin(lines[lo:hi])))
+    ycuts.append(sheet.height)
     out = []
-    for i in range(expected):
-        cell = sheet.crop((cuts[i], 0, cuts[i + 1], sheet.height))
-        cell = _keep_main(cell)
-        box = cell.getchannel("A").point(lambda v: 255 if v > 8 else 0).getbbox()
-        out.append(cell.crop(box) if box else cell)
+    for r in range(rows):
+        band = sheet.crop((0, ycuts[r], sheet.width, ycuts[r + 1]))
+        cols_sum = (np.asarray(band.getchannel("A")) > 24).sum(axis=0).astype(np.float32)
+        w = band.width / cols
+        cuts = [0]
+        for i in range(1, cols):
+            lo, hi = int(i * w - w * 0.2), int(i * w + w * 0.2)
+            cuts.append(lo + int(np.argmin(cols_sum[lo:hi])))
+        cuts.append(band.width)
+        for i in range(cols):
+            if len(out) == expected:
+                break
+            cell = _keep_main(band.crop((cuts[i], 0, cuts[i + 1], band.height)))
+            box = cell.getchannel("A").point(lambda v: 255 if v > 8 else 0).getbbox()
+            if box:
+                out.append(cell.crop(box))
     return out
 
 
@@ -155,7 +171,7 @@ def main() -> int:
         opt = cfg.get(name, {})
         raw = Image.open(p)
         heights[name] = raw.height
-        frames = frames_of(chroma_key(raw), opt.get("frames", 0))
+        frames = frames_of(chroma_key(raw), opt.get("frames", 0), opt.get("grid"))
         fit = opt.get("fit", "stand")
         if isinstance(fit, (int, float)):
             scale = float(fit)
@@ -173,6 +189,10 @@ def main() -> int:
             scale = HEIGHT[who] / float(np.median([f.height for f in frames]))
         scales[name] = scale
         meta = {"frames": []}
+        # Ударные кадры (с 1): hit — первый кадр активной фазы, hit_end — последний.
+        for k in ("hit", "hit_end", "reverse"):
+            if k in opt:
+                meta[k] = opt[k]
         for i, f in enumerate(frames, 1):
             f = f.resize((max(1, round(f.width * scale)), max(1, round(f.height * scale))), Image.LANCZOS)
             f = sharpen(f)

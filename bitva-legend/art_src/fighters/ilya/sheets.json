@@ -11,7 +11,8 @@
  },
  "walk_b": {
   "frames": 6,
-  "pivot_y": "body"
+  "pivot_y": "body",
+  "reverse": true
  },
  "run": {
   "frames": 6,
