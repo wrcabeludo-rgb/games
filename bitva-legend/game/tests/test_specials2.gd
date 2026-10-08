@@ -111,7 +111,7 @@ func _test_ram() -> bool:
 
 
 func _test_ram_armor() -> bool:
-	var sim := _sim_at(900, 1000)
+	var sim := _sim_at(900, 1040)
 	var ilya := sim.fighters[0]
 	_run(sim, R, 0, 2)
 	_run(sim, 0, 0, 2)
@@ -136,7 +136,7 @@ func _test_teleport() -> bool:
 
 
 func _test_mist_intangible() -> bool:
-	var sim := _sim_at(900, 1000)
+	var sim := _sim_at(900, 1040)
 	_run(sim, 0, D, 2)
 	_run(sim, 0, 0, 2)
 	_run(sim, HK, D | LK)  # Илья бьёт ногой, а Дракула уходит в туман
@@ -152,7 +152,7 @@ func _drac_ff(sim: Sim) -> void:
 
 
 func _test_counter() -> bool:
-	var sim := _sim_at(900, 1000)
+	var sim := _sim_at(900, 1040)
 	_drac_ff(sim)
 	_run(sim, 0, 0, 2)
 	_run(sim, LP, 0)  # Илья бьёт в окно взгляда

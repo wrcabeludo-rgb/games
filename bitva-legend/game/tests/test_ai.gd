@@ -40,7 +40,7 @@ func _test_deals_damage(level: LV) -> bool:
 func _damage_taken(level: LV) -> int:
 	var sim := Sim.new(false)
 	sim.fighters[0].x = 900 * SUB
-	sim.fighters[1].x = 1000 * SUB
+	sim.fighters[1].x = 1040 * SUB
 	var ai := _ai(level)
 	var total := 0
 	var last_hp := sim.fighters[1].hp

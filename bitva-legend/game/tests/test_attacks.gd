@@ -50,7 +50,7 @@ func _run(sim: Sim, p1: int, p2: int, ticks := 1) -> void:
 
 
 func _test_startup_and_damage() -> bool:
-	var sim := _sim_at(900, 1000)
+	var sim := _sim_at(900, 1040)
 	var d := sim.fighters[1]
 	_run(sim, LP, 0)
 	_run(sim, 0, 0, 3)
@@ -67,7 +67,7 @@ func _test_whiff() -> bool:
 
 
 func _test_hitstop() -> bool:
-	var sim := _sim_at(900, 1000)
+	var sim := _sim_at(900, 1040)
 	var d := sim.fighters[1]
 	_run(sim, LP, 0)
 	_run(sim, 0, 0, 4)
@@ -104,7 +104,7 @@ func _test_buffer_expired() -> bool:
 
 
 func _test_crouch_attack() -> bool:
-	var sim := _sim_at(900, 1000)
+	var sim := _sim_at(900, 1040)
 	var f := sim.fighters[0]
 	_run(sim, D, 0, 3)
 	_run(sim, D | LK, 0)
@@ -125,7 +125,7 @@ func _test_air_attack() -> bool:
 
 
 func _test_trade() -> bool:
-	var sim := _sim_at(900, 990)
+	var sim := _sim_at(900, 1040)
 	_run(sim, LP, LP)
 	_run(sim, 0, 0, 20)
 	return sim.fighters[0].hp == 1000 - 30 and sim.fighters[1].hp == 1000
@@ -142,7 +142,7 @@ func _test_wall_pushback() -> bool:
 
 
 func _test_combo() -> bool:
-	var sim := _sim_at(900, 1000)
+	var sim := _sim_at(900, 1040)
 	var d := sim.fighters[1]
 	_run(sim, LP, 0)
 	_run(sim, 0, 0, 4)
@@ -154,7 +154,7 @@ func _test_combo() -> bool:
 
 
 func _test_air_hit() -> bool:
-	var sim := _sim_at(900, 1000)
+	var sim := _sim_at(900, 1040)
 	var d := sim.fighters[1]
 	_run(sim, 0, U)
 	_run(sim, 0, 0, 3)

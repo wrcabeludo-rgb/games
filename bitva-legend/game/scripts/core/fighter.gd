@@ -5,11 +5,12 @@ extends RefCounted
 
 enum State {
 	STAND, WALK_F, WALK_B, CROUCH, PREJUMP, AIR, LAND, RUN, RUN_STOP, BACKDASH,
-	ATTACK, HITSTUN, AIR_HIT, BLOCK, BLOCKSTUN, DOWN,
+	ATTACK, HITSTUN, AIR_HIT, BLOCK, BLOCKSTUN, DOWN, KNOCKDOWN, THROWING, THROWN,
 }
 const STATE_NAMES := [
 	"стойка", "шаг вперёд", "шаг назад", "присед", "подготовка прыжка", "в воздухе",
 	"приземление", "бег", "торможение", "отскок", "удар", "оглушён", "отброшен", "блок", "в блоке", "повержен",
+	"сбит с ног", "бросает", "в захвате",
 ]
 
 ## Удары по номерам: 0–3 стоя, 4–7 в приседе, 8–11 в прыжке; внутри — ЛР, ЛН, СР, СН.
@@ -20,12 +21,18 @@ const MOVES := [
 	"sp_proj_l", "sp_proj_h",
 	"sp_dd_l", "sp_dd_h",
 	"sp_ff_l", "sp_ff_h",
+	"sp_bb_l", "sp_bb_h",
+	"st_sweep", "st_round", "throw",
 ]
+const MOVE_SWEEP := 20      # назад + ЛН — подсечка
+const MOVE_ROUND := 21      # назад + СН — удар ногой с разворота
+const MOVE_THROW := 22      # ЛР вплотную — бросок
 ## Спецприёмы: номер → ввод. Удар по номеру: SPECIAL_BASE + номер * 2 + сила (0 лёгкий, 1 сильный).
 const SPECIAL_BASE := 12
 const SPECIAL_PROJ := 0     # «назад, вперёд + удар»
 const SPECIAL_DD := 1       # «вниз, вниз + удар»
 const SPECIAL_FF := 2       # «вперёд, вперёд + удар»
+const SPECIAL_BB := 3       # «назад, назад + удар» — командные броски
 ## Коды нажатий направлений (относительно взгляда бойца).
 const TAP_BACK := 1
 const TAP_FWD := 2
@@ -52,7 +59,9 @@ const KO_VY := 1500
 const DOWN_HEIGHT := 50     # высота лежащего бойца, px
 const BLOCK_PUSH := 130     # в блоке отбрасывает сильнее, чем при попадании, %
 const BLOCKSTUN_LESS := 2   # в блоке оглушение короче, чем при попадании, на столько тиков
-
+const KNOCKDOWN_TICKS := 45 # сбитый с ног лежит (неуязвим) и встаёт
+const KNOCK_LAUNCH := [200, 600]   # подброс по умолчанию у ударов, сбивающих с ног
+const BACKDASH_CANCEL := 3  # в первые кадры отскока ещё можно начать «назад, назад + удар»
 var id := ""
 var data: Dictionary
 var x := 0
@@ -92,6 +101,15 @@ var spawn_request := 0
 var teleport_request := 0
 var armor := 0              # сколько ударов ещё выдержит броня текущего приёма
 var hypnotized := 0         # 1 — оглушён гипнозом (для отрисовки)
+var knock_on_land := 0      # приземлится — будет лежать (сбит с ног)
+## Выставляет симуляция перед тиком: соперник вплотную и его можно бросить (ЛР станет броском).
+var throw_ok := false
+## Удар дошёл до кадра захвата — симуляция проверит, схвачен ли соперник.
+var grab_request := 0
+## Нажата ЛР в этот тик (в захвате — попытка вырваться).
+var tech_press := 0
+## Второй боец того же персонажа — рисуется другим цветом.
+var alt := false
 
 
 func _init(char_id: String, start_x_px: int, start_facing: int) -> void:
@@ -109,7 +127,7 @@ func save() -> PackedInt32Array:
 	])
 	s.append_array(btn_timers)
 	s.append_array(tap_log)
-	s.append_array(PackedInt32Array([special_buf, special_strength, special_timer, armor, hypnotized]))
+	s.append_array(PackedInt32Array([special_buf, special_strength, special_timer, armor, hypnotized, knock_on_land]))
 	return s
 
 
@@ -123,14 +141,34 @@ func load(s: PackedInt32Array) -> void:
 	btn_timers = s.slice(23, 27)
 	tap_log = s.slice(27, 33)
 	special_buf = s[33]; special_strength = s[34]; special_timer = s[35]
-	armor = s[36]; hypnotized = s[37]
+	armor = s[36]; hypnotized = s[37]; knock_on_land = s[38]
 
 
 # --- Вопросы о состоянии --------------------------------------------------
 
+## Цвет бойца; второй боец того же персонажа — холоднее, чтобы их не путать.
+func color() -> Color:
+	var c: Color = data.color
+	return c.lerp(Color(0.35, 0.55, 1.0), 0.5) if alt else c
+
+
 func is_grounded_actionable() -> bool:
 	return state == State.STAND or state == State.WALK_F or state == State.WALK_B \
 		or state == State.CROUCH or state == State.BLOCK
+
+
+## Сбит с ног, захвачен или бросает — по нему нельзя попасть.
+func is_untouchable() -> bool:
+	return state == State.KNOCKDOWN or state == State.THROWING or state == State.THROWN \
+		or state == State.DOWN or state == State.AIR_HIT
+
+
+## Можно ли схватить: на земле и не в оглушении/блоке (защита от бросков, как в Street Fighter).
+func is_throwable() -> bool:
+	if y != 0 or is_untouchable() or is_intangible():
+		return false
+	return state != State.HITSTUN and state != State.BLOCKSTUN and state != State.AIR \
+		and state != State.LAND
 
 
 func is_airborne() -> bool:
@@ -201,7 +239,7 @@ func push_half() -> int:
 
 ## Высота «тела» для столкновений в текущем состоянии.
 func push_height() -> int:
-	if state == State.DOWN:
+	if state == State.DOWN or state == State.KNOCKDOWN:
 		return DOWN_HEIGHT * SUB
 	if is_crouching():
 		return data.crouch_height * SUB
@@ -218,7 +256,7 @@ func hitbox() -> PackedInt32Array:
 
 ## Уязвимые зоны: тело и, во время удара, вытянутая рука или нога.
 func hurtboxes() -> Array[PackedInt32Array]:
-	if is_intangible():
+	if is_intangible() or is_untouchable():
 		return []
 	var half: int = data.push_half * HURT_WIDTH_RATIO / 100 * SUB
 	var h: int = data.crouch_height * SUB if is_crouching() else data.height * SUB
@@ -264,8 +302,14 @@ func take_hit(m: Dictionary, attacker_facing: int) -> void:
 	if is_airborne():
 		vx = AIR_HIT_VX * attacker_facing
 		vy = AIR_HIT_VY
+		knock_on_land = 1 if m.get("knockdown", 0) else 0
 		_set_state(State.AIR_HIT)
 		state_frame = 0
+		return
+	if m.get("knockdown", 0):
+		# Подсечка, разворот, апперкот: подбрасывает, соперник падает и лежит.
+		var launch: Array = m.get("launch", KNOCK_LAUNCH)
+		_launch_knockdown(launch, attacker_facing)
 		return
 	low_pose = 1 if was_crouching else 0
 	stun = m.hitstun
@@ -273,6 +317,54 @@ func take_hit(m: Dictionary, attacker_facing: int) -> void:
 	vx = 0
 	_set_state(State.HITSTUN)
 	state_frame = 0
+
+
+func _launch_knockdown(launch: Array, direction: int) -> void:
+	vx = launch[0] * direction
+	vy = launch[1]
+	y = maxi(y, 1)
+	knock_on_land = 1
+	move = -1
+	_set_state(State.AIR_HIT)
+	state_frame = 0
+
+
+## Схвачен: стоит в захвате, пока симуляция не завершит бросок.
+func become_thrown() -> void:
+	move = -1
+	vx = 0
+	_set_state(State.THROWN)
+	state_frame = 0
+
+
+## Бросок завершён: урон и полёт в сторону direction, потом лежит.
+func take_throw(grab: Dictionary, direction: int) -> void:
+	combo = 0
+	hp = maxi(hp - grab.damage, 0)
+	if hp == 0:
+		vx = KO_VX * direction
+		vy = KO_VY
+		y = maxi(y, 1)
+		_set_state(State.AIR_HIT)
+		state_frame = 0
+		return
+	_launch_knockdown(grab.launch, direction)
+
+
+## Вырвался из захвата (или бросающий, у которого вырвались): разлёт в стороны.
+func throw_break(direction: int) -> void:
+	move = -1
+	stun = 14
+	pushback = 1100 * direction
+	_set_state(State.BLOCKSTUN)
+	state_frame = 0
+
+
+## Бросающий закончил бросок — короткое восстановление.
+func finish_throw(recovery: int) -> void:
+	move = -1
+	landing_frames = recovery
+	_set_state(State.LAND)
 
 
 ## Попробовать заблокировать удар. Стоя не держится низкий удар, сидя — удар сверху.
@@ -362,6 +454,8 @@ func read_input(bits: int, aging: bool) -> Dictionary:
 	for i in 4:
 		if (bits & ATTACK_BITS[i]) != 0 and (prev_bits & ATTACK_BITS[i]) == 0:
 			btn_timers[i] = 0
+			if i == 0:
+				tech_press = 1
 			_check_special(i)
 	prev_bits = bits
 	return {
@@ -393,6 +487,9 @@ func _check_special(button: int) -> void:
 	elif tap_log[0] == TAP_DOWN and tap_log[2] == TAP_DOWN and tap_log[1] <= BUTTON_WINDOW \
 			and tap_log[3] - tap_log[1] <= TAP_WINDOW:
 		_queue_special(SPECIAL_DD, button)
+	elif tap_log[0] == TAP_BACK and tap_log[2] == TAP_BACK and tap_log[1] <= BUTTON_WINDOW \
+			and tap_log[3] - tap_log[1] <= TAP_WINDOW:
+		_queue_special(SPECIAL_BB, button)
 
 
 ## Спецприём узнан по направлениям; проверяем, подходит ли кнопка (руки, ноги или любая).
@@ -470,6 +567,12 @@ func step(bits: int) -> void:
 					vx = 0
 					vy = 0
 					_set_state(State.DOWN)
+				elif knock_on_land:
+					y = 0
+					vx = 0
+					vy = 0
+					knock_on_land = 0
+					_set_state(State.KNOCKDOWN)
 				else:
 					_land(AIR_HIT_LANDING)
 		State.LAND:
@@ -486,13 +589,20 @@ func step(bits: int) -> void:
 				vx = 0
 				_set_state(State.STAND)
 		State.BACKDASH:
+			if state_frame <= BACKDASH_CANCEL and _special_ready():
+				_start_special()
+				return
 			var speed := maxi(data.backdash_v0 - data.backdash_decel * (state_frame - 1), 0)
 			vx = -speed * facing
 			x += vx
 			if speed == 0 and state_frame >= _backdash_moving_frames() + data.backdash_recovery:
 				_set_state(State.STAND)
-		State.DOWN:
-			pass
+		State.DOWN, State.THROWING, State.THROWN:
+			pass  # управляет симуляция
+		State.KNOCKDOWN:
+			if state_frame >= KNOCKDOWN_TICKS:
+				_set_state(State.STAND)
+				_ground_control(inp)
 		State.ATTACK:
 			move_frame += 1
 			var m := move_data()
@@ -500,6 +610,8 @@ func step(bits: int) -> void:
 				spawn_request = 1
 			if m.has("teleport") and move_frame == m.startup:
 				teleport_request = 1
+			if m.has("grab") and move_frame == m.startup:
+				grab_request = 1
 			# Рывок вперёд в активной фазе (таран), пока не попал.
 			if m.has("lunge") and has_hit == 0 and move_frame >= m.startup and move_frame < m.startup + m.active:
 				x += m.lunge * facing
@@ -563,7 +675,7 @@ func _ground_control(inp: Dictionary) -> void:
 	if _special_ready():
 		_start_special()
 	elif b >= 0:
-		_start_attack(b, inp.down)
+		_start_attack(b, inp.down, inp.back)
 	elif inp.block:
 		# Блок держится, пока нажата кнопка; вниз — нижний блок. Ходить в блоке нельзя.
 		vx = 0
@@ -599,9 +711,16 @@ func _ground_control(inp: Dictionary) -> void:
 		_set_state(State.STAND)
 
 
-func _start_attack(button: int, crouching: bool) -> void:
+func _start_attack(button: int, crouching: bool, back := false) -> void:
 	_consume_button(button)
 	move = (4 if crouching else 0) + button
+	if not crouching:
+		if button == 0 and throw_ok and data.moves.has("throw"):
+			move = MOVE_THROW
+		elif back and button == 1 and data.moves.has("st_sweep"):
+			move = MOVE_SWEEP
+		elif back and button == 3 and data.moves.has("st_round"):
+			move = MOVE_ROUND
 	move_frame = 1  # тик нажатия — первый кадр удара (как во фреймдате Street Fighter)
 	has_hit = 0
 	vx = 0
@@ -616,7 +735,7 @@ func _run_control(inp: Dictionary) -> void:
 	if _special_ready():
 		_start_special()
 	elif b >= 0:
-		_start_attack(b, inp.down)
+		_start_attack(b, inp.down, inp.back)
 	elif inp.up:
 		vx = 0
 		from_run = 1

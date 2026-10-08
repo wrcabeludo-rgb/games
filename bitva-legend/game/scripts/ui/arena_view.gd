@@ -127,7 +127,10 @@ func _draw_shadow(f: Fighter) -> void:
 ## Боец-заглушка: тело, голова и «нос», показывающий, куда он смотрит.
 func _draw_fighter(f: Fighter) -> void:
 	if f.state == Fighter.State.DOWN:
-		_draw_down(f)
+		_draw_down(f, true)
+		return
+	if f.state == Fighter.State.KNOCKDOWN and f.state_frame < Fighter.KNOCKDOWN_TICKS - 10:
+		_draw_down(f, false)
 		return
 	if f.is_intangible():
 		_draw_mist(f)
@@ -163,6 +166,11 @@ func _draw_fighter(f: Fighter) -> void:
 			lean = -0.06 if f.state == Fighter.State.BLOCKSTUN else 0.0
 			if f.low_pose:
 				h = f.data.crouch_height
+		Fighter.State.KNOCKDOWN:
+			h = f.data.crouch_height * 0.8  # поднимается
+		Fighter.State.THROWN:
+			lean = -0.2
+			h *= 0.95
 		Fighter.State.AIR_HIT:
 			lean = -0.4
 		Fighter.State.ATTACK:
@@ -173,7 +181,7 @@ func _draw_fighter(f: Fighter) -> void:
 	var head_r := w * 0.32
 	var body_top := base.y - h + head_r * 1.6
 	var shift := Vector2(dir * lean * h, 0)
-	var color: Color = f.data.color
+	var color: Color = f.color()
 	# Вспышка у получившего удар во время заморозки.
 	if f.is_stunned() and _sim.hitstop > 0:
 		color = color.lerp(Color.WHITE, 0.55)
@@ -222,6 +230,11 @@ func _draw_fighter(f: Fighter) -> void:
 		_draw_attack(f, shoulder, Vector2(base.x + dir * w * 0.15, base.y - body_h * 0.45), color)
 	elif f.state == Fighter.State.BLOCK or f.state == Fighter.State.BLOCKSTUN:
 		_draw_guard(f, shoulder, body_h, dir, color)
+	elif f.state == Fighter.State.THROWING:
+		# Держит соперника обеими руками.
+		var grip := shoulder + Vector2(dir * w * 0.85, body_h * 0.05)
+		draw_line(shoulder, grip, color.darkened(0.3), 13)
+		draw_line(shoulder + Vector2(0, body_h * 0.18), grip + Vector2(0, body_h * 0.12), color.darkened(0.3), 13)
 	elif _is_celebrating(f):
 		# Победная поза: рука вверх, у Ильи — с палицей.
 		var hand := shoulder + Vector2(dir * 48, -body_h * 0.5)
@@ -245,13 +258,19 @@ func _draw_fighter(f: Fighter) -> void:
 ## Рука или нога во время удара: замах, удар до края хитбокса, возврат.
 func _draw_attack(f: Fighter, shoulder: Vector2, hip: Vector2, color: Color) -> void:
 	var m := f.move_data()
+	if m.has("grab"):
+		# Захват: руки тянутся вперёд.
+		var reach := shoulder + Vector2(float(f.facing) * (40.0 + 6.0 * f.move_frame), 10)
+		draw_line(shoulder, reach, color.darkened(0.3), 13)
+		draw_circle(reach, 11, color.darkened(0.45))
+		return
 	if not m.has("box"):
 		_draw_throw(f, shoulder, color)
 		return
 	var b: Array = m.box
 	var dir := float(f.facing)
 	var button: int = f.move % 4
-	var is_kick := button == 1 or button == 3
+	var is_kick: bool = button == 1 or button == 3 or m.get("kick", 0) == 1
 	var origin := hip if is_kick else shoulder
 	var tip := to_screen(float(f.x) / Sim.SUB + dir * (b[0] + b[2] * 0.85), float(f.y) / Sim.SUB + b[1] + b[3] / 2.0)
 	var end := tip
@@ -293,20 +312,20 @@ func _is_celebrating(f: Fighter) -> bool:
 
 
 ## Поверженный боец лежит на земле.
-func _draw_down(f: Fighter) -> void:
+func _draw_down(f: Fighter, stars: bool) -> void:
 	var base := to_screen(float(f.x) / Sim.SUB, 0)
 	var length: float = f.data.height * 0.8
 	var thick: float = Fighter.DOWN_HEIGHT * 0.8
 	var head_side := -float(f.facing)
-	var color: Color = f.data.color.darkened(0.15)
+	var color: Color = f.color().darkened(0.15)
 	var body := Rect2(base.x - length / 2.0, base.y - thick, length, thick)
 	draw_rect(body, color)
 	draw_rect(body, color.darkened(0.45), false, 3)
 	var head := Vector2(base.x + head_side * (length / 2.0 + 18), base.y - 24)
 	draw_circle(head, 24, color.lightened(0.15))
 	draw_arc(head, 24, 0, TAU, 24, color.darkened(0.45), 3)
-	# Звёздочки над головой.
-	for i in 3:
+	# Звёздочки над головой — только у поверженного.
+	for i in (3 if stars else 0):
 		var a := _sim.tick * 0.12 + TAU * i / 3.0
 		var star := head + Vector2(cos(a) * 30, -36 + sin(a) * 8)
 		draw_circle(star, 5, Color(1, 0.9, 0.4))

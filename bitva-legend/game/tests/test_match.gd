@@ -37,7 +37,7 @@ func _run(sim: Sim, p1: int, p2: int, ticks := 1) -> void:
 func _ko_sim() -> Sim:
 	var sim := Sim.new(false)
 	sim.fighters[0].x = 900 * SUB
-	sim.fighters[1].x = 1000 * SUB
+	sim.fighters[1].x = 1040 * SUB
 	sim.fighters[1].hp = 30
 	return sim
 
@@ -65,7 +65,7 @@ func _test_timer_runs() -> bool:
 func _test_timer_hitstop() -> bool:
 	var sim := Sim.new(false)
 	sim.fighters[0].x = 900 * SUB
-	sim.fighters[1].x = 1000 * SUB
+	sim.fighters[1].x = 1040 * SUB
 	_run(sim, LP, 0)
 	_run(sim, 0, 0, 4)  # попадание и начало заморозки (8 тиков)
 	var t0 := sim.timer

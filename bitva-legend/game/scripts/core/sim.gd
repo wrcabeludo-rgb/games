@@ -28,6 +28,8 @@ const ATTACK_MASK := InputBits.LP | InputBits.LK | InputBits.HP | InputBits.HK
 ## Поля снаряда (PackedInt32Array): владелец, позиция, скорость, гравитация, размер,
 ## урон и прочее из данных спецприёма, вид для отрисовки, возраст.
 enum Proj { OWNER, X, Y, VX, VY, GRAV, HW, HH, DMG, STUN, STOP, PUSH, CHIP, KIND, AGE, LOW, LIFE, SIZE }
+const TECH_WINDOW := 8              # вырваться из броска: ЛР в первые тики захвата
+const THROW_HITSTOP := 12
 const ARMOR_HITSTOP := 6            # короткая заморозка, когда удар принят бронёй
 const COUNTER_HITSTOP := 24         # драматичная пауза при удачной контратаке
 const PROJ_MARGIN := 150            # снаряд исчезает за краем арены на столько пикселей
@@ -55,8 +57,13 @@ var prev_inputs := PackedInt32Array([0, 0])
 var projectiles: Array[PackedInt32Array] = []
 
 
+## Персонажи игроков (id из FighterData). Можно выбрать одинаковых.
+var chars := PackedStringArray(["ilya", "dracula"])
+
+
 ## with_intro = false — сразу бой (для тестов и тренировки).
-func _init(with_intro := true) -> void:
+func _init(with_intro := true, characters := PackedStringArray(["ilya", "dracula"])) -> void:
+	chars = characters
 	_reset_fighters()
 	if not with_intro:
 		phase = Phase.FIGHT
@@ -66,9 +73,10 @@ func _init(with_intro := true) -> void:
 func _reset_fighters() -> void:
 	var center := ARENA_WIDTH / 2
 	fighters = [
-		Fighter.new("ilya", center - START_GAP / 2, 1),
-		Fighter.new("dracula", center + START_GAP / 2, -1),
+		Fighter.new(chars[0], center - START_GAP / 2, 1),
+		Fighter.new(chars[1], center + START_GAP / 2, -1),
 	]
+	fighters[1].alt = chars[0] == chars[1]
 	hitstop = 0
 	hitstop_total = 0
 	projectiles = []
@@ -118,18 +126,90 @@ func _combat_step(inp: PackedInt32Array, hits: bool) -> void:
 	var prev_x := PackedInt32Array([fighters[0].x, fighters[1].x])
 	for p in PLAYERS:
 		fighters[p].projectile_alive = has_projectile(p)
+		fighters[p].throw_ok = hits and _can_throw(p)
 		fighters[p].step(inp[p])
 	_wall_pushback()
 	_resolve_push()
 	_limit_separation(prev_x)
 	_clamp_walls()
 	_teleports()
+	_process_grabs()
+	_hold_throws()
 	_move_projectiles()
 	_spawn_projectiles()
 	if hits:
 		_check_hits()
 		_check_projectiles()
 	_update_facing()
+	for f in fighters:
+		f.tech_press = 0
+
+
+func _throw_gap(a: Fighter, d: Fighter) -> int:
+	return absi(d.x - a.x) - a.push_half() - d.push_half()
+
+
+## ЛР станет броском, если соперник вплотную и его можно схватить.
+func _can_throw(p: int) -> bool:
+	var a := fighters[p]
+	var d := fighters[1 - p]
+	if not a.data.moves.has("throw") or a.y != 0 or not d.is_throwable():
+		return false
+	return _throw_gap(a, d) <= a.data.moves.throw.grab.range * SUB
+
+
+## Кадр захвата: схватил, если соперник в досягаемости и его можно бросить; иначе — промах.
+func _process_grabs() -> void:
+	for p in PLAYERS:
+		var a := fighters[p]
+		if a.grab_request == 0:
+			continue
+		a.grab_request = 0
+		var d := fighters[1 - p]
+		if a.state != Fighter.State.ATTACK or not d.is_throwable():
+			continue
+		var g: Dictionary = a.move_data().grab
+		if _throw_gap(a, d) > g.range * SUB:
+			continue
+		a.stun = g.hold
+		a.vx = 0
+		a.state = Fighter.State.THROWING
+		a.state_frame = 0
+		d.become_thrown()
+		_hold_position(a, d)
+
+
+func _hold_position(a: Fighter, d: Fighter) -> void:
+	d.x = a.x + a.facing * (a.push_half() + d.push_half())
+	d.x = clampi(d.x, d.push_half(), ARENA_WIDTH * SUB - d.push_half())
+
+
+## Удержание в захвате: можно вырваться (ЛР в первые TECH_WINDOW тиков), иначе — бросок.
+func _hold_throws() -> void:
+	for p in PLAYERS:
+		var a := fighters[p]
+		if a.state != Fighter.State.THROWING:
+			continue
+		var d := fighters[1 - p]
+		var g: Dictionary = a.move_data().grab
+		_hold_position(a, d)
+		if g.tech and d.tech_press and d.state_frame <= TECH_WINDOW:
+			a.throw_break(-a.facing)
+			d.throw_break(a.facing)
+			hitstop = 8
+			hitstop_total = 8
+			_set_spark(1 - p, (a.x + d.x) / 2, a.data.height * SUB / 2, 2)
+			continue
+		a.stun -= 1
+		if a.stun > 0:
+			continue
+		d.take_throw(g, a.facing)
+		if g.has("heal"):
+			a.hp = mini(a.hp + g.heal, Fighter.MAX_HP)
+		a.finish_throw(g.recovery)
+		hitstop = THROW_HITSTOP
+		hitstop_total = THROW_HITSTOP
+		_set_spark(p, d.x, d.data.height * SUB / 2, 1)
 
 
 func has_projectile(owner: int) -> bool:
@@ -407,6 +487,9 @@ func _resolve_push() -> void:
 	var b := fighters[1]
 	if a.is_rising() or b.is_rising() or a.is_intangible() or b.is_intangible():
 		return
+	for f in fighters:
+		if f.state == Fighter.State.THROWING or f.state == Fighter.State.THROWN:
+			return
 	var vertical := a.y < b.y + b.push_height() and b.y < a.y + a.push_height()
 	if not vertical:
 		return

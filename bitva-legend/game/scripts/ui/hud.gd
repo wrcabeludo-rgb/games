@@ -97,7 +97,7 @@ func _draw_bar(p: int) -> void:
 	draw_rect(r.grow(3), COLOR_GOLD.darkened(0.3), false, 2)
 	# Имя под полоской, у внешнего края; победы в раундах — у внутреннего.
 	var name_x := r.position.x if not right else r.end.x
-	_text(Vector2(name_x, r.end.y + 26), f.data.name, 22, f.data.color.lightened(0.25), right)
+	_text(Vector2(name_x, r.end.y + 26), f.data.name, 22, f.color().lightened(0.25), right)
 	var who := "Игрок %d · %s" % [p + 1, _reader.device_label(p)]
 	if p == 1 and _ai.level != AiController.Level.OFF:
 		who = "ИИ · %s (F3 или Options — сменить)" % _ai.level_name()
@@ -150,7 +150,7 @@ func _draw_announcement() -> void:
 			var w := _sim.match_winner()
 			big = "НИЧЬЯ" if w == 2 else "%s ПОБЕЖДАЕТ!" % _sim.fighters[w].data.name
 			if w != 2:
-				color = _sim.fighters[w].data.color.lightened(0.35)
+				color = _sim.fighters[w].color().lightened(0.35)
 			if _sim.phase_frame >= Sim.REMATCH_DELAY:
 				small = "Нажми любую кнопку удара — реванш"
 	if big == "":
@@ -182,11 +182,12 @@ static func _plural_hits(n: int) -> String:
 func _draw_footer() -> void:
 	var version: String = ProjectSettings.get_setting("application/config/version")
 	var stage: String = ProjectSettings.get_setting("application/config/description")
-	var hint := "R1 / L — блок (вниз — нижний) · F3 / Options — ИИ · F1 — ввод · F2 — хитбоксы · R / Create — новый матч · F11 · Esc"
+	var hint := "R1/L — блок · F3/Options — ИИ · F4/F5 или тачпад — бойцы · F1 — ввод · F2 — хитбоксы · R/Create — новый матч · F11 · Esc"
 	draw_rect(Rect2(0, size.y - 30, size.x, 30), COLOR_SHADE)
 	_text(Vector2(size.x / 2.0, size.y - 10), hint, 13, COLOR_TEXT, false, true)
 	_text(Vector2(12, size.y - 38), "сборка %s · %s · %d FPS" % [version, stage, Engine.get_frames_per_second()], 12, COLOR_DIM)
-	_text(Vector2(size.x - 12, size.y - 38), "Спецприёмы: назад, вперёд + рука · вниз, вниз + нога · вперёд, вперёд + рука", 13, COLOR_GOLD, true)
+	_text(Vector2(size.x - 12, size.y - 56), "Спецприёмы: назад, вперёд + рука · вниз, вниз + нога · вперёд, вперёд + рука · назад, назад + рука — захват", 13, COLOR_GOLD, true)
+	_text(Vector2(size.x - 12, size.y - 38), "Назад + ЛН — подсечка · назад + СН — с разворота · вниз + СР — апперкот · ЛР вплотную — бросок (ЛР в ответ — вырваться)", 13, COLOR_GOLD, true)
 
 
 # --- История ввода (F1) --------------------------------------------------
@@ -195,7 +196,7 @@ func _draw_footer() -> void:
 func _draw_history(p: int, origin: Vector2, right: bool) -> void:
 	var h: Array = _sim.history[p]
 	var dir := -1.0 if right else 1.0
-	var accent: Color = _sim.fighters[p].data.color.lightened(0.3)
+	var accent: Color = _sim.fighters[p].color().lightened(0.3)
 	draw_rect(Rect2(origin.x - (150 if right else 0), origin.y - 6, 150, HISTORY_ROWS * 20 + 10), COLOR_SHADE)
 	for i in mini(h.size(), HISTORY_ROWS):
 		var bits: int = h[i][0]

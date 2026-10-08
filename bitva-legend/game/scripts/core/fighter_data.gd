@@ -26,6 +26,14 @@ extends RefCounted
 ##   lunge   — рывок вперёд в активной фазе, субпиксели за тик;  armor — сколько ударов выдерживает
 ##   teleport — туман: invul_from — с какого кадра неуязвим, offset — на сколько px за спину соперника
 ##   counter — контратака в активной фазе: stun — сколько тиков атакующий загипнотизирован
+##
+## Классика (у всех бойцов):
+##   st_sweep — назад + ЛН (подсечка), st_round — назад + СН (с разворота),
+##   cr_hp — вниз + СР (апперкот), throw — ЛР вплотную (бросок, проходит сквозь блок).
+##   knockdown — сбивает с ног; launch — подброс [вперёд, вверх], субпиксели за тик; kick — рисовать ногой
+##   grab — захват: range — дальность захвата (px между телами), hold — сколько тиков держит,
+##     damage, launch — урон и полёт после броска, tech — можно вырваться (ЛР в первые 8 тиков),
+##     heal — лечит бросающего, recovery — восстановление бросающего после броска
 
 const CHARACTERS := {
 	"ilya": {
@@ -57,7 +65,7 @@ const CHARACTERS := {
 			"st_hk": {"startup": 10, "active": 4, "recovery": 18, "damage": 90, "hitstun": 20, "hitstop": 11, "push": 1000, "box": [45, 140, 130, 45]},
 			"cr_lp": {"startup": 5, "active": 3, "recovery": 9, "damage": 35, "hitstun": 14, "hitstop": 7, "push": 650, "box": [45, 110, 85, 35]},
 			"cr_lk": {"startup": 6, "active": 3, "recovery": 10, "damage": 35, "hitstun": 14, "hitstop": 7, "push": 650, "box": [40, 0, 110, 30], "level": "low"},
-			"cr_hp": {"startup": 10, "active": 5, "recovery": 22, "damage": 100, "hitstun": 22, "hitstop": 12, "push": 900, "box": [25, 150, 95, 170]},
+			"cr_hp": {"startup": 10, "active": 5, "recovery": 22, "damage": 100, "hitstun": 22, "hitstop": 12, "push": 900, "box": [25, 150, 95, 170], "knockdown": 1, "launch": [250, 1700]},
 			"cr_hk": {"startup": 11, "active": 4, "recovery": 24, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 1000, "box": [40, 0, 165, 30], "level": "low"},
 			"j_lp": {"startup": 5, "active": 6, "damage": 40, "hitstun": 15, "hitstop": 8, "push": 600, "box": [30, 70, 85, 50], "level": "overhead"},
 			"j_lk": {"startup": 6, "active": 8, "damage": 45, "hitstun": 16, "hitstop": 8, "push": 600, "box": [30, 10, 95, 50], "level": "overhead"},
@@ -70,6 +78,12 @@ const CHARACTERS := {
 			"sp_dd_l": {"buttons": "kick", "startup": 18, "active": 1, "recovery": 24, "proj": {"x": 70, "y": 22, "vx": 900, "vy": 0, "gravity": 0, "w": 70, "h": 44, "kind": 2, "level": "low", "life": 34, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 900, "chip": 8}},
 			# Богатырский таран с палицей (вперёд, вперёд + рука): рывок вперёд, выдерживает один удар.
 			"sp_ff_l": {"buttons": "punch", "startup": 10, "active": 16, "recovery": 20, "lunge": 900, "armor": 1, "damage": 100, "hitstun": 24, "hitstop": 13, "push": 1400, "chip": 10, "box": [30, 60, 110, 200]},
+			# Мельница (назад, назад + рука): дальний захват, раскручивает и швыряет. Вырваться нельзя.
+			"sp_bb_l": {"buttons": "punch", "startup": 6, "active": 2, "recovery": 30, "grab": {"range": 90, "hold": 40, "damage": 170, "launch": [900, 1300], "tech": 0, "recovery": 12}},
+			# Классика.
+			"st_sweep": {"startup": 9, "active": 3, "recovery": 20, "damage": 70, "hitstun": 20, "hitstop": 11, "push": 600, "box": [40, 0, 150, 30], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
+			"st_round": {"startup": 14, "active": 4, "recovery": 24, "damage": 120, "hitstun": 22, "hitstop": 14, "push": 1200, "box": [40, 150, 150, 60], "knockdown": 1, "launch": [650, 950], "kick": 1},
+			"throw": {"startup": 4, "active": 2, "recovery": 18, "grab": {"range": 25, "hold": 26, "damage": 120, "launch": [500, 1000], "tech": 1, "recovery": 10}},
 		},
 	},
 	"dracula": {
@@ -101,7 +115,7 @@ const CHARACTERS := {
 			"st_hk": {"startup": 9, "active": 3, "recovery": 16, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 1000, "box": [32, 115, 135, 45]},
 			"cr_lp": {"startup": 4, "active": 2, "recovery": 7, "damage": 25, "hitstun": 13, "hitstop": 6, "push": 600, "box": [35, 100, 72, 30]},
 			"cr_lk": {"startup": 5, "active": 2, "recovery": 9, "damage": 30, "hitstun": 13, "hitstop": 6, "push": 600, "box": [30, 0, 105, 28], "level": "low"},
-			"cr_hp": {"startup": 7, "active": 4, "recovery": 18, "damage": 75, "hitstun": 20, "hitstop": 11, "push": 850, "box": [22, 140, 85, 155]},
+			"cr_hp": {"startup": 7, "active": 4, "recovery": 18, "damage": 75, "hitstun": 20, "hitstop": 11, "push": 850, "box": [22, 140, 85, 155], "knockdown": 1, "launch": [200, 1600]},
 			"cr_hk": {"startup": 9, "active": 3, "recovery": 20, "damage": 70, "hitstun": 19, "hitstop": 10, "push": 1000, "box": [35, 0, 145, 28], "level": "low"},
 			"j_lp": {"startup": 4, "active": 5, "damage": 30, "hitstun": 14, "hitstop": 7, "push": 550, "box": [25, 60, 72, 45], "level": "overhead"},
 			"j_lk": {"startup": 5, "active": 7, "damage": 35, "hitstun": 15, "hitstop": 7, "push": 550, "box": [25, 10, 85, 45], "level": "overhead"},
@@ -113,6 +127,12 @@ const CHARACTERS := {
 			"sp_dd_l": {"buttons": "kick", "startup": 16, "active": 1, "recovery": 14, "teleport": {"invul_from": 4, "offset": 110}},
 			# Гипнотический взгляд (вперёд, вперёд + рука): если соперник ударит в окно — застынет.
 			"sp_ff_l": {"buttons": "punch", "startup": 4, "active": 16, "recovery": 18, "counter": {"stun": 55}},
+			# Укус (назад, назад + рука): захват, кусает и лечится. Вырваться нельзя.
+			"sp_bb_l": {"buttons": "punch", "startup": 5, "active": 2, "recovery": 28, "grab": {"range": 70, "hold": 40, "damage": 110, "heal": 60, "launch": [300, 600], "tech": 0, "recovery": 10}},
+			# Классика.
+			"st_sweep": {"startup": 8, "active": 3, "recovery": 18, "damage": 60, "hitstun": 20, "hitstop": 10, "push": 600, "box": [30, 0, 140, 28], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
+			"st_round": {"startup": 12, "active": 4, "recovery": 20, "damage": 100, "hitstun": 22, "hitstop": 13, "push": 1100, "box": [30, 140, 145, 55], "knockdown": 1, "launch": [600, 900], "kick": 1},
+			"throw": {"startup": 3, "active": 2, "recovery": 18, "grab": {"range": 25, "hold": 22, "damage": 100, "launch": [450, 900], "tech": 1, "recovery": 10}},
 		},
 	},
 }

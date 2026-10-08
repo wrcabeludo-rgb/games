@@ -47,7 +47,7 @@ func _run(sim: Sim, p1: int, p2: int, ticks := 1) -> void:
 
 
 func _test_block_basic() -> bool:
-	var sim := _sim_at(900, 1000)
+	var sim := _sim_at(900, 1040)
 	var d := sim.fighters[1]
 	_run(sim, LP, BL)
 	_run(sim, 0, BL, 4)
@@ -55,7 +55,7 @@ func _test_block_basic() -> bool:
 
 
 func _test_block_return() -> bool:
-	var sim := _sim_at(900, 1000)
+	var sim := _sim_at(900, 1040)
 	var d := sim.fighters[1]
 	_run(sim, LP, BL)
 	_run(sim, 0, BL, 30)
@@ -63,14 +63,14 @@ func _test_block_return() -> bool:
 
 
 func _test_low_vs_stand() -> bool:
-	var sim := _sim_at(900, 1000)
+	var sim := _sim_at(900, 1040)
 	_run(sim, D | LK, BL)
 	_run(sim, D, BL, 20)
 	return sim.fighters[1].hp == 1000 - 35
 
 
 func _test_low_vs_crouch() -> bool:
-	var sim := _sim_at(900, 1000)
+	var sim := _sim_at(900, 1040)
 	_run(sim, D | LK, D | BL)
 	_run(sim, D, D | BL, 20)
 	return sim.fighters[1].hp == 1000 and sim.fighters[1].low_pose == 1
@@ -94,7 +94,7 @@ func _test_overhead() -> bool:
 
 
 func _push_distance(defender_input: int) -> int:
-	var sim := _sim_at(900, 1000)
+	var sim := _sim_at(900, 1040)
 	var d := sim.fighters[1]
 	var x0 := d.x
 	_run(sim, HK, defender_input)
@@ -144,4 +144,4 @@ func _test_heavy_unsafe() -> bool:
 
 
 func _test_light_safe() -> bool:
-	return _block_advantage(LP, 100) < 0
+	return _block_advantage(LP, 140) < 0

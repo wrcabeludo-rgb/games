@@ -2,7 +2,9 @@ extends Node
 ## Главный цикл: каждый тик (60 в секунду) читает ввод, продвигает симуляцию
 ## и просит отрисовку обновиться. Логика боя живёт только в Sim.
 
-var sim := Sim.new()
+## Персонажи игроков: F4 и F5 перебирают, тачпад или L3 на геймпаде игрока 1 меняет местами.
+var chars := PackedStringArray(["ilya", "dracula"])
+var sim := Sim.new(true, chars)
 var reader := InputReader.new()
 ## ИИ за игрока 2: F3 или Options на геймпаде игрока 1 переключает уровень.
 var ai := AiController.new(20261008)
@@ -60,6 +62,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	if pad != null and pad.pressed and pad.button_index == JOY_BUTTON_START and pad.device == reader.pad_for(0):
 		ai.next_level()
 		return
+	if pad != null and pad.pressed and pad.device == reader.pad_for(0) \
+			and (pad.button_index == JOY_BUTTON_TOUCHPAD or pad.button_index == JOY_BUTTON_LEFT_STICK):
+		chars = PackedStringArray([chars[1], chars[0]])
+		_reset()
+		return
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
 		return
@@ -70,6 +77,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			arena.show_debug = not arena.show_debug
 		KEY_F3:
 			ai.next_level()
+		KEY_F4:
+			_cycle_char(0)
+		KEY_F5:
+			_cycle_char(1)
 		KEY_R:
 			_reset()
 		KEY_F11:
@@ -79,8 +90,14 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _reset() -> void:
-	sim = Sim.new()
+	sim = Sim.new(true, chars)
 	ai.reset()
+
+
+func _cycle_char(p: int) -> void:
+	var ids: Array = FighterData.CHARACTERS.keys()
+	chars[p] = ids[(ids.find(chars[p]) + 1) % ids.size()]
+	_reset()
 
 
 func _toggle_fullscreen() -> void:
