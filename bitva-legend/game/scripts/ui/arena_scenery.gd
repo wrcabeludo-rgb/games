@@ -115,7 +115,9 @@ func draw_front(c: CanvasItem) -> void:
 		var tex: Texture2D = _tex.foreground
 		# Верх растений чуть выше линии земли: кончики травы перед ногами бойцов, остальное ниже.
 		var h := w * tex.get_height() / tex.get_width()
-		_draw_swaying(c, tex, Rect2(x0, ground_y - FRONT_RISE, w, h), Color(0.78, 0.76, 0.8), 7.0, 1.9)
+		# Низ травы — у нижнего края экрана (без полосы голой земли под ней).
+		var top := maxf(ground_y - FRONT_RISE, view.y - h + 4.0)
+		_draw_swaying(c, tex, Rect2(x0, top, w, h), Color(0.78, 0.76, 0.8), 7.0, 1.9)
 		return
 	var i := 0
 	var x := 0.0

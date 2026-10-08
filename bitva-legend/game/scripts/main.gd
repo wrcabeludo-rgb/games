@@ -21,10 +21,31 @@ var _shot_at := DemoInput.LENGTH
 ## Меню (стартовый экран, выбор бойцов) или бой. С отладочными ключами игра сразу начинает бой.
 var in_menu := true
 var sound := SoundDirector.new()
+var rumble := Rumble.new()
+## Пауза и настройки — поверх боя и меню.
+var pause := PauseView.new()
+## Кнопки, зажатые в момент закрытия паузы: не считаются, пока их не отпустят
+## (иначе «Продолжить» крестом сразу дал бы удар ЛН).
+var _mask := 0
 
 
 func _ready() -> void:
+	Settings.load_file()
+	Settings.apply()
+	ai.level = clampi(Settings.ai_level, 0, AiController.LEVEL_NAMES.size() - 1) as AiController.Level
 	add_child(sound)
+	add_child(pause)
+	pause.set_anchors_preset(Control.PRESET_FULL_RECT)
+	pause.sound.connect(func(n: String): sound.play(n))
+	pause.restart.connect(_reset)
+	pause.to_select.connect(func(): _open_menu(MenuView.Screen.SELECT))
+	pause.to_title.connect(func(): _open_menu(MenuView.Screen.TITLE))
+	pause.ai_changed.connect(_set_ai)
+	pause.visibility_changed.connect(func():
+		hud.paused = pause.visible
+		hud.queue_redraw()
+		if not pause.visible:
+			_mask = reader.read(0) | reader.read(1))
 	menu.sound.connect(func(n: String): sound.play(n))
 	menu.voice.connect(func(n: String): sound.say([n] as Array[String]))
 	menu.setup(arena.sprites)
@@ -36,6 +57,7 @@ func _ready() -> void:
 			in_menu = false
 		if arg.begins_with("--screenshot="):
 			_screenshot_path = arg.trim_prefix("--screenshot=")
+			ai.level = AiController.Level.OFF   # снимки — по записанному вводу, без сохранённого ИИ
 		elif arg.begins_with("--shot-at="):
 			_shot_at = int(arg.trim_prefix("--shot-at="))
 		elif arg == "--debug":
@@ -62,6 +84,16 @@ func _ready() -> void:
 		if arg.begins_with("--screen="):
 			in_menu = true
 			start_screen = MenuView.Screen.SELECT if arg.ends_with("select") else MenuView.Screen.TITLE
+	# «--pause=main|settings|moves» — снимок паузы поверх боя (вместе с --screenshot).
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--pause="):
+			for i in 40:
+				sim.step(DemoInput.frame(sim.tick))
+			arena.show_state(sim)
+			hud.show_state(sim, reader, ai)
+			_open_pause(false)
+			pause.page = {"main": PauseView.Page.MAIN, "settings": PauseView.Page.SETTINGS,
+				"moves": PauseView.Page.MOVES}[arg.trim_prefix("--pause=")]
 	if in_menu:
 		_open_menu(start_screen)
 		if "--picked" in OS.get_cmdline_user_args():
@@ -72,21 +104,31 @@ func _ready() -> void:
 
 func _physics_process(_delta: float) -> void:
 	reader.single_player = ai.level != AiController.Level.OFF
+	if pause.visible:
+		pause.step(reader.read(0) | reader.read(1))
+		if _screenshot_path != "" and Engine.get_physics_frames() == _shot_at:
+			_save_screenshot.call_deferred()
+		return
+	var raw := PackedInt32Array([reader.read(0), reader.read(1)])
+	_mask &= raw[0] | raw[1]
+	raw[0] &= ~_mask
+	raw[1] &= ~_mask
 	if in_menu:
 		menu.vs_ai = reader.single_player
-		menu.ai_label = "Соперник: %s   ·   F3 или Options — сменить" % \
+		menu.ai_label = "Соперник: %s   ·   F3 — сменить   ·   Options / F10 — настройки" % \
 			("второй игрок" if ai.level == AiController.Level.OFF else "ИИ, " + ai.level_name())
-		menu.step(PackedInt32Array([reader.read(0), reader.read(1)]))
+		menu.step(raw)
 		if _screenshot_path != "" and menu.tick == _shot_at:
 			_save_screenshot.call_deferred()
 		return
-	var frame := PackedInt32Array([reader.read(0), reader.read(1)])
+	var frame := raw
 	if _screenshot_path != "":
 		frame = DemoInput.frame(sim.tick)
 	if ai.level != AiController.Level.OFF:
 		frame[1] = ai.get_input(sim, 1)
 	sim.step(frame)
 	sound.update(sim, ai.level != AiController.Level.OFF)
+	rumble.update(sim, reader)
 	arena.show_state(sim)
 	hud.show_state(sim, reader, ai)
 	if _screenshot_path != "" and sim.tick == _shot_at:
@@ -101,14 +143,29 @@ func _save_screenshot() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	var pad := event as InputEventJoypadButton
+	var key_ev := event as InputEventKey
+	var key_down := key_ev != null and key_ev.pressed and not key_ev.echo
+	# Пауза открыта: Esc / Options — назад (с главной страницы — продолжить бой).
+	if pause.visible:
+		if (pad != null and pad.pressed and pad.button_index == JOY_BUTTON_START) \
+				or (key_down and key_ev.physical_keycode in [KEY_ESCAPE, KEY_F10]):
+			pause.back_or_resume()
+		elif key_down and key_ev.physical_keycode == KEY_F11:
+			_toggle_fullscreen()
+		return
+	# Настройки из меню: Options или F10.
+	if in_menu and ((pad != null and pad.pressed and pad.button_index == JOY_BUTTON_START) \
+			or (key_down and key_ev.physical_keycode == KEY_F10)):
+		_open_pause(true)
+		return
 	if pad != null and pad.pressed and pad.button_index == JOY_BUTTON_BACK:
 		_reset()
 		return
 	if pad != null and pad.pressed and pad.button_index == JOY_BUTTON_START:
-		if not in_menu and sim.phase == Sim.Phase.MATCH_END:
+		if sim.phase == Sim.Phase.MATCH_END:
 			_open_menu(MenuView.Screen.SELECT)
 		else:
-			_cycle_ai()
+			_open_pause(false)
 		return
 	if in_menu and pad != null:
 		return
@@ -159,8 +216,21 @@ func _unhandled_input(event: InputEvent) -> void:
 			_reset()
 		KEY_F11:
 			_toggle_fullscreen()
-		KEY_ESCAPE:
-			_open_menu(MenuView.Screen.SELECT)
+		KEY_ESCAPE, KEY_F10:
+			_open_pause(false)
+
+
+func _open_pause(only_settings: bool) -> void:
+	pause.chars = chars
+	pause.ai_level = ai.level
+	pause.open(only_settings)
+	for pad in Input.get_connected_joypads():
+		Input.stop_joy_vibration(pad)
+
+
+func _set_ai(level: int) -> void:
+	ai.level = level as AiController.Level
+	ai.reset()
 
 
 func _open_menu(screen: MenuView.Screen) -> void:
@@ -199,6 +269,8 @@ func _toggle_training() -> void:
 
 func _cycle_ai() -> void:
 	ai.next_level()
+	Settings.ai_level = ai.level
+	Settings.save_file()
 	reader.notify("ИИ соперника: %s" % ai.level_name())
 
 
@@ -209,7 +281,6 @@ func _cycle_char(p: int) -> void:
 
 
 func _toggle_fullscreen() -> void:
-	if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN:
-		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
-	else:
-		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+	Settings.fullscreen = DisplayServer.window_get_mode() != DisplayServer.WINDOW_MODE_FULLSCREEN
+	Settings.apply()
+	Settings.save_file()

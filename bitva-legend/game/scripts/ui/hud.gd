@@ -19,6 +19,7 @@ const TRAIL_DELAY := 30     # «красный след» урона начин�
 const TRAIL_SPEED := 6.0    # и тает со скоростью столько очков здоровья за кадр
 
 var show_inputs := false
+var paused := false          # открыта пауза — своя подсказка внизу не нужна
 var _font := SystemFont.new()
 var _sim: Sim
 var _reader: InputReader
@@ -169,6 +170,8 @@ func _draw_timer() -> void:
 # --- Объявления ----------------------------------------------------------
 
 func _draw_announcement() -> void:
+	if paused:
+		return
 	var big := ""
 	var small := ""
 	var color := COLOR_GOLD
@@ -246,6 +249,11 @@ func _draw_pad_notice() -> void:
 
 
 func _draw_footer() -> void:
+	# По умолчанию экран чистый: подсказки — в паузе («Приёмы»), включить здесь — в настройках.
+	if not Settings.hints:
+		if not paused and _sim.phase == Sim.Phase.INTRO or _sim.phase == Sim.Phase.MATCH_END:
+			_text(Vector2(size.x / 2.0, size.y - 14), "Esc / Options — пауза, приёмы и настройки", 15, COLOR_DIM, false, true)
+		return
 	var version: String = ProjectSettings.get_setting("application/config/version")
 	var stage: String = ProjectSettings.get_setting("application/config/description")
 	var hint := "R1/L — блок · F3/Options — ИИ · F4/F5/тачпад — бойцы · F6/R1+тачпад — тренировка · F7 — спрайты · F1 — ввод · F2 — хитбоксы · R/Create — заново · F11 · Esc"

@@ -200,7 +200,7 @@ func _draw_title() -> void:
 	_text_c(Vector2(cx, y + 38), "CLASH OF LEGENDS", 22, COLOR_TEXT)
 	if (tick / 30) % 2 == 0:
 		_text_c(Vector2(cx, size.y - 62), "Нажмите Enter или крест", 26, COLOR_TEXT)
-	_text_c(Vector2(cx, size.y - 30), "Esc — выход   ·   F11 — полный экран", 16, COLOR_DIM)
+	_text_c(Vector2(cx, size.y - 30), "Options / F10 — настройки   ·   Esc — выход   ·   F11 — полный экран", 16, COLOR_DIM)
 
 
 func _draw_select() -> void:

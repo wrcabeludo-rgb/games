@@ -42,14 +42,17 @@ var _last_frame := PackedInt32Array([-1, -1])
 func _ready() -> void:
 	_rng.seed = 1
 	_music.volume_db = MUSIC_DB
+	_music.bus = Settings.bus_name("music")
 	add_child(_music)
 	_music.finished.connect(func(): _music.play())
 	_voice.volume_db = VOICE_DB
+	_voice.bus = Settings.bus_name("voice")
 	add_child(_voice)
 	_voice.finished.connect(_next_voice)
 	for i in SFX_PLAYERS:
 		var p := AudioStreamPlayer.new()
 		p.volume_db = SFX_DB
+		p.bus = Settings.bus_name("sfx")
 		add_child(p)
 		_sfx.append(p)
 
