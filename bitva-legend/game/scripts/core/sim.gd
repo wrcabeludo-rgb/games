@@ -22,7 +22,7 @@ var fighters: Array[Fighter] = []
 ## Заморозка после попадания: пока > 0, бойцы стоят, но нажатия запоминаются.
 var hitstop := 0
 var hitstop_total := 0              # длительность текущей заморозки (для тряски камеры)
-## Последнее попадание каждого игрока (для искр): [тик, x, y, сильный 0/1].
+## Последнее попадание каждого игрока (для искр): [тик, x, y, вид: 0 лёгкий, 1 сильный, 2 блок].
 var sparks := PackedInt32Array([-999, 0, 0, 0, -999, 0, 0, 0])
 
 
@@ -68,7 +68,7 @@ func step(frame_inputs: PackedInt32Array) -> void:
 func _wall_pushback() -> void:
 	for p in PLAYERS:
 		var f := fighters[p]
-		if f.state != Fighter.State.HITSTUN:
+		if f.state != Fighter.State.HITSTUN and f.state != Fighter.State.BLOCKSTUN:
 			continue
 		var other := fighters[1 - p]
 		var hi := ARENA_WIDTH * SUB - f.push_half()
@@ -98,10 +98,16 @@ func _check_hits() -> void:
 		var a := fighters[p]
 		var d := fighters[1 - p]
 		a.mark_hit()
-		d.take_hit(m, a.facing)
-		if m.hitstop > hitstop:
-			hitstop = m.hitstop
-			hitstop_total = m.hitstop
+		var blocked := d.try_block(m)
+		var stop: int = m.hitstop
+		if blocked:
+			d.take_block(m, a.facing)
+			stop = maxi(m.hitstop * 2 / 3, 4)  # блок «легче» попадания
+		else:
+			d.take_hit(m, a.facing)
+		if stop > hitstop:
+			hitstop = stop
+			hitstop_total = stop
 		# Искра — в точке, где хитбокс заходит в тело соперника.
 		var spark_x := (maxi(hb[0], d.x - d.push_half()) + mini(hb[1], d.x + d.push_half())) / 2
 		var spark_y := (hb[2] + hb[3]) / 2
@@ -109,7 +115,7 @@ func _check_hits() -> void:
 		sparks[base] = tick
 		sparks[base + 1] = spark_x
 		sparks[base + 2] = spark_y
-		sparks[base + 3] = 1 if m.hitstop >= 11 else 0
+		sparks[base + 3] = 2 if blocked else (1 if m.hitstop >= 11 else 0)
 
 
 static func _overlap(a: PackedInt32Array, b: PackedInt32Array) -> bool:

@@ -41,7 +41,7 @@ func _draw() -> void:
 	var stage: String = ProjectSettings.get_setting("application/config/description")
 	_text(Vector2(w / 2.0, 30), "БИТВА ЛЕГЕНД · сборка %s · %s" % [version, stage], 15, COLOR_DIM, false, true)
 	_text(Vector2(w / 2.0, 50), "%d FPS" % Engine.get_frames_per_second(), 13, COLOR_DIM, false, true)
-	var hint := "F1 — история ввода · F2 — хитбоксы и отладка · R или Create — сброс · F11 — полный экран · Esc — выход"
+	var hint := "R1 / L — блок (вниз — нижний) · F1 — история ввода · F2 — хитбоксы · R или Create — сброс · F11 — полный экран · Esc — выход"
 	draw_rect(Rect2(0, size.y - 34, w, 34), COLOR_SHADE)
 	_text(Vector2(w / 2.0, size.y - 12), hint, 14, COLOR_TEXT, false, true)
 

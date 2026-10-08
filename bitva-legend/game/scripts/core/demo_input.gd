@@ -1,14 +1,14 @@
 class_name DemoInput
 extends RefCounted
 ## Записанный сценарий ввода для отладочных скриншотов и проверок без геймпада.
-## Илья подходит и бьёт палицей (СР), Дракула стоит.
+## Илья подходит и бьёт палицей (СР), Дракула держит блок.
 
 ## Шаги: [биты игрока 1, биты игрока 2, сколько тиков держать].
 const STEPS := [
 	[0, 0, 5],
-	[InputBits.RIGHT, 0, 80],
-	[InputBits.HP, 0, 1],
-	[0, 0, 60],
+	[InputBits.RIGHT, InputBits.BLOCK, 80],
+	[InputBits.HP, InputBits.BLOCK, 1],
+	[0, InputBits.BLOCK, 60],
 ]
 const LENGTH := 98
 

@@ -149,7 +149,11 @@ func _draw_fighter(f: Fighter) -> void:
 			h *= 0.95
 		Fighter.State.HITSTUN:
 			lean = -0.15
-			if f.crouch_hit:
+			if f.low_pose:
+				h = f.data.crouch_height
+		Fighter.State.BLOCK, Fighter.State.BLOCKSTUN:
+			lean = -0.06 if f.state == Fighter.State.BLOCKSTUN else 0.0
+			if f.low_pose:
 				h = f.data.crouch_height
 		Fighter.State.AIR_HIT:
 			lean = -0.4
@@ -190,6 +194,8 @@ func _draw_fighter(f: Fighter) -> void:
 	var shoulder := Vector2(base.x + dir * w * 0.2, body_top + body_h * 0.25) + shift * 0.75
 	if f.move >= 0:
 		_draw_attack(f, shoulder, Vector2(base.x + dir * w * 0.15, base.y - body_h * 0.45), color)
+	elif f.state == Fighter.State.BLOCK or f.state == Fighter.State.BLOCKSTUN:
+		_draw_guard(f, shoulder, body_h, dir, color)
 	else:
 		# Рука вперёд — тоже подсказка, куда смотрит боец.
 		draw_line(shoulder, shoulder + Vector2(dir * w * 0.55, body_h * 0.2), color.darkened(0.3), 10)
@@ -237,15 +243,35 @@ func _draw_attack(f: Fighter, shoulder: Vector2, hip: Vector2, color: Color) -> 
 			draw_line(end + side, end + side + v * 22, Color(0.95, 0.9, 0.85), 3)
 
 
+## Блок: скрещённые руки перед собой и полупрозрачный щит.
+func _draw_guard(f: Fighter, shoulder: Vector2, body_h: float, dir: float, color: Color) -> void:
+	var front := shoulder + Vector2(dir * f.data.push_half * 0.9, body_h * 0.15)
+	var arm := color.darkened(0.3)
+	draw_line(shoulder, front + Vector2(0, -body_h * 0.12), arm, 12)
+	draw_line(shoulder + Vector2(0, body_h * 0.2), front + Vector2(0, body_h * 0.05), arm, 12)
+	var glow := 0.55 if f.state == Fighter.State.BLOCKSTUN else 0.3
+	var c := front + Vector2(-dir * 6, 0)
+	var r := body_h * 0.28
+	draw_arc(c, r, -PI / 2.6 if dir > 0 else PI - PI / 2.6, (PI / 2.6) if dir > 0 else PI + PI / 2.6,
+		16, Color(0.45, 0.75, 1.0, glow), 6)
+
+
 ## Искра попадания: вспышка-звезда, у сильных ударов крупнее.
 func _draw_spark(p: int) -> void:
 	var base := p * 4
 	var age := _sim.tick - _sim.sparks[base]
 	if age < 0 or age > 14:
 		return
-	var heavy := _sim.sparks[base + 3] == 1
+	var kind := _sim.sparks[base + 3]
+	var heavy := kind == 1
 	var c := to_screen(float(_sim.sparks[base + 1]) / Sim.SUB, float(_sim.sparks[base + 2]) / Sim.SUB)
 	var k := 1.0 - age / 14.0
+	if kind == 2:
+		# Блок — голубые расходящиеся дуги.
+		for i in 3:
+			var rr := 14.0 + age * 3.0 + i * 9.0
+			draw_arc(c, rr, 0, TAU, 24, Color(0.5, 0.8, 1.0, k * (1.0 - i * 0.25)), 3)
+		return
 	var r := (46.0 if heavy else 30.0) * (0.6 + 0.4 * k)
 	var col := Color(1.0, 0.95, 0.6, k)
 	var rays := 10 if heavy else 7
