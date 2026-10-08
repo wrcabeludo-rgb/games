@@ -1,0 +1,26 @@
+{
+ "frames": [
+  {
+   "file": "block_low_1.png",
+   "pivot": [
+    193,
+    439
+   ],
+   "size": [
+    482,
+    440
+   ]
+  },
+  {
+   "file": "block_low_2.png",
+   "pivot": [
+    193,
+    421
+   ],
+   "size": [
+    534,
+    422
+   ]
+  }
+ ]
+}

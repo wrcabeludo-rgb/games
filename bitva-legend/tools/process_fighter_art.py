@@ -12,6 +12,7 @@
   {"idle": {"frames": 4, "fit": "stand"}, "st_lp": {"frames": 3, "fit": "inherit:idle"}}
   fit: "stand"        — масштаб по высоте кадров (боец стоит во весь рост): высота = росту бойца;
        "inherit:<лист>" — тот же масштаб, что у другого листа (холсты одной высоты, боец того же размера);
+       "h:<кадр>:<px>"   — кадр № <кадр> высотой <px> (1440p): для приседа, блока, прыжка;
        число           — масштаб вручную.
   pivot_y: "feet" (по умолчанию — задняя ступня стоит на месте), "body" (по центру фигуры — ходьба, бег)
            или "center" (кадры в воздухе).
@@ -158,6 +159,10 @@ def main() -> int:
         fit = opt.get("fit", "stand")
         if isinstance(fit, (int, float)):
             scale = float(fit)
+        elif str(fit).startswith("h:"):
+            # h:<кадр>:<px> — кадр № такой-то должен быть такой высоты (присед, блок с поднятой палицей…).
+            _, idx, px = str(fit).split(":")
+            scale = float(px) / frames[int(idx) - 1].height
         elif str(fit).startswith("inherit:"):
             base = fit.split(":", 1)[1]
             if base not in scales:

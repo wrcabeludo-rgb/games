@@ -69,6 +69,31 @@ func frame_for(f: Fighter, tick: int) -> Array:
 		Fighter.State.RUN:
 			if anims.has("run"):
 				return _pick(anims.run, (f.state_frame / RUN_TICKS) % anims.run.tex.size())
+		Fighter.State.CROUCH:
+			if anims.has("crouch"):
+				return _pick(anims.crouch, 0 if f.state_frame < 3 else anims.crouch.tex.size() - 1)
+		Fighter.State.BLOCK, Fighter.State.BLOCKSTUN:
+			# Блок: 1-й кадр — стойка в блоке, 2-й — принял удар (оглушение в блоке).
+			var key := "block_low" if f.low_pose else "block"
+			if anims.has(key):
+				var n: int = anims[key].tex.size()
+				return _pick(anims[key], mini(1 if f.state == Fighter.State.BLOCKSTUN else 0, n - 1))
+		Fighter.State.PREJUMP:
+			if anims.has("jump"):
+				return _pick(anims.jump, 0)
+		Fighter.State.AIR:
+			# Прыжок: взлёт → верх (сгруппировался) → падение. Удар в прыжке — пока заглушкой (нет кадров).
+			if anims.has("jump") and f.move < 0:
+				var n: int = anims.jump.tex.size()
+				var i := 1
+				if absi(f.vy) < 500:
+					i = 2
+				elif f.vy < 0:
+					i = 3
+				return _pick(anims.jump, mini(i, n - 1))
+		Fighter.State.LAND:
+			if anims.has("jump"):
+				return _pick(anims.jump, anims.jump.tex.size() - 1)
 		Fighter.State.BACKDASH:
 			if anims.has("backdash"):
 				var n: int = anims.backdash.tex.size()

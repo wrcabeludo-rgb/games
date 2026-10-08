@@ -70,7 +70,7 @@ Sprite sheet for a 2D fighting game: 3 animation frames of the SAME character in
 | ilya/idle, ilya/st_lp | ✅ в игре (3.2). Кадры привязаны к задней ступне: на джебе Илья делает выпад вперёд |
 | ilya/walk_f, ilya/walk_b, ilya/run, ilya/backdash | ✅ в игре (3.3). Шаг назад — второй лист ходьбы в обратном порядке |
 | ilya/idle (6 кадров, спокойнее) | ⏳ ждём — промпт ниже |
-| ilya/crouch, jump, block, block_low | ⏳ ждём |
+| ilya/crouch, jump, block, block_low | ✅ в игре (3.3). Масштаб листов выровнен вручную по размеру шлема и сапог (sheets.json) |
 
 Заметки: спрайт Ильи шире «тела» для столкновений и бьёт дальше хитбокса — хитбоксы и ширину
 подгоним под спрайты в 3.4, когда будут все удары. F7 в игре — переключить спрайты/заглушки.
