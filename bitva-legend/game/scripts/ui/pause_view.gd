@@ -289,6 +289,8 @@ func _draw_moves() -> void:
 			_text(Vector2(x, yy), "%s: %s" % [Loc.t(st.name), ", ".join(keys)], 16, COLOR_TEXT, 0)
 			yy += 24.0
 		yy += 8.0
+		if not SPECIALS.has(id):
+			_text(Vector2(x, yy + 10), "Спецприёмы — скоро", 16, COLOR_DIM, 0)
 		for row in SPECIALS.get(id, []):
 			_text(Vector2(x, yy), row[0], 16, COLOR_GOLD, 0)
 			_text(Vector2(x, yy + 20), row[1], 15, COLOR_TEXT, 0)

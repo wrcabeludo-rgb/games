@@ -11,7 +11,7 @@ signal voice(name: String)        # фраза диктора
 enum Screen { TITLE, SELECT, VERSUS }
 
 ## Сетка выбора 4×2: пустая строка — закрытое место (боец ещё не готов).
-const ROSTER := ["ilya", "dracula", "", "", "", "", "", ""]
+const ROSTER := ["ilya", "dracula", "hercules", "koschei", "", "", "", ""]
 const COLS := 4
 const CELL := Vector2(104, 104)
 const CELL_GAP := 12.0
@@ -319,6 +319,9 @@ func _draw_preview(p: int) -> void:
 		a = _sprites.anim(id, "idle")  # портрета ещё нет — стойка покрупнее
 		k = 0.62
 		at = feet
+	if a.is_empty():
+		_draw_silhouette(id, waist, 1.0)
+		return
 	# Портреты нарисованы с поворотом вправо; второй игрок — зеркально: герои смотрят друг на друга.
 	if a.is_empty():
 		return
@@ -350,6 +353,8 @@ func _draw_versus() -> void:
 			draw_set_transform(Vector2(x + slide, size.y), 0, Vector2(k * (1.0 if p == 0 else -1.0), k))
 			FighterSprites.draw_breathing(self, tex, a.pivot[0], Color.WHITE, tex.get_height() * 0.9, phase, 8.0)
 			draw_set_transform(Vector2.ZERO)
+		else:
+			_draw_silhouette(id, Vector2(x, size.y), 1.2)
 		_text_c(Vector2(x, 84), FighterData.get_data(id).name, 36, COLOR_P[p].lightened(0.2), _title_font, 3)
 	var pop := 1.0 + 0.6 * (1.0 - smoothstep(10.0, 26.0, float(tick)))
 	_text_c(Vector2(cx, 300), "ПРОТИВ", int(64 * pop), COLOR_GOLD, _title_font, 4)
@@ -371,6 +376,16 @@ func _draw_versus() -> void:
 		draw_multiline_string(_font, box.position + Vector2(16, 52), shown, HORIZONTAL_ALIGNMENT_LEFT, box.size.x - 32, 19, 3, COLOR_TEXT)
 	if tick > VS_SKIP_AFTER:
 		_text_c(Vector2(cx, size.y - 20), "Enter / крест — пропустить", 15, COLOR_DIM)
+
+
+## Силуэт бойца, пока нет портрета: тело по пояс в цвете бойца и «?».
+func _draw_silhouette(id: String, waist: Vector2, k: float) -> void:
+	var col: Color = FighterData.get_data(id).color.darkened(0.55)
+	var body := PackedVector2Array([waist + Vector2(-130, 0) * k, waist + Vector2(-110, -230) * k,
+		waist + Vector2(-60, -280) * k, waist + Vector2(60, -280) * k, waist + Vector2(110, -230) * k, waist + Vector2(130, 0) * k])
+	draw_colored_polygon(body, col)
+	draw_circle(waist + Vector2(0, -345) * k, 62 * k, col)
+	_text_c(waist + Vector2(0, -150) * k, "?", int(90 * k), FighterData.get_data(id).color.lightened(0.2), _title_font, 3)
 
 
 func _text_c(pos: Vector2, s: String, font_size: int, color: Color, font: Font = null, outline := 1) -> void:

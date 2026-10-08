@@ -31,6 +31,24 @@ const INTRO := {
 	],
 }
 
+## Если для пары нет своего диалога — каждый говорит свою общую фразу: id → [ru, en].
+const GENERIC_INTRO := {
+	"ilya": ["Ну, выходи, кто бы ты ни был. На Руси гостей встречают — палицей.",
+		"Step forward, whoever you are. In Rus we greet guests — with a mace."],
+	"dracula": ["Добрый вечер. Позвольте пригласить вас на ужин… в качестве ужина.",
+		"Good evening. Allow me to invite you to dinner… as the dinner."],
+	"koschei": ["Меня убить нельзя — смерть моя на конце иглы. А игла далеко. А ты — близко.",
+		"I cannot be killed — my death lies at a needle's tip. The needle is far away. You are close."],
+	"hercules": ["Двенадцать подвигов совершил. Ты будешь тринадцатым — коротким.",
+		"Twelve labours I have done. You'll be the thirteenth — a short one."],
+}
+const GENERIC_WIN := {
+	"ilya": ["Отдохни, полежи. А я пойду — ещё не всех чудищ перебил.", "Lie down, rest. I'm off — plenty of monsters left."],
+	"dracula": ["Восхитительно. Повторим в полнолуние?", "Delightful. Shall we repeat it at the full moon?"],
+	"koschei": ["Над златом чахну, над тобой — смеюсь.", "I waste away over my gold — and laugh over you."],
+	"hercules": ["Тринадцатый подвиг. Самый лёгкий.", "The thirteenth labour. The easiest one."],
+}
+
 ## Победа: победитель → проигравший → варианты [ru, en].
 const WIN := {
 	"ilya": {
@@ -66,7 +84,11 @@ static func intro(a: String, b: String, seed_value: int) -> Array:
 	ids.sort()
 	var variants: Array = INTRO.get("%s|%s" % ids, [])
 	if variants.is_empty():
-		return []
+		var out_g := []
+		for id in [a, b]:
+			if GENERIC_INTRO.has(id):
+				out_g.append([id, GENERIC_INTRO[id][0] if Loc.lang == "ru" else GENERIC_INTRO[id][1]])
+		return out_g
 	var out := []
 	for line in _pick(variants, seed_value):
 		out.append([line[0], line[1] if Loc.lang == "ru" else line[2]])
@@ -77,6 +99,8 @@ static func intro(a: String, b: String, seed_value: int) -> Array:
 static func win(winner: String, loser: String, seed_value: int) -> String:
 	var lines: Array = WIN.get(winner, {}).get(loser, [])
 	if lines.is_empty():
-		return ""
+		if not GENERIC_WIN.has(winner):
+			return ""
+		lines = [GENERIC_WIN[winner]]
 	var q: Array = _pick(lines, seed_value)
 	return q[0] if Loc.lang == "ru" else q[1]
