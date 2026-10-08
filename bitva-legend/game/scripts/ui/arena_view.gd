@@ -17,6 +17,9 @@ var use_sprites := true
 
 
 func _ready() -> void:
+	# Спрайты нарисованы для 1440p и на экране уменьшены: без mip-карт тонкие линии
+	# (когти, кружево, края плаща) рвутся лесенкой и мерцают.
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	_font.font_names = PackedStringArray(["Segoe UI", "Arial", "DejaVu Sans", "Noto Sans"])
 
 
