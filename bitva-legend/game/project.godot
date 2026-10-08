@@ -29,3 +29,10 @@ common/max_physics_steps_per_frame=4
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 environment/defaults/default_clear_color=Color(0.07, 0.07, 0.1, 1)
+
+[importer_defaults]
+
+texture={
+"compress/lossy_quality": 0.9,
+"compress/mode": 1
+}
