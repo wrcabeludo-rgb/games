@@ -1,0 +1,92 @@
+{
+ "frames": [
+  {
+   "file": "select_win_1.png",
+   "pivot": [
+    424,
+    899
+   ],
+   "size": [
+    849,
+    900
+   ]
+  },
+  {
+   "file": "select_win_2.png",
+   "pivot": [
+    388,
+    1073
+   ],
+   "size": [
+    777,
+    1074
+   ]
+  },
+  {
+   "file": "select_win_3.png",
+   "pivot": [
+    394,
+    1174
+   ],
+   "size": [
+    790,
+    1175
+   ]
+  },
+  {
+   "file": "select_win_4.png",
+   "pivot": [
+    392,
+    1165
+   ],
+   "size": [
+    784,
+    1166
+   ]
+  },
+  {
+   "file": "select_win_5.png",
+   "pivot": [
+    378,
+    899
+   ],
+   "size": [
+    757,
+    900
+   ]
+  },
+  {
+   "file": "select_win_6.png",
+   "pivot": [
+    404,
+    896
+   ],
+   "size": [
+    810,
+    897
+   ]
+  },
+  {
+   "file": "select_win_7.png",
+   "pivot": [
+    392,
+    1048
+   ],
+   "size": [
+    784,
+    1049
+   ]
+  },
+  {
+   "file": "select_win_8.png",
+   "pivot": [
+    394,
+    1105
+   ],
+   "size": [
+    789,
+    1106
+   ]
+  }
+ ]
+}

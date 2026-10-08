@@ -13,12 +13,12 @@ enum Screen { TITLE, SELECT }
 ## Сетка выбора 4×2: пустая строка — закрытое место (боец ещё не готов).
 const ROSTER := ["ilya", "dracula", "", "", "", "", "", ""]
 const COLS := 4
-const CELL := Vector2(118, 118)
+const CELL := Vector2(104, 104)
 const CELL_GAP := 12.0
 const GRID_Y := 396.0
 const READY_TICKS := 100        # после выбора обоих — столько тиков радуются, потом бой
 const WIN_TICKS := 48           # анимация «радуется» проигрывается за столько тиков и замирает
-const PORTRAIT_SCALE := 0.5     # портреты нарисованы для 1440p
+const PORTRAIT_SCALE := 0.4     # портреты по пояс (кадр 900 px) — около 360 px на экране
 const COLOR_GOLD := Color(1, 0.85, 0.3)
 const COLOR_TEXT := Color(0.95, 0.95, 0.97)
 const COLOR_DIM := Color(0.7, 0.72, 0.8)
@@ -181,6 +181,7 @@ func _draw_select() -> void:
 	for p in 2:
 		_draw_preview(p)
 	_draw_grid()
+	draw_rect(Rect2(0, size.y - 64, size.x, 64), Color(0, 0, 0, 0.6))
 	var hint := "←→↑↓ — выбор   ·   Enter / крест — подтвердить   ·   K / круг — назад"
 	_text_c(Vector2(cx, size.y - 22), hint, 16, COLOR_DIM)
 	_text_c(Vector2(cx, size.y - 46), ai_label, 16, COLOR_DIM)
@@ -236,7 +237,7 @@ func _draw_face(id: String, r: Rect2) -> void:
 
 func _draw_preview(p: int) -> void:
 	var id: String = ROSTER[cursor[p]] if ROSTER[cursor[p]] != "" else ""
-	var x := size.x * (0.17 if p == 0 else 0.83)
+	var x := size.x * (0.16 if p == 0 else 0.84)
 	var feet := Vector2(x, size.y - 70)
 	var name: String = FighterData.get_data(id).name if id != "" else "???"
 	_text_c(Vector2(x + 2, 122), name, 34, Color(0, 0, 0, 0.7))
@@ -246,7 +247,7 @@ func _draw_preview(p: int) -> void:
 	if id == "":
 		return
 	var face := 1.0 if p == 0 else -1.0
-	var waist := Vector2(x, size.y)       # портрет по пояс — низ кадра у нижнего края экрана
+	var waist := Vector2(x, size.y - 64)       # портрет по пояс — низ кадра у нижнего края экрана
 	var since := tick - picked_at[p]
 	var win := _sprites.anim(id, "select_win")
 	if picked[p] and not win.is_empty():

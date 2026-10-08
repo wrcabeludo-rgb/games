@@ -5,7 +5,7 @@
   <анимация>_<N>.png — кадры без фона, все в одном масштабе;
   <анимация>.json    — опорные точки кадров (ступни на земле) для игры.
 
-Запуск: python3 tools/process_fighter_art.py <боец>        (ilya, dracula)
+Запуск: python3 tools/process_fighter_art.py <боец> [листы…]   (ilya, dracula; без списка — все листы)
 
 Лист — кадры одной анимации в ряд (слева направо) на пурпурном фоне. Имя файла = имя анимации
 (idle.png, st_lp.png …). Необязательный art_src/fighters/<боец>/sheets.json уточняет обработку:
@@ -166,7 +166,7 @@ def _fit_scale(fit, frames, who) -> float:
 
 
 def main() -> int:
-    if len(sys.argv) != 2 or sys.argv[1] not in HEIGHT:
+    if len(sys.argv) < 2 or sys.argv[1] not in HEIGHT:
         print(__doc__)
         return 1
     who = sys.argv[1]
@@ -182,7 +182,9 @@ def main() -> int:
     for f in files:
         m = re.match(r"^(.*)_p(\d+)$", f.stem)
         parts.setdefault(m.group(1) if m else f.stem, []).append((int(m.group(2)) if m else 0, f))
-    sheets = [Path(name) for name in parts]
+    # Можно обработать только часть листов: process_fighter_art.py ilya select select_win
+    only = set(sys.argv[2:])
+    sheets = [Path(name) for name in parts if not only or name in only or name == "idle"]
     # Сначала стойка (по ней — центр бойца), потом листы с собственным масштабом, потом наследующие.
     sheets.sort(key=lambda p: (p.stem != "idle", str(cfg.get(p.stem, {}).get("fit", "stand")).startswith("inherit")))
     ref = None  # по первому кадру стойки: от задней ступни и от центра масс до центра бойца на земле
