@@ -53,7 +53,7 @@ func _init() -> void:
 		var c := _load("cloud_%d" % i)
 		if c != null:
 			_clouds.append(c)
-	for i in range(1, 9):
+	for i in range(1, 17):
 		var r := _load("raven_%d" % i)
 		if r != null:
 			_raven_frames.append(r)
@@ -250,7 +250,7 @@ func _draw_ravens(c: CanvasItem) -> void:
 		var pos := Vector2(layer_x(k) + lx, y)
 		var scale := 0.7 + 0.12 * (i % 3)
 		if not _raven_frames.is_empty():
-			var tex := _raven_frames[int(t * 10.0 + i * 2) % _raven_frames.size()]
+			var tex := _raven_frames[int(t * 1.6 * _raven_frames.size() + i * 2) % _raven_frames.size()]  # взмах ≈ 0,6 с при любом числе кадров
 			var sz := Vector2(tex.get_width(), tex.get_height()) * 0.24 * scale
 			# Кадры нарисованы летящими вправо; летящих влево отражаем.
 			c.draw_texture_rect(tex, Rect2(pos - Vector2(sz.x * dir, sz.y) / 2.0, Vector2(sz.x * dir, sz.y)), false)
