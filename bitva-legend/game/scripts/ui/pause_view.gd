@@ -15,7 +15,7 @@ enum Page { MAIN, SETTINGS, MOVES }
 
 const MAIN_ITEMS := ["Продолжить", "Заново", "Приёмы", "Настройки", "Выбор бойца", "Главное меню"]
 const SETTING_ITEMS := ["Музыка", "Звуки", "Диктор", "Вибрация", "Соперник", "Полный экран",
-	"Подсказки на экране", "Назад"]
+	"Подсказки на экране", "Язык", "Назад"]
 const CONFIRM := InputBits.LP | InputBits.LK | InputBits.START
 const BACK := InputBits.HK
 const COLOR_GOLD := Color(1, 0.85, 0.3)
@@ -198,6 +198,9 @@ func _change(i: int, d: int) -> void:
 			Settings.fullscreen = not Settings.fullscreen
 		6:
 			Settings.hints = not Settings.hints
+		7:
+			var i_lang := wrapi(Loc.LANGS.find(Settings.lang) + d, 0, Loc.LANGS.size())
+			Settings.lang = Loc.LANGS[i_lang]
 		_:
 			return
 	Settings.apply()
@@ -215,11 +218,13 @@ func _value(i: int) -> String:
 		3:
 			return Settings.RUMBLE_NAMES[Settings.rumble]
 		4:
-			return "второй игрок" if ai_level == 0 else "ИИ, " + AiController.LEVEL_NAMES[ai_level]
+			return Loc.t("второй игрок") if ai_level == 0 else Loc.t("ИИ, ") + Loc.t(AiController.LEVEL_NAMES[ai_level])
 		5:
 			return "да" if Settings.fullscreen else "нет"
 		6:
 			return "показывать" if Settings.hints else "скрыть"
+		7:
+			return Loc.LANG_NAMES[Loc.LANGS.find(Settings.lang)]
 	return ""
 
 
@@ -239,7 +244,7 @@ func _draw() -> void:
 			_list(MAIN_ITEMS, cx, 240, false)
 		Page.SETTINGS:
 			_title(cx, "НАСТРОЙКИ")
-			_list(SETTING_ITEMS, cx, 200, true)
+			_list(SETTING_ITEMS, cx, 196, true)
 		Page.MOVES:
 			_draw_moves()
 	var hint := "↑↓ — пункт   ·   ←→ — изменить   ·   Enter / крест — выбрать   ·   Esc / круг — назад"
@@ -252,7 +257,7 @@ func _title(cx: float, s: String) -> void:
 
 func _list(items: Array, cx: float, y0: float, values: bool) -> void:
 	for i in items.size():
-		var y := y0 + i * 52.0
+		var y := y0 + i * 48.0
 		var sel := i == cursor
 		if sel:
 			draw_rect(Rect2(cx - 330, y - 34, 660, 46), Color(1, 0.85, 0.3, 0.18))
@@ -278,9 +283,9 @@ func _draw_moves() -> void:
 		for st in FighterData.get_data(id).get("strings", []):
 			var keys: Array[String] = []
 			for key in st.moves:
-				keys.append(Fighter.MOVE_LABELS[Fighter.BUTTON_OF[(key as String).right(2)]] \
-					+ (" (низ)" if (key as String).begins_with("cr_") else ""))
-			_text(Vector2(x, yy), "%s: %s" % [st.name, ", ".join(keys)], 16, COLOR_TEXT, 0)
+				keys.append(Loc.t(Fighter.MOVE_LABELS[Fighter.BUTTON_OF[(key as String).right(2)]]) \
+					+ (Loc.t(" (низ)") if (key as String).begins_with("cr_") else ""))
+			_text(Vector2(x, yy), "%s: %s" % [Loc.t(st.name), ", ".join(keys)], 16, COLOR_TEXT, 0)
 			yy += 24.0
 		yy += 8.0
 		for row in SPECIALS.get(id, []):
@@ -293,13 +298,14 @@ func _draw_moves() -> void:
 		var col := i % 2
 		var row := i / 2
 		var x := size.x * (0.27 if col == 0 else 0.73)
-		_text(Vector2(x, y2 + 30 + row * 24), "%s — %s" % COMMON[i], 15, COLOR_TEXT, 0)
+		_text(Vector2(x, y2 + 30 + row * 24), "%s — %s" % [Loc.t(COMMON[i][0]), Loc.t(COMMON[i][1])], 15, COLOR_TEXT, 0)
 	_text(Vector2(cx, size.y - 54), "ЛР, ЛН, СР, СН — лёгкий и сильный удар рукой и ногой · попавшая строка (и в блок) отменяется в спецприём", 15, COLOR_DIM, 0)
 
 
 ## align: -1 — по левому краю, 0 — по центру, 1 — по правому.
 func _text(pos: Vector2, s: String, font_size: int, color: Color, align: int, font: Font = null) -> void:
 	var fnt: Font = font if font != null else _font
+	s = Loc.t(s)
 	var w := fnt.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
 	var x := pos.x - (w / 2.0 if align == 0 else (w if align == 1 else 0.0))
 	draw_string_outline(fnt, Vector2(x, pos.y), s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, 4, Color(0.06, 0.02, 0.05, 0.9))

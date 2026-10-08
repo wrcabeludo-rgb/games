@@ -78,13 +78,17 @@ func _ready() -> void:
 		elif arg.begins_with("--demo-meter="):
 			for f in sim.fighters:
 				f.meter = int(arg.trim_prefix("--demo-meter="))
+		elif arg.begins_with("--lang="):
+			Settings.lang = arg.trim_prefix("--lang=")
+			Settings.apply()
 		elif arg.begins_with("--demo-ai="):
 			ai.level = int(arg.trim_prefix("--demo-ai=")) as AiController.Level
 	# «--screen=title|select [--picked]» — снимок меню (вместе с --screenshot).
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--screen="):
 			in_menu = true
-			start_screen = MenuView.Screen.SELECT if arg.ends_with("select") else MenuView.Screen.TITLE
+			start_screen = MenuView.Screen.SELECT if arg.ends_with("select") or arg.ends_with("versus") \
+				else MenuView.Screen.TITLE
 	# «--pause=main|settings|moves» — снимок паузы поверх боя (вместе с --screenshot).
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--pause="):
@@ -99,6 +103,8 @@ func _ready() -> void:
 		_open_menu(start_screen)
 		if "--picked" in OS.get_cmdline_user_args():
 			menu.picked = [true, true]
+		if "--screen=versus" in OS.get_cmdline_user_args():
+			menu.start_versus()
 	else:
 		menu.visible = false
 
@@ -116,8 +122,8 @@ func _physics_process(_delta: float) -> void:
 	raw[1] &= ~_mask
 	if in_menu:
 		menu.vs_ai = reader.single_player
-		menu.ai_label = "Соперник: %s   ·   F3 — сменить   ·   Options / F10 — настройки" % \
-			("второй игрок" if ai.level == AiController.Level.OFF else "ИИ, " + ai.level_name())
+		menu.ai_label = Loc.t("Соперник: %s   ·   F3 — сменить   ·   Options / F10 — настройки") % \
+			(Loc.t("второй игрок") if ai.level == AiController.Level.OFF else Loc.t("ИИ, ") + Loc.t(ai.level_name()))
 		menu.step(raw)
 		if _screenshot_path != "" and menu.tick == _shot_at:
 			_save_screenshot.call_deferred()
@@ -206,7 +212,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			_cycle_ai()
 		KEY_F7:
 			arena.use_sprites = not arena.use_sprites
-			reader.notify("Спрайты бойцов: " + ("включены" if arena.use_sprites else "выключены (заглушки)"))
+			reader.notify(Loc.t("Спрайты бойцов: ") + Loc.t("включены" if arena.use_sprites else "выключены (заглушки)"))
 		KEY_F6:
 			_toggle_training()
 		KEY_F4:
@@ -265,14 +271,15 @@ func _toggle_training() -> void:
 	if training and ai.level == AiController.Level.OFF:
 		ai.level = AiController.Level.MEDIUM
 	_reset()
-	reader.notify("ТРЕНИРОВКА · соперник — ИИ (%s), F3 или Options — сменить" % ai.level_name() if training else "Тренировка выключена — обычный бой")
+	reader.notify(Loc.t("ТРЕНИРОВКА · соперник — ИИ (%s), F3 или Options — сменить") % Loc.t(ai.level_name()) \
+		if training else Loc.t("Тренировка выключена — обычный бой"))
 
 
 func _cycle_ai() -> void:
 	ai.next_level()
 	Settings.ai_level = ai.level
 	Settings.save_file()
-	reader.notify("ИИ соперника: %s" % ai.level_name())
+	reader.notify(Loc.t("ИИ соперника: %s") % Loc.t(ai.level_name()))
 
 
 func _cycle_char(p: int) -> void:

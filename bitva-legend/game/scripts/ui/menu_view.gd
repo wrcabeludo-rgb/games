@@ -8,7 +8,7 @@ signal fight_requested(chars: PackedStringArray)
 signal sound(name: String)        # звук интерфейса: ui_move, ui_confirm, ui_back
 signal voice(name: String)        # фраза диктора
 
-enum Screen { TITLE, SELECT }
+enum Screen { TITLE, SELECT, VERSUS }
 
 ## Сетка выбора 4×2: пустая строка — закрытое место (боец ещё не готов).
 const ROSTER := ["ilya", "dracula", "", "", "", "", "", ""]
@@ -16,7 +16,12 @@ const COLS := 4
 const CELL := Vector2(104, 104)
 const CELL_GAP := 12.0
 const GRID_Y := 396.0
-const READY_TICKS := 100        # после выбора обоих — столько тиков радуются, потом бой
+const READY_TICKS := 100        # после выбора обоих — столько тиков радуются, потом экран «ПРОТИВ»
+const VS_LINE_START := 30       # экран «ПРОТИВ»: первая реплика — с этого тика
+const VS_LINE_TICKS := 170      # на каждую реплику
+const VS_TAIL := 40             # после последней реплики — до боя
+const VS_SKIP_AFTER := 15       # пропустить кнопкой можно не сразу (кнопка выбора ещё зажата)
+const TYPE_SPEED := 1.6         # букв за тик
 const WIN_TICKS := 48           # анимация «радуется» проигрывается за столько тиков и замирает
 const PORTRAIT_SCALE := 0.38    # портреты по пояс (кадр 900 px) — около 360 px на экране
 const COLOR_GOLD := Color(1, 0.85, 0.3)
@@ -44,6 +49,8 @@ var _sky: Texture2D
 var _moon: Texture2D
 var _prev := PackedInt32Array([0, 0])
 var _ready_tick := -1
+## Диалог экрана «ПРОТИВ»: [кто, текст].
+var _dialog: Array = []
 
 
 func _ready() -> void:
@@ -80,15 +87,29 @@ func step(bits: PackedInt32Array) -> void:
 				sound.emit("ui_confirm")
 				open(Screen.SELECT)
 				voice.emit("choose_your_character")
+		elif screen == Screen.VERSUS:
+			var total := VS_LINE_START + _dialog.size() * VS_LINE_TICKS + VS_TAIL
+			if tick >= total or (tick > VS_SKIP_AFTER and (press[0] | press[1]) & CONFIRM):
+				fight_requested.emit(PackedStringArray([ROSTER[cursor[0]], ROSTER[cursor[1]]]))
 		else:
 			_step_select(press)
+	queue_redraw()
+
+
+## Экран «ПРОТИВ» с репликами бойцов перед боем.
+func start_versus() -> void:
+	picked = [true, true]
+	_dialog = Quotes.intro(ROSTER[cursor[0]], ROSTER[cursor[1]], Time.get_ticks_msec() / 7)
+	screen = Screen.VERSUS
+	tick = 0
+	visible = true
 	queue_redraw()
 
 
 func _step_select(press: PackedInt32Array) -> void:
 	if _ready_tick >= 0:
 		if tick - _ready_tick >= READY_TICKS:
-			fight_requested.emit(PackedStringArray([ROSTER[cursor[0]], ROSTER[cursor[1]]]))
+			start_versus()
 		return
 	for p in 2:
 		var who := _chooser(p)
@@ -142,6 +163,8 @@ func _draw() -> void:
 	_draw_background()
 	if screen == Screen.TITLE:
 		_draw_title()
+	elif screen == Screen.VERSUS:
+		_draw_versus()
 	else:
 		_draw_select()
 
@@ -159,7 +182,7 @@ func _draw_background() -> void:
 		draw_polygon(PackedVector2Array([Vector2(0, y0), Vector2(size.x, y0), size, Vector2(0, size.y)]),
 			PackedColorArray([clear, clear, dark, dark]))
 		return
-	if screen == Screen.SELECT and _sky != null:
+	if screen != Screen.TITLE and _sky != null:
 		draw_texture_rect(_sky, _cover(_sky.get_size()), false, Color(0.55, 0.55, 0.65))
 		if _moon != null:
 			var ms := _moon.get_size() * (220.0 / _moon.get_height())
@@ -195,7 +218,8 @@ func _draw_title() -> void:
 	# Название — внизу, на затемнении: вверху заставки лица героев и луна.
 	var y := size.y - 150 if _title != null else 190.0
 	_text_c(Vector2(cx, y), "БИТВА ЛЕГЕНД", 84, COLOR_GOLD, _title_font, 4)
-	_text_c(Vector2(cx, y + 38), "CLASH OF LEGENDS", 22, COLOR_TEXT)
+	if Loc.lang == "ru":
+		_text_c(Vector2(cx, y + 38), "CLASH OF LEGENDS", 22, COLOR_TEXT)
 	if (tick / 30) % 2 == 0:
 		_text_c(Vector2(cx, size.y - 62), "Нажмите Enter или крест", 26, COLOR_TEXT)
 	_text_c(Vector2(cx, size.y - 30), "Options / F10 — настройки   ·   Esc — выход   ·   F11 — полный экран", 16, COLOR_DIM)
@@ -310,8 +334,48 @@ func _draw_preview(p: int) -> void:
 
 
 ## Текст по центру с тёмной обводкой; font — по умолчанию Russo One.
+func _draw_versus() -> void:
+	var cx := size.x / 2.0
+	draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, 0.35))
+	for p in 2:
+		var id: String = ROSTER[cursor[p]]
+		var x := size.x * (0.22 if p == 0 else 0.78)
+		var a := _sprites.anim(id, "select")
+		if not a.is_empty():
+			var tex: Texture2D = a.tex[0]
+			var phase := 0.5 - 0.5 * cos(TAU * float(tick + p * 40) / FighterSprites.BREATH_TICKS)
+			var k := 0.5
+			# Выезжают с краёв экрана.
+			var slide := (1.0 - smoothstep(0.0, 18.0, float(tick))) * 500.0 * (-1.0 if p == 0 else 1.0)
+			draw_set_transform(Vector2(x + slide, size.y), 0, Vector2(k * (1.0 if p == 0 else -1.0), k))
+			FighterSprites.draw_breathing(self, tex, a.pivot[0], Color.WHITE, tex.get_height() * 0.9, phase, 8.0)
+			draw_set_transform(Vector2.ZERO)
+		_text_c(Vector2(x, 84), FighterData.get_data(id).name, 36, COLOR_P[p].lightened(0.2), _title_font, 3)
+	var pop := 1.0 + 0.6 * (1.0 - smoothstep(10.0, 26.0, float(tick)))
+	_text_c(Vector2(cx, 300), "ПРОТИВ", int(64 * pop), COLOR_GOLD, _title_font, 4)
+	# Реплики: печатаются по очереди, у края говорящего.
+	for i in _dialog.size():
+		var t0 := VS_LINE_START + i * VS_LINE_TICKS
+		if tick < t0:
+			break
+		var who: String = _dialog[i][0]
+		var p := i % 2
+		if ROSTER[cursor[0]] != ROSTER[cursor[1]]:
+			p = 0 if ROSTER[cursor[0]] == who else 1
+		var text: String = _dialog[i][1]
+		var shown := text.left(mini(text.length(), int((tick - t0) * TYPE_SPEED)))
+		var box := Rect2(Vector2(40 if p == 0 else size.x - 40 - 560, 400 + i * 120), Vector2(560, 104))
+		draw_rect(box, Color(0.04, 0.02, 0.05, 0.85))
+		draw_rect(box, COLOR_P[p].lightened(0.1), false, 2.0)
+		draw_string(_font, box.position + Vector2(16, 26), Loc.t(FighterData.get_data(who).name), HORIZONTAL_ALIGNMENT_LEFT, -1, 16, COLOR_P[p].lightened(0.3))
+		draw_multiline_string(_font, box.position + Vector2(16, 52), shown, HORIZONTAL_ALIGNMENT_LEFT, box.size.x - 32, 19, 3, COLOR_TEXT)
+	if tick > VS_SKIP_AFTER:
+		_text_c(Vector2(cx, size.y - 20), "Enter / крест — пропустить", 15, COLOR_DIM)
+
+
 func _text_c(pos: Vector2, s: String, font_size: int, color: Color, font: Font = null, outline := 1) -> void:
 	var fnt: Font = font if font != null else _font
+	s = Loc.t(s)
 	var w := fnt.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
 	var at := pos - Vector2(w / 2.0, 0)
 	if color.a > 0.95:

@@ -79,6 +79,7 @@ func _draw() -> void:
 	_draw_timer()
 	_draw_super_name()
 	_draw_announcement()
+	_draw_win_quote()
 	_draw_footer()
 	_draw_pad_notice()
 
@@ -148,12 +149,13 @@ func _draw_bar(p: int) -> void:
 	var name_x := r.position.x + 4 if not right else r.end.x - 4
 	_text(Vector2(name_x, r.end.y + 27), f.data.name, 21, COLOR_TEXT, right, false, 2, _title_font)
 	var tag := ""
-	if p == 1 and _ai.level != AiController.Level.OFF:
-		tag = "ИИ · " + _ai.level_name()
+	var cpu := p == 1 and _ai.level != AiController.Level.OFF
+	if cpu:
+		tag = Loc.t("ИИ · ") + Loc.t(_ai.level_name())
 	elif Settings.hints:
-		tag = "Игрок %d · %s" % [p + 1, _reader.device_label(p)]
+		tag = Loc.t("Игрок %d · %s") % [p + 1, _reader.device_label(p)]
 	if tag != "":
-		_text(Vector2(name_x, r.end.y + 46), tag, 13, COLOR_GOLD if tag.begins_with("ИИ") else COLOR_DIM, right)
+		_text(Vector2(name_x, r.end.y + 46), tag, 13, COLOR_GOLD if cpu else COLOR_DIM, right)
 	for i in Sim.WINS_NEEDED:
 		var cx := r.end.x - 22 - i * 26 if not right else r.position.x + 22 + i * 26
 		_draw_gem(Vector2(cx, r.end.y + 17), i < _sim.wins[p])
@@ -259,7 +261,7 @@ func _draw_super_name() -> void:
 		if f.is_super() and (flash or f.state == Fighter.State.THROWING):
 			var y := size.y * 0.38
 			_banner(y, 70)
-			_text(Vector2(size.x / 2.0, y), f.move_data().name + "!", 54, f.color().lightened(0.4), false, true, 3, _title_font)
+			_text(Vector2(size.x / 2.0, y), Loc.t(f.move_data().name) + "!", 54, f.color().lightened(0.4), false, true, 3, _title_font)
 
 
 ## Таймер — восьмиугольник с двойным золотым кантом.
@@ -310,7 +312,7 @@ func _draw_announcement() -> void:
 	var color := COLOR_GOLD
 	match _sim.phase:
 		Sim.Phase.INTRO:
-			big = "ФИНАЛЬНЫЙ РАУНД" if _sim.wins[0] == 1 and _sim.wins[1] == 1 else "РАУНД %d" % _sim.round_num
+			big = "ФИНАЛЬНЫЙ РАУНД" if _sim.wins[0] == 1 and _sim.wins[1] == 1 else Loc.t("РАУНД %d") % _sim.round_num
 		Sim.Phase.FIGHT:
 			if _sim.phase_frame < 45:
 				big = "БОЙ!"
@@ -327,10 +329,10 @@ func _draw_announcement() -> void:
 					big = "ВРЕМЯ!"
 			if _sim.phase_frame > 60:
 				small = "НИЧЬЯ" if _sim.round_winner == 2 \
-					else "Раунд за: %s" % _sim.fighters[_sim.round_winner].data.name
+					else Loc.t("Раунд за: %s") % Loc.t(_sim.fighters[_sim.round_winner].data.name)
 		Sim.Phase.MATCH_END:
 			var w := _sim.match_winner()
-			big = "НИЧЬЯ" if w == 2 else "%s ПОБЕЖДАЕТ!" % _sim.fighters[w].data.name
+			big = "НИЧЬЯ" if w == 2 else Loc.t("%s ПОБЕЖДАЕТ!") % Loc.t(_sim.fighters[w].data.name)
 			if w != 2:
 				color = _sim.fighters[w].color().lightened(0.35)
 			if _sim.phase_frame >= Sim.REMATCH_DELAY:
@@ -344,6 +346,26 @@ func _draw_announcement() -> void:
 		_text(Vector2(size.x / 2.0, y + 46), small, 22, COLOR_TEXT, false, true, 2)
 
 
+## Победная реплика под объявлением о победе в матче.
+func _draw_win_quote() -> void:
+	if paused or _sim.phase != Sim.Phase.MATCH_END or _sim.phase_frame < 30:
+		return
+	var w := _sim.match_winner()
+	if w < 0 or w > 1:
+		return
+	var winner := _sim.fighters[w]
+	var q := Quotes.win(winner.id, _sim.fighters[1 - w].id, _sim.tick - _sim.phase_frame)
+	if q == "":
+		return
+	var lines := 1 if _font.get_string_size(q, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x < 700 else 2
+	var box := Rect2(size.x / 2.0 - 380, size.y * 0.3 + 92, 760, 26 + lines * 26)
+	draw_rect(box, Color(0.04, 0.02, 0.05, 0.82))
+	draw_rect(box, winner.color().lightened(0.3), false, 2.0)
+	var shown := q.left(mini(q.length(), int((_sim.phase_frame - 30) * 1.6)))
+	draw_multiline_string(_font, box.position + Vector2(20, 36), "«%s»" % shown if Loc.lang == "ru" else "“%s”" % shown,
+		HORIZONTAL_ALIGNMENT_CENTER, box.size.x - 40, 20, 3, COLOR_TEXT)
+
+
 ## Счётчик комбо — на стороне атакующего, пока соперник оглушён.
 func _draw_combo(p: int, right: bool) -> void:
 	var d := _sim.fighters[1 - p]
@@ -351,8 +373,8 @@ func _draw_combo(p: int, right: bool) -> void:
 		return
 	var x := size.x * (0.75 if right else 0.25)
 	_text(Vector2(x, 210), str(d.combo), 64, COLOR_GOLD, false, true, 3)
-	_text(Vector2(x, 240), "%s!" % _plural_hits(d.combo), 26, COLOR_GOLD.lightened(0.3), false, true, 2, _title_font)
-	_text(Vector2(x, 266), "урон %d" % d.combo_damage, 18, COLOR_TEXT, false, true, 2)
+	_text(Vector2(x, 240), Loc.t(_plural_hits(d.combo)) + "!", 26, COLOR_GOLD.lightened(0.3), false, true, 2, _title_font)
+	_text(Vector2(x, 266), Loc.t("урон %d") % d.combo_damage, 18, COLOR_TEXT, false, true, 2)
 
 
 ## «ПАРИРОВАНИЕ!» на стороне парировавшего.
@@ -377,7 +399,7 @@ static func _plural_hits(n: int) -> String:
 func _draw_pad_notice() -> void:
 	if Time.get_ticks_msec() - _reader.pad_notice_ms > 4000:
 		return
-	var bad := _reader.pad_notice.begins_with("ГЕЙМПАД")
+	var bad := _reader.pad_notice.begins_with("ГЕЙМПАД") or _reader.pad_notice.begins_with("GAMEPAD")
 	draw_rect(Rect2(size.x / 2.0 - 380, 250, 760, 44), Color(0.5, 0.05, 0.05, 0.85) if bad else COLOR_SHADE)
 	_text(Vector2(size.x / 2.0, 280), _reader.pad_notice, 20, COLOR_TEXT, false, true)
 
@@ -394,7 +416,7 @@ func _draw_footer() -> void:
 	draw_rect(Rect2(0, size.y - 92, size.x, 62), Color(0, 0, 0, 0.35))  # подложка под подсказки
 	draw_rect(Rect2(0, size.y - 30, size.x, 30), COLOR_SHADE)
 	_text(Vector2(size.x / 2.0, size.y - 10), hint, 13, COLOR_TEXT, false, true)
-	_text(Vector2(12, size.y - 98), "сборка %s · %s · %d FPS" % [version, stage, Engine.get_frames_per_second()], 12, COLOR_DIM)
+	_text(Vector2(12, size.y - 98), Loc.t("сборка %s · %s · %d FPS") % [version, stage, Engine.get_frames_per_second()], 12, COLOR_DIM)
 	_text(Vector2(size.x - 12, size.y - 74), _strings_hint(_sim.fighters[0]), 13, COLOR_GOLD, true)
 	_text(Vector2(size.x - 12, size.y - 56), "Спецприёмы: назад, вперёд + рука · вниз, вниз + нога · вперёд, вперёд + рука · назад, назад + рука — захват", 13, COLOR_GOLD, true)
 	_text(Vector2(size.x - 12, size.y - 38), "Назад + ЛН — подсечка · назад + СН — с разворота · вниз + СР — апперкот · ЛР вплотную — бросок · тап «вперёд» в момент удара — парирование", 13, COLOR_GOLD, true)
@@ -407,9 +429,9 @@ static func _strings_hint(f: Fighter) -> String:
 		var keys: Array[String] = []
 		for key in st.moves:
 			var label: String = Fighter.MOVE_LABELS[Fighter.BUTTON_OF[(key as String).right(2)]]
-			keys.append(label + (" (низ)" if (key as String).begins_with("cr_") else ""))
+			keys.append(Loc.t(label) + (Loc.t(" (низ)") if (key as String).begins_with("cr_") else ""))
 		parts.append(", ".join(keys))
-	return "Строки: %s — попавший удар (и в блок) отменяется в спецприём" % " · ".join(parts)
+	return Loc.t("Строки: %s — попавший удар (и в блок) отменяется в спецприём") % " · ".join(parts)
 
 
 # --- История ввода (F1) --------------------------------------------------
@@ -450,6 +472,7 @@ func _draw_arrow(c: Vector2, n: int, s: float, color: Color) -> void:
 func _text(pos: Vector2, s: String, font_size: int, color: Color, align_right := false,
 		centered := false, outline := 1, font: Font = null) -> void:
 	var fnt: Font = font if font != null else _font
+	s = Loc.t(s)
 	var width := fnt.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
 	if align_right:
 		pos.x -= width

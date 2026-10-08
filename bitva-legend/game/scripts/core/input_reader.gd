@@ -60,8 +60,9 @@ func notify(text: String) -> void:
 func _on_joy_changed(device: int, connected: bool) -> void:
 	if not connected:
 		pad_drops += 1
-	var name := Input.get_joy_name(device) if connected else "геймпад %d" % device
-	pad_notice = ("Подключён: %s" % name) if connected else ("ГЕЙМПАД ОТКЛЮЧИЛСЯ (%s) · отключений: %d" % [name, pad_drops])
+	var name := Input.get_joy_name(device) if connected else Loc.t("геймпад %d") % device
+	pad_notice = (Loc.t("Подключён: %s") % name) if connected \
+		else (Loc.t("ГЕЙМПАД ОТКЛЮЧИЛСЯ (%s) · отключений: %d") % [name, pad_drops])
 	pad_notice_ms = Time.get_ticks_msec()
 
 const STICK_DEADZONE := 0.5
@@ -92,19 +93,19 @@ func read(player: int) -> int:
 
 
 func device_label(player: int) -> String:
-	var drops := " · отключений геймпада: %d" % pad_drops if pad_drops > 0 and player == 0 else ""
+	var drops := Loc.t(" · отключений геймпада: %d") % pad_drops if pad_drops > 0 and player == 0 else ""
 	return _device_label(player) + drops
 
 
 func _device_label(player: int) -> String:
-	var keys := "WASD" if player == 0 else "стрелки"
+	var keys := "WASD" if player == 0 else Loc.t("стрелки")
 	if single_player and player == 0:
 		var n := Input.get_connected_joypads().size()
-		return "любой геймпад (%d) + клавиатура (%s)" % [n, keys] if n > 0 else "клавиатура (%s)" % keys
+		return Loc.t("любой геймпад (%d) + клавиатура (%s)") % [n, keys] if n > 0 else Loc.t("клавиатура (%s)") % keys
 	var pad := pad_for(player)
 	if pad < 0:
-		return "клавиатура (%s)" % keys
-	return "%s + клавиатура (%s)" % [Input.get_joy_name(pad), keys]
+		return Loc.t("клавиатура (%s)") % keys
+	return Loc.t("%s + клавиатура (%s)") % [Input.get_joy_name(pad), keys]
 
 
 func _read_pad(pad: int) -> int:

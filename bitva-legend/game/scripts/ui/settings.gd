@@ -19,6 +19,7 @@ static var rumble := 1
 static var fullscreen := false
 static var hints := false          # подсказки по клавишам и номер сборки внизу экрана
 static var ai_level := 0           # AiController.Level
+static var lang := Loc.system_default()
 
 
 static func load_file() -> void:
@@ -32,6 +33,9 @@ static func load_file() -> void:
 	fullscreen = bool(cfg.get_value("screen", "fullscreen", fullscreen))
 	hints = bool(cfg.get_value("screen", "hints", hints))
 	ai_level = int(cfg.get_value("game", "ai_level", ai_level))
+	lang = str(cfg.get_value("game", "lang", lang))
+	if not lang in Loc.LANGS:
+		lang = "ru"
 
 
 static func save_file() -> void:
@@ -43,11 +47,13 @@ static func save_file() -> void:
 	cfg.set_value("screen", "fullscreen", fullscreen)
 	cfg.set_value("screen", "hints", hints)
 	cfg.set_value("game", "ai_level", ai_level)
+	cfg.set_value("game", "lang", lang)
 	cfg.save(PATH)
 
 
 ## Громкость шин и режим окна — по текущим значениям.
 static func apply() -> void:
+	Loc.lang = lang
 	for key in BUSES:
 		var idx := _bus(BUSES[key])
 		var level: int = {"music": music, "sfx": sfx, "voice": voice}[key]

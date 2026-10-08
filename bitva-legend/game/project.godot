@@ -5,8 +5,8 @@ config_version=5
 [application]
 
 config/name="Битва легенд"
-config/version="3.9.2"
-config/description="Откат фонов; гладкие спрайты бойцов"
+config/version="3.10"
+config/description="Реплики героев, экран «Против», английский язык"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="res://icon.svg"
