@@ -165,6 +165,32 @@ def split_objects(img: Image.Image, min_gap: int = 12, min_share: float = 0.002)
             yield trim(img.crop((left, top, right, bottom)))
 
 
+def _eye(img: Image.Image):
+    """Центр жёлтого глаза ворона (или центр картинки, если глаз не найден)."""
+    a = np.asarray(img).astype(int)
+    r, g, b, al = a[..., 0], a[..., 1], a[..., 2], a[..., 3]
+    ys, xs = np.where((r > 190) & (g > 140) & (b < 90) & (al > 200))
+    if len(xs) == 0:
+        return img.width / 2, img.height / 2
+    return float(xs.mean()), float(ys.mean())
+
+
+def align_by_eye(frames):
+    """Кадры анимации на общем холсте так, чтобы глаз был в одной точке: тело не дрожит, двигаются крылья."""
+    eyes = [_eye(f) for f in frames]
+    left = max(e[0] for e in eyes)
+    top = max(e[1] for e in eyes)
+    right = max(f.width - e[0] for f, e in zip(frames, eyes))
+    bottom = max(f.height - e[1] for f, e in zip(frames, eyes))
+    size = (round(left + right), round(top + bottom))
+    out = []
+    for f, (ex, ey) in zip(frames, eyes):
+        canvas = Image.new("RGBA", size, (0, 0, 0, 0))
+        canvas.paste(f, (round(left - ex), round(top - ey)))
+        out.append(canvas)
+    return out
+
+
 def save(img: Image.Image, name: str) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     img.save(OUT / (name + ".png"), optimize=True)
@@ -198,13 +224,8 @@ def main() -> int:
             save(cloud, f"cloud_{i}")
         done += 1
     if p := find(src, "ravens"):
-        # Кадры одной высоты, чтобы ворон не «прыгал» при взмахах.
-        frames = list(split_objects(chroma_key(Image.open(p))))
-        tallest = max(f.height for f in frames)
-        for i, f in enumerate(frames, 1):
-            canvas = Image.new("RGBA", (f.width, tallest), (0, 0, 0, 0))
-            canvas.paste(f, (0, (tallest - f.height) // 2))
-            save(resize_h(canvas, RAVEN_HEIGHT), f"raven_{i}")
+        for i, frame in enumerate(align_by_eye(list(split_objects(chroma_key(Image.open(p))))), 1):
+            save(resize_h(frame, RAVEN_HEIGHT), f"raven_{i}")
         done += 1
     print(f"Готово слоёв: {done}. Папка: {OUT}")
     return 0

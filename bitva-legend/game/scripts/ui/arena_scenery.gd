@@ -21,6 +21,10 @@ const K_FOG := 0.8
 const K_GROUND := 1.0
 const K_FRONT := 1.3
 
+const GROUND_SQUASH := 0.6  # картинку земли сжимаем по высоте
+const GROUND_RISE := 36.0   # трава на краю дороги выше линии, где стоят бойцы, px
+const FRONT_RISE := 95.0    # передний план поднимается над линией земли, px
+
 const SKY_LIGHT := Color(0.98, 0.74, 0.4)    # закат над Русью
 const SKY_DARK := Color(0.3, 0.07, 0.17)     # ночь над Карпатами
 const SKY_TOP := Color(0.08, 0.07, 0.15)
@@ -103,8 +107,9 @@ func draw_front(c: CanvasItem) -> void:
 	var w := layer_w(k)
 	if _tex.has("foreground"):
 		var tex: Texture2D = _tex.foreground
+		# Верх растений чуть выше линии земли: кончики травы перед ногами бойцов, остальное ниже.
 		var h := w * tex.get_height() / tex.get_width()
-		c.draw_texture_rect(tex, Rect2(x0, view.y - h + 10, w, h), false)
+		c.draw_texture_rect(tex, Rect2(x0, ground_y - FRONT_RISE, w, h), false, Color(0.78, 0.76, 0.8))
 		return
 	var i := 0
 	var x := 0.0
@@ -244,7 +249,7 @@ func _draw_ravens(c: CanvasItem) -> void:
 		var scale := 0.7 + 0.12 * (i % 3)
 		if not _raven_frames.is_empty():
 			var tex := _raven_frames[int(t * 10.0 + i * 2) % _raven_frames.size()]
-			var sz := Vector2(tex.get_width(), tex.get_height()) * 0.18 * scale
+			var sz := Vector2(tex.get_width(), tex.get_height()) * 0.24 * scale
 			# Кадры нарисованы летящими вправо; летящих влево отражаем.
 			c.draw_texture_rect(tex, Rect2(pos - Vector2(sz.x * dir, sz.y) / 2.0, Vector2(sz.x * dir, sz.y)), false)
 			continue
@@ -262,7 +267,7 @@ func _draw_forest(c: CanvasItem) -> void:
 	var w := layer_w(k)
 	if _tex.has("forest"):
 		# Нижняя часть леса уходит за землю; чуть приглушён, чтобы бойцы читались.
-		_draw_strip(c, _tex.forest, k, ground_y + 150, Color(0.82, 0.8, 0.88))
+		_draw_strip(c, _tex.forest, k, ground_y + 40, Color(0.82, 0.8, 0.88))
 		return
 	var i := 0
 	var x := 30.0
@@ -315,8 +320,9 @@ func _draw_ground(c: CanvasItem) -> void:
 	var x0 := layer_x(k)
 	if _tex.has("ground"):
 		var tex: Texture2D = _tex.ground
-		var h := arena_w * tex.get_height() / tex.get_width()
-		c.draw_texture_rect(tex, Rect2(x0, ground_y - 28, arena_w, h), false)
+		# Дорога сжата по высоте (вид сбоку, земля «уходит» вдаль); бойцы стоят чуть ниже травы.
+		var h := arena_w * tex.get_height() / tex.get_width() * GROUND_SQUASH
+		c.draw_texture_rect(tex, Rect2(x0, ground_y - GROUND_RISE, arena_w, h), false)
 		return
 	c.draw_rect(Rect2(0, ground_y, view.x, view.y - ground_y), Color(0.2, 0.17, 0.16))
 	c.draw_line(Vector2(0, ground_y), Vector2(view.x, ground_y), Color(0.32, 0.28, 0.26), 3)
@@ -332,7 +338,7 @@ func _draw_stone(c: CanvasItem) -> void:
 	var p := Vector2(layer_x(K_GROUND) + arena_w / 2.0, ground_y + 4)
 	if _tex.has("stone"):
 		var tex: Texture2D = _tex.stone
-		var h := 170.0
+		var h := 200.0
 		var w := h * tex.get_width() / tex.get_height()
 		c.draw_texture_rect(tex, Rect2(p.x - w / 2.0, p.y - h, w, h), false)
 		return
