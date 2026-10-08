@@ -217,6 +217,13 @@ func _draw_fighter(f: Fighter) -> void:
 		# Гипнотический взгляд — фиолетовая аура и горящие глаза.
 		draw_arc(head, head_r + 10, 0, TAU, 32, Color(0.7, 0.3, 1.0, 0.6), 4)
 		draw_circle(head + Vector2(float(f.facing) * head_r * 0.4, -head_r * 0.25), head_r * 0.22, Color(0.85, 0.4, 1.0))
+	if f.staggered:
+		# Ошеломлён парированием — звёздочки кружат над головой.
+		for i in 3:
+			var a := _sim.tick * 0.2 + TAU * i / 3.0
+			var sp := head + Vector2(cos(a) * head_r * 1.2, -head_r - 14 + sin(a) * 6)
+			draw_circle(sp, 6, Color(1, 0.9, 0.3))
+			draw_circle(sp, 3, Color(1, 1, 0.8))
 	if f.hypnotized:
 		# Загипнотизирован — спираль над головой.
 		var c := head + Vector2(0, -head_r - 26)
@@ -457,6 +464,14 @@ func _draw_spark(p: int) -> void:
 	if kind == 3:
 		# Удар в броню — оранжевое кольцо.
 		draw_arc(c, 20.0 + age * 3.0, 0, TAU, 24, Color(1, 0.6, 0.15, k), 5)
+		return
+	if kind == 5:
+		# Парирование — синяя вспышка и расходящееся кольцо.
+		draw_circle(c, 30.0 * k + 6.0, Color(0.6, 0.85, 1.0, k * 0.8))
+		draw_arc(c, 18.0 + age * 5.0, 0, TAU, 32, Color(0.4, 0.7, 1.0, k), 5)
+		for i in 8:
+			var a := TAU * i / 8.0
+			draw_line(c + Vector2.from_angle(a) * (20.0 + age * 3.0), c + Vector2.from_angle(a) * (34.0 + age * 5.0), Color(0.85, 0.95, 1.0, k), 3)
 		return
 	if kind == 4:
 		# Контратака — фиолетовая спираль.

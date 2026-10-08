@@ -56,7 +56,7 @@ A single big full moon, 2D game asset. HD hand-painted cartoon style, clean dark
 ### 3. Тучи — `clouds` (21:9, сетка 3×2)
 
 ```
-Sprite sheet of 6 separate fluffy cartoon clouds arranged in a neat 3 columns × 2 rows grid, each cloud centered in its own cell with clear empty space around it, no cloud touches another or the image edge. 2D fighting game stage asset, HD hand-painted cartoon style, clean dark-plum outlines (#24141F), soft cel shading. Clouds are NEUTRAL light grey-white with soft lavender-grey shadows on the bottom (the game will tint them warm or cold), lit from the upper left. Different shapes: 2 long flat stretched clouds, 2 medium puffy cumulus clouds, 2 small wispy clouds. Background: perfectly flat solid magenta #FF00FF, no gradient, no shadow, no texture. Do not use pink or purple on the clouds. NO text, NO watermark, NO grid lines, NO frame.
+Sprite sheet of 6 separate fluffy cartoon clouds arranged in a neat 3 columns × 2 rows grid, each cloud centered in its own cell with clear empty space around it, no cloud touches another or the image edge. 2D fighting game stage asset, HD hand-painted cartoon style, soft painterly cel shading, NO outlines at all (no dark contour line around the clouds, edges defined only by light and shadow). Clouds are NEUTRAL light grey-white with soft lavender-grey shadows on the bottom (the game will tint them warm or cold), lit from the upper left. Different shapes: 2 long flat stretched clouds, 2 medium puffy cumulus clouds, 2 small wispy clouds. Background: perfectly flat solid magenta #FF00FF, no gradient, no shadow, no texture. Do not use pink or purple on the clouds. NO text, NO watermark, NO grid lines, NO frame.
 ```
 
 ### 4. Дальние горы — `mountains` (21:9)
@@ -74,7 +74,7 @@ Sprite sheet of a flight animation cycle: the SAME cartoon raven drawn 6 times i
 ### 6. Лес — `forest` (21:9)
 
 ```
-Wide horizontal strip of trees for a 2D fighting game parallax layer (middle distance, behind the fighters). HD hand-painted cartoon style, clean dark-plum outlines (#24141F), cel shading with soft gradients, medium-low contrast so the fighters in front stay readable. Strict side view, all tree trunks stand on one flat horizontal ground line at the very bottom edge. The trees span the FULL width edge to edge, tallest trees reach about 70% of the image height, with gaps between groups. LEFT half: warm Russian birch grove and a mighty old oak at sunset — white birch trunks with black marks, golden-green foliage (#6E8B3D, #F2B45A). RIGHT half: twisted leafless gothic trees with crooked claw-like branches, dark violet bark (#2A1838) with cold moonlight rim light (#E8E4D8). In the middle the birches gradually turn into dead trees. Everything around the trees is perfectly flat solid magenta #FF00FF (no sky, no ground, no gradient, no shadow). Do not use pink or purple on the trees. NO characters, NO animals, NO text, NO watermark, NO frame.
+Wide horizontal strip of trees for a 2D fighting game parallax layer (middle distance, behind the fighters). Generate in 4K. HD hand-painted cartoon style, clean dark-plum outlines (#24141F), cel shading with soft gradients, CRISP SHARP details: clearly defined leaf clusters, bark texture and branch silhouettes, no blur, no soft focus, no depth of field, no painterly smudging, medium-low contrast so the fighters in front stay readable. Strict side view, all tree trunks stand on one flat horizontal ground line at the very bottom edge. The trees span the FULL width edge to edge, tallest trees reach about 70% of the image height, with gaps between groups. LEFT half: warm Russian birch grove and a mighty old oak at sunset — white birch trunks with black marks, golden-green foliage (#6E8B3D, #F2B45A). RIGHT half: twisted leafless gothic trees with crooked claw-like branches, dark violet bark (#2A1838) with cold moonlight rim light (#E8E4D8). In the middle the birches gradually turn into dead trees. Everything around the trees is perfectly flat solid magenta #FF00FF (no sky, no ground, no gradient, no shadow). Do not use pink or purple on the trees. NO characters, NO animals, NO text, NO watermark, NO frame.
 ```
 
 ### 7. Камень на перепутье — `stone` (3:4)
@@ -102,6 +102,9 @@ Wide horizontal strip of foreground vegetation for a 2D fighting game, it will b
 | все 9 слоёв | ✅ в игре (2.5.3). Исходники — `art_src/arena/` (первый вариант леса — `old_forest_v1.webp`) |
 
 Заметки по полученному:
+- 2.6: у туч контур снимается скриптом (`strip_outline`), камень утоплен в дорогу и отбрасывает тень,
+  полосы (горы, лес, передний план) скрипт делает чуть резче. Промпты туч (без контура) и леса (чётко, 4K)
+  обновлены выше — если перегенерировать, станет ещё лучше.
 - Лес перегенерирован ниже (деревья на половину высоты) — так над бойцами больше неба.
 - Кадры ворона выравниваются по жёлтому глазу, чтобы тело не дрожало между кадрами.
 - Земля сжата по высоте до 60%, передний план опущен: видны только верхушки травы перед ногами бойцов.

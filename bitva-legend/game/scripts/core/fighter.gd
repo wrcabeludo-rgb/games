@@ -76,6 +76,10 @@ const BUTTON_OF := {"lp": 0, "lk": 1, "hp": 2, "hk": 3}
 ## Шкала силы (2.5): 3 секции.
 const METER_SECTION := 1000
 const METER_MAX := 3 * METER_SECTION
+## Парирование (2.6): тап «вперёд» не раньше PARRY_WINDOW тиков до попадания.
+const PARRY_WINDOW := 6
+const PARRY_LOCK := 20      # следующая попытка — не раньше, чем через столько тиков (нельзя долбить)
+const PARRY_STAGGER := 32   # парированный атакующий ошеломлён (хватает на комбо)
 var id := ""
 var data: Dictionary
 var x := 0
@@ -116,6 +120,9 @@ var teleport_request := 0
 var armor := 0              # сколько ударов ещё выдержит броня текущего приёма
 var hypnotized := 0         # 1 — оглушён гипнозом (для отрисовки)
 var knock_on_land := 0      # приземлится — будет лежать (сбит с ног)
+var parry_timer := TAP_TIMER_MAX  # тиков с последней засчитанной попытки парирования
+var parry_cool := 0         # тиков до следующей возможной попытки
+var staggered := 0          # 1 — ошеломлён парированием (для отрисовки)
 ## Удары текущей строки (номера в MOVES), -1 — пусто.
 var chain := PackedInt32Array([-1, -1, -1, -1])
 var juggle := 0             # сколько раз добит в воздухе за этот полёт
@@ -158,7 +165,8 @@ func save() -> PackedInt32Array:
 	s.append_array(tap_log)
 	s.append_array(PackedInt32Array([special_buf, special_strength, special_timer, armor, hypnotized, knock_on_land]))
 	s.append_array(chain)
-	s.append_array(PackedInt32Array([juggle, combo_damage, meter, ex, special_ex, super_timer]))
+	s.append_array(PackedInt32Array([juggle, combo_damage, meter, ex, special_ex, super_timer,
+		parry_timer, parry_cool, staggered]))
 	return s
 
 
@@ -176,6 +184,7 @@ func load(s: PackedInt32Array) -> void:
 	chain = s.slice(39, 43)
 	juggle = s[43]; combo_damage = s[44]
 	meter = s[45]; ex = s[46]; special_ex = s[47]; super_timer = s[48]
+	parry_timer = s[49]; parry_cool = s[50]; staggered = s[51]
 
 
 # --- Вопросы о состоянии --------------------------------------------------
@@ -184,6 +193,31 @@ func load(s: PackedInt32Array) -> void:
 func color() -> Color:
 	var c: Color = data.color
 	return c.lerp(Color(0.35, 0.55, 1.0), 0.5) if alt else c
+
+
+## Парирует ли боец удар, который попадает прямо сейчас: недавно тапнул «вперёд» и стоит на земле свободно.
+func can_parry() -> bool:
+	return parry_timer <= PARRY_WINDOW and y == 0 and (is_grounded_actionable() or state == State.LAND)
+
+
+## Удачное парирование: сразу свободен.
+func parry_success() -> void:
+	parry_timer = TAP_TIMER_MAX
+	move = -1
+	vx = 0
+	_set_state(State.STAND)
+
+
+## Удар парировали — ошеломлён.
+func take_stagger() -> void:
+	move = -1
+	stun = PARRY_STAGGER
+	pushback = 0
+	low_pose = 0
+	staggered = 1
+	vx = 0
+	_set_state(State.HITSTUN)
+	state_frame = 0
 
 
 func is_grounded_actionable() -> bool:
@@ -516,6 +550,8 @@ func read_input(bits: int, aging: bool) -> Dictionary:
 	var back_bit := InputBits.LEFT if facing > 0 else InputBits.RIGHT
 	if aging:
 		fwd_tap_timer = mini(fwd_tap_timer + 1, TAP_TIMER_MAX)
+		parry_timer = mini(parry_timer + 1, TAP_TIMER_MAX)
+		parry_cool = maxi(parry_cool - 1, 0)
 		back_tap_timer = mini(back_tap_timer + 1, TAP_TIMER_MAX)
 		special_timer = mini(special_timer + 1, TAP_TIMER_MAX)
 		super_timer = mini(super_timer + 1, TAP_TIMER_MAX)
@@ -532,6 +568,9 @@ func read_input(bits: int, aging: bool) -> Dictionary:
 	if (bits & fwd_bit) != 0 and (prev_bits & fwd_bit) == 0:
 		dash_fwd = fwd_tap_timer <= DASH_WINDOW
 		fwd_tap_timer = 0
+		if parry_cool == 0:
+			parry_timer = 0
+			parry_cool = PARRY_LOCK
 	if (bits & back_bit) != 0 and (prev_bits & back_bit) == 0:
 		dash_back = back_tap_timer <= DASH_WINDOW
 		back_tap_timer = 0
@@ -749,6 +788,7 @@ func step(bits: int) -> void:
 				pushback = 0
 				combo = 0
 				hypnotized = 0
+				staggered = 0
 				_set_state(State.STAND)
 				_ground_control(inp)
 		_:

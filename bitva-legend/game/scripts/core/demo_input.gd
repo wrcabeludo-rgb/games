@@ -30,7 +30,11 @@ const SCENARIOS := {
 	"super": [[0, 0, 80], [R, 0, 100], [InputBits.BLOCK | InputBits.HP | InputBits.HK, 0, 1], [0, 0, 600]],
 	# Усиленные мыши Дракулы (с --demo-meter=1000): назад, вперёд + ЛР с зажатым блоком.
 	"ex": [[0, 0, 80], [0, R, 2], [0, 0, 2], [0, L | InputBits.LP | InputBits.BLOCK, 1], [0, 0, 600]],
+	# Илья бьёт СР, Дракула парирует (тап «вперёд» за 3 кадра до удара) и наказывает строкой.
+	"parry": [[0, 0, 80], [R, 0, 100], [InputBits.HP, 0, 1], [0, 0, PARRY_TAP], [0, L, 1], [0, 0, 600]],
 }
+## Через сколько тиков после нажатия СР Дракула тапает «вперёд» в демо «parry».
+const PARRY_TAP := 8
 const LENGTH := 112
 
 static var scenario := "projectiles"

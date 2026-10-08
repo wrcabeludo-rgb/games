@@ -36,7 +36,7 @@ func _test_deals_damage(level: LV) -> bool:
 	return sim.fighters[0].hp < Fighter.MAX_HP
 
 
-## Илья вплотную раз за разом бьёт ЛР; считаем урон по ИИ за 20 секунд.
+## Илья идёт вперёд и раз за разом бьёт ЛР; считаем урон по ИИ за 20 секунд.
 func _damage_taken(level: LV) -> int:
 	var sim := Sim.new(false)
 	sim.fighters[0].x = 900 * SUB
@@ -45,7 +45,8 @@ func _damage_taken(level: LV) -> int:
 	var total := 0
 	var last_hp := sim.fighters[1].hp
 	for i in 1200:
-		var p1 := InputBits.LP if i % 24 == 0 else (InputBits.RIGHT if i % 24 > 12 else 0)
+		# «Вперёд» зажат всё время: повторные тапы «вперёд» — это парирование, оно бы мешало замеру.
+		var p1 := InputBits.RIGHT | (InputBits.LP if i % 24 == 0 else 0)
 		sim.step(PackedInt32Array([p1, ai.get_input(sim, 1)]))
 		var hp := sim.fighters[1].hp
 		if hp < last_hp:

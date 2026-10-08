@@ -64,6 +64,7 @@ func _draw() -> void:
 		if show_inputs:
 			_draw_history(p, Vector2(size.x - 40.0 if p == 1 else 40.0, 150), p == 1)
 		_draw_combo(p, p == 1)
+		_draw_parry(p, p == 1)
 		_draw_meter(p)
 	_draw_timer()
 	_draw_super_name()
@@ -213,6 +214,16 @@ func _draw_combo(p: int, right: bool) -> void:
 	_text(Vector2(x, 232), "урон %d" % d.combo_damage, 22, COLOR_TEXT, false, true, 2)
 
 
+## «ПАРИРОВАНИЕ!» на стороне парировавшего.
+func _draw_parry(p: int, right: bool) -> void:
+	var base := p * 4
+	var age := _sim.tick - _sim.sparks[base]
+	if _sim.sparks[base + 3] != 5 or age < 0 or age > 50:
+		return
+	var x := size.x * (0.75 if right else 0.25)
+	_text(Vector2(x, 270), "ПАРИРОВАНИЕ!", 34, Color(0.55, 0.85, 1.0), false, true, 2)
+
+
 static func _plural_hits(n: int) -> String:
 	if n % 10 == 1 and n % 100 != 11:
 		return "УДАР"
@@ -240,7 +251,7 @@ func _draw_footer() -> void:
 	_text(Vector2(12, size.y - 38), "сборка %s · %s · %d FPS" % [version, stage, Engine.get_frames_per_second()], 12, COLOR_DIM)
 	_text(Vector2(size.x - 12, size.y - 74), _strings_hint(_sim.fighters[0]), 13, COLOR_GOLD, true)
 	_text(Vector2(size.x - 12, size.y - 56), "Спецприёмы: назад, вперёд + рука · вниз, вниз + нога · вперёд, вперёд + рука · назад, назад + рука — захват", 13, COLOR_GOLD, true)
-	_text(Vector2(size.x - 12, size.y - 38), "Назад + ЛН — подсечка · назад + СН — с разворота · вниз + СР — апперкот · ЛР вплотную — бросок (ЛР в ответ — вырваться)", 13, COLOR_GOLD, true)
+	_text(Vector2(size.x - 12, size.y - 38), "Назад + ЛН — подсечка · назад + СН — с разворота · вниз + СР — апперкот · ЛР вплотную — бросок · тап «вперёд» в момент удара — парирование", 13, COLOR_GOLD, true)
 
 
 ## Строки ударов первого игрока: «ЛР, ЛР, СР · ЛН, СН…».

@@ -23,6 +23,7 @@ const K_FRONT := 1.3
 
 const GROUND_SQUASH := 0.6  # картинку земли сжимаем по высоте
 const GROUND_RISE := 36.0   # трава на краю дороги выше линии, где стоят бойцы, px
+const STONE_SINK := 16.0    # камень утоплен в землю, px
 const FRONT_RISE := 95.0    # передний план поднимается над линией земли, px
 
 const SKY_LIGHT := Color(0.98, 0.74, 0.4)    # закат над Русью
@@ -338,9 +339,14 @@ func _draw_stone(c: CanvasItem) -> void:
 	var p := Vector2(layer_x(K_GROUND) + arena_w / 2.0, ground_y + 4)
 	if _tex.has("stone"):
 		var tex: Texture2D = _tex.stone
+		# Основание (трава и камешки) утоплено в дорогу, под ним — тень: камень стоит, а не висит.
 		var h := 200.0
 		var w := h * tex.get_width() / tex.get_height()
-		c.draw_texture_rect(tex, Rect2(p.x - w / 2.0, p.y - h, w, h), false)
+		var foot := p + Vector2(0, STONE_SINK)
+		c.draw_set_transform(foot + Vector2(0, -4), 0, Vector2(1, 0.2))
+		c.draw_circle(Vector2.ZERO, w * 0.55, Color(0.05, 0.03, 0.05, 0.55))
+		c.draw_set_transform(Vector2.ZERO)
+		c.draw_texture_rect(tex, Rect2(foot.x - w / 2.0, foot.y - h, w, h), false)
 		return
 	var pts := PackedVector2Array([p + Vector2(-56, 0), p + Vector2(-50, -120), p + Vector2(-30, -150),
 		p + Vector2(28, -152), p + Vector2(50, -126), p + Vector2(58, 0)])

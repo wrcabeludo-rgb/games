@@ -33,6 +33,8 @@ const THROW_HITSTOP := 12
 const ARMOR_HITSTOP := 6            # короткая заморозка, когда удар принят бронёй
 const COUNTER_HITSTOP := 24         # драматичная пауза при удачной контратаке
 const PROJ_MARGIN := 150            # снаряд исчезает за краем арены на столько пикселей
+const PARRY_HITSTOP := 16          # парирование: короткая пауза с синей вспышкой
+const PARRY_METER := 60
 const SUPER_FLASH := 30             # суперприём: пауза с затемнением перед ударом
 ## Шкала силы: за попадание атакующему — урон × 2, за блок — урон; пропустившему удар — урон.
 const METER_HIT := 2
@@ -48,7 +50,7 @@ var fighters: Array[Fighter] = []
 var hitstop := 0
 var hitstop_total := 0              # длительность текущей заморозки (для тряски камеры)
 ## Последнее попадание каждого игрока (для искр): [тик, x, y, вид]:
-## 0 лёгкий, 1 сильный, 2 блок, 3 удар в броню, 4 контратака-гипноз.
+## 0 лёгкий, 1 сильный, 2 блок, 3 удар в броню, 4 контратака-гипноз, 5 парирование (p — парировавший).
 var sparks := PackedInt32Array([-999, 0, 0, 0, -999, 0, 0, 0])
 
 var phase := Phase.INTRO
@@ -457,6 +459,16 @@ func _check_hits() -> void:
 ## melee — удар рукой или ногой (его можно поймать контратакой).
 func _apply_hit(p: int, m: Dictionary, direction: int, spark_x: int, spark_y: int, melee := false) -> void:
 	var d := fighters[1 - p]
+	if d.can_parry():
+		# Парирование: урона нет; атакующий врукопашную ошеломлён, снаряд просто гаснет.
+		d.parry_success()
+		d.add_meter(PARRY_METER)
+		if melee:
+			fighters[p].take_stagger()
+		hitstop = maxi(hitstop, PARRY_HITSTOP)
+		hitstop_total = 0
+		_set_spark(1 - p, spark_x, spark_y, 5)
+		return
 	if melee and d.is_countering():
 		# Гипнотический взгляд: атакующий застывает, защитник свободен.
 		fighters[p].take_hypnosis(d.move_data().counter.stun)

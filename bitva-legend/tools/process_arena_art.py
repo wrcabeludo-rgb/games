@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter
 
 OUT = Path(__file__).resolve().parent.parent / "game" / "art" / "arena"
 KEY = np.array([255, 0, 255], dtype=np.float32)
@@ -84,6 +84,30 @@ def _bleed_inside_color(fg: np.ndarray, alpha: np.ndarray, steps: int = 4) -> np
         col[new] = acc[new] / cnt[new][:, None]
         known = known | new
     return col
+
+
+def strip_outline(img: Image.Image, band: int = 7, luma_max: float = 120.0) -> Image.Image:
+    """Убрать тёмный контур по краю (тучи без обводки): тёмные пиксели у края становятся прозрачными,
+    край смягчается."""
+    a = np.asarray(img).astype(np.float32)
+    alpha = a[..., 3] / 255.0
+    luma = a[..., 0] * 0.3 + a[..., 1] * 0.59 + a[..., 2] * 0.11
+    near_edge = _dilate(alpha < 0.99, band)
+    dark = near_edge & (luma < luma_max)
+    alpha = np.where(dark, 0.0, alpha)
+    # Мягкий край: полупрозрачная кромка в 1 px.
+    soft = _dilate(alpha < 0.5, 1) & (alpha >= 0.5)
+    alpha = np.where(soft, alpha * 0.55, alpha)
+    a[..., 3] = alpha * 255
+    return Image.fromarray(a.astype(np.uint8), "RGBA")
+
+
+def sharpen(img: Image.Image) -> Image.Image:
+    """Чуть резче (нейросеть даёт мягкие текстуры); прозрачность не трогаем."""
+    rgb = img.convert("RGB").filter(ImageFilter.UnsharpMask(radius=2, percent=90, threshold=2))
+    out = rgb.convert("RGBA")
+    out.putalpha(img.getchannel("A"))
+    return out
 
 
 def _dilate(mask: np.ndarray, r: int) -> np.ndarray:
@@ -212,13 +236,13 @@ def main() -> int:
         done += 1
     for name, width in STRIP_WIDTH.items():
         if p := find(src, name):
-            save(resize_w(trim_vertical(chroma_key(Image.open(p))), width), name)
+            save(sharpen(resize_w(trim_vertical(chroma_key(Image.open(p))), width)), name)
             done += 1
     if p := find(src, "stone"):
         save(resize_h(trim(chroma_key(Image.open(p))), STONE_HEIGHT), "stone")
         done += 1
     if p := find(src, "clouds"):
-        for i, cloud in enumerate(split_objects(chroma_key(Image.open(p))), 1):
+        for i, cloud in enumerate(split_objects(strip_outline(chroma_key(Image.open(p)))), 1):
             if cloud.width > CLOUD_MAX_WIDTH:
                 cloud = resize_w(cloud, CLOUD_MAX_WIDTH)
             save(cloud, f"cloud_{i}")
