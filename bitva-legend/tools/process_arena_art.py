@@ -198,15 +198,47 @@ def _eye(img: Image.Image):
     """Центр жёлтого глаза ворона (или центр картинки, если глаз не найден)."""
     a = np.asarray(img).astype(int)
     r, g, b, al = a[..., 0], a[..., 1], a[..., 2], a[..., 3]
-    ys, xs = np.where((r > 190) & (g > 140) & (b < 90) & (al > 200))
+    ys, xs = np.where((r > 150) & (g > 100) & (b < 90) & (r - b > 80) & (al > 200))
     if len(xs) == 0:
         return img.width / 2, img.height / 2
-    return float(xs.mean()), float(ys.mean())
+    # Ворон смотрит вправо: глаз — самое правое жёлтое пятно (блики на перьях и лапах не считаем).
+    near = xs > xs.max() - 20
+    return float(xs[near].mean()), float(ys[near].mean())
+
+
+def _gray(img: Image.Image) -> np.ndarray:
+    bg = Image.new("RGBA", img.size, (255, 0, 255, 255))
+    bg.alpha_composite(img)
+    return np.asarray(bg.convert("L")).astype(np.float32)
+
+
+def _find_head(img: Image.Image, tpl: np.ndarray):
+    """Где на кадре голова (образец tpl) — по нормированной корреляции; возвращает левый верхний угол."""
+    g = _gray(img)
+    th, tw = tpl.shape
+    if g.shape[0] <= th or g.shape[1] <= tw:
+        return None
+    t = tpl - tpl.mean()
+    win = np.lib.stride_tricks.sliding_window_view(g, (th, tw))
+    w = win - win.mean(axis=(2, 3), keepdims=True)
+    score = (w * t).sum(axis=(2, 3)) / (np.sqrt((w * w).sum(axis=(2, 3)) * (t * t).sum()) + 1e-6)
+    y, x = np.unravel_index(int(score.argmax()), score.shape)
+    return x, y
 
 
 def align_by_eye(frames):
     """Кадры анимации на общем холсте так, чтобы глаз был в одной точке: тело не дрожит, двигаются крылья."""
     eyes = [_eye(f) for f in frames]
+    # Жёлтым бывают и блики на крыльях: точку берём по голове первого кадра (глаз с клювом),
+    # найденной на каждом кадре сопоставлением образца.
+    ex, ey = eyes[0]
+    box = (round(ex) - 30, round(ey) - 20, round(ex) + 30, round(ey) + 20)
+    if box[0] >= 0 and box[1] >= 0 and box[2] <= frames[0].width and box[3] <= frames[0].height:
+        tpl = _gray(frames[0])[box[1]:box[3], box[0]:box[2]]
+        for i, f in enumerate(frames):
+            hit = _find_head(f, tpl)
+            if hit is not None:
+                eyes[i] = (hit[0] + 30.0, hit[1] + 20.0)
     left = max(e[0] for e in eyes)
     top = max(e[1] for e in eyes)
     right = max(f.width - e[0] for f, e in zip(frames, eyes))
@@ -276,7 +308,14 @@ def main() -> int:
             save(cloud, f"cloud_{i}")
         done += 1
     if p := find(src, "ravens"):
-        for i, frame in enumerate(align_by_eye(list(split_objects(chroma_key(Image.open(p))))), 1):
+        frames = align_by_eye(list(split_objects(chroma_key(Image.open(p)))))
+        # Последний кадр, повторяющий первый, — заминка на стыке цикла: выкидываем.
+        first, last = (np.asarray(f)[..., 3] > 128 for f in (frames[0], frames[-1]))
+        if len(frames) > 2 and (first ^ last).mean() < 0.015:
+            frames = frames[:-1]
+        for old in OUT.glob("raven_*.png"):
+            old.unlink()
+        for i, frame in enumerate(frames, 1):
             save(resize_h(frame, RAVEN_HEIGHT), f"raven_{i}")
         done += 1
     print(f"Готово слоёв: {done}. Папка: {OUT}")

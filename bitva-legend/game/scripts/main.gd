@@ -17,10 +17,19 @@ var _shot_at := DemoInput.LENGTH
 
 @onready var arena: ArenaView = $ArenaView
 @onready var hud: Hud = $Hud
+@onready var menu: MenuView = $MenuView
+## Меню (стартовый экран, выбор бойцов) или бой. С отладочными ключами игра сразу начинает бой.
+var in_menu := true
 
 
 func _ready() -> void:
+	menu.setup(arena.sprites)
+	menu.fight_requested.connect(_start_fight)
+	var start_screen := MenuView.Screen.TITLE
 	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--screenshot=") or arg.begins_with("--demo") or arg.begins_with("--chars=") \
+				or arg == "--training":
+			in_menu = false
 		if arg.begins_with("--screenshot="):
 			_screenshot_path = arg.trim_prefix("--screenshot=")
 		elif arg.begins_with("--shot-at="):
@@ -44,10 +53,29 @@ func _ready() -> void:
 				f.meter = int(arg.trim_prefix("--demo-meter="))
 		elif arg.begins_with("--demo-ai="):
 			ai.level = int(arg.trim_prefix("--demo-ai=")) as AiController.Level
+	# «--screen=title|select [--picked]» — снимок меню (вместе с --screenshot).
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--screen="):
+			in_menu = true
+			start_screen = MenuView.Screen.SELECT if arg.ends_with("select") else MenuView.Screen.TITLE
+	if in_menu:
+		_open_menu(start_screen)
+		if "--picked" in OS.get_cmdline_user_args():
+			menu.picked = [true, true]
+	else:
+		menu.visible = false
 
 
 func _physics_process(_delta: float) -> void:
 	reader.single_player = ai.level != AiController.Level.OFF
+	if in_menu:
+		menu.vs_ai = reader.single_player
+		menu.ai_label = "Соперник: %s   ·   F3 или Options — сменить" % \
+			("второй игрок" if ai.level == AiController.Level.OFF else "ИИ, " + ai.level_name())
+		menu.step(PackedInt32Array([reader.read(0), reader.read(1)]))
+		if _screenshot_path != "" and menu.tick == _shot_at:
+			_save_screenshot.call_deferred()
+		return
 	var frame := PackedInt32Array([reader.read(0), reader.read(1)])
 	if _screenshot_path != "":
 		frame = DemoInput.frame(sim.tick)
@@ -72,7 +100,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		_reset()
 		return
 	if pad != null and pad.pressed and pad.button_index == JOY_BUTTON_START:
-		_cycle_ai()
+		if not in_menu and sim.phase == Sim.Phase.MATCH_END:
+			_open_menu(MenuView.Screen.SELECT)
+		else:
+			_cycle_ai()
+		return
+	if in_menu and pad != null:
 		return
 	if pad != null and pad.pressed and pad.button_index == JOY_BUTTON_TOUCHPAD:
 		var r1 := Input.is_joy_button_pressed(pad.device, JOY_BUTTON_RIGHT_SHOULDER) \
@@ -85,6 +118,21 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
+		return
+	if in_menu:
+		match key.physical_keycode:
+			KEY_F3:
+				_cycle_ai()
+			KEY_F11:
+				_toggle_fullscreen()
+			KEY_ESCAPE:
+				if menu.screen == MenuView.Screen.SELECT:
+					menu.open(MenuView.Screen.TITLE)
+				else:
+					get_tree().quit()
+		return
+	if key.physical_keycode in [KEY_ENTER, KEY_KP_ENTER] and sim.phase == Sim.Phase.MATCH_END:
+		_open_menu(MenuView.Screen.SELECT)
 		return
 	match key.physical_keycode:
 		KEY_F1:
@@ -107,7 +155,24 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_F11:
 			_toggle_fullscreen()
 		KEY_ESCAPE:
-			get_tree().quit()
+			_open_menu(MenuView.Screen.SELECT)
+
+
+func _open_menu(screen: MenuView.Screen) -> void:
+	in_menu = true
+	arena.visible = false
+	hud.visible = false
+	menu.cursor = PackedInt32Array([MenuView.ROSTER.find(chars[0]), MenuView.ROSTER.find(chars[1])])
+	menu.open(screen)
+
+
+func _start_fight(picked: PackedStringArray) -> void:
+	chars = picked
+	in_menu = false
+	menu.visible = false
+	arena.visible = true
+	hud.visible = true
+	_reset()
 
 
 func _reset() -> void:

@@ -32,5 +32,26 @@
   "frames": 4,
   "fit": "h:1:436",
   "pivot_y": "body"
+ },
+ "block": {
+  "frames": 2,
+  "fit": "h:1:540"
+ },
+ "block_low": {
+  "frames": 2,
+  "fit": "h:1:352"
+ },
+ "st_lp": {
+  "frames": 4,
+  "fit": "h:1:546"
+ },
+ "st_lk": {
+  "frames": 4,
+  "fit": "h:3:600"
+ },
+ "backdash": {
+  "frames": 3,
+  "fit": "h:1:500",
+  "pivot_y": "body"
  }
 }

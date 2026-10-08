@@ -198,7 +198,7 @@ func _draw_announcement() -> void:
 			if w != 2:
 				color = _sim.fighters[w].color().lightened(0.35)
 			if _sim.phase_frame >= Sim.REMATCH_DELAY:
-				small = "Нажми любую кнопку удара — реванш"
+				small = "Удар — реванш   ·   Enter или Options — выбор бойца"
 	if big == "":
 		return
 	var y := size.y * 0.3

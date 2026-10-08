@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b7sema5he106f"
-path="res://.godot/imported/raven_12.png-b42a7cd6d16269a12c383af8982653ef.ctex"
+uid="uid://2828d37nyiub"
+path="res://.godot/imported/st_lp_2.png-cff5f06e90f43fac3f9bdcc92bf923cb.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/arena/raven_12.png"
-dest_files=["res://.godot/imported/raven_12.png-b42a7cd6d16269a12c383af8982653ef.ctex"]
+source_file="res://art/fighters/dracula/st_lp_2.png"
+dest_files=["res://.godot/imported/st_lp_2.png-cff5f06e90f43fac3f9bdcc92bf923cb.ctex"]
 
 [params]
 

@@ -58,6 +58,36 @@ func has_any(id: String) -> bool:
 	return not _bank.get(id, {}).is_empty()
 
 
+## Анимация бойца по имени: {"tex", "pivot", …} или пусто, если её ещё не нарисовали.
+func anim(id: String, name: String) -> Dictionary:
+	return _bank.get(id, {}).get(name, {})
+
+
+## Дыхание: один кадр, натянутый на сетку; грудь, плечи и голова плавно поднимаются,
+## ноги стоят на месте. Без смены кадров — никакой «рваности». Координаты — в пикселях кадра,
+## phase — 0 (выдох) … 1 (вдох), body_h — рост в пикселях кадра.
+static func draw_breathing(c: CanvasItem, tex: Texture2D, pivot: Vector2, tint: Color, body_h: float,
+		phase: float, lift := 7.0) -> void:
+	const ROWS := 12
+	var size := tex.get_size()
+	var colors := PackedColorArray([tint, tint, tint, tint])
+	for j in ROWS:
+		var v0 := float(j) / ROWS
+		var v1 := float(j + 1) / ROWS
+		var y0 := v0 * size.y - pivot.y - _lift(v0 * size.y, pivot.y, body_h) * lift * phase
+		var y1 := v1 * size.y - pivot.y - _lift(v1 * size.y, pivot.y, body_h) * lift * phase
+		var pts := PackedVector2Array([Vector2(-pivot.x, y0), Vector2(size.x - pivot.x, y0),
+			Vector2(size.x - pivot.x, y1), Vector2(-pivot.x, y1)])
+		var uvs := PackedVector2Array([Vector2(0, v0), Vector2(1, v0), Vector2(1, v1), Vector2(0, v1)])
+		c.draw_polygon(pts, colors, uvs, tex)
+
+
+## Насколько поднимается точка кадра на вдохе: ноги — 0, от пояса растёт, грудь и выше — полностью.
+static func _lift(y: float, feet_y: float, body_h: float) -> float:
+	var h := clampf((feet_y - y) / body_h, 0.0, 1.0)
+	return smoothstep(0.35, 0.7, h)
+
+
 ## Кадр для текущего состояния бойца: [текстура, опорная точка] или [] (нет анимации — рисовать заглушку).
 func frame_for(f: Fighter, tick: int) -> Array:
 	var anims: Dictionary = _bank.get(f.id, {})
