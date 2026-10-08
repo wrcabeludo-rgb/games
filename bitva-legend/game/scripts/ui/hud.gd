@@ -2,7 +2,6 @@ class_name Hud
 extends Control
 ## Интерфейс поверх арены: имена бойцов, история ввода (F1), подсказки.
 
-const VERSION := "1.2"
 const COLOR_TEXT := Color(0.95, 0.95, 0.97)
 const COLOR_DIM := Color(0.75, 0.75, 0.8)
 const COLOR_SHADE := Color(0, 0, 0, 0.45)
@@ -36,7 +35,9 @@ func _draw() -> void:
 		_text(Vector2(x, 68), "Игрок %d · %s" % [p + 1, _reader.device_label(p)], 14, COLOR_DIM, right)
 		if show_inputs:
 			_draw_history(p, Vector2(x, 100), right)
-	_text(Vector2(w / 2.0, 30), "БИТВА ЛЕГЕНД · сборка %s · движение" % VERSION, 15, COLOR_DIM, false, true)
+	var version: String = ProjectSettings.get_setting("application/config/version")
+	var stage: String = ProjectSettings.get_setting("application/config/description")
+	_text(Vector2(w / 2.0, 30), "БИТВА ЛЕГЕНД · сборка %s · %s" % [version, stage], 15, COLOR_DIM, false, true)
 	_text(Vector2(w / 2.0, 50), "%d FPS" % Engine.get_frames_per_second(), 13, COLOR_DIM, false, true)
 	var hint := "F1 — история ввода · F2 — отладка · R или Create — сброс · F11 — полный экран · Esc — выход"
 	draw_rect(Rect2(0, size.y - 34, w, 34), COLOR_SHADE)

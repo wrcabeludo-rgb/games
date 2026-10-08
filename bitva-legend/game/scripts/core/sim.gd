@@ -121,6 +121,8 @@ func _update_facing() -> void:
 	for p in PLAYERS:
 		var f := fighters[p]
 		var other := fighters[1 - p]
+		if f.state == Fighter.State.RUN and (other.x - f.x) * f.run_dir < 0:
+			f.stop_run()
 		if not (f.is_grounded_actionable() or f.state == Fighter.State.LAND):
 			continue
 		if other.x > f.x:

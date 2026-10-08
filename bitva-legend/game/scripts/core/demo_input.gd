@@ -1,16 +1,16 @@
 class_name DemoInput
 extends RefCounted
 ## Записанный сценарий ввода для отладочных скриншотов и проверок без геймпада.
-## Илья идёт вперёд и садится, Дракула подходит и прыгает через него.
+## Илья разбегается (двойное «вперёд»), Дракула делает отскок (двойное «назад»).
 
 ## Шаги: [биты игрока 1, биты игрока 2, сколько тиков держать].
 const STEPS := [
 	[0, 0, 10],
-	[InputBits.RIGHT, InputBits.LEFT, 30],
-	[InputBits.DOWN, InputBits.UP | InputBits.LEFT, 20],
-	[InputBits.DOWN, 0, 60],
+	[InputBits.RIGHT, InputBits.RIGHT, 3],
+	[0, 0, 3],
+	[InputBits.RIGHT, InputBits.RIGHT, 60],
 ]
-const LENGTH := 60
+const LENGTH := 26
 
 
 static func frame(tick: int) -> PackedInt32Array:

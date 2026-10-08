@@ -125,16 +125,36 @@ func _draw_fighter(f: Fighter) -> void:
 			w *= 1.1
 		Fighter.State.AIR:
 			h *= 0.8
+	var dir := float(f.facing)
+	# Наклон корпуса: вперёд в беге, назад при торможении и отскоке.
+	var lean := 0.0
+	match f.state:
+		Fighter.State.RUN:
+			lean = 0.22
+			h *= 0.92
+		Fighter.State.RUN_STOP:
+			lean = -0.1
+		Fighter.State.BACKDASH:
+			lean = -0.2
+			h *= 0.95
 	var head_r := w * 0.32
-	var body := Rect2(base.x - w / 2.0, base.y - h + head_r * 1.6, w, h - head_r * 1.6)
+	var body_top := base.y - h + head_r * 1.6
+	var shift := Vector2(dir * lean * h, 0)
 	var color: Color = f.data.color
-	draw_rect(body, color)
-	draw_rect(body, color.darkened(0.45), false, 3)
-	var head := Vector2(base.x, base.y - h + head_r)
+	var body := PackedVector2Array([
+		Vector2(base.x - w / 2.0, base.y),
+		Vector2(base.x + w / 2.0, base.y),
+		Vector2(base.x + w / 2.0, body_top) + shift,
+		Vector2(base.x - w / 2.0, body_top) + shift,
+	])
+	draw_colored_polygon(body, color)
+	var outline := body.duplicate()
+	outline.append(body[0])
+	draw_polyline(outline, color.darkened(0.45), 3)
+	var head := Vector2(base.x, base.y - h + head_r) + shift * 1.1
 	draw_circle(head, head_r, color.lightened(0.15))
 	draw_arc(head, head_r, 0, TAU, 32, color.darkened(0.45), 3)
 	# Нос и глаз со стороны взгляда.
-	var dir := float(f.facing)
 	var nose := PackedVector2Array([
 		head + Vector2(dir * head_r * 0.8, -head_r * 0.15),
 		head + Vector2(dir * head_r * 1.45, head_r * 0.15),
@@ -143,8 +163,16 @@ func _draw_fighter(f: Fighter) -> void:
 	draw_colored_polygon(nose, color.darkened(0.45))
 	draw_circle(head + Vector2(dir * head_r * 0.4, -head_r * 0.25), head_r * 0.14, Color.WHITE)
 	# Рука вперёд — тоже подсказка, куда смотрит боец.
-	var shoulder := Vector2(base.x + dir * w * 0.2, body.position.y + body.size.y * 0.25)
-	draw_line(shoulder, shoulder + Vector2(dir * w * 0.55, body.size.y * 0.2), color.darkened(0.3), 10)
+	var body_h := base.y - body_top
+	var shoulder := Vector2(base.x + dir * w * 0.2, body_top + body_h * 0.25) + shift * 0.75
+	draw_line(shoulder, shoulder + Vector2(dir * w * 0.55, body_h * 0.2), color.darkened(0.3), 10)
+	# Линии скорости за спиной в беге и отскоке.
+	if f.state == Fighter.State.RUN or f.state == Fighter.State.BACKDASH:
+		var behind := -signf(float(f.vx)) if f.vx != 0 else -dir
+		for i in 3:
+			var ly := base.y - h * (0.3 + 0.2 * i)
+			var lx := base.x + behind * (w * 0.7 + 10 * i)
+			draw_line(Vector2(lx, ly), Vector2(lx + behind * 50, ly), Color(1, 1, 1, 0.45), 3)
 
 
 ## Отладка (F2): рамка «тела» для столкновений, состояние, координаты.
