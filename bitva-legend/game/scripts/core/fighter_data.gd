@@ -83,8 +83,8 @@ const CHARACTERS := {
 			# Апперкот (вниз + СР): удар снизу вверх, распрямляется из приседа, подбрасывает.
 			"cr_hp": {"startup": 8, "active": 5, "recovery": 24, "damage": 100, "hitstun": 22, "hitstop": 13, "push": 900, "box": [20, 40, 110, 260], "knockdown": 1, "launch": [250, 1700], "uppercut": 1},
 			"cr_hk": {"startup": 11, "active": 4, "recovery": 24, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 1000, "box": [40, 0, 140, 35], "level": "low"},
-			"j_lp": {"startup": 5, "active": 6, "damage": 40, "hitstun": 15, "hitstop": 8, "push": 600, "box": [30, 70, 85, 50], "level": "overhead"},
-			"j_lk": {"startup": 6, "active": 8, "damage": 45, "hitstun": 16, "hitstop": 8, "push": 600, "box": [30, 10, 95, 50], "level": "overhead"},
+			"j_lp": {"startup": 5, "active": 6, "damage": 40, "hitstun": 15, "hitstop": 8, "push": 600, "box": [60, 140, 120, 55], "level": "overhead"},
+			"j_lk": {"startup": 6, "active": 8, "damage": 45, "hitstun": 16, "hitstop": 8, "push": 600, "box": [60, 70, 115, 65], "level": "overhead"},
 			"j_hp": {"startup": 9, "active": 5, "damage": 100, "hitstun": 22, "hitstop": 13, "push": 800, "box": [25, -15, 125, 95], "level": "overhead"},
 			"j_hk": {"startup": 8, "active": 6, "damage": 90, "hitstun": 20, "hitstop": 11, "push": 800, "box": [30, 15, 125, 50], "level": "overhead"},
 			# Бросок палицы (только руками): летит по дуге и падает. Медленный, но мощный.

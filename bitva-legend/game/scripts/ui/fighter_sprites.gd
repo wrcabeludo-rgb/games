@@ -93,7 +93,11 @@ func frame_for(f: Fighter, tick: int) -> Array:
 			if anims.has("jump"):
 				return _pick(anims.jump, 0)
 		Fighter.State.AIR:
-			# Прыжок: взлёт → верх (сгруппировался) → падение. Удар в прыжке — пока заглушкой (нет кадров).
+			# Удар в прыжке — свои кадры, если нарисованы.
+			if f.move >= 0 and anims.has(Fighter.MOVES[f.move]):
+				var air: Dictionary = anims[Fighter.MOVES[f.move]]
+				return _pick(air, _attack_index(f, air))
+			# Прыжок: взлёт → верх (сгруппировался) → падение.
 			if anims.has("jump") and f.move < 0:
 				var n: int = anims.jump.tex.size()
 				var i := 1

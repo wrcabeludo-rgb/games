@@ -81,7 +81,9 @@ Sprite sheet for a 2D fighting game: 3 animation frames of the SAME character in
 | ilya/st_lk, st_hp, st_hk | ✅ в игре (3.4), хитбоксы подогнаны по спрайтам |
 | ilya/cr_lp, cr_lk, cr_hp, cr_hk | ✅ в игре (3.4) |
 | ilya/j_*, st_sweep, st_round, hit_high, hit_low | ⏳ ждём (плавные версии) |
-| ilya/idle 12, walk_f 8, walk_b 8 | ⏳ ждём (замена на плавные) |
+| ilya/idle 12, walk_f 8, walk_b 8 | ✅ в игре (3.4.5) |
+| ilya/j_lp, j_lk (4 кадра) | ✅ в игре (3.4.5) |
+| ilya/cr_hp — апперкот палицей (6) | ⏳ ждём: перерисовать кадры 4–5 |
 
 Заметки: спрайт Ильи шире «тела» для столкновений и бьёт дальше хитбокса — хитбоксы и ширину
 подгоним под спрайты в 3.4, когда будут все удары. F7 в игре — переключить спрайты/заглушки.

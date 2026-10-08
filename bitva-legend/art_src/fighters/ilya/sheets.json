@@ -1,18 +1,30 @@
 {
  "idle": {
-  "frames": 6
+  "frames": 12,
+  "grid": [
+   4,
+   3
+  ],
+  "fit": "h:1:620"
  },
  "st_lp": {
   "frames": 3
  },
  "walk_f": {
-  "frames": 6,
+  "frames": 8,
+  "grid": [
+   4,
+   2
+  ],
   "pivot_y": "body"
  },
  "walk_b": {
-  "frames": 6,
-  "pivot_y": "body",
-  "reverse": true
+  "frames": 8,
+  "grid": [
+   4,
+   2
+  ],
+  "pivot_y": "body"
  },
  "run": {
   "frames": 6,
@@ -38,7 +50,7 @@
  },
  "jump": {
   "frames": 5,
-  "fit": "h:1:440",
+  "fit": "h:1:490",
   "pivot_y": "body"
  },
  "st_lk": {
@@ -66,5 +78,19 @@
  "cr_hk": {
   "frames": 4,
   "fit": "h:1:380"
+ },
+ "j_lp": {
+  "frames": 4,
+  "fit": "h:1:590",
+  "pivot_y": "body",
+  "hit": 2,
+  "hit_end": 3
+ },
+ "j_lk": {
+  "frames": 4,
+  "fit": "h:1:520",
+  "pivot_y": "body",
+  "hit": 2,
+  "hit_end": 3
  }
 }
