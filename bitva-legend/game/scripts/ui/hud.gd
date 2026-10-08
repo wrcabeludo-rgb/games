@@ -186,6 +186,7 @@ func _draw_footer() -> void:
 	draw_rect(Rect2(0, size.y - 30, size.x, 30), COLOR_SHADE)
 	_text(Vector2(size.x / 2.0, size.y - 10), hint, 13, COLOR_TEXT, false, true)
 	_text(Vector2(12, size.y - 38), "сборка %s · %s · %d FPS" % [version, stage, Engine.get_frames_per_second()], 12, COLOR_DIM)
+	_text(Vector2(size.x - 12, size.y - 38), "Спецприём: назад, вперёд + удар — снаряд (ЛР/ЛН — лёгкий, СР/СН — сильный)", 13, COLOR_GOLD, true)
 
 
 # --- История ввода (F1) --------------------------------------------------

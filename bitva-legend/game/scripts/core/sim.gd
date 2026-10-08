@@ -25,6 +25,11 @@ const KO_FREEZE := 40               # драматичная заморозка 
 const WINS_NEEDED := 2
 const ATTACK_MASK := InputBits.LP | InputBits.LK | InputBits.HP | InputBits.HK
 
+## Поля снаряда (PackedInt32Array): владелец, позиция, скорость, гравитация, размер,
+## урон и прочее из данных спецприёма, вид для отрисовки, возраст.
+enum Proj { OWNER, X, Y, VX, VY, GRAV, HW, HH, DMG, STUN, STOP, PUSH, CHIP, KIND, AGE, SIZE }
+const PROJ_MARGIN := 150            # снаряд исчезает за краем арены на столько пикселей
+
 var tick := 0
 var inputs := PackedInt32Array([0, 0])
 ## История ввода по игрокам: записи [биты, сколько тиков удерживались], новые — первыми.
@@ -44,6 +49,7 @@ var timer := ROUND_TICKS
 var round_winner := -1              # -1 ещё нет, 0/1 — игрок, 2 — ничья
 var end_reason := EndReason.NONE
 var prev_inputs := PackedInt32Array([0, 0])
+var projectiles: Array[PackedInt32Array] = []
 
 
 ## with_intro = false — сразу бой (для тестов и тренировки).
@@ -62,6 +68,7 @@ func _reset_fighters() -> void:
 	]
 	hitstop = 0
 	hitstop_total = 0
+	projectiles = []
 
 
 func step(frame_inputs: PackedInt32Array) -> void:
@@ -107,14 +114,107 @@ func _combat_step(inp: PackedInt32Array, hits: bool) -> void:
 		return
 	var prev_x := PackedInt32Array([fighters[0].x, fighters[1].x])
 	for p in PLAYERS:
+		fighters[p].projectile_alive = has_projectile(p)
 		fighters[p].step(inp[p])
 	_wall_pushback()
 	_resolve_push()
 	_limit_separation(prev_x)
 	_clamp_walls()
+	_move_projectiles()
+	_spawn_projectiles()
 	if hits:
 		_check_hits()
+		_check_projectiles()
 	_update_facing()
+
+
+func has_projectile(owner: int) -> bool:
+	for pr in projectiles:
+		if pr[Proj.OWNER] == owner:
+			return true
+	return false
+
+
+func _spawn_projectiles() -> void:
+	for p in PLAYERS:
+		var f := fighters[p]
+		if f.spawn_request == 0:
+			continue
+		f.spawn_request = 0
+		var d: Dictionary = f.move_data().proj
+		var pr := PackedInt32Array()
+		pr.resize(Proj.SIZE)
+		pr[Proj.OWNER] = p
+		pr[Proj.X] = f.x + f.facing * d.x * SUB
+		pr[Proj.Y] = f.y + d.y * SUB
+		pr[Proj.VX] = d.vx * f.facing
+		pr[Proj.VY] = d.vy
+		pr[Proj.GRAV] = d.gravity
+		pr[Proj.HW] = d.w * SUB / 2
+		pr[Proj.HH] = d.h * SUB / 2
+		pr[Proj.DMG] = d.damage
+		pr[Proj.STUN] = d.hitstun
+		pr[Proj.STOP] = d.hitstop
+		pr[Proj.PUSH] = d.push
+		pr[Proj.CHIP] = d.chip
+		pr[Proj.KIND] = d.kind
+		pr[Proj.AGE] = 0
+		projectiles.append(pr)
+
+
+func _move_projectiles() -> void:
+	var alive: Array[PackedInt32Array] = []
+	for pr in projectiles:
+		pr[Proj.X] += pr[Proj.VX]
+		pr[Proj.Y] += pr[Proj.VY]
+		pr[Proj.VY] -= pr[Proj.GRAV]
+		pr[Proj.AGE] += 1
+		var out := pr[Proj.X] < -PROJ_MARGIN * SUB or pr[Proj.X] > (ARENA_WIDTH + PROJ_MARGIN) * SUB
+		var landed := pr[Proj.Y] <= 0
+		if not out and not landed:
+			alive.append(pr)
+	projectiles = alive
+
+
+static func _proj_box(pr: PackedInt32Array) -> PackedInt32Array:
+	return PackedInt32Array([pr[Proj.X] - pr[Proj.HW], pr[Proj.X] + pr[Proj.HW],
+		pr[Proj.Y] - pr[Proj.HH], pr[Proj.Y] + pr[Proj.HH]])
+
+
+## Снаряды: встречные гасят друг друга; попавший в соперника исчезает.
+func _check_projectiles() -> void:
+	var removed := {}
+	for i in projectiles.size():
+		for j in range(i + 1, projectiles.size()):
+			var a := projectiles[i]
+			var b := projectiles[j]
+			if a[Proj.OWNER] != b[Proj.OWNER] and _overlap(_proj_box(a), _proj_box(b)):
+				removed[i] = true
+				removed[j] = true
+				_set_spark(a[Proj.OWNER], (a[Proj.X] + b[Proj.X]) / 2, (a[Proj.Y] + b[Proj.Y]) / 2, 0)
+	for i in projectiles.size():
+		if removed.has(i):
+			continue
+		var pr := projectiles[i]
+		var p: int = pr[Proj.OWNER]
+		var d := fighters[1 - p]
+		if d.state == Fighter.State.AIR_HIT or d.state == Fighter.State.DOWN:
+			continue
+		var box := _proj_box(pr)
+		for hurt in d.hurtboxes():
+			if _overlap(box, hurt):
+				var m := {"damage": pr[Proj.DMG], "hitstun": pr[Proj.STUN], "hitstop": pr[Proj.STOP],
+					"push": pr[Proj.PUSH], "chip": pr[Proj.CHIP], "level": "high"}
+				_apply_hit(p, m, signi(pr[Proj.VX]), pr[Proj.X], pr[Proj.Y])
+				removed[i] = true
+				break
+	if removed.is_empty():
+		return
+	var alive: Array[PackedInt32Array] = []
+	for i in projectiles.size():
+		if not removed.has(i):
+			alive.append(projectiles[i])
+	projectiles = alive
 
 
 func _check_round_end() -> void:
@@ -218,24 +318,33 @@ func _check_hits() -> void:
 		var a := fighters[p]
 		var d := fighters[1 - p]
 		a.mark_hit()
-		var blocked := d.try_block(m)
-		var stop: int = m.hitstop
-		if blocked:
-			d.take_block(m, a.facing)
-			stop = maxi(m.hitstop * 2 / 3, 4)  # блок «легче» попадания
-		else:
-			d.take_hit(m, a.facing)
-		if stop > hitstop:
-			hitstop = stop
-			hitstop_total = stop
 		# Искра — в точке, где хитбокс заходит в тело соперника.
 		var spark_x := (maxi(hb[0], d.x - d.push_half()) + mini(hb[1], d.x + d.push_half())) / 2
-		var spark_y := (hb[2] + hb[3]) / 2
-		var base := p * 4
-		sparks[base] = tick
-		sparks[base + 1] = spark_x
-		sparks[base + 2] = spark_y
-		sparks[base + 3] = 2 if blocked else (1 if m.hitstop >= 11 else 0)
+		_apply_hit(p, m, a.facing, spark_x, (hb[2] + hb[3]) / 2)
+
+
+## Попадание или блок от игрока p (удар или снаряд); direction — куда отбрасывать.
+func _apply_hit(p: int, m: Dictionary, direction: int, spark_x: int, spark_y: int) -> void:
+	var d := fighters[1 - p]
+	var blocked := d.try_block(m)
+	var stop: int = m.hitstop
+	if blocked:
+		d.take_block(m, direction)
+		stop = maxi(m.hitstop * 2 / 3, 4)  # блок «легче» попадания
+	else:
+		d.take_hit(m, direction)
+	if stop > hitstop:
+		hitstop = stop
+		hitstop_total = stop
+	_set_spark(p, spark_x, spark_y, 2 if blocked else (1 if m.hitstop >= 11 else 0))
+
+
+func _set_spark(p: int, x: int, y: int, kind: int) -> void:
+	var base := p * 4
+	sparks[base] = tick
+	sparks[base + 1] = x
+	sparks[base + 2] = y
+	sparks[base + 3] = kind
 
 
 static func _overlap(a: PackedInt32Array, b: PackedInt32Array) -> bool:
@@ -334,6 +443,7 @@ func save_state() -> Dictionary:
 		"sparks": sparks.duplicate(),
 		"match": PackedInt32Array([phase, phase_frame, round_num, wins[0], wins[1], timer,
 			round_winner, end_reason, prev_inputs[0], prev_inputs[1]]),
+		"projectiles": projectiles.duplicate(true),
 	}
 
 
@@ -351,6 +461,9 @@ func load_state(state: Dictionary) -> void:
 	wins = PackedInt32Array([m[3], m[4]]); timer = m[5]
 	round_winner = m[6]; end_reason = m[7] as EndReason
 	prev_inputs = PackedInt32Array([m[8], m[9]])
+	projectiles.clear()
+	for pr in state.projectiles:
+		projectiles.append((pr as PackedInt32Array).duplicate())
 
 
 ## Контрольная сумма состояния (FNV-1a по целым числам).
@@ -364,6 +477,9 @@ func checksum() -> int:
 		h = _mix(h, v)
 	for v in [phase, phase_frame, round_num, wins[0], wins[1], timer, round_winner, end_reason]:
 		h = _mix(h, v)
+	for pr in projectiles:
+		for v in pr:
+			h = _mix(h, v)
 	for p in PLAYERS:
 		h = _mix(h, inputs[p])
 		for entry in history[p]:

@@ -17,7 +17,18 @@ const MOVES := [
 	"st_lp", "st_lk", "st_hp", "st_hk",
 	"cr_lp", "cr_lk", "cr_hp", "cr_hk",
 	"j_lp", "j_lk", "j_hp", "j_hk",
+	"sp_proj_l", "sp_proj_h",
 ]
+## Спецприёмы: номер → ввод. Удар по номеру: SPECIAL_BASE + номер * 2 + сила (0 лёгкий, 1 сильный).
+const SPECIAL_BASE := 12
+const SPECIAL_PROJ := 0     # «назад, вперёд + удар» — снаряд
+## Коды нажатий направлений (относительно взгляда бойца).
+const TAP_BACK := 1
+const TAP_FWD := 2
+const TAP_DOWN := 3
+const TAP_UP := 4
+const TAP_WINDOW := 14      # между нажатиями направлений в спецприёме, тиков
+const BUTTON_WINDOW := 10   # от последнего направления до кнопки удара, тиков
 const MOVE_LABELS := ["ЛР", "ЛН", "СР", "СН"]
 const ATTACK_BITS := [InputBits.LP, InputBits.LK, InputBits.HP, InputBits.HK]
 
@@ -64,6 +75,15 @@ var low_pose := 0           # низкая стойка в оглушении и
 var combo := 0              # сколько ударов подряд пропущено
 var landing_frames := 0     # длительность текущего приземления
 var btn_timers := PackedInt32Array([TAP_TIMER_MAX, TAP_TIMER_MAX, TAP_TIMER_MAX, TAP_TIMER_MAX])
+## Три последних нажатия направлений: [код, тиков назад] × 3, новые — первыми.
+var tap_log := PackedInt32Array([0, TAP_TIMER_MAX, 0, TAP_TIMER_MAX, 0, TAP_TIMER_MAX])
+var special_buf := -1       # распознанный спецприём, ждущий исполнения
+var special_strength := 0
+var special_timer := TAP_TIMER_MAX
+## Выставляет симуляция перед тиком: свой снаряд ещё летит (второй выпустить нельзя).
+var projectile_alive := false
+## Удар дошёл до кадра выпуска снаряда — симуляция создаст снаряд в этот же тик.
+var spawn_request := 0
 
 
 func _init(char_id: String, start_x_px: int, start_facing: int) -> void:
@@ -80,6 +100,8 @@ func save() -> PackedInt32Array:
 		hp, move, move_frame, has_hit, stun, pushback, low_pose, combo, landing_frames,
 	])
 	s.append_array(btn_timers)
+	s.append_array(tap_log)
+	s.append_array(PackedInt32Array([special_buf, special_strength, special_timer]))
 	return s
 
 
@@ -91,6 +113,8 @@ func load(s: PackedInt32Array) -> void:
 	hp = s[14]; move = s[15]; move_frame = s[16]; has_hit = s[17]; stun = s[18]
 	pushback = s[19]; low_pose = s[20]; combo = s[21]; landing_frames = s[22]
 	btn_timers = s.slice(23, 27)
+	tap_log = s.slice(27, 33)
+	special_buf = s[33]; special_strength = s[34]; special_timer = s[35]
 
 
 # --- Вопросы о состоянии --------------------------------------------------
@@ -126,6 +150,8 @@ func is_active() -> bool:
 	if move < 0 or has_hit:
 		return false
 	var m := move_data()
+	if not m.has("box"):
+		return false
 	return move_frame >= m.startup and move_frame < m.startup + m.active
 
 
@@ -167,7 +193,7 @@ func hurtboxes() -> Array[PackedInt32Array]:
 	if state == State.AIR:
 		h = h * 80 / 100
 	var boxes: Array[PackedInt32Array] = [PackedInt32Array([x - half, x + half, y, y + h])]
-	if move >= 0 and move_phase() >= 1:
+	if move >= 0 and move_phase() >= 1 and move_data().has("box"):
 		var b: Array = move_data().box
 		var shrink := 10
 		if b[2] > shrink * 2 and b[3] > shrink * 2:
@@ -227,8 +253,15 @@ func try_block(m: Dictionary) -> bool:
 	return true
 
 
-## Удар заблокирован: короткое оглушение в блоке и сильное отталкивание, без урона.
+## Удар заблокирован: короткое оглушение в блоке и сильное отталкивание.
+## Обычные удары урона не наносят, спецприёмы снимают немного сквозь блок (chip).
 func take_block(m: Dictionary, attacker_facing: int) -> void:
+	var chip: int = m.get("chip", 0)
+	if chip > 0:
+		if hp <= chip:
+			take_hit(m, attacker_facing)  # урон сквозь блок может добить
+			return
+		hp -= chip
 	stun = m.get("blockstun", m.hitstun - BLOCKSTUN_LESS)
 	pushback = m.push * BLOCK_PUSH / 100 * attacker_facing
 	vx = 0
@@ -250,8 +283,15 @@ func read_input(bits: int, aging: bool) -> Dictionary:
 	if aging:
 		fwd_tap_timer = mini(fwd_tap_timer + 1, TAP_TIMER_MAX)
 		back_tap_timer = mini(back_tap_timer + 1, TAP_TIMER_MAX)
+		special_timer = mini(special_timer + 1, TAP_TIMER_MAX)
 		for i in 4:
 			btn_timers[i] = mini(btn_timers[i] + 1, TAP_TIMER_MAX)
+		for i in 3:
+			tap_log[i * 2 + 1] = mini(tap_log[i * 2 + 1] + 1, TAP_TIMER_MAX)
+	# Журнал нажатий направлений — по нему узнаются спецприёмы.
+	for pair in [[back_bit, TAP_BACK], [fwd_bit, TAP_FWD], [InputBits.DOWN, TAP_DOWN], [InputBits.UP, TAP_UP]]:
+		if (bits & pair[0]) != 0 and (prev_bits & pair[0]) == 0:
+			_push_tap(pair[1])
 	var dash_fwd := false
 	var dash_back := false
 	if (bits & fwd_bit) != 0 and (prev_bits & fwd_bit) == 0:
@@ -263,6 +303,7 @@ func read_input(bits: int, aging: bool) -> Dictionary:
 	for i in 4:
 		if (bits & ATTACK_BITS[i]) != 0 and (prev_bits & ATTACK_BITS[i]) == 0:
 			btn_timers[i] = 0
+			_check_special(1 if i >= 2 else 0)
 	prev_bits = bits
 	return {
 		"fwd": (bits & fwd_bit) != 0, "back": (bits & back_bit) != 0,
@@ -270,6 +311,48 @@ func read_input(bits: int, aging: bool) -> Dictionary:
 		"dash_fwd": dash_fwd, "dash_back": dash_back,
 		"block": (bits & InputBits.BLOCK) != 0,
 	}
+
+
+func _push_tap(code: int) -> void:
+	for i in [2, 1]:
+		tap_log[i * 2] = tap_log[(i - 1) * 2]
+		tap_log[i * 2 + 1] = tap_log[(i - 1) * 2 + 1]
+	tap_log[0] = code
+	tap_log[1] = 0
+
+
+## Нажата кнопка удара: не завершает ли она ввод спецприёма?
+## «Назад, вперёд + удар»: вперёд не раньше BUTTON_WINDOW тиков до кнопки,
+## назад — не раньше TAP_WINDOW тиков до «вперёд».
+func _check_special(strength: int) -> void:
+	if tap_log[0] == TAP_FWD and tap_log[2] == TAP_BACK and tap_log[1] <= BUTTON_WINDOW \
+			and tap_log[3] - tap_log[1] <= TAP_WINDOW:
+		special_buf = SPECIAL_PROJ
+		special_strength = strength
+		special_timer = 0
+
+
+## Готов ли спецприём из буфера к исполнению (и разрешён ли он сейчас).
+func _special_ready() -> bool:
+	if special_buf < 0 or special_timer > BUFFER:
+		return false
+	if special_buf == SPECIAL_PROJ and projectile_alive:
+		return false
+	return true
+
+
+func _start_special() -> void:
+	for i in 4:
+		if btn_timers[i] <= BUFFER:
+			_consume_button(i)  # чтобы вслед не вышел ещё и обычный удар
+	move = SPECIAL_BASE + special_buf * 2 + special_strength
+	special_buf = -1
+	special_timer = TAP_TIMER_MAX
+	move_frame = 1
+	has_hit = 0
+	vx = 0
+	_set_state(State.ATTACK)
+	state_frame = 0
 
 
 ## Самая свежая нажатая кнопка удара из буфера (0–3) или -1. Сильные — при равенстве.
@@ -332,6 +415,8 @@ func step(bits: int) -> void:
 		State.ATTACK:
 			move_frame += 1
 			var m := move_data()
+			if m.has("proj") and move_frame == m.startup:
+				spawn_request = 1
 			if move_frame > m.startup + m.active - 1 + m.recovery:
 				move = -1
 				_set_state(State.STAND)
@@ -388,7 +473,9 @@ func _land(frames: int) -> void:
 
 func _ground_control(inp: Dictionary) -> void:
 	var b := _buffered_button()
-	if b >= 0:
+	if _special_ready():
+		_start_special()
+	elif b >= 0:
 		_start_attack(b, inp.down)
 	elif inp.block:
 		# Блок держится, пока нажата кнопка; вниз — нижний блок. Ходить в блоке нельзя.
@@ -439,7 +526,9 @@ func _start_attack(button: int, crouching: bool) -> void:
 ## Из бега можно сразу ударить.
 func _run_control(inp: Dictionary) -> void:
 	var b := _buffered_button()
-	if b >= 0:
+	if _special_ready():
+		_start_special()
+	elif b >= 0:
 		_start_attack(b, inp.down)
 	elif inp.up:
 		vx = 0

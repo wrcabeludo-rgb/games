@@ -58,6 +58,8 @@ func _draw() -> void:
 		_draw_shadow(f)
 	for f in _sim.fighters:
 		_draw_fighter(f)
+	for pr in _sim.projectiles:
+		_draw_projectile(pr)
 	for p in Sim.PLAYERS:
 		_draw_spark(p)
 	if show_debug:
@@ -222,6 +224,9 @@ func _draw_fighter(f: Fighter) -> void:
 ## Рука или нога во время удара: замах, удар до края хитбокса, возврат.
 func _draw_attack(f: Fighter, shoulder: Vector2, hip: Vector2, color: Color) -> void:
 	var m := f.move_data()
+	if not m.has("box"):
+		_draw_throw(f, shoulder, color)
+		return
 	var b: Array = m.box
 	var dir := float(f.facing)
 	var button: int = f.move % 4
@@ -240,7 +245,7 @@ func _draw_attack(f: Fighter, shoulder: Vector2, hip: Vector2, color: Color) -> 
 	var limb_color := color.darkened(0.3)
 	draw_line(origin, end, limb_color, 18.0 if is_kick else 14.0)
 	draw_circle(end, 10.0 if is_kick else 9.0, limb_color.darkened(0.2))
-	if button == 2 and f.id == "ilya":
+	if button == 2 and f.id == "ilya" and not _sim.has_projectile(_sim.fighters.find(f)):
 		# Палица.
 		draw_circle(end, 24, Color(0.36, 0.3, 0.26))
 		for i in 6:
@@ -296,6 +301,51 @@ func _draw_guard(f: Fighter, shoulder: Vector2, body_h: float, dir: float, color
 	var r := body_h * 0.28
 	draw_arc(c, r, -PI / 2.6 if dir > 0 else PI - PI / 2.6, (PI / 2.6) if dir > 0 else PI + PI / 2.6,
 		16, Color(0.45, 0.75, 1.0, glow), 6)
+
+
+## Поза броска снаряда: замах назад-вверх, затем рука вперёд.
+func _draw_throw(f: Fighter, shoulder: Vector2, color: Color) -> void:
+	var m := f.move_data()
+	var dir := float(f.facing)
+	var t := clampf(float(f.move_frame) / m.startup, 0.0, 1.0)
+	var hand: Vector2
+	if f.move_frame < m.startup:
+		hand = shoulder + Vector2(-dir * 40 * t, -70 * t)  # замах
+	else:
+		hand = shoulder + Vector2(dir * 70, -10)            # бросок
+	draw_line(shoulder, hand, color.darkened(0.3), 13)
+	if f.id == "ilya" and f.move_frame < m.startup:
+		draw_circle(hand, 24, Color(0.36, 0.3, 0.26))  # палица в руке до броска
+	elif f.id == "dracula":
+		draw_circle(hand, 10 + 6 * t, Color(0.55, 0.1, 0.2, 0.6))  # тёмная сила в ладони
+
+
+## Снаряд: палица крутится в полёте, летучие мыши машут крыльями.
+func _draw_projectile(pr: PackedInt32Array) -> void:
+	var c := to_screen(float(pr[Sim.Proj.X]) / Sim.SUB, float(pr[Sim.Proj.Y]) / Sim.SUB)
+	var age := pr[Sim.Proj.AGE]
+	var dir := signf(float(pr[Sim.Proj.VX]))
+	if pr[Sim.Proj.KIND] == 0:
+		var a := age * 0.35 * dir
+		var handle := Vector2.from_angle(a) * 34
+		draw_line(c - handle, c, Color(0.45, 0.32, 0.2), 9)
+		draw_circle(c + handle * 0.25, 24, Color(0.36, 0.3, 0.26))
+		for i in 6:
+			var sa := a + TAU * i / 6.0
+			draw_line(c + handle * 0.25 + Vector2.from_angle(sa) * 20, c + handle * 0.25 + Vector2.from_angle(sa) * 32, Color(0.25, 0.2, 0.18), 5)
+	else:
+		var hw := float(pr[Sim.Proj.HW]) / Sim.SUB
+		for i in 3:
+			var off := Vector2(-dir * (i * hw * 0.55 - hw * 0.4), sin(age * 0.5 + i * 2.1) * 10 + (i - 1) * 9)
+			var b := c + off
+			var flap := 8.0 + 7.0 * sin(age * 0.9 + i)
+			var ink := Color(0.12, 0.05, 0.1)
+			for side in [-1.0, 1.0]:
+				draw_colored_polygon(PackedVector2Array([b, b + Vector2(side * 17, -flap), b + Vector2(side * 7, 6)]), ink)
+			draw_circle(b, 5, ink)
+			draw_circle(b + Vector2(dir * 3, -1), 2, Color(1, 0.3, 0.3))
+	if show_debug:
+		_debug_box(Sim._proj_box(pr), Color(1, 0.2, 0.2, 0.95))
 
 
 ## Искра попадания: вспышка-звезда, у сильных ударов крупнее.
