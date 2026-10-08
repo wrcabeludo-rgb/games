@@ -102,8 +102,7 @@ Sprite sheet for a 2D fighting game: 3 animation frames of the SAME character in
 | dracula/backdash, block, block_low, st_lp, st_lk | ✅ в игре (3.6), масштаб сверен по размеру головы; хитбоксы ЛР и ЛН — по спрайтам |
 | dracula/st_hp, st_hk, cr_*, j_*, st_sweep (8), st_round (8), hit_high, hit_low | ✅ в игре (3.7), масштаб по голове, хитбоксы по спрайтам |
 | dracula/fall, get_up, throw, thrown, спецприёмы, супер | ⏳ промпты — следующая партия |
-| ilya/select, select_win (8), dracula/select, select_win_p1 | ✅ в игре (3.7.1) |
-| dracula/select_win_p2, menu/title | ⏳ ждём (пока Дракула радуется 4 кадрами, на заставке — заглушка) |
+| ilya/select, select_win (8), dracula/select, select_win (8), menu/title | ✅ в игре (3.7.2). Название игры рисуется поверх заставки внизу |
 
 Единый масштаб проверяется `python3 tools/measure_scale.py <боец>`: голова из стойки ищется на каждом кадре; медиана по листу должна быть ≈ 1.0 (±5%).
 

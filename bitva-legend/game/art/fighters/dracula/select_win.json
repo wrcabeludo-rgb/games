@@ -43,6 +43,50 @@
     884,
     947
    ]
+  },
+  {
+   "file": "select_win_5.png",
+   "pivot": [
+    440,
+    952
+   ],
+   "size": [
+    882,
+    953
+   ]
+  },
+  {
+   "file": "select_win_6.png",
+   "pivot": [
+    314,
+    893
+   ],
+   "size": [
+    630,
+    894
+   ]
+  },
+  {
+   "file": "select_win_7.png",
+   "pivot": [
+    348,
+    911
+   ],
+   "size": [
+    698,
+    912
+   ]
+  },
+  {
+   "file": "select_win_8.png",
+   "pivot": [
+    367,
+    911
+   ],
+   "size": [
+    735,
+    912
+   ]
   }
  ]
 }

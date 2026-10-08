@@ -39,6 +39,8 @@ var ai_label := ""
 var _font := SystemFont.new()
 var _sprites: FighterSprites
 var _title: Texture2D
+var _sky: Texture2D
+var _moon: Texture2D
 var _prev := PackedInt32Array([0, 0])
 var _ready_tick := -1
 
@@ -48,6 +50,11 @@ func _ready() -> void:
 	_font.font_weight = 700
 	if ResourceLoader.exists("res://art/menu/title.png"):
 		_title = load("res://art/menu/title.png")
+	# Экран выбора — ночное небо арены (на заставке те же герои: рядом с портретами путались бы).
+	if ResourceLoader.exists("res://art/arena/sky.png"):
+		_sky = load("res://art/arena/sky.png")
+	if ResourceLoader.exists("res://art/arena/moon.png"):
+		_moon = load("res://art/arena/moon.png")
 
 
 func setup(sprites: FighterSprites) -> void:
@@ -142,9 +149,20 @@ func _draw() -> void:
 
 func _draw_background() -> void:
 	var r := Rect2(Vector2.ZERO, size)
-	if _title != null:
-		draw_texture_rect(_title, _cover(_title.get_size()), false,
-			Color.WHITE if screen == Screen.TITLE else Color(0.38, 0.38, 0.45))
+	if screen == Screen.TITLE and _title != null:
+		draw_texture_rect(_title, _cover(_title.get_size()), false)
+		# Низ затемнён — на нём название и подсказка.
+		var clear := Color(0, 0, 0, 0)
+		var dark := Color(0, 0, 0, 0.8)
+		var y0 := size.y * 0.6
+		draw_polygon(PackedVector2Array([Vector2(0, y0), Vector2(size.x, y0), size, Vector2(0, size.y)]),
+			PackedColorArray([clear, clear, dark, dark]))
+		return
+	if screen == Screen.SELECT and _sky != null:
+		draw_texture_rect(_sky, _cover(_sky.get_size()), false, Color(0.55, 0.55, 0.65))
+		if _moon != null:
+			var ms := _moon.get_size() * (220.0 / _moon.get_height())
+			draw_texture_rect(_moon, Rect2(Vector2(size.x / 2.0, 230) - ms / 2.0, ms), false, Color(0.8, 0.8, 0.85))
 		return
 	# Заглушка: ночное небо и луна.
 	var top := Color(0.05, 0.06, 0.13)
@@ -166,11 +184,13 @@ func _cover(img: Vector2) -> Rect2:
 
 func _draw_title() -> void:
 	var cx := size.x / 2.0
-	_text_c(Vector2(cx + 4, 196), "БИТВА ЛЕГЕНД", 92, Color(0.25, 0.05, 0.05, 0.85))
-	_text_c(Vector2(cx, 190), "БИТВА ЛЕГЕНД", 92, COLOR_GOLD)
-	_text_c(Vector2(cx, 236), "CLASH OF LEGENDS", 24, COLOR_TEXT)
+	# Название — внизу, на затемнении: вверху заставки лица героев и луна.
+	var y := size.y - 150 if _title != null else 190.0
+	_text_c(Vector2(cx + 4, y + 6), "БИТВА ЛЕГЕНД", 80, Color(0.25, 0.05, 0.05, 0.9))
+	_text_c(Vector2(cx, y), "БИТВА ЛЕГЕНД", 80, COLOR_GOLD)
+	_text_c(Vector2(cx, y + 38), "CLASH OF LEGENDS", 22, COLOR_TEXT)
 	if (tick / 30) % 2 == 0:
-		_text_c(Vector2(cx, size.y - 90), "Нажмите Enter или крест", 28, COLOR_TEXT)
+		_text_c(Vector2(cx, size.y - 62), "Нажмите Enter или крест", 26, COLOR_TEXT)
 	_text_c(Vector2(cx, size.y - 30), "Esc — выход   ·   F11 — полный экран", 16, COLOR_DIM)
 
 

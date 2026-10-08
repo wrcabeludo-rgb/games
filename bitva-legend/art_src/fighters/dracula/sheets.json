@@ -130,8 +130,11 @@
   "pivot_y": "bottom_center"
  },
  "select_win": {
-  "frames": 4,
-  "fit": "h:1:900",
+  "part_frames": 4,
+  "parts_fit": [
+   "h:1:900",
+   1.473
+  ],
   "pivot_y": "bottom_center"
  }
 }
