@@ -89,6 +89,14 @@ func frame_for(f: Fighter, tick: int) -> Array:
 			if anims.has(key):
 				var n: int = anims[key].tex.size()
 				return _pick(anims[key], mini(1 if f.state == Fighter.State.BLOCKSTUN else 0, n - 1))
+		Fighter.State.HITSTUN:
+			# Получил удар: удар → откинулся → сильнее всего откинулся; в конце оглушения — приходит в себя.
+			var key := "hit_low" if f.low_pose else "hit_high"
+			if anims.has(key):
+				var n: int = anims[key].tex.size()
+				if f.stun <= 4:
+					return _pick(anims[key], n - 1)
+				return _pick(anims[key], mini(f.state_frame / 4, n - 2))
 		Fighter.State.PREJUMP:
 			if anims.has("jump"):
 				return _pick(anims.jump, 0)

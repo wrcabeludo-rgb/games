@@ -92,5 +92,13 @@
   "pivot_y": "body",
   "hit": 2,
   "hit_end": 3
+ },
+ "hit_high": {
+  "frames": 4,
+  "fit": "h:4:560"
+ },
+ "hit_low": {
+  "frames": 4,
+  "fit": "h:4:440"
  }
 }
