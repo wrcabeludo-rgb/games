@@ -19,6 +19,8 @@ const SCENARIOS := {
 	"sweep": [[0, 0, 80], [R, 0, 85], [L | InputBits.LK, 0, 1], [0, 0, 600]],
 	# Илья подходит вплотную и бросает Дракулу, который держит блок.
 	"throw": [[0, 0, 80], [R, InputBits.BLOCK, 140], [InputBits.LP, InputBits.BLOCK, 1], [0, InputBits.BLOCK, 600]],
+	# Илья подходит, Дракула бьёт апперкотом (вниз + СР).
+	"uppercut": [[0, 0, 80], [R, 0, 100], [0, D | InputBits.HP, 1], [0, 0, 600]],
 	"counter": [[0, 0, 80], [R, 0, 60], [0, 0, 4], [R, L, 2], [0, 0, 2], [R | InputBits.LP, L | InputBits.LP, 1], [0, 0, 600]],
 }
 const LENGTH := 112

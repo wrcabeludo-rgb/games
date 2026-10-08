@@ -184,6 +184,8 @@ func is_stunned() -> bool:
 
 
 func is_crouching() -> bool:
+	if state == State.ATTACK and move >= 4 and move <= 7 and move_phase() >= 1 and move_data().get("uppercut", 0):
+		return false  # апперкот: распрямился
 	return state == State.CROUCH or (state == State.ATTACK and move >= 4 and move <= 7) \
 		or ((state == State.HITSTUN or state == State.BLOCK or state == State.BLOCKSTUN) and low_pose == 1)
 

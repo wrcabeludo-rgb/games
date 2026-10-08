@@ -20,6 +20,8 @@ func _init() -> void:
 	ok = _check("сбитый с ног неуязвим и встаёт", _test_knockdown_invul()) and ok
 	ok = _check("назад + СН — удар с разворота: урон 120, сбивает", _test_roundhouse()) and ok
 	ok = _check("вниз + СР — апперкот подбрасывает", _test_uppercut()) and ok
+	ok = _check("апперкот Дракулы попадает по стоящему Илье на обычной дистанции", _test_drac_uppercut()) and ok
+	ok = _check("апперкот Дракулы сбивает прыгнувшего Илью", _test_drac_uppercut_antiair()) and ok
 	ok = _check("ЛР вплотную — бросок сквозь блок: урон 120", _test_throw_through_block()) and ok
 	ok = _check("ЛР не вплотную — обычный удар", _test_throw_range()) and ok
 	ok = _check("ЛР в ответ — вырвался из броска", _test_tech()) and ok
@@ -174,3 +176,28 @@ func _test_swapped() -> bool:
 	_run(sim, 0, 0, 2)
 	_run(sim, R | LP, 0)  # у Дракулы «вперёд, вперёд + рука» — гипнотический взгляд
 	return sim.fighters[0].id == "dracula" and _move_name(sim.fighters[0]) == "sp_ff_l"
+
+
+func _test_drac_uppercut() -> bool:
+	var sim := _sim_at(900, 1060)
+	_run(sim, 0, D | HP)
+	var name := _move_name(sim.fighters[1])
+	var max_y := 0
+	for i in 60:
+		_run(sim, 0, 0)
+		max_y = maxi(max_y, sim.fighters[0].y)
+	return name == "cr_hp" and sim.fighters[0].hp == 1000 - 85 and max_y > 100 * SUB
+
+
+## Илья прыгает вперёд на Дракулу; ищем момент, когда апперкот его сбивает (как игрок, ловящий прыжок).
+func _test_drac_uppercut_antiair() -> bool:
+	for press in range(5, 45):
+		var sim := _sim_at(820, 1080)
+		_run(sim, R | InputBits.UP, 0)
+		var flew := false
+		for i in 70:
+			_run(sim, R, D | HP if i == press else 0)
+			flew = flew or sim.fighters[0].state == S.AIR_HIT
+		if flew and sim.fighters[0].hp == 1000 - 85 and sim.fighters[1].hp == 1000:
+			return true
+	return false

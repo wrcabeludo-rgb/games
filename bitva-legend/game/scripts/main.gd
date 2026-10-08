@@ -2,7 +2,7 @@ extends Node
 ## Главный цикл: каждый тик (60 в секунду) читает ввод, продвигает симуляцию
 ## и просит отрисовку обновиться. Логика боя живёт только в Sim.
 
-## Персонажи игроков: F4 и F5 перебирают, тачпад или L3 на геймпаде игрока 1 меняет местами.
+## Персонажи игроков: F4 и F5 перебирают, тачпад на геймпаде меняет местами.
 var chars := PackedStringArray(["ilya", "dracula"])
 var sim := Sim.new(true, chars)
 var reader := InputReader.new()
@@ -36,6 +36,7 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
+	reader.single_player = ai.level != AiController.Level.OFF
 	var frame := PackedInt32Array([reader.read(0), reader.read(1)])
 	if _screenshot_path != "":
 		frame = DemoInput.frame(sim.tick)
@@ -59,11 +60,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if pad != null and pad.pressed and pad.button_index == JOY_BUTTON_BACK:
 		_reset()
 		return
-	if pad != null and pad.pressed and pad.button_index == JOY_BUTTON_START and pad.device == reader.pad_for(0):
+	if pad != null and pad.pressed and pad.button_index == JOY_BUTTON_START:
 		ai.next_level()
 		return
-	if pad != null and pad.pressed and pad.device == reader.pad_for(0) \
-			and (pad.button_index == JOY_BUTTON_TOUCHPAD or pad.button_index == JOY_BUTTON_LEFT_STICK):
+	if pad != null and pad.pressed and pad.button_index == JOY_BUTTON_TOUCHPAD:
 		chars = PackedStringArray([chars[1], chars[0]])
 		_reset()
 		return

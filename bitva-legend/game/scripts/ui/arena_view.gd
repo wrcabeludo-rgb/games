@@ -273,6 +273,13 @@ func _draw_attack(f: Fighter, shoulder: Vector2, hip: Vector2, color: Color) -> 
 	var is_kick: bool = button == 1 or button == 3 or m.get("kick", 0) == 1
 	var origin := hip if is_kick else shoulder
 	var tip := to_screen(float(f.x) / Sim.SUB + dir * (b[0] + b[2] * 0.85), float(f.y) / Sim.SUB + b[1] + b[3] / 2.0)
+	if m.get("uppercut", 0):
+		# Апперкот: кулак у земли перед собой → вверх над головой.
+		var low := to_screen(float(f.x) / Sim.SUB + dir * (b[0] + b[2] * 0.6), float(f.y) / Sim.SUB + 40)
+		var high := to_screen(float(f.x) / Sim.SUB + dir * (b[0] + b[2] * 0.45), float(f.y) / Sim.SUB + b[1] + b[3] * 0.9)
+		tip = high
+		if f.move_phase() == 0:
+			tip = low
 	var end := tip
 	match f.move_phase():
 		0:

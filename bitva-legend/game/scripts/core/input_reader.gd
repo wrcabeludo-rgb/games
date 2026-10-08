@@ -37,6 +37,10 @@ const PAD_BUTTONS := [
 	[InputBits.RIGHT, JOY_BUTTON_DPAD_RIGHT],
 ]
 
+## Одиночная игра (против ИИ): первым игроком управляет любой подключённый геймпад —
+## на случай, если Windows видит лишний «виртуальный» геймпад и настоящий оказался вторым.
+var single_player := false
+
 const STICK_DEADZONE := 0.5
 const TRIGGER_THRESHOLD := 0.5
 
@@ -53,6 +57,11 @@ func read(player: int) -> int:
 	for pair in KEYS[player]:
 		if Input.is_physical_key_pressed(pair[1]):
 			bits |= pair[0]
+	if single_player:
+		if player == 0:
+			for pad in Input.get_connected_joypads():
+				bits |= _read_pad(pad)
+		return bits
 	var pad := pad_for(player)
 	if pad >= 0:
 		bits |= _read_pad(pad)
@@ -60,8 +69,11 @@ func read(player: int) -> int:
 
 
 func device_label(player: int) -> String:
-	var pad := pad_for(player)
 	var keys := "WASD" if player == 0 else "стрелки"
+	if single_player and player == 0:
+		var n := Input.get_connected_joypads().size()
+		return "любой геймпад (%d) + клавиатура (%s)" % [n, keys] if n > 0 else "клавиатура (%s)" % keys
+	var pad := pad_for(player)
 	if pad < 0:
 		return "клавиатура (%s)" % keys
 	return "%s + клавиатура (%s)" % [Input.get_joy_name(pad), keys]
