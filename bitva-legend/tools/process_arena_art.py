@@ -8,15 +8,18 @@
 
 Запуск: python3 tools/process_arena_art.py <папка с исходниками>
 Ожидаемые имена: sky, moon, clouds, mountains, forest, stone, ground, foreground, ravens (.png/.jpg/.webp).
+Полосу (mountains, forest, ground, foreground) можно прислать панелями: forest_1, forest_2, forest_3 — склеятся.
 Отсутствующие слои пропускаются — в игре вместо них останутся заглушки.
 """
+import os
 import sys
 from pathlib import Path
 
 import numpy as np
 from PIL import Image, ImageFilter
 
-OUT = Path(__file__).resolve().parent.parent / "game" / "art" / "arena"
+# Куда класть результат (ART_OUT — для проверок, по умолчанию — в игру).
+OUT = Path(os.environ.get("ART_OUT", Path(__file__).resolve().parent.parent / "game" / "art" / "arena"))
 KEY = np.array([255, 0, 255], dtype=np.float32)
 M_SAFE = 45.0      # «пурпурность» до этого — полностью непрозрачно
 M_FULL = 200.0     # от этого — полностью прозрачно, между — плавный край
@@ -24,7 +27,8 @@ EDGE_PX = 10       # ширина полосы у краёв, где убира�
 
 # Ширина слоёв в пикселях 1080p (= ширина слоя в игре × 1.5, см. ArenaScenery.layer_w).
 SKY_SIZE = (1980, 1080)
-STRIP_WIDTH = {"mountains": 2200, "forest": 2520, "ground": 3000, "foreground": 3330}
+# Полосы — в двойном разрешении 720p (= 1440p): на большом мониторе во весь экран не мылятся.
+STRIP_WIDTH = {"mountains": 2704, "forest": 2992, "ground": 4000, "foreground": 4432}
 MOON_SIZE = 320
 STONE_HEIGHT = 300
 CLOUD_MAX_WIDTH = 720
@@ -215,6 +219,19 @@ def align_by_eye(frames):
     return out
 
 
+def stitch(panels):
+    """Панели одной полосы — встык слева направо, низом (линией земли) на одном уровне."""
+    parts = [p.crop(p.getchannel("A").point(lambda a: 255 if a > 8 else 0).getbbox() or (0, 0, p.width, p.height))
+             for p in panels]
+    height = max(p.height for p in parts)
+    out = Image.new("RGBA", (sum(p.width for p in parts), height), (0, 0, 0, 0))
+    x = 0
+    for p in parts:
+        out.alpha_composite(p, (x, height - p.height))
+        x += p.width
+    return out
+
+
 def save(img: Image.Image, name: str) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     img.save(OUT / (name + ".png"), optimize=True)
@@ -235,9 +252,19 @@ def main() -> int:
         save(moon.resize((MOON_SIZE, MOON_SIZE), Image.LANCZOS), "moon")
         done += 1
     for name, width in STRIP_WIDTH.items():
-        if p := find(src, name):
-            save(sharpen(resize_w(trim_vertical(chroma_key(Image.open(p))), width)), name)
-            done += 1
+        # Полосу можно прислать панелями name_1, name_2, … (слева направо) — склеим в одну.
+        panels = [q for i in range(1, 7) if (q := find(src, f"{name}_{i}"))]
+        if panels:
+            strip = stitch([chroma_key(Image.open(q)) for q in panels])
+        elif p := find(src, name):
+            strip = chroma_key(Image.open(p))
+        else:
+            continue
+        strip = trim_vertical(strip)
+        if strip.width > width:
+            strip = resize_w(strip, width)
+        save(sharpen(strip), name)
+        done += 1
     if p := find(src, "stone"):
         save(resize_h(trim(chroma_key(Image.open(p))), STONE_HEIGHT), "stone")
         done += 1
