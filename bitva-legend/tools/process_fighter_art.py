@@ -157,6 +157,14 @@ def pivot(frame: Image.Image, mode: str, ref: dict):
     return rear + ref["center_offset"], bottom
 
 
+def _fit_scale(fit, frames, who) -> float:
+    """Масштаб части по правилу fit: число или "h:<кадр>:<px>" (кадр с 1 внутри части)."""
+    if isinstance(fit, (int, float)):
+        return float(fit)
+    _, idx, px = str(fit).split(":")
+    return float(px) / frames[int(idx) - 1].height
+
+
 def main() -> int:
     if len(sys.argv) != 2 or sys.argv[1] not in HEIGHT:
         print(__doc__)
@@ -189,12 +197,26 @@ def main() -> int:
         if len(group) == 1:
             frames = frames_of(chroma_key(raw), opt.get("frames", 0), opt.get("grid"))
         else:
+            # Части могут прийти в разном разрешении: у каждой — свой масштаб (parts_fit, как fit),
+            # тогда общий масштаб листа — 1.
             frames = []
-            for f in group:
-                frames += frames_of(chroma_key(Image.open(f)), opt.get("part_frames", 0), opt.get("grid"))
+            pf = opt.get("part_frames", 0)
+            for i, f in enumerate(group):
+                n = pf[i] if isinstance(pf, list) else pf
+                part = frames_of(chroma_key(Image.open(f)), n, opt.get("grid"))
+                if "parts_fit" in opt:
+                    k = _fit_scale(opt["parts_fit"][i], part, who)
+                    part = [x.resize((max(1, round(x.width * k)), max(1, round(x.height * k))), Image.LANCZOS)
+                            for x in part]
+                frames += part
         # Бракованные кадры (лишняя рука и т. п.) можно выбросить: "skip": [3] — номера с 1.
         if opt.get("skip"):
             frames = [f for i, f in enumerate(frames, 1) if i not in opt["skip"]]
+        # Порядок кадров после пропуска: "order": [1, 2, 4, 3] (номера с 1).
+        if opt.get("order"):
+            frames = [frames[i - 1] for i in opt["order"]]
+        if "parts_fit" in opt:
+            opt = dict(opt, fit=1.0)
         fit = opt.get("fit", "stand")
         if isinstance(fit, (int, float)):
             scale = float(fit)
@@ -213,7 +235,7 @@ def main() -> int:
         scales[name] = scale
         meta = {"frames": []}
         # Ударные кадры (с 1): hit — первый кадр активной фазы, hit_end — последний.
-        for k in ("hit", "hit_end", "reverse"):
+        for k in ("hit", "hit_end", "reverse", "air_frames"):
             if k in opt:
                 meta[k] = opt[k]
         for i, f in enumerate(frames, 1):

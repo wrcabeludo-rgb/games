@@ -49,7 +49,8 @@ static func _load_character(id: String) -> Dictionary:
 			var hit: int = int(meta.get("hit", 2 if n <= 3 else n - 1)) - 1
 			var hit_end: int = int(meta.get("hit_end", hit + 1)) - 1
 			out[file.get_basename()] = {"tex": tex, "pivot": pivots, "hit": clampi(hit, 0, n - 1),
-				"hit_end": clampi(hit_end, hit, n - 1), "reverse": bool(meta.get("reverse", false))}
+				"hit_end": clampi(hit_end, hit, n - 1), "reverse": bool(meta.get("reverse", false)),
+				"air": int(meta.get("air_frames", 1))}
 	return out
 
 
@@ -113,8 +114,9 @@ func frame_for(f: Fighter, tick: int) -> Array:
 				var n: int = anims.thrown.tex.size()
 				return _pick(anims.thrown, mini(f.state_frame / 10, n - 2))
 		Fighter.State.AIR_HIT:
+			# Полёт после удара: кадры полёта по очереди (откинуло → летит → почти лёг).
 			if anims.has("fall"):
-				return _pick(anims.fall, 0)
+				return _pick(anims.fall, mini(f.state_frame / 6, anims.fall.air - 1))
 		Fighter.State.KNOCKDOWN:
 			# Удар о землю → подскок → лежит → встаёт (последние кадры).
 			var up := Fighter.KNOCKDOWN_TICKS - f.state_frame
@@ -123,12 +125,14 @@ func frame_for(f: Fighter, tick: int) -> Array:
 				return _pick(anims.get_up, clampi((GET_UP_TICKS - up) * n / GET_UP_TICKS, 0, n - 1))
 			if anims.has("fall"):
 				var n: int = anims.fall.tex.size()
-				var i := 1 if f.state_frame < 5 else (2 if f.state_frame < 10 else n - 2)
+				var air: int = anims.fall.air
+				var i := air if f.state_frame < 5 else (air + 1 if f.state_frame < 10 else n - 2)
 				return _pick(anims.fall, mini(i, n - 1))
 		Fighter.State.DOWN:
 			if anims.has("fall"):
 				var n: int = anims.fall.tex.size()
-				var i := 1 if f.state_frame < 5 else (2 if f.state_frame < 10 else n - 2 + (tick / 40) % 2)
+				var air: int = anims.fall.air
+				var i := air if f.state_frame < 5 else (air + 1 if f.state_frame < 10 else n - 2 + (tick / 40) % 2)
 				return _pick(anims.fall, mini(i, n - 1))
 		Fighter.State.PREJUMP:
 			if anims.has("jump"):

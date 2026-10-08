@@ -25,6 +25,17 @@
   {
    "file": "thrown_3.png",
    "pivot": [
+    313,
+    429
+   ],
+   "size": [
+    627,
+    430
+   ]
+  },
+  {
+   "file": "thrown_4.png",
+   "pivot": [
     241,
     638
    ],

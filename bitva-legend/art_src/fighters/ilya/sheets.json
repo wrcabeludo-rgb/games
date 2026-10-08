@@ -4,7 +4,8 @@
   "fit": "h:1:620"
  },
  "st_lp": {
-  "frames": 3
+  "frames": 3,
+  "fit": 0.833
  },
  "walk_f": {
   "frames": 8,
@@ -24,21 +25,21 @@
  },
  "run": {
   "frames": 6,
-  "fit": 1.33,
+  "fit": 1.463,
   "pivot_y": "body"
  },
  "backdash": {
   "frames": 3,
-  "fit": 0.743,
+  "fit": 0.8693,
   "pivot_y": "body"
  },
  "crouch": {
   "frames": 2,
-  "fit": "h:2:440"
+  "fit": "h:2:414"
  },
  "block": {
   "frames": 2,
-  "fit": "h:1:560"
+  "fit": "h:1:616"
  },
  "block_low": {
   "frames": 2,
@@ -46,18 +47,20 @@
  },
  "jump": {
   "frames": 5,
-  "fit": "h:1:490",
+  "fit": "h:1:461",
   "pivot_y": "body"
  },
  "st_lk": {
-  "frames": 3
+  "frames": 3,
+  "fit": 0.919
  },
  "st_hp": {
   "frames": 4,
   "fit": "h:4:600"
  },
  "st_hk": {
-  "frames": 4
+  "frames": 4,
+  "fit": 1.255
  },
  "cr_lp": {
   "frames": 3,
@@ -73,31 +76,31 @@
    3,
    2
   ],
-  "fit": "h:4:610",
+  "fit": "h:4:756",
   "hit": 4,
   "hit_end": 5
  },
  "cr_hk": {
   "frames": 4,
-  "fit": "h:1:380"
+  "fit": "h:1:407"
  },
  "j_lp": {
   "frames": 4,
-  "fit": "h:1:590",
+  "fit": "h:1:543",
   "pivot_y": "body",
   "hit": 2,
   "hit_end": 3
  },
  "j_lk": {
   "frames": 4,
-  "fit": "h:1:520",
+  "fit": "h:1:468",
   "pivot_y": "body",
   "hit": 2,
   "hit_end": 3
  },
  "hit_high": {
   "frames": 4,
-  "fit": "h:4:560"
+  "fit": "h:4:605"
  },
  "hit_low": {
   "frames": 4,
@@ -109,7 +112,7 @@
    4,
    2
   ],
-  "fit": "h:1:570",
+  "fit": "h:1:627",
   "hit": 5,
   "hit_end": 6
  },
@@ -119,7 +122,7 @@
    3,
    2
   ],
-  "fit": "h:1:470",
+  "fit": "h:1:508",
   "pivot_y": "body",
   "hit": 4,
   "hit_end": 5
@@ -140,7 +143,7 @@
    3,
    2
   ],
-  "fit": "h:1:470",
+  "fit": "h:1:517",
   "pivot_y": "body",
   "hit": 4,
   "hit_end": 5
@@ -151,14 +154,25 @@
   "pivot_y": "bottom_center"
  },
  "fall": {
-  "part_frames": 4,
-  "fit": "inherit:get_up",
+  "part_frames": [
+   1,
+   1,
+   4,
+   4
+  ],
+  "parts_fit": [
+   0.46,
+   0.46,
+   1.034,
+   1.034
+  ],
   "pivot_y": "bottom_center",
   "skip": [
-   1,
-   2,
-   3
-  ]
+   3,
+   4,
+   5
+  ],
+  "air_frames": 3
  },
  "throw": {
   "frames": 4,
@@ -167,10 +181,22 @@
   "hit_end": 1
  },
  "thrown": {
-  "frames": 4,
-  "fit": "inherit:get_up",
+  "part_frames": [
+   4,
+   1
+  ],
+  "parts_fit": [
+   1.034,
+   0.46
+  ],
   "pivot_y": "bottom_center",
   "skip": [
+   3
+  ],
+  "order": [
+   1,
+   2,
+   4,
    3
   ]
  }
