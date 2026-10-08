@@ -15,6 +15,7 @@ var show_debug := false
 var _font := SystemFont.new()
 var _sim: Sim
 var _cam_x := 0.0
+var _shake := Vector2.ZERO
 
 
 func _ready() -> void:
@@ -33,10 +34,17 @@ func _update_camera() -> void:
 	_cam_x = clampf(mid, half_view, Sim.ARENA_WIDTH - half_view)
 	if Sim.ARENA_WIDTH < size.x:
 		_cam_x = Sim.ARENA_WIDTH / 2.0
+	# Тряска на попадании: сильнее в начале заморозки, знак меняется каждый тик.
+	_shake = Vector2.ZERO
+	if _sim.hitstop > 0 and _sim.hitstop_total > 0:
+		var amp := 2.0 + _sim.hitstop_total * 0.6
+		var k := float(_sim.hitstop) / _sim.hitstop_total
+		var sgn := 1.0 if _sim.tick % 2 == 0 else -1.0
+		_shake = Vector2(sgn * amp * k, -sgn * amp * k * 0.5)
 
 
 func to_screen(world_x_px: float, height_px: float) -> Vector2:
-	return Vector2(world_x_px - _cam_x + size.x / 2.0, GROUND_Y - height_px)
+	return Vector2(world_x_px - _cam_x + size.x / 2.0, GROUND_Y - height_px) + _shake
 
 
 func _draw() -> void:
@@ -50,6 +58,8 @@ func _draw() -> void:
 		_draw_shadow(f)
 	for f in _sim.fighters:
 		_draw_fighter(f)
+	for p in Sim.PLAYERS:
+		_draw_spark(p)
 	if show_debug:
 		for f in _sim.fighters:
 			_draw_debug(f)
@@ -137,10 +147,24 @@ func _draw_fighter(f: Fighter) -> void:
 		Fighter.State.BACKDASH:
 			lean = -0.2
 			h *= 0.95
+		Fighter.State.HITSTUN:
+			lean = -0.15
+			if f.crouch_hit:
+				h = f.data.crouch_height
+		Fighter.State.AIR_HIT:
+			lean = -0.4
+		Fighter.State.ATTACK:
+			if f.is_crouching():
+				h = f.data.crouch_height
+			elif f.move_phase() == 1:
+				lean = 0.08
 	var head_r := w * 0.32
 	var body_top := base.y - h + head_r * 1.6
 	var shift := Vector2(dir * lean * h, 0)
 	var color: Color = f.data.color
+	# Вспышка у получившего удар во время заморозки.
+	if f.is_stunned() and _sim.hitstop > 0:
+		color = color.lerp(Color.WHITE, 0.55)
 	var body := PackedVector2Array([
 		Vector2(base.x - w / 2.0, base.y),
 		Vector2(base.x + w / 2.0, base.y),
@@ -162,10 +186,13 @@ func _draw_fighter(f: Fighter) -> void:
 	])
 	draw_colored_polygon(nose, color.darkened(0.45))
 	draw_circle(head + Vector2(dir * head_r * 0.4, -head_r * 0.25), head_r * 0.14, Color.WHITE)
-	# Рука вперёд — тоже подсказка, куда смотрит боец.
 	var body_h := base.y - body_top
 	var shoulder := Vector2(base.x + dir * w * 0.2, body_top + body_h * 0.25) + shift * 0.75
-	draw_line(shoulder, shoulder + Vector2(dir * w * 0.55, body_h * 0.2), color.darkened(0.3), 10)
+	if f.move >= 0:
+		_draw_attack(f, shoulder, Vector2(base.x + dir * w * 0.15, base.y - body_h * 0.45), color)
+	else:
+		# Рука вперёд — тоже подсказка, куда смотрит боец.
+		draw_line(shoulder, shoulder + Vector2(dir * w * 0.55, body_h * 0.2), color.darkened(0.3), 10)
 	# Линии скорости за спиной в беге и отскоке.
 	if f.state == Fighter.State.RUN or f.state == Fighter.State.BACKDASH:
 		var behind := -signf(float(f.vx)) if f.vx != 0 else -dir
@@ -173,6 +200,60 @@ func _draw_fighter(f: Fighter) -> void:
 			var ly := base.y - h * (0.3 + 0.2 * i)
 			var lx := base.x + behind * (w * 0.7 + 10 * i)
 			draw_line(Vector2(lx, ly), Vector2(lx + behind * 50, ly), Color(1, 1, 1, 0.45), 3)
+
+
+## Рука или нога во время удара: замах, удар до края хитбокса, возврат.
+func _draw_attack(f: Fighter, shoulder: Vector2, hip: Vector2, color: Color) -> void:
+	var m := f.move_data()
+	var b: Array = m.box
+	var dir := float(f.facing)
+	var button: int = f.move % 4
+	var is_kick := button == 1 or button == 3
+	var origin := hip if is_kick else shoulder
+	var tip := to_screen(float(f.x) / Sim.SUB + dir * (b[0] + b[2] * 0.85), float(f.y) / Sim.SUB + b[1] + b[3] / 2.0)
+	var end := tip
+	match f.move_phase():
+		0:
+			var t: float = float(f.move_frame) / m.startup
+			end = origin + Vector2(-dir * 25.0 * t, -10.0 * t)
+		2:
+			var rec: int = m.get("recovery", 12)
+			var r := clampf(float(f.move_frame - m.startup - m.active) / rec, 0.0, 1.0)
+			end = tip.lerp(origin + Vector2(dir * 20, 0), r)
+	var limb_color := color.darkened(0.3)
+	draw_line(origin, end, limb_color, 18.0 if is_kick else 14.0)
+	draw_circle(end, 10.0 if is_kick else 9.0, limb_color.darkened(0.2))
+	if button == 2 and f.id == "ilya":
+		# Палица.
+		draw_circle(end, 24, Color(0.36, 0.3, 0.26))
+		for i in 6:
+			var a := TAU * i / 6.0
+			draw_line(end + Vector2.from_angle(a) * 20, end + Vector2.from_angle(a) * 32, Color(0.25, 0.2, 0.18), 5)
+	elif button == 2 and f.id == "dracula":
+		# Когти.
+		var v := (end - origin).normalized()
+		for i in 3:
+			var side := v.orthogonal() * (i - 1) * 8.0
+			draw_line(end + side, end + side + v * 22, Color(0.95, 0.9, 0.85), 3)
+
+
+## Искра попадания: вспышка-звезда, у сильных ударов крупнее.
+func _draw_spark(p: int) -> void:
+	var base := p * 4
+	var age := _sim.tick - _sim.sparks[base]
+	if age < 0 or age > 14:
+		return
+	var heavy := _sim.sparks[base + 3] == 1
+	var c := to_screen(float(_sim.sparks[base + 1]) / Sim.SUB, float(_sim.sparks[base + 2]) / Sim.SUB)
+	var k := 1.0 - age / 14.0
+	var r := (46.0 if heavy else 30.0) * (0.6 + 0.4 * k)
+	var col := Color(1.0, 0.95, 0.6, k)
+	var rays := 10 if heavy else 7
+	for i in rays:
+		var a := TAU * i / rays + age * 0.15
+		var ray_len := r * (1.0 if i % 2 == 0 else 0.55)
+		draw_line(c, c + Vector2.from_angle(a) * ray_len, col, 4.0 if heavy else 3.0)
+	draw_circle(c, r * 0.35, Color(1, 1, 1, k))
 
 
 ## Отладка (F2): рамка «тела» для столкновений, состояние, координаты.
@@ -183,13 +264,29 @@ func _draw_debug(f: Fighter) -> void:
 	var half := float(f.push_half()) / Sim.SUB
 	var tl := to_screen(x - half, y + ph)
 	draw_rect(Rect2(tl, Vector2(half * 2, ph)), Color(0.3, 0.9, 1.0), false, 2)
+	# Уязвимые зоны — зелёные, хитбокс — красный (бледный, если сейчас не бьёт).
+	for hb in f.hurtboxes():
+		_debug_box(hb, Color(0.3, 1.0, 0.4, 0.8))
+	if f.move >= 0:
+		_debug_box(f.hitbox(), Color(1, 0.2, 0.2, 0.95) if f.is_active() else Color(1, 0.5, 0.5, 0.35))
 	var origin := to_screen(x, y)
 	draw_line(origin + Vector2(-8, 0), origin + Vector2(8, 0), Color.WHITE, 2)
 	draw_line(origin + Vector2(0, -8), origin + Vector2(0, 8), Color.WHITE, 2)
 	var label := "%s · %d\nx %d  y %d" % [Fighter.STATE_NAMES[f.state], f.state_frame, int(x), int(y)]
+	if f.move >= 0:
+		var m := f.move_data()
+		label = "%s %s · тик %d/%d\nx %d  y %d" % [Fighter.MOVES[f.move], ["замах", "БЬЁТ", "возврат"][f.move_phase()],
+			f.move_frame, m.startup + m.active - 1 + m.get("recovery", 0), int(x), int(y)]
 	var lines := label.split("\n")
 	for i in lines.size():
 		_text_centered(tl + Vector2(half, -34 + i * 18), lines[i], 14, Color(0.3, 0.9, 1.0))
+
+
+func _debug_box(b: PackedInt32Array, color: Color) -> void:
+	var a := to_screen(float(b[0]) / Sim.SUB, float(b[3]) / Sim.SUB)
+	var c := to_screen(float(b[1]) / Sim.SUB, float(b[2]) / Sim.SUB)
+	draw_rect(Rect2(a, c - a), color, false, 2)
+	draw_rect(Rect2(a, c - a), Color(color, 0.12))
 
 
 func _text_centered(pos: Vector2, s: String, font_size: int, color: Color) -> void:

@@ -2,6 +2,17 @@ class_name FighterData
 extends RefCounted
 ## Параметры бойцов. Размеры — в пикселях, скорости — в субпикселях за тик
 ## (1 пиксель = Fighter.SUB субпикселей), время — в тиках (60 тиков = 1 секунда).
+##
+## Удары: st_ — стоя, cr_ — в приседе, j_ — в прыжке; lp/lk/hp/hk — кнопки.
+##   startup  — на каком тике после нажатия удар начинает бить
+##   active   — сколько тиков бьёт
+##   recovery — восстановление после (у ударов в прыжке нет: до приземления)
+##   damage   — урон (здоровье бойца — 1000)
+##   hitstun  — сколько тиков соперник оглушён после попадания
+##   hitstop  — заморозка обоих бойцов при попадании (ощущение «веса»)
+##   push     — сила отбрасывания соперника
+##   box      — хитбокс [вперёд от центра, высота низа над ногами, ширина, высота], px
+##   level    — high (по умолчанию), low (надо блокировать сидя), overhead (стоя) — для блока в 1.5
 
 const CHARACTERS := {
 	"ilya": {
@@ -25,6 +36,21 @@ const CHARACTERS := {
 		"backdash_v0": 1000,    # отскок: начальная скорость
 		"backdash_decel": 55,   # отскок: замедление за тик (~96 px за 19 тиков)
 		"backdash_recovery": 8, # после отскока нельзя действовать, тиков
+		"moves": {
+			# Кулаки и ноги Ильи медленнее, зато палица (сильные удары рукой) бьёт далеко.
+			"st_lp": {"startup": 5, "active": 3, "recovery": 8, "damage": 40, "hitstun": 15, "hitstop": 8, "push": 700, "box": [40, 180, 90, 40]},
+			"st_lk": {"startup": 7, "active": 3, "recovery": 11, "damage": 50, "hitstun": 16, "hitstop": 8, "push": 800, "box": [40, 85, 105, 40]},
+			"st_hp": {"startup": 12, "active": 4, "recovery": 20, "damage": 110, "hitstun": 22, "hitstop": 13, "push": 1100, "box": [40, 120, 155, 140]},
+			"st_hk": {"startup": 10, "active": 4, "recovery": 18, "damage": 90, "hitstun": 20, "hitstop": 11, "push": 1000, "box": [45, 140, 130, 45]},
+			"cr_lp": {"startup": 5, "active": 3, "recovery": 9, "damage": 35, "hitstun": 14, "hitstop": 7, "push": 650, "box": [45, 110, 85, 35]},
+			"cr_lk": {"startup": 6, "active": 3, "recovery": 10, "damage": 35, "hitstun": 14, "hitstop": 7, "push": 650, "box": [40, 0, 110, 30], "level": "low"},
+			"cr_hp": {"startup": 10, "active": 5, "recovery": 22, "damage": 100, "hitstun": 22, "hitstop": 12, "push": 900, "box": [25, 150, 95, 170]},
+			"cr_hk": {"startup": 11, "active": 4, "recovery": 24, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 1000, "box": [40, 0, 165, 30], "level": "low"},
+			"j_lp": {"startup": 5, "active": 6, "damage": 40, "hitstun": 15, "hitstop": 8, "push": 600, "box": [30, 70, 85, 50], "level": "overhead"},
+			"j_lk": {"startup": 6, "active": 8, "damage": 45, "hitstun": 16, "hitstop": 8, "push": 600, "box": [30, 10, 95, 50], "level": "overhead"},
+			"j_hp": {"startup": 9, "active": 5, "damage": 100, "hitstun": 22, "hitstop": 13, "push": 800, "box": [25, -15, 125, 95], "level": "overhead"},
+			"j_hk": {"startup": 8, "active": 6, "damage": 90, "hitstun": 20, "hitstop": 11, "push": 800, "box": [30, 15, 125, 50], "level": "overhead"},
+		},
 	},
 	"dracula": {
 		"name": "ДРАКУЛА",
@@ -47,6 +73,21 @@ const CHARACTERS := {
 		"backdash_v0": 1700,
 		"backdash_decel": 120,
 		"backdash_recovery": 3,
+		"moves": {
+			# Дракула быстрее и бьёт чаще, но слабее; ноги длиннее рук.
+			"st_lp": {"startup": 4, "active": 2, "recovery": 7, "damage": 30, "hitstun": 14, "hitstop": 7, "push": 650, "box": [32, 165, 72, 35]},
+			"st_lk": {"startup": 5, "active": 3, "recovery": 9, "damage": 35, "hitstun": 14, "hitstop": 7, "push": 700, "box": [30, 80, 95, 35]},
+			"st_hp": {"startup": 8, "active": 3, "recovery": 16, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 950, "box": [32, 150, 115, 50]},
+			"st_hk": {"startup": 9, "active": 3, "recovery": 16, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 1000, "box": [32, 115, 135, 45]},
+			"cr_lp": {"startup": 4, "active": 2, "recovery": 7, "damage": 25, "hitstun": 13, "hitstop": 6, "push": 600, "box": [35, 100, 72, 30]},
+			"cr_lk": {"startup": 5, "active": 2, "recovery": 9, "damage": 30, "hitstun": 13, "hitstop": 6, "push": 600, "box": [30, 0, 105, 28], "level": "low"},
+			"cr_hp": {"startup": 7, "active": 4, "recovery": 18, "damage": 75, "hitstun": 20, "hitstop": 11, "push": 850, "box": [22, 140, 85, 155]},
+			"cr_hk": {"startup": 9, "active": 3, "recovery": 20, "damage": 70, "hitstun": 19, "hitstop": 10, "push": 1000, "box": [35, 0, 145, 28], "level": "low"},
+			"j_lp": {"startup": 4, "active": 5, "damage": 30, "hitstun": 14, "hitstop": 7, "push": 550, "box": [25, 60, 72, 45], "level": "overhead"},
+			"j_lk": {"startup": 5, "active": 7, "damage": 35, "hitstun": 15, "hitstop": 7, "push": 550, "box": [25, 10, 85, 45], "level": "overhead"},
+			"j_hp": {"startup": 7, "active": 4, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 750, "box": [25, 0, 105, 80], "level": "overhead"},
+			"j_hk": {"startup": 7, "active": 5, "damage": 75, "hitstun": 19, "hitstop": 10, "push": 750, "box": [25, 20, 115, 45], "level": "overhead"},
+		},
 	},
 }
 

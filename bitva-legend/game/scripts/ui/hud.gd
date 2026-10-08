@@ -33,15 +33,46 @@ func _draw() -> void:
 		var x := w - 40.0 if right else 40.0
 		_text(Vector2(x, 44), f.data.name, 26, f.data.color.lightened(0.2), right)
 		_text(Vector2(x, 68), "Игрок %d · %s" % [p + 1, _reader.device_label(p)], 14, COLOR_DIM, right)
+		_draw_hp(f, Vector2(x, 80), right)
 		if show_inputs:
-			_draw_history(p, Vector2(x, 100), right)
+			_draw_history(p, Vector2(x, 118), right)
+		_draw_combo(p, right)
 	var version: String = ProjectSettings.get_setting("application/config/version")
 	var stage: String = ProjectSettings.get_setting("application/config/description")
 	_text(Vector2(w / 2.0, 30), "БИТВА ЛЕГЕНД · сборка %s · %s" % [version, stage], 15, COLOR_DIM, false, true)
 	_text(Vector2(w / 2.0, 50), "%d FPS" % Engine.get_frames_per_second(), 13, COLOR_DIM, false, true)
-	var hint := "F1 — история ввода · F2 — отладка · R или Create — сброс · F11 — полный экран · Esc — выход"
+	var hint := "F1 — история ввода · F2 — хитбоксы и отладка · R или Create — сброс · F11 — полный экран · Esc — выход"
 	draw_rect(Rect2(0, size.y - 34, w, 34), COLOR_SHADE)
 	_text(Vector2(w / 2.0, size.y - 12), hint, 14, COLOR_TEXT, false, true)
+
+
+## Временная полоска здоровья (полноценный интерфейс боя — в подэтапе 1.6).
+func _draw_hp(f: Fighter, origin: Vector2, right: bool) -> void:
+	var w := 360.0
+	var x0 := origin.x - w if right else origin.x
+	draw_rect(Rect2(x0, origin.y, w, 14), Color(0, 0, 0, 0.6))
+	var k := float(f.hp) / Fighter.MAX_HP
+	var fill := w * k
+	var fx := x0 + (w - fill) if right else x0
+	draw_rect(Rect2(fx, origin.y, fill, 14), Color(0.95, 0.8, 0.25).lerp(Color(0.9, 0.2, 0.15), 1.0 - k))
+	_text(Vector2(origin.x + (-w - 8 if right else w + 8), origin.y + 13), str(f.hp), 14, COLOR_TEXT, right)
+
+
+## Счётчик комбо — на стороне атакующего, пока соперник оглушён.
+func _draw_combo(p: int, right: bool) -> void:
+	var d := _sim.fighters[1 - p]
+	if d.combo < 2 or not d.is_stunned():
+		return
+	var x := size.x * (0.72 if right else 0.28)
+	_text(Vector2(x, 220), "%d %s!" % [d.combo, _plural_hits(d.combo)], 40, Color(1, 0.85, 0.3), false, true)
+
+
+static func _plural_hits(n: int) -> String:
+	if n % 10 == 1 and n % 100 != 11:
+		return "УДАР"
+	if n % 10 >= 2 and n % 10 <= 4 and (n % 100 < 12 or n % 100 > 14):
+		return "УДАРА"
+	return "УДАРОВ"
 
 
 ## Колонка истории ввода. Направления показаны относительно экрана.

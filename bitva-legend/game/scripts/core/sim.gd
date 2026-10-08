@@ -19,6 +19,11 @@ var inputs := PackedInt32Array([0, 0])
 ## История ввода по игрокам: записи [биты, сколько тиков удерживались], новые — первыми.
 var history: Array = [[], []]
 var fighters: Array[Fighter] = []
+## Заморозка после попадания: пока > 0, бойцы стоят, но нажатия запоминаются.
+var hitstop := 0
+var hitstop_total := 0              # длительность текущей заморозки (для тряски камеры)
+## Последнее попадание каждого игрока (для искр): [тик, x, y, сильный 0/1].
+var sparks := PackedInt32Array([-999, 0, 0, 0, -999, 0, 0, 0])
 
 
 func _init() -> void:
@@ -40,14 +45,75 @@ func step(frame_inputs: PackedInt32Array) -> void:
 		inputs[p] = bits
 		_record_history(p, bits)
 
+	if hitstop > 0:
+		for p in PLAYERS:
+			fighters[p].read_input(inputs[p], false)
+		hitstop -= 1
+		tick += 1
+		return
+
 	var prev_x := PackedInt32Array([fighters[0].x, fighters[1].x])
 	for p in PLAYERS:
 		fighters[p].step(inputs[p])
+	_wall_pushback()
 	_resolve_push()
 	_limit_separation(prev_x)
 	_clamp_walls()
+	_check_hits()
 	_update_facing()
 	tick += 1
+
+
+## Отбросило в стену — значит, отбрасывает самого атакующего (как в Street Fighter).
+func _wall_pushback() -> void:
+	for p in PLAYERS:
+		var f := fighters[p]
+		if f.state != Fighter.State.HITSTUN:
+			continue
+		var other := fighters[1 - p]
+		var hi := ARENA_WIDTH * SUB - f.push_half()
+		if f.x > hi:
+			other.x -= f.x - hi
+		elif f.x < f.push_half():
+			other.x += f.push_half() - f.x
+
+
+## Попадания проверяются для обоих сразу, поэтому возможны размены ударами.
+func _check_hits() -> void:
+	var hits: Array = []
+	for p in PLAYERS:
+		var a := fighters[p]
+		var d := fighters[1 - p]
+		if not a.is_active() or d.state == Fighter.State.AIR_HIT:
+			continue
+		var hb := a.hitbox()
+		for hurt in d.hurtboxes():
+			if _overlap(hb, hurt):
+				hits.append([p, a.move_data(), hb])
+				break
+	for hit in hits:
+		var p: int = hit[0]
+		var m: Dictionary = hit[1]
+		var hb: PackedInt32Array = hit[2]
+		var a := fighters[p]
+		var d := fighters[1 - p]
+		a.mark_hit()
+		d.take_hit(m, a.facing)
+		if m.hitstop > hitstop:
+			hitstop = m.hitstop
+			hitstop_total = m.hitstop
+		# Искра — в точке, где хитбокс заходит в тело соперника.
+		var spark_x := (maxi(hb[0], d.x - d.push_half()) + mini(hb[1], d.x + d.push_half())) / 2
+		var spark_y := (hb[2] + hb[3]) / 2
+		var base := p * 4
+		sparks[base] = tick
+		sparks[base + 1] = spark_x
+		sparks[base + 2] = spark_y
+		sparks[base + 3] = 1 if m.hitstop >= 11 else 0
+
+
+static func _overlap(a: PackedInt32Array, b: PackedInt32Array) -> bool:
+	return a[0] < b[1] and b[0] < a[1] and a[2] < b[3] and b[2] < a[3]
 
 
 func _record_history(p: int, bits: int) -> void:
@@ -137,6 +203,9 @@ func save_state() -> Dictionary:
 		"inputs": inputs.duplicate(),
 		"history": history.duplicate(true),
 		"fighters": [fighters[0].save(), fighters[1].save()],
+		"hitstop": hitstop,
+		"hitstop_total": hitstop_total,
+		"sparks": sparks.duplicate(),
 	}
 
 
@@ -146,6 +215,9 @@ func load_state(state: Dictionary) -> void:
 	history = state.history.duplicate(true)
 	for p in PLAYERS:
 		fighters[p].load(state.fighters[p])
+	hitstop = state.hitstop
+	hitstop_total = state.hitstop_total
+	sparks = state.sparks.duplicate()
 
 
 ## Контрольная сумма состояния (FNV-1a по целым числам).
@@ -153,6 +225,10 @@ func load_state(state: Dictionary) -> void:
 func checksum() -> int:
 	var h := 2166136261
 	h = _mix(h, tick)
+	h = _mix(h, hitstop)
+	h = _mix(h, hitstop_total)
+	for v in sparks:
+		h = _mix(h, v)
 	for p in PLAYERS:
 		h = _mix(h, inputs[p])
 		for entry in history[p]:
