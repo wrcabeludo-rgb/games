@@ -143,6 +143,8 @@ def pivot(frame: Image.Image, mode: str, ref: dict):
            на столько же, сколько в стойке;
     body — привязка по центру масс фигуры (ходьба, бег, отскок: ступни не стоят на месте),
            смещение до «центра на земле» — как в стойке;
+    body_ground — по центру масс по горизонтали, а по вертикали — нижняя точка фигуры: ступни
+           всегда на земле (ходьба, бег, отскок; иначе боец «парит» над землёй);
     center — центр кадра (в воздухе)."""
     if mode == "bottom_center":
         a = np.asarray(frame.getchannel("A")) > 24
@@ -150,6 +152,10 @@ def pivot(frame: Image.Image, mode: str, ref: dict):
         return float((xs.min() + xs.max()) / 2), float(ys.max())
     if mode == "center":
         return centroid(frame)
+    if mode == "body_ground":
+        cx, _ = centroid(frame)
+        ys = np.where(np.asarray(frame.getchannel("A")) > 24)[0]
+        return cx + ref["body_dx"], float(ys.max())
     if mode == "body":
         cx, cy = centroid(frame)
         return cx + ref["body_dx"], cy + ref["body_dy"]

@@ -13,7 +13,7 @@
    4,
    2
   ],
-  "pivot_y": "body"
+  "pivot_y": "body_ground"
  },
  "walk_b": {
   "frames": 8,
@@ -21,17 +21,17 @@
    4,
    2
   ],
-  "pivot_y": "body"
+  "pivot_y": "body_ground"
  },
  "run": {
   "frames": 6,
   "fit": 1.463,
-  "pivot_y": "body"
+  "pivot_y": "body_ground"
  },
  "backdash": {
   "frames": 3,
   "fit": 0.8693,
-  "pivot_y": "body"
+  "pivot_y": "body_ground"
  },
  "crouch": {
   "frames": 2,

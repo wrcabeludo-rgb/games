@@ -5,8 +5,8 @@ config_version=5
 [application]
 
 config/name="Битва легенд"
-config/version="3.7.3"
-config/description="Исправления: суперприём, музыка, экран выбора"
+config/version="3.7.4"
+config/description="Бойцы на земле при ходьбе и беге"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="res://icon.svg"

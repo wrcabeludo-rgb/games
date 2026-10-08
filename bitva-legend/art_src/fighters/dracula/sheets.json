@@ -9,7 +9,7 @@
    "h:1:574",
    "h:1:574"
   ],
-  "pivot_y": "body"
+  "pivot_y": "body_ground"
  },
  "walk_b": {
   "part_frames": 4,
@@ -17,12 +17,12 @@
    "h:1:591",
    "h:1:591"
   ],
-  "pivot_y": "body"
+  "pivot_y": "body_ground"
  },
  "run": {
   "frames": 4,
   "fit": "h:1:505",
-  "pivot_y": "body"
+  "pivot_y": "body_ground"
  },
  "crouch": {
   "frames": 2,
@@ -52,7 +52,7 @@
  "backdash": {
   "frames": 3,
   "fit": "h:1:500",
-  "pivot_y": "body"
+  "pivot_y": "body_ground"
  },
  "cr_lp": {
   "frames": 4,

@@ -150,7 +150,9 @@ func _draw() -> void:
 func _draw_background() -> void:
 	var r := Rect2(Vector2.ZERO, size)
 	if screen == Screen.TITLE and _title != null:
-		draw_texture_rect(_title, _cover(_title.get_size()), false)
+		# Заставка целиком (на широком мониторе — с полями), чтобы герои не уходили за край экрана.
+		draw_rect(r, Color.BLACK)
+		draw_texture_rect(_title, _contain(_title.get_size()), false)
 		# Низ затемнён — на нём название и подсказка.
 		var clear := Color(0, 0, 0, 0)
 		var dark := Color(0, 0, 0, 0.8)
@@ -173,6 +175,13 @@ func _draw_background() -> void:
 	for i in 6:
 		draw_circle(moon, 90 + i * 22, Color(0.9, 0.9, 1.0, 0.035))
 	draw_circle(moon, 80, Color(0.93, 0.92, 0.85))
+
+
+## Прямоугольник, в который картинка вписывается целиком, по центру.
+func _contain(img: Vector2) -> Rect2:
+	var k := minf(size.x / img.x, size.y / img.y)
+	var s := img * k
+	return Rect2((size - s) / 2.0, s)
 
 
 ## Прямоугольник, которым картинка закрывает весь экран без искажений.
