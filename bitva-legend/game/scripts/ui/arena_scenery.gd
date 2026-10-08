@@ -209,7 +209,9 @@ func _draw_mountains(c: CanvasItem) -> void:
 	var x0 := layer_x(k)
 	var w := layer_w(k)
 	if _tex.has("mountains"):
-		_draw_strip(c, _tex.mountains, k, ground_y + 70)
+		# Дальний план из панелей (широкий): поднят, чтобы холмы, деревни и замок были видны над лесом.
+		var wide: bool = float(_tex.mountains.get_width()) / _tex.mountains.get_height() > 5.0
+		_draw_strip(c, _tex.mountains, k, ground_y - 95 if wide else ground_y + 70)
 		return
 	var pts := PackedVector2Array([Vector2(x0, ground_y)])
 	var x := 0.0

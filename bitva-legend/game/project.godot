@@ -5,8 +5,8 @@ config_version=5
 [application]
 
 config/name="Битва легенд"
-config/version="3.7.7"
-config/description="Чёткая трава переднего плана"
+config/version="3.7.8"
+config/description="Дальний план: деревня и замок"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="res://icon.svg"

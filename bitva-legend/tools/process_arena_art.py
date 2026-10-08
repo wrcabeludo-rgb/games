@@ -32,7 +32,7 @@ SKY_SIZE = (1980, 1080)
 STRIP_WIDTH = {"mountains": 5400, "forest": 6000, "ground": 4000, "foreground": 4432}
 MOON_SIZE = 320
 STONE_HEIGHT = 520  # 2× высоты в игре (STONE_H в arena_scenery.gd) — надпись читается
-STITCH_OVERLAP = {"ground": 0.12, "mountains": 0.06}  # перетекание соседних панелей сплошных полос
+STITCH_OVERLAP = {"ground": 0.12, "mountains": 0.15}  # перетекание соседних панелей сплошных полос
 CLOUD_MAX_WIDTH = 720
 RAVEN_HEIGHT = 220
 
