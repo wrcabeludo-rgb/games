@@ -11,6 +11,7 @@ ZIP="$ROOT/build/BitvaLegend-$VERSION-windows.zip"
 REMOTE="$(git -C "$ROOT" remote get-url origin)"
 [ -f "$ZIP" ] || { echo "Нет $ZIP — сначала запусти tools/build.sh"; exit 1; }
 
+EXE_SHA="$(sha256sum "$ROOT/build/BitvaLegend/BitvaLegend.exe" | cut -d' ' -f1)"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 cp "$ZIP" "$TMP/BitvaLegend-windows.zip"
@@ -22,6 +23,12 @@ cat > "$TMP/README.md" <<EOF
 [Скачать BitvaLegend-windows.zip](BitvaLegend-windows.zip?raw=1) — распаковать и запустить \`BitvaLegend.exe\`.
 
 Если Windows покажет «Windows защитила ваш компьютер»: «Подробнее» → «Выполнить в любом случае».
+
+В архиве два файла: \`BitvaLegend.exe\` — официальный запускатель Godot 4.4.1 без изменений
+(байт в байт совпадает с шаблоном экспорта Godot), и \`BitvaLegend.pck\` — данные игры.
+Держи их в одной папке.
+
+SHA-256 \`BitvaLegend.exe\`: \`$EXE_SHA\`
 EOF
 
 cd "$TMP"
