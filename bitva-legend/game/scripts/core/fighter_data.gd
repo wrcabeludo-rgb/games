@@ -85,7 +85,7 @@ const CHARACTERS := {
 			"cr_hk": {"startup": 11, "active": 4, "recovery": 24, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 1000, "box": [40, 0, 140, 35], "level": "low"},
 			"j_lp": {"startup": 5, "active": 6, "damage": 40, "hitstun": 15, "hitstop": 8, "push": 600, "box": [60, 140, 120, 55], "level": "overhead"},
 			"j_lk": {"startup": 6, "active": 8, "damage": 45, "hitstun": 16, "hitstop": 8, "push": 600, "box": [60, 70, 115, 65], "level": "overhead"},
-			"j_hp": {"startup": 9, "active": 5, "damage": 100, "hitstun": 22, "hitstop": 13, "push": 800, "box": [25, -15, 125, 95], "level": "overhead"},
+			"j_hp": {"startup": 9, "active": 5, "damage": 100, "hitstun": 22, "hitstop": 13, "push": 800, "box": [40, 0, 110, 130], "level": "overhead"},
 			"j_hk": {"startup": 8, "active": 6, "damage": 90, "hitstun": 20, "hitstop": 11, "push": 800, "box": [30, 15, 125, 50], "level": "overhead"},
 			# Бросок палицы (только руками): летит по дуге и падает. Медленный, но мощный.
 			"sp_proj_l": {"buttons": "punch", "versions": 2, "startup": 16, "active": 1, "recovery": 20, "proj": {"x": 60, "y": 200, "vx": 650, "vy": 1100, "gravity": 70, "w": 54, "h": 54, "kind": 0, "damage": 90, "hitstun": 22, "hitstop": 12, "push": 900, "chip": 9}, "ex": {"startup": 12, "proj": {"vx": 900, "vy": 1000, "damage": 140, "hitstun": 26, "chip": 16, "kind": 3}}},
@@ -97,7 +97,7 @@ const CHARACTERS := {
 			# Мельница (назад, назад + рука): дальний захват, раскручивает и швыряет. Вырваться нельзя.
 			"sp_bb_l": {"buttons": "punch", "startup": 6, "active": 2, "recovery": 30, "grab": {"range": 90, "hold": 40, "damage": 170, "launch": [900, 1300], "tech": 0, "recovery": 12}, "ex": {"grab": {"range": 130, "damage": 240}}},
 			# Классика.
-			"st_sweep": {"startup": 9, "active": 3, "recovery": 20, "damage": 70, "hitstun": 20, "hitstop": 11, "push": 600, "box": [40, 0, 150, 30], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
+			"st_sweep": {"startup": 9, "active": 3, "recovery": 20, "damage": 70, "hitstun": 20, "hitstop": 11, "push": 600, "box": [30, 0, 125, 40], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
 			"st_round": {"startup": 14, "active": 4, "recovery": 24, "damage": 120, "hitstun": 22, "hitstop": 14, "push": 1200, "box": [40, 150, 150, 60], "knockdown": 1, "launch": [650, 950], "kick": 1},
 			"throw": {"startup": 4, "active": 2, "recovery": 18, "grab": {"range": 25, "hold": 26, "damage": 120, "launch": [500, 1000], "tech": 1, "recovery": 10}},
 			# «Удар с небес» (блок + СР + СН): рывок с палицей; попал — небо разверзается, молнии и удар сверху.

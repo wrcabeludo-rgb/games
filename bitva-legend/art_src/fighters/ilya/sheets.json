@@ -96,5 +96,26 @@
  "hit_low": {
   "frames": 4,
   "fit": "h:4:440"
+ },
+ "st_sweep": {
+  "frames": 8,
+  "grid": [
+   4,
+   2
+  ],
+  "fit": "h:1:570",
+  "hit": 5,
+  "hit_end": 6
+ },
+ "j_hp": {
+  "frames": 6,
+  "grid": [
+   3,
+   2
+  ],
+  "fit": "h:1:470",
+  "pivot_y": "body",
+  "hit": 4,
+  "hit_end": 5
  }
 }
