@@ -107,8 +107,8 @@ const CHARACTERS := {
 	"dracula": {
 		"name": "ДРАКУЛА",
 		"color": Color(0.72, 0.16, 0.24),
-		"height": 270,
-		"crouch_height": 165,
+		"height": 310,
+		"crouch_height": 190,
 		"push_half": 40,
 		"walk_f": 360,
 		"walk_b": 300,

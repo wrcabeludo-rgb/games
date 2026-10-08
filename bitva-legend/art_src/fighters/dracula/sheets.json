@@ -1,36 +1,36 @@
 {
  "idle": {
   "frames": 1,
-  "fit": "h:1:540"
+  "fit": "h:1:620"
  },
  "walk_f": {
   "part_frames": 4,
   "parts_fit": [
-   "h:1:500",
-   "h:1:500"
+   "h:1:574",
+   "h:1:574"
   ],
   "pivot_y": "body"
  },
  "walk_b": {
   "part_frames": 4,
   "parts_fit": [
-   "h:1:515",
-   "h:1:515"
+   "h:1:591",
+   "h:1:591"
   ],
   "pivot_y": "body"
  },
  "run": {
   "frames": 4,
-  "fit": "h:1:440",
+  "fit": "h:1:505",
   "pivot_y": "body"
  },
  "crouch": {
   "frames": 2,
-  "fit": "h:2:340"
+  "fit": "h:2:390"
  },
  "jump": {
   "frames": 4,
-  "fit": "h:1:380",
+  "fit": "h:1:436",
   "pivot_y": "body"
  }
 }

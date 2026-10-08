@@ -36,7 +36,7 @@ from process_arena_art import chroma_key, split_objects, sharpen  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 # Рост бойца стоя в пикселях 1440p (= рост в игре × 2, см. FighterData "height").
-HEIGHT = {"ilya": 600, "dracula": 540}
+HEIGHT = {"ilya": 600, "dracula": 620}
 FEET_BAND = 0.06   # опорная точка по x — центр непрозрачных пикселей в нижних 6% кадра
 
 
