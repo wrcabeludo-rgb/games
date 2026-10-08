@@ -17,10 +17,12 @@
   grid: [столбцов, рядов] — лист сеткой (8 кадров = [4, 2], 12 = [4, 3]); порядок — слева направо, сверху вниз.
   reverse: true — проигрывать задом наперёд (шаг назад, нарисованный как шаг вперёд).
   hit / hit_end: номера ударных кадров (с 1) — показываются в активной фазе удара; до них — замах, после — возврат.
+  part_frames: сколько кадров в каждой части (лист прислан частями <имя>_p1, <имя>_p2, …).
   pivot_y: "feet" (по умолчанию — задняя ступня стоит на месте), "body" (по центру фигуры — ходьба, бег)
            или "center" (кадры в воздухе).
 """
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -159,8 +161,14 @@ def main() -> int:
     out.mkdir(parents=True, exist_ok=True)
     cfg_path = src / "sheets.json"
     cfg = json.loads(cfg_path.read_text()) if cfg_path.exists() else {}
-    sheets = sorted(p for p in src.iterdir() if p.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp")
-                    and not p.stem.startswith(("model", "old_")))
+    files = sorted(p for p in src.iterdir() if p.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp")
+                   and not p.stem.startswith(("model", "old_")))
+    # Длинную анимацию можно прислать частями: idle_p1, idle_p2, … — кадры склеятся по порядку.
+    parts = {}
+    for f in files:
+        m = re.match(r"^(.*)_p(\d+)$", f.stem)
+        parts.setdefault(m.group(1) if m else f.stem, []).append((int(m.group(2)) if m else 0, f))
+    sheets = [Path(name) for name in parts]
     # Сначала стойка (по ней — центр бойца), потом листы с собственным масштабом, потом наследующие.
     sheets.sort(key=lambda p: (p.stem != "idle", str(cfg.get(p.stem, {}).get("fit", "stand")).startswith("inherit")))
     ref = None  # по первому кадру стойки: от задней ступни и от центра масс до центра бойца на земле
@@ -169,9 +177,15 @@ def main() -> int:
     for p in sheets:
         name = p.stem
         opt = cfg.get(name, {})
-        raw = Image.open(p)
+        group = [f for _, f in sorted(parts[name])]
+        raw = Image.open(group[0])
         heights[name] = raw.height
-        frames = frames_of(chroma_key(raw), opt.get("frames", 0), opt.get("grid"))
+        if len(group) == 1:
+            frames = frames_of(chroma_key(raw), opt.get("frames", 0), opt.get("grid"))
+        else:
+            frames = []
+            for f in group:
+                frames += frames_of(chroma_key(Image.open(f)), opt.get("part_frames", 0), opt.get("grid"))
         fit = opt.get("fit", "stand")
         if isinstance(fit, (int, float)):
             scale = float(fit)

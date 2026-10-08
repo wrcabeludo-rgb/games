@@ -22,8 +22,10 @@ const K_GROUND := 1.0
 const K_FRONT := 1.3
 
 const GROUND_SQUASH := 0.8  # картинку земли сжимаем по высоте
-const GROUND_RISE := 128.0  # бойцы стоят на дороге: полоса травы и кустов — выше их ступней, px
+const GROUND_RISE := 148.0  # бойцы стоят на дороге: полоса травы и кустов — выше их ступней, px
 const FOREST_HEIGHT := 270.0  # высота полосы леса на экране, px (ширина — по пропорциям картинки)
+const K_STONE := 0.85
+const STONE_BACK := 26.0    # насколько выше линии бойцов стоит камень (дальше от зрителя), px
 const STONE_SINK := 16.0    # камень утоплен в землю, px
 const FRONT_RISE := 95.0    # передний план поднимается над линией земли, px
 
@@ -346,17 +348,18 @@ func _draw_ground(c: CanvasItem) -> void:
 
 ## Камень на перепутье — в центре арены, на линии бойцов.
 func _draw_stone(c: CanvasItem) -> void:
-	var p := Vector2(layer_x(K_GROUND) + arena_w / 2.0, ground_y + 4)
+	# Камень дальше, за спиной бойцов: свой параллакс, стоит выше по дороге, чуть меньше и в дымке.
+	var p := Vector2(layer_x(K_STONE) + layer_w(K_STONE) / 2.0, ground_y - STONE_BACK)
 	if _tex.has("stone"):
 		var tex: Texture2D = _tex.stone
 		# Основание (трава и камешки) утоплено в дорогу, под ним — тень: камень стоит, а не висит.
-		var h := 200.0
+		var h := 165.0
 		var w := h * tex.get_width() / tex.get_height()
 		var foot := p + Vector2(0, STONE_SINK)
 		c.draw_set_transform(foot + Vector2(0, -4), 0, Vector2(1, 0.2))
 		c.draw_circle(Vector2.ZERO, w * 0.55, Color(0.05, 0.03, 0.05, 0.55))
 		c.draw_set_transform(Vector2.ZERO)
-		c.draw_texture_rect(tex, Rect2(foot.x - w / 2.0, foot.y - h, w, h), false)
+		c.draw_texture_rect(tex, Rect2(foot.x - w / 2.0, foot.y - h, w, h), false, Color(0.88, 0.86, 0.9))  # дальше — чуть в дымке
 		return
 	var pts := PackedVector2Array([p + Vector2(-56, 0), p + Vector2(-50, -120), p + Vector2(-30, -150),
 		p + Vector2(28, -152), p + Vector2(50, -126), p + Vector2(58, 0)])

@@ -11,6 +11,7 @@ const SCALE := 0.5          # кадры нарисованы для 1440p, иг
 const IDLE_CYCLE := 96      # стойка (дыхание)
 const WALK_CYCLE := 40      # шаг (полный цикл — два шага)
 const RUN_CYCLE := 26       # бег
+const BREATH_TICKS := 110  # один вдох-выдох в стойке (дыхание рисует игра, см. ArenaView._draw_breathing)
 const PING_PONG_MAX := 5    # до стольких кадров стойка идёт туда-обратно (1-2-3-2), больше — нарисован цикл
 
 ## id бойца → {анимация: {"tex": Array[Texture2D], "pivot": Array[Vector2]}}
@@ -127,6 +128,8 @@ func frame_for(f: Fighter, tick: int) -> Array:
 		Fighter.State.STAND, Fighter.State.WALK_F, Fighter.State.WALK_B, Fighter.State.LAND, \
 				Fighter.State.RUN_STOP, Fighter.State.PREJUMP, Fighter.State.RUN, Fighter.State.BACKDASH:
 			if anims.has("idle"):
+				# Стойка — один чистый кадр, дыхание делает игра плавной деформацией.
+				return [anims.idle.tex[0], anims.idle.pivot[0], true]
 				var n: int = anims.idle.tex.size()
 				if n <= PING_PONG_MAX:
 					return _pick(anims.idle, _ping_pong(tick * (2 * n - 2) / IDLE_CYCLE, n))

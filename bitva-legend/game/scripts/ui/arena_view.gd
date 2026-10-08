@@ -3,7 +3,7 @@ extends Control
 ## Отрисовка арены и бойцов по состоянию Sim. Только чтение: в логику боя не вмешивается.
 ## Пока вместо спрайтов — цветные фигуры. Фон арены — ArenaScenery.
 
-const GROUND_Y := 620                 # линия земли на экране (при высоте 720)
+const GROUND_Y := 640                 # линия земли на экране (при высоте 720)
 
 var show_debug := false
 var _font := SystemFont.new()
@@ -133,19 +133,47 @@ func _draw_shadow(f: Fighter) -> void:
 
 
 ## Кадр спрайта: опорная точка (центр бойца на земле) — в позиции бойца; смотрит влево — отражаем.
-func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2) -> void:
+func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2, breathe := false) -> void:
 	var base := to_screen(float(f.x) / Sim.SUB, float(f.y) / Sim.SUB)
 	var tint := Color(0.75, 0.85, 1.0) if f.alt else Color.WHITE
 	if f.is_stunned() and _sim.hitstop > 0:
 		tint = Color(1.0, 0.75, 0.7)  # получил удар — краснеет на время заморозки
 	draw_set_transform(base, 0, Vector2(FighterSprites.SCALE * f.facing, FighterSprites.SCALE))
-	draw_texture(tex, -pivot, tint)
+	if breathe:
+		_draw_breathing(tex, pivot, tint, f.data.height * 2.0)
+	else:
+		draw_texture(tex, -pivot, tint)
 	draw_set_transform(Vector2.ZERO)
 	if f.staggered:
 		var head := base + Vector2(0, -float(f.data.height) - 10)
 		for i in 3:
 			var a := _sim.tick * 0.2 + TAU * i / 3.0
 			draw_circle(head + Vector2(cos(a) * 40, sin(a) * 8), 6, Color(1, 0.9, 0.3))
+
+
+## Дыхание в стойке: один кадр, натянутый на сетку; грудь, плечи и голова плавно поднимаются,
+## ноги стоят на месте. Без смены кадров — никакой «рваности». Координаты — в пикселях кадра.
+func _draw_breathing(tex: Texture2D, pivot: Vector2, tint: Color, body_h: float) -> void:
+	const ROWS := 12
+	const LIFT := 7.0            # подъём груди на вдохе, px кадра (1440p)
+	var phase := 0.5 - 0.5 * cos(TAU * float(_sim.tick) / FighterSprites.BREATH_TICKS)
+	var size := tex.get_size()
+	var colors := PackedColorArray([tint, tint, tint, tint])
+	for j in ROWS:
+		var v0 := float(j) / ROWS
+		var v1 := float(j + 1) / ROWS
+		var y0 := v0 * size.y - pivot.y - _lift(v0 * size.y, pivot.y, body_h) * LIFT * phase
+		var y1 := v1 * size.y - pivot.y - _lift(v1 * size.y, pivot.y, body_h) * LIFT * phase
+		var pts := PackedVector2Array([Vector2(-pivot.x, y0), Vector2(size.x - pivot.x, y0),
+			Vector2(size.x - pivot.x, y1), Vector2(-pivot.x, y1)])
+		var uvs := PackedVector2Array([Vector2(0, v0), Vector2(1, v0), Vector2(1, v1), Vector2(0, v1)])
+		draw_polygon(pts, colors, uvs, tex)
+
+
+## Насколько поднимается точка кадра на вдохе: ноги — 0, от пояса растёт, грудь и выше — полностью.
+static func _lift(y: float, feet_y: float, body_h: float) -> float:
+	var h := clampf((feet_y - y) / body_h, 0.0, 1.0)
+	return smoothstep(0.35, 0.7, h)
 
 
 ## Боец-заглушка: тело, голова и «нос», показывающий, куда он смотрит.
@@ -159,7 +187,7 @@ func _draw_fighter(f: Fighter) -> void:
 	if use_sprites:
 		var fr := _sprites.frame_for(f, _sim.tick)
 		if not fr.is_empty():
-			_draw_sprite(f, fr[0], fr[1])
+			_draw_sprite(f, fr[0], fr[1], fr.size() > 2 and fr[2])
 			return
 	if f.is_intangible():
 		_draw_mist(f)

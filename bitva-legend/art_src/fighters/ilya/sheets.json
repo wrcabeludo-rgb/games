@@ -1,10 +1,6 @@
 {
  "idle": {
-  "frames": 12,
-  "grid": [
-   4,
-   3
-  ],
+  "frames": 4,
   "fit": "h:1:620"
  },
  "st_lp": {
