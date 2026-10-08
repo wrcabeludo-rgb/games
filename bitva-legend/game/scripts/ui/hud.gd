@@ -22,6 +22,7 @@ var show_inputs := false
 var _font := SystemFont.new()
 var _sim: Sim
 var _reader: InputReader
+var _ai: AiController
 ## «След» урона — только для красоты, в симуляции не участвует.
 var _trail := [Fighter.MAX_HP * 1.0, Fighter.MAX_HP * 1.0]
 var _trail_wait := [0, 0]
@@ -33,9 +34,10 @@ func _ready() -> void:
 	_font.font_weight = 600
 
 
-func show_state(sim: Sim, reader: InputReader) -> void:
+func show_state(sim: Sim, reader: InputReader, ai: AiController) -> void:
 	_sim = sim
 	_reader = reader
+	_ai = ai
 	_update_trails()
 	queue_redraw()
 
@@ -96,7 +98,10 @@ func _draw_bar(p: int) -> void:
 	# Имя под полоской, у внешнего края; победы в раундах — у внутреннего.
 	var name_x := r.position.x if not right else r.end.x
 	_text(Vector2(name_x, r.end.y + 26), f.data.name, 22, f.data.color.lightened(0.25), right)
-	_text(Vector2(name_x, r.end.y + 46), "Игрок %d · %s" % [p + 1, _reader.device_label(p)], 13, COLOR_DIM, right)
+	var who := "Игрок %d · %s" % [p + 1, _reader.device_label(p)]
+	if p == 1 and _ai.level != AiController.Level.OFF:
+		who = "ИИ · %s (F3 или Options — сменить)" % _ai.level_name()
+	_text(Vector2(name_x, r.end.y + 46), who, 13, COLOR_GOLD if who.begins_with("ИИ") else COLOR_DIM, right)
 	for i in Sim.WINS_NEEDED:
 		var cx := r.end.x - 12 - i * 26 if not right else r.position.x + 12 + i * 26
 		var c := Vector2(cx, r.end.y + 18)
@@ -177,7 +182,7 @@ static func _plural_hits(n: int) -> String:
 func _draw_footer() -> void:
 	var version: String = ProjectSettings.get_setting("application/config/version")
 	var stage: String = ProjectSettings.get_setting("application/config/description")
-	var hint := "R1 / L — блок (вниз — нижний) · F1 — ввод · F2 — хитбоксы · R или Create — новый матч · F11 — экран · Esc — выход"
+	var hint := "R1 / L — блок (вниз — нижний) · F3 / Options — ИИ · F1 — ввод · F2 — хитбоксы · R / Create — новый матч · F11 · Esc"
 	draw_rect(Rect2(0, size.y - 30, size.x, 30), COLOR_SHADE)
 	_text(Vector2(size.x / 2.0, size.y - 10), hint, 13, COLOR_TEXT, false, true)
 	_text(Vector2(12, size.y - 38), "сборка %s · %s · %d FPS" % [version, stage, Engine.get_frames_per_second()], 12, COLOR_DIM)
