@@ -49,5 +49,21 @@
  },
  "st_hk": {
   "frames": 4
+ },
+ "cr_lp": {
+  "frames": 3,
+  "fit": "h:1:440"
+ },
+ "cr_lk": {
+  "frames": 3,
+  "fit": "h:1:440"
+ },
+ "cr_hp": {
+  "frames": 4,
+  "fit": "h:4:400"
+ },
+ "cr_hk": {
+  "frames": 4,
+  "fit": "h:1:330"
  }
 }
