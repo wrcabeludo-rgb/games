@@ -18,7 +18,7 @@ const CELL_GAP := 12.0
 const GRID_Y := 396.0
 const READY_TICKS := 100        # после выбора обоих — столько тиков радуются, потом бой
 const WIN_TICKS := 48           # анимация «радуется» проигрывается за столько тиков и замирает
-const PORTRAIT_SCALE := 0.4     # портреты по пояс (кадр 900 px) — около 360 px на экране
+const PORTRAIT_SCALE := 0.38    # портреты по пояс (кадр 900 px) — около 360 px на экране
 const COLOR_GOLD := Color(1, 0.85, 0.3)
 const COLOR_TEXT := Color(0.95, 0.95, 0.97)
 const COLOR_DIM := Color(0.7, 0.72, 0.8)
@@ -260,6 +260,10 @@ func _draw_preview(p: int) -> void:
 	var x := size.x * (0.16 if p == 0 else 0.84)
 	var feet := Vector2(x, size.y - 70)
 	var name: String = FighterData.get_data(id).name if id != "" else "???"
+	# Рамка портрета: у первого игрока — слева от сетки, у второго — справа; цвет игрока, выбран — золото.
+	var panel := Rect2(x - 190, 84, 380, size.y - 64 - 84)
+	draw_rect(panel, Color(0, 0, 0, 0.35))
+	draw_rect(panel, COLOR_P[p] if not picked[p] else COLOR_GOLD, false, 3.0)
 	_text_c(Vector2(x + 2, 122), name, 34, Color(0, 0, 0, 0.7))
 	_text_c(Vector2(x, 120), name, 34, COLOR_P[p] if not picked[p] else COLOR_GOLD)
 	if picked[p]:
@@ -273,7 +277,7 @@ func _draw_preview(p: int) -> void:
 	if picked[p] and not win.is_empty():
 		var n: int = win.tex.size()
 		var i := mini(since * n / WIN_TICKS, n - 1)
-		draw_set_transform(waist, 0, Vector2(PORTRAIT_SCALE, PORTRAIT_SCALE))
+		draw_set_transform(waist, 0, Vector2(PORTRAIT_SCALE * face, PORTRAIT_SCALE))
 		draw_texture(win.tex[i], -win.pivot[i])
 		draw_set_transform(Vector2.ZERO)
 		return
@@ -281,11 +285,10 @@ func _draw_preview(p: int) -> void:
 	var k := PORTRAIT_SCALE
 	var at := waist
 	if a.is_empty():
-		a = _sprites.anim(id, "idle")  # портрета ещё нет — стойка покрупнее, второй игрок — зеркально
+		a = _sprites.anim(id, "idle")  # портрета ещё нет — стойка покрупнее
 		k = 0.62
 		at = feet
-	else:
-		face = 1.0                       # портрет смотрит в камеру — не отражаем
+	# Портреты нарисованы с поворотом вправо; второй игрок — зеркально: герои смотрят друг на друга.
 	if a.is_empty():
 		return
 	# Выбран, а анимации радости нет — подпрыгивает.

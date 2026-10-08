@@ -454,6 +454,15 @@ func become_thrown() -> void:
 	state_frame = 0
 
 
+## Отпустили из захвата без броска: в воздухе — падает, на земле — сразу свободен.
+func release_grab() -> void:
+	if y > 0:
+		_launch_knockdown([0, 0], facing)
+	else:
+		_set_state(State.STAND)
+		state_frame = 0
+
+
 ## Бросок завершён: урон и полёт в сторону direction, потом лежит.
 func take_throw(grab: Dictionary, direction: int) -> void:
 	var dmg: int = scaled_damage(grab.damage, combo + 1) if grab.get("scaled", 0) else grab.damage

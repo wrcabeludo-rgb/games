@@ -12,9 +12,33 @@ const BL := InputBits.BLOCK
 const SUPER := BL | HP | HK
 
 
+## Суперприём и встречный ЛР в один тик (баг 3.7: схваченный навсегда оставался в захвате).
+func _test_super_vs_jab(chars: PackedStringArray, sup: int) -> bool:
+	for delay in range(0, 12):
+		var sim := Sim.new(false, chars)
+		sim.fighters[0].x = 900 * SUB
+		sim.fighters[1].x = 1150 * SUB
+		sim.fighters[sup].meter = Fighter.METER_MAX
+		for i in 400:
+			var inp := PackedInt32Array([0, 0])
+			if i == 5:
+				inp[sup] = SUPER
+			if i == 5 + delay:
+				inp[1 - sup] |= LP
+			sim.step(inp)
+		for f in sim.fighters:
+			if f.state == S.THROWN or f.state == S.THROWING:
+				return false
+	return true
+
+
 func _init() -> void:
 	var ok := true
 	ok = _check("попадание: атакующему урон × 2, пропустившему — урон", _test_gain_hit()) and ok
+	for who in [["dracula", "ilya"], ["ilya", "dracula"]]:
+		for sup in [0, 1]:
+			ok = _check("суперприём %s против ЛР в упор: никто не застревает в захвате" % who[sup],
+				_test_super_vs_jab(PackedStringArray(who), sup)) and ok
 	ok = _check("блок: атакующему — урон, защитнику ничего", _test_gain_block()) and ok
 	ok = _check("шкала переходит в следующий раунд, в новом матче — с нуля", _test_carry()) and ok
 	ok = _check("усиленные мыши (спецприём + блок): секция шкалы, урон 90", _test_ex_bats()) and ok

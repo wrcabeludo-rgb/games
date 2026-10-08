@@ -24,6 +24,9 @@ var _voice_queue: Array[String] = []
 var _cache := {}
 var _rng := RandomNumberGenerator.new()
 var _fight_track := 0
+## Сколько раз включалась музыка и говорил диктор (для тестов: трек не должен перезапускаться каждый тик).
+var music_starts := 0
+var voice_lines := 0
 ## Без экрана (проверки, тесты) — без звука: у «немого» аудиодрайвера играющий поток
 ## остаётся висеть при выходе, и Godot сообщает об утечке.
 var _silent := DisplayServer.get_name() == "headless"
@@ -89,6 +92,7 @@ func play(name: String, pitch := 1.0, db := 0.0) -> void:
 
 
 func say(lines: Array[String]) -> void:
+	voice_lines += 1
 	if _silent:
 		return
 	_voice_queue = lines.duplicate()
@@ -109,6 +113,7 @@ func music(name: String) -> void:
 	if name == _music_name:
 		return
 	_music_name = name
+	music_starts += 1
 	var s := _load("music/" + name)
 	_music.stop()
 	if s != null and not _silent:
@@ -127,7 +132,6 @@ func new_match() -> void:
 	_fight_track = _fight_track % 2 + 1
 	_music_name = ""
 	music("fight_%d" % _fight_track)
-	_last_tick = -1
 
 
 ## Каждый тик боя.

@@ -159,6 +159,7 @@ func _combat_step(inp: PackedInt32Array, hits: bool) -> void:
 	_teleports()
 	_process_grabs()
 	_hold_throws()
+	_release_orphans()
 	_move_projectiles()
 	_spawn_projectiles()
 	if hits:
@@ -247,6 +248,14 @@ func _hold_throws() -> void:
 		hitstop = THROW_HITSTOP
 		hitstop_total = THROW_HITSTOP
 		_set_spark(p, d.x, d.data.height * SUB / 2, 1)
+
+
+## Страховка: схваченный, которого никто не держит (бросающего сбили), освобождается.
+## Иначе он навсегда остался бы в захвате — неуязвимым и неподвижным.
+func _release_orphans() -> void:
+	for p in PLAYERS:
+		if fighters[p].state == Fighter.State.THROWN and fighters[1 - p].state != Fighter.State.THROWING:
+			fighters[p].release_grab()
 
 
 func has_projectile(owner: int) -> bool:
@@ -490,6 +499,9 @@ func _check_hits() -> void:
 		var hb: PackedInt32Array = hit[2]
 		var a := fighters[p]
 		var d := fighters[1 - p]
+		# Соперник в этот же тик схватил атакующего суперприёмом — удар атакующего не выходит.
+		if a.state == Fighter.State.THROWN:
+			continue
 		a.mark_hit()
 		# Искра — в точке, где хитбокс заходит в тело соперника.
 		var spark_x := (maxi(hb[0], d.x - d.push_half()) + mini(hb[1], d.x + d.push_half())) / 2
@@ -533,7 +545,8 @@ func _apply_hit(p: int, m: Dictionary, direction: int, spark_x: int, spark_y: in
 		stop = maxi(m.hitstop * 2 / 3, 4)  # блок «легче» попадания
 		if not a.is_super():
 			a.add_meter(m.damage * METER_BLOCK)
-	elif m.has("cinema") and melee:
+	elif m.has("cinema") and melee and a.state == Fighter.State.ATTACK:
+		# (если атакующего в этот же тик сбили — размен: суперприём бьёт как обычный удар)
 		# Суперприём попал: ролик — соперник схвачен, серия ударов, в конце урон (_hold_throws).
 		if not d.is_stunned():
 			d.combo = 0
