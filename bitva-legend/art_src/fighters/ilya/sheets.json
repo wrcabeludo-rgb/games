@@ -21,7 +21,7 @@
  },
  "backdash": {
   "frames": 3,
-  "fit": "inherit:idle",
+  "fit": 0.743,
   "pivot_y": "body"
  },
  "crouch": {
@@ -65,6 +65,6 @@
  },
  "cr_hk": {
   "frames": 4,
-  "fit": "h:1:330"
+  "fit": "h:1:380"
  }
 }
