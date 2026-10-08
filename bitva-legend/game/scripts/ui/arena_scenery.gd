@@ -14,9 +14,9 @@ const ART_DIR := "res://art/arena/"
 const K_SKY := 0.04
 const K_MOON := 0.07
 const K_CLOUDS := 0.14
-const K_MOUNTAINS := 0.25
-const K_RAVENS := 0.32
-const K_FOREST := 0.55
+const K_MOUNTAINS := 0.1
+const K_RAVENS := 0.2
+const K_FOREST := 0.3
 const K_FOG := 0.8
 const K_GROUND := 1.0
 const K_FRONT := 1.3
@@ -127,7 +127,10 @@ func draw_front(c: CanvasItem) -> void:
 func _draw_sky(c: CanvasItem) -> void:
 	var k := K_SKY
 	if _tex.has("sky"):
-		c.draw_texture_rect(_tex.sky, Rect2(layer_x(k), 0, layer_w(k), view.y), false)
+		# Низ неба (горизонт с солнцем) — чуть выше земли, лишнее сверху уходит за экран.
+		var tex: Texture2D = _tex.sky
+		var h := maxf(layer_w(k) * tex.get_height() / tex.get_width(), ground_y)
+		c.draw_texture_rect(tex, Rect2(layer_x(k), ground_y - h, layer_w(k), h), false)
 		return
 	var steps := 32
 	var w := view.x / steps
@@ -195,7 +198,7 @@ func _draw_mountains(c: CanvasItem) -> void:
 	var x0 := layer_x(k)
 	var w := layer_w(k)
 	if _tex.has("mountains"):
-		_draw_strip(c, _tex.mountains, k, ground_y + 10)
+		_draw_strip(c, _tex.mountains, k, ground_y + 70)
 		return
 	var pts := PackedVector2Array([Vector2(x0, ground_y)])
 	var x := 0.0
@@ -258,7 +261,8 @@ func _draw_forest(c: CanvasItem) -> void:
 	var x0 := layer_x(k)
 	var w := layer_w(k)
 	if _tex.has("forest"):
-		_draw_strip(c, _tex.forest, k, ground_y + 25)
+		# Нижняя часть леса уходит за землю; чуть приглушён, чтобы бойцы читались.
+		_draw_strip(c, _tex.forest, k, ground_y + 150, Color(0.82, 0.8, 0.88))
 		return
 	var i := 0
 	var x := 30.0
@@ -344,7 +348,7 @@ func _draw_stone(c: CanvasItem) -> void:
 
 
 ## Слой-полоса: растянут по ширине слоя, низ — у bottom_y.
-func _draw_strip(c: CanvasItem, tex: Texture2D, k: float, bottom_y: float) -> void:
+func _draw_strip(c: CanvasItem, tex: Texture2D, k: float, bottom_y: float, tint := Color.WHITE) -> void:
 	var w := layer_w(k)
 	var h := w * tex.get_height() / tex.get_width()
-	c.draw_texture_rect(tex, Rect2(layer_x(k), bottom_y - h, w, h), false)
+	c.draw_texture_rect(tex, Rect2(layer_x(k), bottom_y - h, w, h), false, tint)

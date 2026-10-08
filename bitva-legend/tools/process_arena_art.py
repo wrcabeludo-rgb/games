@@ -3,7 +3,7 @@
 
 Берёт картинки из папки (как их выдала нейросеть) и кладёт готовые слои в game/art/arena/:
   - убирает пурпурный фон #FF00FF (хромакей) и пурпурную кайму по краям;
-  - режет листы 3×2 (тучи, вороны) на отдельные картинки и обрезает пустые поля;
+  - режет листы (тучи, вороны) на отдельные объекты по пустому месту между ними и обрезает поля;
   - приводит размеры к нужным для 1080p.
 
 Запуск: python3 tools/process_arena_art.py <папка с исходниками>
@@ -18,8 +18,9 @@ from PIL import Image
 
 OUT = Path(__file__).resolve().parent.parent / "game" / "art" / "arena"
 KEY = np.array([255, 0, 255], dtype=np.float32)
-KEY_FULL = 90.0    # ближе к пурпурному — полностью прозрачно
-KEY_EDGE = 170.0   # дальше — полностью непрозрачно, между — плавный край
+M_SAFE = 45.0      # «пурпурность» до этого — полностью непрозрачно
+M_FULL = 200.0     # от этого — полностью прозрачно, между — плавный край
+EDGE_PX = 10       # ширина полосы у краёв, где убирается пурпурный отсвет (нейросеть подкрашивает края)
 
 # Ширина слоёв в пикселях 1080p (= ширина слоя в игре × 1.5, см. ArenaScenery.layer_w).
 SKY_SIZE = (1980, 1080)
@@ -39,16 +40,62 @@ def find(src: Path, name: str):
 
 
 def chroma_key(img: Image.Image) -> Image.Image:
+    """Прозрачность по «пурпурности» m = min(R, B) − G: у фона ≈ 250, у обычных цветов ≤ 0,
+    у тёмно-фиолетовой коры ≈ 20–40 (остаётся непрозрачной). На краях цвет «отмешивается»
+    от пурпурного, чтобы не было розового ореола."""
     rgb = np.asarray(img.convert("RGB")).astype(np.float32)
-    dist = np.sqrt(((rgb - KEY) ** 2).sum(axis=2))
-    alpha = np.clip((dist - KEY_FULL) / (KEY_EDGE - KEY_FULL), 0.0, 1.0)
-    # Убираем пурпурный отсвет на краях: красный и синий не выше зелёного + запас.
-    edge = alpha < 1.0
-    g = rgb[..., 1]
-    for ch in (0, 2):
-        rgb[..., ch] = np.where(edge, np.minimum(rgb[..., ch], g + 40), rgb[..., ch])
-    out = np.dstack([rgb, alpha * 255]).astype(np.uint8)
+    m = np.minimum(rgb[..., 0], rgb[..., 2]) - rgb[..., 1]
+    alpha = np.clip((M_FULL - m) / (M_FULL - M_SAFE), 0.0, 1.0)
+    a = np.maximum(alpha, 0.05)[..., None]
+    fg = (rgb - (1.0 - alpha[..., None]) * KEY) / a
+    # Сжатие (webp/jpeg) размазывает пурпурный на соседние пиксели: в полосе EDGE_PX у краёв
+    # убираем пурпурный оттенок совсем (R и B не выше G). Внутри объектов цвета не трогаем.
+    edge = _dilate(alpha < 0.99, EDGE_PX)
+    tint = np.maximum(np.minimum(fg[..., 0], fg[..., 2]) - fg[..., 1], 0) * edge
+    fg[..., 0] -= tint
+    fg[..., 2] -= tint
+    # Яркий розовый отсвет (красный ≫ зелёного, синий не ниже зелёного) у краёв → тёплый оранжевый.
+    # Тёмную фиолетовую кору (R < 140) не трогаем.
+    r, g, b = fg[..., 0], fg[..., 1], fg[..., 2]
+    pink = edge & (r > 140) & (r > g * 1.3) & (b > g * 0.7)
+    fg[..., 2] = np.where(pink, np.minimum(b, g * 0.55), b)
+    fg[..., 1] = np.where(pink, np.maximum(g, r * 0.62), g)
+    fg = np.clip(fg, 0, 255)
+    # Полупрозрачный край берёт цвет ближайших непрозрачных соседей изнутри:
+    # смесь «жёлтая листва + пурпур» иначе остаётся розовой каймой.
+    fg = _bleed_inside_color(fg, alpha)
+    fg[alpha <= 0] = 0
+    out = np.dstack([fg, alpha * 255]).astype(np.uint8)
     return Image.fromarray(out, "RGBA")
+
+
+def _bleed_inside_color(fg: np.ndarray, alpha: np.ndarray, steps: int = 4) -> np.ndarray:
+    known = alpha >= 0.99
+    col = fg.copy()
+    for _ in range(steps):
+        acc = np.zeros_like(col)
+        cnt = np.zeros(alpha.shape, dtype=np.float32)
+        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            shifted_known = np.roll(known, (dy, dx), axis=(0, 1))
+            shifted_col = np.roll(col, (dy, dx), axis=(0, 1))
+            acc += shifted_col * shifted_known[..., None]
+            cnt += shifted_known
+        new = (~known) & (cnt > 0) & (alpha > 0)
+        col[new] = acc[new] / cnt[new][:, None]
+        known = known | new
+    return col
+
+
+def _dilate(mask: np.ndarray, r: int) -> np.ndarray:
+    out = mask.copy()
+    for _ in range(r):
+        grown = out.copy()
+        grown[1:, :] |= out[:-1, :]
+        grown[:-1, :] |= out[1:, :]
+        grown[:, 1:] |= out[:, :-1]
+        grown[:, :-1] |= out[:, 1:]
+        out = grown
+    return out
 
 
 def trim(img: Image.Image, pad: int = 4) -> Image.Image:
@@ -75,20 +122,47 @@ def resize_h(img: Image.Image, h: int) -> Image.Image:
 
 
 def cover(img: Image.Image, size) -> Image.Image:
-    """Заполнить size целиком, обрезав лишнее по центру."""
+    """Заполнить size целиком, обрезав лишнее: по ширине — по центру, по высоте — сверху
+    (низ с горизонтом и солнцем сохраняется)."""
     tw, th = size
     k = max(tw / img.width, th / img.height)
     img = img.resize((round(img.width * k), round(img.height * k)), Image.LANCZOS)
     l = (img.width - tw) // 2
-    t = (img.height - th) // 2
+    t = img.height - th
     return img.crop((l, t, l + tw, t + th))
 
 
-def grid(img: Image.Image, cols: int = 3, rows: int = 2):
-    cw, ch = img.width / cols, img.height / rows
-    for r in range(rows):
-        for c in range(cols):
-            yield img.crop((round(c * cw), round(r * ch), round((c + 1) * cw), round((r + 1) * ch)))
+def _runs(filled: np.ndarray, min_gap: int):
+    """Отрезки подряд идущих True, разделённые не меньше чем min_gap пустыми."""
+    runs, start, gap = [], None, 0
+    for i, v in enumerate(filled):
+        if v:
+            if start is None:
+                start = i
+            gap = 0
+            end = i
+        elif start is not None:
+            gap += 1
+            if gap >= min_gap:
+                runs.append((start, end + 1))
+                start = None
+    if start is not None:
+        runs.append((start, end + 1))
+    return runs
+
+
+def split_objects(img: Image.Image, min_gap: int = 12, min_share: float = 0.002):
+    """Отдельные объекты листа (тучи, кадры ворона): сначала ряды по пустым полосам,
+    в каждом ряду — объекты по пустым столбцам. Нейросеть не всегда попадает в клетки сетки,
+    поэтому режем по пустому месту между объектами. Порядок — слева направо, сверху вниз."""
+    alpha = np.asarray(img.getchannel("A")) > 24
+    total = alpha.size
+    for top, bottom in _runs(alpha.any(axis=1), min_gap):
+        band = alpha[top:bottom]
+        for left, right in _runs(band.any(axis=0), min_gap):
+            if band[:, left:right].sum() < total * min_share:
+                continue  # пылинка
+            yield trim(img.crop((left, top, right, bottom)))
 
 
 def save(img: Image.Image, name: str) -> None:
@@ -118,15 +192,14 @@ def main() -> int:
         save(resize_h(trim(chroma_key(Image.open(p))), STONE_HEIGHT), "stone")
         done += 1
     if p := find(src, "clouds"):
-        for i, cell in enumerate(grid(chroma_key(Image.open(p))), 1):
-            cloud = trim(cell)
+        for i, cloud in enumerate(split_objects(chroma_key(Image.open(p))), 1):
             if cloud.width > CLOUD_MAX_WIDTH:
                 cloud = resize_w(cloud, CLOUD_MAX_WIDTH)
             save(cloud, f"cloud_{i}")
         done += 1
     if p := find(src, "ravens"):
         # Кадры одной высоты, чтобы ворон не «прыгал» при взмахах.
-        frames = [trim(cell) for cell in grid(chroma_key(Image.open(p)))]
+        frames = list(split_objects(chroma_key(Image.open(p))))
         tallest = max(f.height for f in frames)
         for i, f in enumerate(frames, 1):
             canvas = Image.new("RGBA", (f.width, tallest), (0, 0, 0, 0))

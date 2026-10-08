@@ -34,9 +34,9 @@
 | 1 | sky | 21:9 | Небо: закат слева → ночь со звёздами справа | 0.04 |
 | 2 | moon | 1:1, пурпур | Луна | 0.07 |
 | 3 | clouds | 21:9, пурпур, сетка 3×2 | 6 туч | 0.14 + дрейф |
-| 4 | mountains | 21:9, пурпур | Дальние холмы и горы, церковь, замок | 0.25 |
-| 5 | ravens | 3:2, пурпур, сетка 3×2 | 6 кадров взмаха ворона | 0.32 + полёт |
-| 6 | forest | 21:9, пурпур | Деревья: берёзы → сухие деревья | 0.55 |
+| 4 | mountains | 21:9, пурпур | Дальние холмы и горы, церковь, замок | 0.1 |
+| 5 | ravens | 3:2, пурпур, сетка 3×2 | 6 кадров взмаха ворона | 0.2 + полёт |
+| 6 | forest | 21:9, пурпур | Деревья: берёзы → сухие деревья | 0.3 |
 | 7 | stone | 3:4, пурпур | Камень на перепутье | 1.0 |
 | 8 | ground | 21:9, пурпур | Земля: дорога, по которой ходят бойцы | 1.0 |
 | 9 | foreground | 21:9, пурпур | Трава и кусты перед бойцами | 1.3 |
@@ -94,6 +94,18 @@ Wide horizontal strip of ground for a 2D fighting game stage — the floor where
 ```
 Wide horizontal strip of foreground vegetation for a 2D fighting game, it will be drawn IN FRONT of the fighters at the very bottom of the screen. HD hand-painted cartoon style, clean dark-plum outlines (#24141F), cel shading, darker and more saturated than the background (it is close to the camera, in shadow). Strict side view. Tall grass tufts, ferns and a few low bushes growing from the bottom edge, at most 25% of the image height, spanning the FULL width edge to edge with uneven gaps (the fighters must stay visible between them). LEFT half: green-golden grass and wildflowers. RIGHT half: dry dark-violet grass and thorny weeds. Everything above the vegetation is perfectly flat solid magenta #FF00FF (no sky, no gradient, no shadow). Do not use pink or purple on the plants. NO characters, NO text, NO watermark, NO frame.
 ```
+
+## Статус
+
+| Слой | Статус |
+|---|---|
+| sky, moon, clouds, mountains, forest | ✅ в игре (2.5.2). Исходники — `art_src/arena/` |
+| ravens, stone, ground, foreground | ждём |
+
+Заметки по полученному:
+- Небо пришло 3:2 — подходит: обрезается сверху, горизонт с солнцем сохраняется.
+- Нейросеть подкрашивает края объектов розовым отсветом от пурпурного фона — скрипт это вычищает
+  (полоса 10 px у краёв). Если на ваших картинках кайма всё же заметна — пишите.
 
 ## Что делаю я, когда получу картинки
 
