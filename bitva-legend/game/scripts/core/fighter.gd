@@ -62,6 +62,16 @@ const BLOCKSTUN_LESS := 2   # в блоке оглушение короче, ч�
 const KNOCKDOWN_TICKS := 45 # сбитый с ног лежит (неуязвим) и встаёт
 const KNOCK_LAUNCH := [200, 600]   # подброс по умолчанию у ударов, сбивающих с ног
 const BACKDASH_CANCEL := 3  # в первые кадры отскока ещё можно начать «назад, назад + удар»
+## Комбо (2.4).
+const CHAIN_MAX := 4        # самая длинная строка ударов
+const CHAIN_LATE := 10      # строку можно продолжить ещё столько тиков после активной фазы
+const CANCEL_LATE := 12     # попавший удар можно отменить в спецприём ещё столько тиков после активной фазы
+const COMBO_SCALE := 10     # каждый следующий удар в комбо слабее на 10%…
+const COMBO_MIN := 30       # …но не слабее 30% от полного урона
+const JUGGLE_MAX := 3       # сколько ударов можно добавить подброшенному сопернику
+const JUGGLE_DECAY := 250   # каждый удар в воздухе подбрасывает слабее
+const JUGGLE_MIN_VY := 500
+const BUTTON_OF := {"lp": 0, "lk": 1, "hp": 2, "hk": 3}
 var id := ""
 var data: Dictionary
 var x := 0
@@ -102,6 +112,10 @@ var teleport_request := 0
 var armor := 0              # сколько ударов ещё выдержит броня текущего приёма
 var hypnotized := 0         # 1 — оглушён гипнозом (для отрисовки)
 var knock_on_land := 0      # приземлится — будет лежать (сбит с ног)
+## Удары текущей строки (номера в MOVES), -1 — пусто.
+var chain := PackedInt32Array([-1, -1, -1, -1])
+var juggle := 0             # сколько раз добит в воздухе за этот полёт
+var combo_damage := 0       # урон текущего комбо (для счётчика)
 ## Выставляет симуляция перед тиком: соперник вплотную и его можно бросить (ЛР станет броском).
 var throw_ok := false
 ## Удар дошёл до кадра захвата — симуляция проверит, схвачен ли соперник.
@@ -128,6 +142,8 @@ func save() -> PackedInt32Array:
 	s.append_array(btn_timers)
 	s.append_array(tap_log)
 	s.append_array(PackedInt32Array([special_buf, special_strength, special_timer, armor, hypnotized, knock_on_land]))
+	s.append_array(chain)
+	s.append_array(PackedInt32Array([juggle, combo_damage]))
 	return s
 
 
@@ -142,6 +158,8 @@ func load(s: PackedInt32Array) -> void:
 	tap_log = s.slice(27, 33)
 	special_buf = s[33]; special_strength = s[34]; special_timer = s[35]
 	armor = s[36]; hypnotized = s[37]; knock_on_land = s[38]
+	chain = s.slice(39, 43)
+	juggle = s[43]; combo_damage = s[44]
 
 
 # --- Вопросы о состоянии --------------------------------------------------
@@ -160,7 +178,17 @@ func is_grounded_actionable() -> bool:
 ## Сбит с ног, захвачен или бросает — по нему нельзя попасть.
 func is_untouchable() -> bool:
 	return state == State.KNOCKDOWN or state == State.THROWING or state == State.THROWN \
-		or state == State.DOWN or state == State.AIR_HIT
+		or state == State.DOWN or (state == State.AIR_HIT and not is_juggleable())
+
+
+## Подброшенного можно добить в воздухе, но не больше JUGGLE_MAX раз за полёт.
+func is_juggleable() -> bool:
+	return state == State.AIR_HIT and hp > 0 and juggle < JUGGLE_MAX
+
+
+## Урон с учётом затухания в комбо: combo — номер удара в комбо (1 — первый).
+static func scaled_damage(damage: int, combo_hits: int) -> int:
+	return damage * maxi(100 - COMBO_SCALE * (combo_hits - 1), COMBO_MIN) / 100
 
 
 ## Можно ли схватить: на земле и не в оглушении/блоке (защита от бросков, как в Street Fighter).
@@ -289,10 +317,15 @@ func stop_run() -> void:
 
 ## Попадание по этому бойцу. attacker_facing — куда смотрит атакующий (туда и отбрасывает).
 func take_hit(m: Dictionary, attacker_facing: int) -> void:
-	combo = combo + 1 if is_stunned() else 1
-	hp = maxi(hp - m.damage, 0)
+	var in_combo := is_stunned()
+	combo = combo + 1 if in_combo else 1
+	var dmg := scaled_damage(m.damage, combo)
+	combo_damage = combo_damage + dmg if in_combo else dmg
+	hp = maxi(hp - dmg, 0)
 	var was_crouching := is_crouching()
+	var juggled := state == State.AIR_HIT
 	move = -1
+	chain = PackedInt32Array([-1, -1, -1, -1])
 	if hp == 0:
 		# Нокаут: отлетает в любом положении и падает.
 		vx = KO_VX * attacker_facing
@@ -302,9 +335,13 @@ func take_hit(m: Dictionary, attacker_facing: int) -> void:
 		state_frame = 0
 		return
 	if is_airborne():
-		vx = AIR_HIT_VX * attacker_facing
-		vy = AIR_HIT_VY
-		knock_on_land = 1 if m.get("knockdown", 0) else 0
+		# В воздухе: отбрасывает; добивание подброшенного (жонглирование) — каждый раз ниже.
+		var launch: Array = m.get("launch", KNOCK_LAUNCH) if m.get("knockdown", 0) else [AIR_HIT_VX, AIR_HIT_VY]
+		juggle = juggle + 1 if juggled else 0
+		vx = launch[0] * attacker_facing
+		vy = maxi(launch[1] - juggle * JUGGLE_DECAY, JUGGLE_MIN_VY)
+		y = maxi(y, 1)
+		knock_on_land = 1 if m.get("knockdown", 0) or (juggled and knock_on_land) else 0
 		_set_state(State.AIR_HIT)
 		state_frame = 0
 		return
@@ -326,6 +363,7 @@ func _launch_knockdown(launch: Array, direction: int) -> void:
 	vy = launch[1]
 	y = maxi(y, 1)
 	knock_on_land = 1
+	juggle = 0
 	move = -1
 	_set_state(State.AIR_HIT)
 	state_frame = 0
@@ -351,6 +389,7 @@ func take_throw(grab: Dictionary, direction: int) -> void:
 		state_frame = 0
 		return
 	_launch_knockdown(grab.launch, direction)
+	juggle = JUGGLE_MAX  # после броска не добить
 
 
 ## Вырвался из захвата (или бросающий, у которого вырвались): разлёт в стороны.
@@ -528,6 +567,7 @@ func _start_special() -> void:
 	armor = move_data().get("armor", 0)
 	special_buf = -1
 	special_timer = TAP_TIMER_MAX
+	chain = PackedInt32Array([-1, -1, -1, -1])
 	move_frame = 1
 	has_hit = 0
 	vx = 0
@@ -606,6 +646,8 @@ func step(bits: int) -> void:
 				_set_state(State.STAND)
 				_ground_control(inp)
 		State.ATTACK:
+			if _try_cancel():
+				return
 			move_frame += 1
 			var m := move_data()
 			if m.has("proj") and move_frame == m.startup:
@@ -723,11 +765,65 @@ func _start_attack(button: int, crouching: bool, back := false) -> void:
 			move = MOVE_SWEEP
 		elif back and button == 3 and data.moves.has("st_round"):
 			move = MOVE_ROUND
+	chain = PackedInt32Array([move if move <= 7 else -1, -1, -1, -1])
+	_begin_move()
+
+
+func _begin_move() -> void:
 	move_frame = 1  # тик нажатия — первый кадр удара (как во фреймдате Street Fighter)
 	has_hit = 0
 	vx = 0
 	_set_state(State.ATTACK)
 	state_frame = 0
+
+
+## Обычный удар на земле: его можно продолжить строкой или отменить в спецприём.
+func _is_ground_normal() -> bool:
+	return move >= 0 and (move <= 7 or move == MOVE_SWEEP or move == MOVE_ROUND)
+
+
+## Во время удара: отмена в спецприём (только если удар коснулся — попал или в блок)
+## или следующий удар строки (как в Mortal Kombat — выходит и при промахе).
+func _try_cancel() -> bool:
+	if not _is_ground_normal():
+		return false
+	var m := move_data()
+	var after: int = move_frame - (m.startup + m.active - 1)  # > 0 — уже восстановление
+	if has_hit and after <= CANCEL_LATE and _special_ready():
+		_start_special()
+		return true
+	if (has_hit or after >= 0) and after <= CHAIN_LATE:
+		var b := _buffered_button()
+		if b < 0:
+			return false
+		var n := chain.find(-1)
+		var next := _next_in_string(b, n)
+		if next < 0:
+			return false
+		_consume_button(b)
+		chain[n] = next
+		move = next
+		_begin_move()
+		return true
+	return false
+
+
+## Следующий удар строки для кнопки button, если строка сейчас на шаге n; иначе -1.
+func _next_in_string(button: int, n: int) -> int:
+	if n <= 0:
+		return -1
+	for s in data.get("strings", []):
+		var keys: Array = s.moves
+		if keys.size() <= n:
+			continue
+		var same := true
+		for i in n:
+			if keys[i] != MOVES[chain[i]]:
+				same = false
+				break
+		if same and BUTTON_OF[(keys[n] as String).right(2)] == button:
+			return MOVES.find(keys[n])
+	return -1
 
 
 ## Бег продолжается, пока держишь «вперёд»; скорость растёт до run_speed.

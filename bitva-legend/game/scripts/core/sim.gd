@@ -301,7 +301,7 @@ func _check_projectiles() -> void:
 		var pr := projectiles[i]
 		var p: int = pr[Proj.OWNER]
 		var d := fighters[1 - p]
-		if d.state == Fighter.State.AIR_HIT or d.state == Fighter.State.DOWN:
+		if d.is_untouchable():
 			continue
 		var box := _proj_box(pr)
 		for hurt in d.hurtboxes():
@@ -407,7 +407,7 @@ func _check_hits() -> void:
 	for p in PLAYERS:
 		var a := fighters[p]
 		var d := fighters[1 - p]
-		if not a.is_active() or d.state == Fighter.State.AIR_HIT or d.state == Fighter.State.DOWN:
+		if not a.is_active() or d.is_untouchable():
 			continue
 		var hb := a.hitbox()
 		for hurt in d.hurtboxes():

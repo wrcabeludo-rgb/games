@@ -169,6 +169,7 @@ func _draw_combo(p: int, right: bool) -> void:
 		return
 	var x := size.x * (0.75 if right else 0.25)
 	_text(Vector2(x, 200), "%d %s!" % [d.combo, _plural_hits(d.combo)], 40, COLOR_GOLD, false, true, 2)
+	_text(Vector2(x, 232), "урон %d" % d.combo_damage, 22, COLOR_TEXT, false, true, 2)
 
 
 static func _plural_hits(n: int) -> String:
@@ -186,8 +187,21 @@ func _draw_footer() -> void:
 	draw_rect(Rect2(0, size.y - 30, size.x, 30), COLOR_SHADE)
 	_text(Vector2(size.x / 2.0, size.y - 10), hint, 13, COLOR_TEXT, false, true)
 	_text(Vector2(12, size.y - 38), "сборка %s · %s · %d FPS" % [version, stage, Engine.get_frames_per_second()], 12, COLOR_DIM)
+	_text(Vector2(size.x - 12, size.y - 74), _strings_hint(_sim.fighters[0]), 13, COLOR_GOLD, true)
 	_text(Vector2(size.x - 12, size.y - 56), "Спецприёмы: назад, вперёд + рука · вниз, вниз + нога · вперёд, вперёд + рука · назад, назад + рука — захват", 13, COLOR_GOLD, true)
 	_text(Vector2(size.x - 12, size.y - 38), "Назад + ЛН — подсечка · назад + СН — с разворота · вниз + СР — апперкот · ЛР вплотную — бросок (ЛР в ответ — вырваться)", 13, COLOR_GOLD, true)
+
+
+## Строки ударов первого игрока: «ЛР, ЛР, СР · ЛН, СН…».
+static func _strings_hint(f: Fighter) -> String:
+	var parts: Array[String] = []
+	for st in f.data.get("strings", []):
+		var keys: Array[String] = []
+		for key in st.moves:
+			var label: String = Fighter.MOVE_LABELS[Fighter.BUTTON_OF[(key as String).right(2)]]
+			keys.append(label + (" (низ)" if (key as String).begins_with("cr_") else ""))
+		parts.append(", ".join(keys))
+	return "Строки: %s — попавший удар (и в блок) отменяется в спецприём" % " · ".join(parts)
 
 
 # --- История ввода (F1) --------------------------------------------------

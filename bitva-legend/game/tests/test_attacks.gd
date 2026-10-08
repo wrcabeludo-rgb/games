@@ -86,13 +86,14 @@ func _test_single_hit() -> bool:
 
 
 ## Удар Ильи ЛР длится 15 тиков (5 + 3 − 1 + 8). Второе нажатие — на тике press_at.
+## ЛР, потом СН (не продолжение строки — значит, выйдет только после конца ЛР, из буфера).
 func _second_attack_started(press_at: int) -> bool:
 	var sim := _sim_at(600, 1400)
 	var f := sim.fighters[0]
 	_run(sim, LP, 0)
 	for t in range(1, 16):
-		_run(sim, LP if t == press_at else 0, 0)
-	return f.state == S.ATTACK and f.move == 0 and f.move_frame == 1
+		_run(sim, HK if t == press_at else 0, 0)
+	return f.state == S.ATTACK and f.move == 3 and f.move_frame == 1
 
 
 func _test_buffer() -> bool:
@@ -150,7 +151,7 @@ func _test_combo() -> bool:
 	_run(sim, 0, 0, 20)  # 8 тиков заморозки + конец первого удара
 	_run(sim, LP, 0)
 	_run(sim, 0, 0, 20)
-	return d.combo == 2 and d.hp == 920
+	return d.combo == 2 and d.hp == 1000 - 40 - 36  # второй удар — 90%
 
 
 func _test_air_hit() -> bool:

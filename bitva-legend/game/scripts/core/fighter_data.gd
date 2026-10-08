@@ -35,6 +35,9 @@ extends RefCounted
 ##   grab — захват: range — дальность захвата (px между телами), hold — сколько тиков держит,
 ##     damage, launch — урон и полёт после броска, tech — можно вырваться (ЛР в первые 8 тиков),
 ##     heal — лечит бросающего, recovery — восстановление бросающего после броска
+##
+## Строки (strings, как в Mortal Kombat): заданные цепочки ударов. Следующая кнопка нажимается,
+## пока предыдущий удар бьёт или сразу после; направление не важно — удар берётся из строки.
 
 const CHARACTERS := {
 	"ilya": {
@@ -58,6 +61,11 @@ const CHARACTERS := {
 		"backdash_v0": 1000,    # отскок: начальная скорость
 		"backdash_decel": 55,   # отскок: замедление за тик (~96 px за 19 тиков)
 		"backdash_recovery": 8, # после отскока нельзя действовать, тиков
+		"strings": [
+			{"name": "Кулачный бой", "moves": ["st_lp", "st_lp", "st_hp"]},
+			{"name": "Богатырский пинок", "moves": ["st_lk", "st_hk"]},
+			{"name": "Сверху и снизу", "moves": ["st_lp", "st_lk", "cr_hk"]},
+		],
 		"moves": {
 			# Кулаки и ноги Ильи медленнее, зато палица (сильные удары рукой) бьёт далеко.
 			"st_lp": {"startup": 5, "active": 3, "recovery": 8, "damage": 40, "hitstun": 15, "hitstop": 8, "push": 700, "box": [40, 180, 90, 40]},
@@ -109,6 +117,11 @@ const CHARACTERS := {
 		"backdash_v0": 1700,
 		"backdash_decel": 120,
 		"backdash_recovery": 3,
+		"strings": [
+			{"name": "Когти ночи", "moves": ["st_lp", "st_lp", "st_hk"]},
+			{"name": "Взмах плаща", "moves": ["st_lk", "st_lk", "st_hp"]},
+			{"name": "Вальс", "moves": ["st_hp", "st_hk"]},
+		],
 		"moves": {
 			# Дракула быстрее и бьёт чаще, но слабее; ноги длиннее рук.
 			"st_lp": {"startup": 4, "active": 2, "recovery": 7, "damage": 30, "hitstun": 14, "hitstop": 7, "push": 650, "box": [32, 165, 72, 35]},
