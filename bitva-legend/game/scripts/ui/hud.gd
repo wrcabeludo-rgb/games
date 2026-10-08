@@ -67,6 +67,7 @@ func _draw() -> void:
 	_draw_timer()
 	_draw_announcement()
 	_draw_footer()
+	_draw_pad_notice()
 
 
 # --- Полоски здоровья ----------------------------------------------------
@@ -178,6 +179,15 @@ static func _plural_hits(n: int) -> String:
 	if n % 10 >= 2 and n % 10 <= 4 and (n % 100 < 12 or n % 100 > 14):
 		return "УДАРА"
 	return "УДАРОВ"
+
+
+## Геймпад отключился или подключился — крупная плашка на 4 секунды.
+func _draw_pad_notice() -> void:
+	if Time.get_ticks_msec() - _reader.pad_notice_ms > 4000:
+		return
+	var bad := _reader.pad_notice.begins_with("ГЕЙМПАД")
+	draw_rect(Rect2(size.x / 2.0 - 380, 250, 760, 44), Color(0.5, 0.05, 0.05, 0.85) if bad else COLOR_SHADE)
+	_text(Vector2(size.x / 2.0, 280), _reader.pad_notice, 20, COLOR_TEXT, false, true)
 
 
 func _draw_footer() -> void:

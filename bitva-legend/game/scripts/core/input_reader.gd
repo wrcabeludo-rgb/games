@@ -41,6 +41,23 @@ const PAD_BUTTONS := [
 ## на случай, если Windows видит лишний «виртуальный» геймпад и настоящий оказался вторым.
 var single_player := false
 
+## Отключения геймпадов за сессию и последнее событие — чтобы было видно, если геймпад «отваливается».
+var pad_drops := 0
+var pad_notice := ""
+var pad_notice_ms := -100000
+
+
+func _init() -> void:
+	Input.joy_connection_changed.connect(_on_joy_changed)
+
+
+func _on_joy_changed(device: int, connected: bool) -> void:
+	if not connected:
+		pad_drops += 1
+	var name := Input.get_joy_name(device) if connected else "геймпад %d" % device
+	pad_notice = ("Подключён: %s" % name) if connected else ("ГЕЙМПАД ОТКЛЮЧИЛСЯ (%s) · отключений: %d" % [name, pad_drops])
+	pad_notice_ms = Time.get_ticks_msec()
+
 const STICK_DEADZONE := 0.5
 const TRIGGER_THRESHOLD := 0.5
 
@@ -69,6 +86,11 @@ func read(player: int) -> int:
 
 
 func device_label(player: int) -> String:
+	var drops := " · отключений геймпада: %d" % pad_drops if pad_drops > 0 and player == 0 else ""
+	return _device_label(player) + drops
+
+
+func _device_label(player: int) -> String:
 	var keys := "WASD" if player == 0 else "стрелки"
 	if single_player and player == 0:
 		var n := Input.get_connected_joypads().size()
