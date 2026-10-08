@@ -5,8 +5,8 @@ config_version=5
 [application]
 
 config/name="Битва легенд"
-config/version="2.5"
-config/description="шкала силы и суперприёмы"
+config/version="2.5.1"
+config/description="арена с параллаксом"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="res://icon.svg"

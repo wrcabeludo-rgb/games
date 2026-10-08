@@ -1,21 +1,16 @@
 class_name ArenaView
 extends Control
 ## Отрисовка арены и бойцов по состоянию Sim. Только чтение: в логику боя не вмешивается.
-## Пока вместо спрайтов — цветные фигуры, фон — заглушка «Перекрёстка миров».
+## Пока вместо спрайтов — цветные фигуры. Фон арены — ArenaScenery.
 
 const GROUND_Y := 620                 # линия земли на экране (при высоте 720)
-const PARALLAX_HILLS := 0.35
-const COLOR_GROUND := Color(0.2, 0.17, 0.16)
-const COLOR_LINE := Color(0.32, 0.28, 0.26)
-const SKY_LIGHT := Color(0.95, 0.72, 0.38)   # сторона света
-const SKY_DARK := Color(0.32, 0.08, 0.16)    # сторона тьмы
-const SKY_TOP := Color(0.08, 0.07, 0.14)
 
 var show_debug := false
 var _font := SystemFont.new()
 var _sim: Sim
 var _cam_x := 0.0
 var _shake := Vector2.ZERO
+var _scenery := ArenaScenery.new()
 
 
 func _ready() -> void:
@@ -51,9 +46,9 @@ func _draw() -> void:
 	if _sim == null:
 		return
 	_update_camera()
-	_draw_sky()
-	_draw_hills()
-	_draw_ground()
+	_scenery.update(_cam_x, _shake, _sim.tick, size, GROUND_Y, Sim.ARENA_WIDTH)
+	_scenery.draw_back(self)
+	_draw_walls()
 	_draw_super_backdrop()
 	for f in _sim.fighters:
 		_draw_shadow(f)
@@ -61,6 +56,7 @@ func _draw() -> void:
 		_draw_fighter(f)
 	for pr in _sim.projectiles:
 		_draw_projectile(pr)
+	_scenery.draw_front(self)
 	for p in Sim.PLAYERS:
 		_draw_spark(p)
 	if show_debug:
@@ -68,49 +64,8 @@ func _draw() -> void:
 			_draw_debug(f)
 
 
-func _draw_sky() -> void:
-	# Небо меняется от света (левый край арены) к тьме (правый край).
-	var steps := 24
-	var w := size.x / steps
-	for i in steps:
-		var world_x := _cam_x - size.x / 2.0 + (i + 0.5) * w
-		var t := clampf(world_x / Sim.ARENA_WIDTH, 0.0, 1.0)
-		var horizon := SKY_LIGHT.lerp(SKY_DARK, t)
-		var top := Rect2(i * w, 0, w + 1, GROUND_Y * 0.5)
-		var low := Rect2(i * w, GROUND_Y * 0.5, w + 1, GROUND_Y * 0.5)
-		draw_rect(top, SKY_TOP.lerp(horizon, 0.35))
-		draw_rect(low, SKY_TOP.lerp(horizon, 0.8))
-
-
-func _draw_hills() -> void:
-	var offset := -_cam_x * PARALLAX_HILLS
-	var pts := PackedVector2Array()
-	pts.append(Vector2(0, GROUND_Y))
-	var x := 0.0
-	while x <= size.x + 20:
-		var wx := x - offset
-		var h := 70.0 + 40.0 * sin(wx * 0.011) + 25.0 * sin(wx * 0.027 + 1.3)
-		pts.append(Vector2(x, GROUND_Y - h))
-		x += 20
-	pts.append(Vector2(size.x, GROUND_Y))
-	draw_colored_polygon(pts, Color(0.12, 0.1, 0.14, 0.85))
-
-
-func _draw_ground() -> void:
-	draw_rect(Rect2(0, GROUND_Y, size.x, size.y - GROUND_Y), COLOR_GROUND)
-	draw_line(Vector2(0, GROUND_Y), Vector2(size.x, GROUND_Y), COLOR_LINE, 3)
-	# Метки каждые 100 пикселей — чтобы было видно движение камеры.
-	var first := int(floor((_cam_x - size.x / 2.0) / 100.0)) * 100
-	for wx in range(first, int(_cam_x + size.x / 2.0) + 100, 100):
-		var p := to_screen(wx, 0)
-		draw_line(p, p + Vector2(-30, 40), COLOR_LINE, 2)
-	# Камень на перекрёстке в центре арены.
-	var stone := to_screen(Sim.ARENA_WIDTH / 2.0, 0)
-	draw_rect(Rect2(stone + Vector2(-46, -150), Vector2(92, 150)), Color(0.42, 0.4, 0.42))
-	draw_rect(Rect2(stone + Vector2(-46, -150), Vector2(92, 150)), Color(0.25, 0.24, 0.26), false, 3)
-	_text_centered(stone + Vector2(0, -112), "НАЛЕВО", 13, Color(0.15, 0.14, 0.16))
-	_text_centered(stone + Vector2(0, -92), "ПОЙДЁШЬ…", 13, Color(0.15, 0.14, 0.16))
-	# Стены по краям арены.
+## Стены по краям арены.
+func _draw_walls() -> void:
 	for wall_x in [0.0, float(Sim.ARENA_WIDTH)]:
 		var w := to_screen(wall_x, 0)
 		draw_rect(Rect2(w.x - 12, 0, 24, GROUND_Y), Color(0.05, 0.05, 0.07))
