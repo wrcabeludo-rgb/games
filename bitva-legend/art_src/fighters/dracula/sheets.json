@@ -12,12 +12,11 @@
   "align_top": 0.45
  },
  "walk_b": {
-  "part_frames": 4,
-  "parts_fit": [
-   "h:1:591",
-   "h:1:591"
-  ],
-  "pivot_y": "body_ground"
+  "frames": 4,
+  "fit": "inherit:idle",
+  "align_to": "idle:1",
+  "align_each": true,
+  "align_top": 0.45
  },
  "run": {
   "frames": 4,
@@ -66,7 +65,8 @@
  },
  "cr_hp": {
   "frames": 4,
-  "fit": 1.07
+  "fit": "h:1:390",
+  "align_to": "crouch:2"
  },
  "st_hk": {
   "frames": 4,
