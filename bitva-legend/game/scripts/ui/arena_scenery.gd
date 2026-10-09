@@ -49,6 +49,9 @@ var t := 0.0                # время в секундах (по тикам б
 var _tex := {}
 var _clouds: Array[Texture2D] = []
 var _raven_frames: Array[Texture2D] = []
+## Жизнь дальнего плана (life.json, tools/make_arena_life.py): вода, окна, трубы — в пикселях картинки mountains.
+var _life := {}
+var _water: Array[Texture2D] = []
 ## Ореол луны: свет плавно гаснет от края диска к краю текстуры.
 var _halo := _make_halo()
 
@@ -71,6 +74,11 @@ func _init(arena_id := Arenas.DEFAULT) -> void:
 		var r := _load("raven_%d" % i)
 		if r != null:
 			_raven_frames.append(r)
+	var life_path: String = _d.dir + "life.json"
+	if _tex.has("mountains") and FileAccess.file_exists(life_path):
+		_life = JSON.parse_string(FileAccess.get_file_as_string(life_path))
+		for w in _life.water:
+			_water.append(load(_d.dir + String(w.file)))
 
 
 static func _make_halo() -> Texture2D:
@@ -128,6 +136,8 @@ func draw_back(c: CanvasItem) -> void:
 	_draw_forest(c)
 	_draw_fog(c)
 	_draw_ground(c)
+	_draw_leaves(c)
+	_draw_fireflies(c)
 	_draw_stone(c)
 
 
@@ -209,10 +219,10 @@ func _draw_moon(c: CanvasItem) -> void:
 		c.draw_texture_rect(_halo, Rect2(pos - Vector2(260, 260), Vector2(520, 520)), false, Color(glow, 0.9))
 		c.draw_circle(pos, 58, Color(1.0, 0.93, 0.7))
 		return
-	var pulse := 0.5 + 0.5 * sin(t * 0.8)
-	# Ореол: мягкий радиальный градиент (без ступенек), слегка дышит.
-	var r := 230.0 + pulse * 12.0
-	c.draw_texture_rect(_halo, Rect2(pos - Vector2(r, r), Vector2(r, r) * 2.0), false, Color(1, 1, 1, 0.85 + 0.15 * pulse))
+	var pulse := 0.5 + 0.5 * sin(t * 0.6) * (0.8 + 0.2 * sin(t * 0.23))
+	# Ореол: мягкий радиальный градиент (без ступенек), медленно дышит.
+	var r := 222.0 + pulse * 30.0
+	c.draw_texture_rect(_halo, Rect2(pos - Vector2(r, r), Vector2(r, r) * 2.0), false, Color(1, 1, 1, 0.72 + 0.28 * pulse))
 	if _tex.has("moon"):
 		var tex: Texture2D = _tex.moon
 		var size := 150.0
@@ -257,7 +267,11 @@ func _draw_mountains(c: CanvasItem) -> void:
 	if _tex.has("mountains"):
 		# Дальний план из панелей (широкий): поднят, чтобы холмы, деревни и замок были видны над лесом.
 		var wide: bool = float(_tex.mountains.get_width()) / _tex.mountains.get_height() > 5.0
-		_draw_strip(c, _tex.mountains, k, ground_y - 95 if wide else ground_y + 70)
+		var bottom := ground_y - 95 if wide else ground_y + 70
+		_draw_strip(c, _tex.mountains, k, bottom)
+		if not _life.is_empty():
+			var sc: float = w / _tex.mountains.get_width()
+			_draw_life(c, Vector2(x0, bottom - _tex.mountains.get_height() * sc), sc)
 		return
 	var col: Color = _d.hills
 	if not _d.get("indoor", false):
@@ -280,6 +294,79 @@ func _draw_mountains(c: CanvasItem) -> void:
 					c.draw_line(Vector2(wx + sin(t + i) * 6, wy), Vector2(wx + 26 + sin(t + i) * 6, wy), Color(1, 1, 1, 0.35), 2)
 	for m in _d.marks:
 		_draw_mark(c, m[0], Vector2(x0 + w * float(m[1]), ground_y), float(m[2]), col.darkened(0.25))
+
+
+## Дальний план живёт: вода течёт (кадры плавно перетекают друг в друга), окна мерцают, из труб идёт дым.
+## origin — экранная точка левого верхнего угла картинки mountains, sc — её масштаб на экране.
+func _draw_life(c: CanvasItem, origin: Vector2, sc: float) -> void:
+	for i in _water.size():
+		var w: Dictionary = _life.water[i]
+		var r: Array = w.rect
+		var n: int = w.frames
+		var ft := fmod(t / float(w.period), 1.0) * n
+		var f0 := int(ft)
+		var dst := Rect2(origin + Vector2(r[0], r[1]) * sc, Vector2(r[2], r[3]) * sc)
+		c.draw_texture_rect_region(_water[i], dst, Rect2(f0 * float(r[2]), 0, r[2], r[3]))
+		c.draw_texture_rect_region(_water[i], dst, Rect2(((f0 + 1) % n) * float(r[2]), 0, r[2], r[3]), Color(1, 1, 1, ft - f0))
+	# Окна: тёплый ореол, у каждого своё неровное мерцание свечи.
+	var wins: Array = _life.windows
+	for i in wins.size():
+		var p := origin + Vector2(wins[i][0], wins[i][1]) * sc
+		var fl := 0.55 + 0.25 * sin(t * (2.1 + (i % 5) * 0.6) + i * 1.7) + 0.2 * sin(t * (5.3 + (i % 3)) + i * 0.9)
+		var rad := (7.0 + minf(wins[i][2], 12.0) * 0.6) * sc * 2.2
+		c.draw_texture_rect(_halo, Rect2(p - Vector2(rad, rad), Vector2(rad, rad) * 2.0), false, Color(1.0, 0.68, 0.3, 0.25 + 0.55 * fl))
+	# Дым: клубы поднимаются, растут, относятся ветром вправо и тают.
+	var pipes: Array = _life.chimneys
+	for i in pipes.size():
+		var base := origin + Vector2(pipes[i][0], pipes[i][1]) * sc
+		var dark := darkness(K_MOUNTAINS, base.x - layer_x(K_MOUNTAINS))
+		var col := Color(0.92, 0.86, 0.78).lerp(Color(0.62, 0.6, 0.7), dark)
+		for j in 5:
+			var age := fmod(t * 0.16 + j / 5.0 + i * 0.37, 1.0)
+			var drift := Vector2(age * age * 34.0 + sin(t * 0.9 + j + i) * 3.0 * age, -age * 70.0)
+			var rad := (4.0 + age * 14.0) * sc * 2.0
+			var a := 0.7 * minf(age * 6.0, 1.0) * (1.0 - age)
+			c.draw_texture_rect(_halo, Rect2(base + drift * sc - Vector2(rad, rad), Vector2(rad, rad) * 2.0), false, Color(col, a))
+
+
+## Листья берёз летят на светлой стороне: кружатся, падают на дорогу и тают.
+func _draw_leaves(c: CanvasItem) -> void:
+	if not _d.get("leaves", false):
+		return
+	var k := 0.6
+	var w := layer_w(k)
+	for i in 7:
+		var life := 7.0 + (i % 3) * 1.6
+		var age := fmod(t / life + i * 0.29, 1.0)
+		var lx := w * (0.04 + 0.055 * i) + age * 160.0 + sin(t * 1.3 + i * 2.1) * 26.0
+		var p := Vector2(layer_x(k) + lx, lerpf(300.0 + 30.0 * (i % 3), ground_y - 6.0, age))
+		if p.x < -20 or p.x > view.x + 20:
+			continue
+		var a := minf(age * 8.0, 1.0) * minf((1.0 - age) * 10.0, 1.0)
+		var col := Color(1.0, 0.9, 0.3, a).lerp(Color(0.75, 0.82, 0.25, a), float(i % 2))
+		var spin := t * (2.6 + (i % 4) * 0.5) + i
+		# Лист — ромбик с черешком; поворот и «сплющивание» по cos — кувыркается в воздухе.
+		c.draw_set_transform(p, spin * 0.35, Vector2(6.0 * cos(spin), 3.6))
+		var leaf := PackedVector2Array([Vector2(-1, 0), Vector2(0, -0.6), Vector2(1, 0), Vector2(0, 0.6), Vector2(-1, 0)])
+		c.draw_colored_polygon(leaf, col)
+		c.draw_polyline(leaf, Color(col.darkened(0.55), a), 1.0)
+		c.draw_set_transform(Vector2.ZERO)
+
+
+## Светлячки на тёмной стороне: медленно плывут и мерцают.
+func _draw_fireflies(c: CanvasItem) -> void:
+	if not _d.get("fireflies", false):
+		return
+	var k := 0.7
+	var w := layer_w(k)
+	for i in 6:
+		var lx := w * (0.66 + 0.055 * i) + sin(t * 0.37 + i * 1.9) * 60.0 + sin(t * 0.9 + i) * 14.0
+		var p := Vector2(layer_x(k) + lx, ground_y - 70.0 - 26.0 * (i % 4) + sin(t * 0.55 + i * 2.3) * 22.0)
+		var glow := clampf(0.5 + 0.7 * sin(t * (1.4 + (i % 3) * 0.5) + i * 2.0), 0.0, 1.0)
+		if glow <= 0.02:
+			continue
+		c.draw_texture_rect(_halo, Rect2(p - Vector2(12, 12), Vector2(24, 24)), false, Color(0.8, 1.0, 0.5, glow))
+		c.draw_circle(p, 1.6, Color(0.95, 1.0, 0.75, glow))
 
 
 ## Высота дальнего плана заглушки в точке x слоя для вида рельефа.

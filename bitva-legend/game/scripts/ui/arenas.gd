@@ -13,6 +13,7 @@ extends RefCounted
 ##   trees      — [слева, справа]: birch, dead, cypress, olive, palm, pine, column, peach, apple, screen, cable, none
 ##   ground     — цвет земли; birds — ravens, gulls, bats, none; indoor — зал (стены вместо неба)
 ##   stone      — камень на перепутье в центре; glitch — помехи и пиксельная пыль (логово Скроллера)
+##   leaves     — листья летят на светлой стороне; fireflies — светлячки на тёмной
 ##   still      — средний план не качается на ветру (колонны, статуи, экраны)
 
 const DEFAULT := "crossroads"
@@ -24,7 +25,7 @@ const LIST := {
 		"sky": [Color(0.08, 0.07, 0.15), Color(0.98, 0.74, 0.4), Color(0.3, 0.07, 0.17)], "stars": true,
 		"light": ["moon", 0.8], "hills": Color(0.29, 0.2, 0.24), "shape": ["soft", "sharp"],
 		"marks": [["church", 0.12, 1.0], ["castle", 0.86, 1.0]], "trees": ["birch", "dead"],
-		"ground": Color(0.2, 0.17, 0.16), "birds": "ravens", "stone": true,
+		"ground": Color(0.2, 0.17, 0.16), "birds": "ravens", "stone": true, "leaves": true, "fireflies": true,
 	},
 	"coast": {
 		"name": "Эгейский берег", "dir": "res://art/arenas/coast/",
