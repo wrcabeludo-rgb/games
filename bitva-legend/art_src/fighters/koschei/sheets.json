@@ -33,7 +33,7 @@
  },
  "crouch": {
   "frames": 2,
-  "fit": "h:2:405"
+  "fit": "h:2:371"
  },
  "backdash": {
   "frames": 3,
@@ -62,7 +62,7 @@
  },
  "block_low": {
   "frames": 2,
-  "fit": 0.8
+  "fit": 0.733
  },
  "fall": {
   "part_frames": 4,
@@ -74,5 +74,25 @@
    "7": 1.15,
    "8": 1.15
   }
+ },
+ "get_up": {
+  "frames": 4,
+  "fit": "inherit:idle",
+  "pivot_y": "bottom_center",
+  "align_to": "idle:1",
+  "align_frame": 4
+ },
+ "throw": {
+  "frames": 4,
+  "fit": "inherit:idle",
+  "hit": 1,
+  "hit_end": 1,
+  "align_to": "idle:1",
+  "match_scale": true
+ },
+ "thrown": {
+  "frames": 4,
+  "fit": "inherit:idle",
+  "pivot_y": "bottom_center"
  }
 }
