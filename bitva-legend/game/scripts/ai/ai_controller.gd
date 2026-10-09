@@ -91,7 +91,7 @@ func get_input(sim: Sim, p: int) -> int:
 		_guarding = 10
 		return InputBits.BLOCK
 
-	# Сбить прыжок ударом снизу (у обоих бойцов вниз + СР бьёт вверх).
+	# Сбить прыжок ударом снизу (у обоих бойцов вниз + ВР бьёт вверх).
 	if me.is_grounded_actionable() and op.is_airborne() and op.state == Fighter.State.AIR \
 			and op.vy < 0 and dist < 230 and _cooldown <= 0:
 		_cooldown = 25

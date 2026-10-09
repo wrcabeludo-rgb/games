@@ -23,7 +23,7 @@ const KEYS := [
 ]
 
 ## Геймпад (раскладка DualSense / Xbox): [бит, кнопка].
-## Квадрат — ЛР, крест — ЛН, треугольник — СР, круг — СН, R1 — блок.
+## Квадрат — НР, крест — НН, треугольник — ВР, круг — ВН, R1 — блок.
 const PAD_BUTTONS := [
 	[InputBits.LP, JOY_BUTTON_X],
 	[InputBits.LK, JOY_BUTTON_A],

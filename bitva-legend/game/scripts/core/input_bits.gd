@@ -18,7 +18,7 @@ const DIRS := UP | DOWN | LEFT | RIGHT
 const BUTTONS := LP | LK | HP | HK | BLOCK
 
 ## Кнопки атаки и блока в порядке показа: [бит, подпись].
-const BUTTON_LABELS := [[LP, "ЛР"], [LK, "ЛН"], [HP, "СР"], [HK, "СН"], [BLOCK, "БЛ"]]
+const BUTTON_LABELS := [[LP, "НР"], [LK, "НН"], [HP, "ВР"], [HK, "ВН"], [BLOCK, "БЛ"]]
 
 
 ## Одновременное «влево + вправо» или «вверх + вниз» считается нейтралью.

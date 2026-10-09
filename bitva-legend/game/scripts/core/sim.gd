@@ -24,7 +24,7 @@ const REMATCH_DELAY := 60           # после конца матча кноп�
 const KO_FREEZE := 40               # драматичная заморозка на нокауте
 const WINS_NEEDED := 2
 ## Добивание: после решающего нокаута проигравший встаёт оглушённым, у победителя есть время
-## ввести «вперёд, назад + СР» вплотную. Сами добивания — заглушка, будут переписаны.
+## ввести «вперёд, назад + ВР» вплотную. Сами добивания — заглушка, будут переписаны.
 const FINISH_DELAY := 110           # тиков после нокаута до «ДОБИВАЙ!»
 const FINISH_TICKS := 180           # время на команду
 const FINISH_STEP := 30             # между нажатиями команды — не дольше
@@ -35,7 +35,7 @@ const ATTACK_MASK := InputBits.LP | InputBits.LK | InputBits.HP | InputBits.HK
 ## Поля снаряда (PackedInt32Array): владелец, позиция, скорость, гравитация, размер,
 ## урон и прочее из данных спецприёма, вид для отрисовки, возраст.
 enum Proj { OWNER, X, Y, VX, VY, GRAV, HW, HH, DMG, STUN, STOP, PUSH, CHIP, KIND, AGE, LOW, LIFE, SIZE }
-const TECH_WINDOW := 8              # вырваться из броска: ЛР в первые тики захвата
+const TECH_WINDOW := 8              # вырваться из броска: НР в первые тики захвата
 const THROW_HITSTOP := 12
 const ARMOR_HITSTOP := 6            # короткая заморозка, когда удар принят бронёй
 const COUNTER_HITSTOP := 24         # драматичная пауза при удачной контратаке
@@ -75,7 +75,7 @@ var projectiles: Array[PackedInt32Array] = []
 var training := false
 ## Ничья в решающем раунде (1:1): следующий — «Последний бой», пока кто-то не победит.
 var last_bout := false
-## Добивание: этап ввода команды (0 — ждём «вперёд», 1 — «назад», 2 — СР), сколько ждать, было ли.
+## Добивание: этап ввода команды (0 — ждём «вперёд», 1 — «назад», 2 — ВР), сколько ждать, было ли.
 var finish_step := 0
 var finish_wait := 0
 var finished := false
@@ -214,7 +214,7 @@ func _throw_gap(a: Fighter, d: Fighter) -> int:
 	return absi(d.x - a.x) - a.push_half() - d.push_half()
 
 
-## ЛР станет броском, если соперник вплотную и его можно схватить.
+## НР станет броском, если соперник вплотную и его можно схватить.
 func _can_throw(p: int) -> bool:
 	var a := fighters[p]
 	var d := fighters[1 - p]
@@ -253,7 +253,7 @@ func _hold_position(a: Fighter, d: Fighter) -> void:
 	d.x = clampi(d.x, d.push_half(), ARENA_WIDTH * SUB - d.push_half())
 
 
-## Удержание в захвате: можно вырваться (ЛР в первые TECH_WINDOW тиков), иначе — бросок.
+## Удержание в захвате: можно вырваться (НР в первые TECH_WINDOW тиков), иначе — бросок.
 func _hold_throws() -> void:
 	for p in PLAYERS:
 		var a := fighters[p]
@@ -507,7 +507,7 @@ func _start_finish() -> void:
 	_set_phase(Phase.FINISH)
 
 
-## «Вперёд, назад + СР» вплотную; направления — относительно взгляда победителя.
+## «Вперёд, назад + ВР» вплотную; направления — относительно взгляда победителя.
 func _finish_input(w: int) -> bool:
 	var a := fighters[w]
 	var press := inputs[w] & ~prev_inputs[w]
@@ -527,7 +527,7 @@ func _finish_input(w: int) -> bool:
 		if finish_in_range():
 			finish_step = 0
 			return true
-		finish_wait = FINISH_STEP  # далеко — команда не теряется: подойди и нажми СР ещё раз
+		finish_wait = FINISH_STEP  # далеко — команда не теряется: подойди и нажми ВР ещё раз
 	return false
 
 

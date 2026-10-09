@@ -15,30 +15,30 @@ extends RefCounted
 ##   level    — high (по умолчанию), low (надо блокировать сидя), overhead (стоя) — для блока в 1.5
 ##
 ## Спецприёмы: sp_proj — «назад, вперёд», sp_dd — «вниз, вниз», sp_ff — «вперёд, вперёд».
-##   У приёма одна версия (_l). Только у палицы versions: 2 — лёгкая (ЛР) и сильная (СР, _h).
+##   У приёма одна версия (_l). Только у палицы versions: 2 — лёгкая (НР) и сильная (ВР, _h).
 ##   proj — снаряд, выпускается на кадре startup:
 ##     x, y   — откуда вылетает (вперёд от центра, высота), px
 ##     vx, vy — скорость (вперёд, вверх), субпиксели за тик; gravity — гравитация
 ##     w, h   — размер хитбокса снаряда, px;  kind — вид для отрисовки (0 палица, 1 мыши)
 ##     damage, hitstun, hitstop, push — как у ударов; chip — урон сквозь блок
-##   buttons — какими кнопками вызывается: punch (руки: ЛР/СР), kick (ноги: ЛН/СН), any
+##   buttons — какими кнопками вызывается: punch (руки: НР/ВР), kick (ноги: НН/ВН), any
 ##   proj.level — high или low (волна по земле); proj.life — сколько тиков живёт (0 — пока не улетит)
 ##   lunge   — рывок вперёд в активной фазе, субпиксели за тик;  armor — сколько ударов выдерживает
 ##   teleport — туман: invul_from — с какого кадра неуязвим, offset — на сколько px за спину соперника
 ##   counter — контратака в активной фазе: stun — сколько тиков атакующий загипнотизирован
 ##
 ## Классика (у всех бойцов):
-##   st_sweep — назад + ЛН (подсечка), st_round — назад + СН (с разворота),
-##   cr_hp — вниз + СР (апперкот), throw — ЛР вплотную (бросок, проходит сквозь блок).
+##   st_sweep — назад + НН (подсечка), st_round — назад + ВН (с разворота),
+##   cr_hp — вниз + ВР (апперкот), throw — НР вплотную (бросок, проходит сквозь блок).
 ##   uppercut — апперкот: в активной фазе боец распрямляется, рука идёт снизу вверх
 ##   knockdown — сбивает с ног; launch — подброс [вперёд, вверх], субпиксели за тик; kick — рисовать ногой
 ##   grab — захват: range — дальность захвата (px между телами), hold — сколько тиков держит,
-##     damage, launch — урон и полёт после броска, tech — можно вырваться (ЛР в первые 8 тиков),
+##     damage, launch — урон и полёт после броска, tech — можно вырваться (НР в первые 8 тиков),
 ##     heal — лечит бросающего, recovery — восстановление бросающего после броска
 ##
 ## Шкала силы (2.5):
 ##   ex — усиленная версия спецприёма (ввод с зажатым блоком, тратит секцию шкалы): поля, которые меняются.
-##   super — суперприём (блок + СР + СН, вся шкала). Если удар попал — ролик:
+##   super — суперприём (блок + ВР + ВН, вся шкала). Если удар попал — ролик:
 ##     cinema — hold (длительность ролика), damage, launch, heal, recovery, scaled (урон затухает в комбо)
 ##
 ## Строки (strings, как в Mortal Kombat): заданные цепочки ударов. Следующая кнопка нажимается,
@@ -81,7 +81,7 @@ const CHARACTERS := {
 			"st_hk": {"startup": 10, "active": 4, "recovery": 18, "damage": 90, "hitstun": 20, "hitstop": 11, "push": 1000, "box": [45, 150, 130, 90]},
 			"cr_lp": {"startup": 5, "active": 3, "recovery": 9, "damage": 35, "hitstun": 14, "hitstop": 7, "push": 650, "box": [70, 125, 125, 45]},
 			"cr_lk": {"startup": 6, "active": 3, "recovery": 10, "damage": 35, "hitstun": 14, "hitstop": 7, "push": 650, "box": [60, 0, 130, 45], "level": "low"},
-			# Апперкот (вниз + СР): удар снизу вверх, распрямляется из приседа, подбрасывает.
+			# Апперкот (вниз + ВР): удар снизу вверх, распрямляется из приседа, подбрасывает.
 			"cr_hp": {"startup": 8, "active": 5, "recovery": 24, "damage": 100, "hitstun": 22, "hitstop": 13, "push": 900, "box": [20, 50, 150, 260], "knockdown": 1, "launch": [250, 1700], "uppercut": 1},
 			"cr_hk": {"startup": 11, "active": 4, "recovery": 24, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 1000, "box": [40, 0, 140, 35], "level": "low"},
 			"j_lp": {"startup": 5, "active": 6, "damage": 40, "hitstun": 15, "hitstop": 8, "push": 600, "box": [60, 140, 120, 55], "level": "overhead"},
@@ -101,7 +101,7 @@ const CHARACTERS := {
 			"st_sweep": {"startup": 9, "active": 3, "recovery": 20, "damage": 70, "hitstun": 20, "hitstop": 11, "push": 600, "box": [30, 0, 125, 40], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
 			"st_round": {"startup": 14, "active": 4, "recovery": 24, "damage": 120, "hitstun": 22, "hitstop": 14, "push": 1200, "box": [30, 160, 130, 130], "knockdown": 1, "launch": [650, 950], "kick": 1},
 			"throw": {"startup": 4, "active": 2, "recovery": 18, "grab": {"range": 25, "hold": 26, "damage": 120, "launch": [500, 1000], "tech": 1, "recovery": 10}},
-			# «Удар с небес» (блок + СР + СН): рывок с палицей; попал — небо разверзается, молнии и удар сверху.
+			# «Удар с небес» (блок + ВР + ВН): рывок с палицей; попал — небо разверзается, молнии и удар сверху.
 			"super": {"name": "УДАР С НЕБЕС", "startup": 8, "active": 8, "recovery": 45, "lunge": 700, "damage": 60, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 45, "box": [25, 40, 140, 240], "cinema": {"hold": 100, "damage": 330, "launch": [700, 1700], "tech": 0, "recovery": 20, "scaled": 1}},
 		},
 	},
@@ -140,7 +140,7 @@ const CHARACTERS := {
 			"st_hk": {"startup": 9, "active": 3, "recovery": 16, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 1000, "box": [40, 140, 105, 110]},
 			"cr_lp": {"startup": 4, "active": 2, "recovery": 7, "damage": 25, "hitstun": 13, "hitstop": 6, "push": 600, "box": [60, 105, 115, 45]},
 			"cr_lk": {"startup": 5, "active": 2, "recovery": 9, "damage": 30, "hitstun": 13, "hitstop": 6, "push": 600, "box": [50, 0, 155, 40], "level": "low"},
-			# Апперкот (вниз + СР): удар снизу вверх, распрямляется из приседа, подбрасывает.
+			# Апперкот (вниз + ВР): удар снизу вверх, распрямляется из приседа, подбрасывает.
 			"cr_hp": {"startup": 7, "active": 4, "recovery": 20, "damage": 85, "hitstun": 20, "hitstop": 12, "push": 850, "box": [20, 60, 105, 240], "knockdown": 1, "launch": [200, 1600], "uppercut": 1},
 			"cr_hk": {"startup": 9, "active": 3, "recovery": 20, "damage": 70, "hitstun": 19, "hitstop": 10, "push": 1000, "box": [50, 0, 210, 40], "level": "low"},
 			"j_lp": {"startup": 4, "active": 5, "damage": 30, "hitstun": 14, "hitstop": 7, "push": 550, "box": [25, 60, 95, 45], "level": "overhead"},
@@ -159,7 +159,7 @@ const CHARACTERS := {
 			"st_sweep": {"startup": 8, "active": 3, "recovery": 18, "damage": 60, "hitstun": 20, "hitstop": 10, "push": 600, "box": [30, 0, 140, 28], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
 			"st_round": {"startup": 12, "active": 4, "recovery": 20, "damage": 100, "hitstun": 22, "hitstop": 13, "push": 1100, "box": [20, 160, 110, 90], "knockdown": 1, "launch": [600, 900], "kick": 1},
 			"throw": {"startup": 3, "active": 2, "recovery": 18, "grab": {"range": 25, "hold": 22, "damage": 100, "launch": [450, 900], "tech": 1, "recovery": 10}},
-			# «Кровавая луна» (блок + СР + СН): бросок вперёд; попал — восходит кровавая луна, стая и укус.
+			# «Кровавая луна» (блок + ВР + ВН): бросок вперёд; попал — восходит кровавая луна, стая и укус.
 			"super": {"name": "КРОВАВАЯ ЛУНА", "startup": 6, "active": 8, "recovery": 40, "lunge": 950, "damage": 50, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 40, "box": [20, 40, 120, 220], "cinema": {"hold": 100, "damage": 300, "heal": 80, "launch": [600, 1500], "tech": 0, "recovery": 18, "scaled": 1}},
 		},
 	},

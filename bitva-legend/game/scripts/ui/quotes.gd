@@ -135,6 +135,47 @@ const WIN := {
 	},
 }
 
+## Ответ проигравшего — только пары-соперники и зеркальные бои: проигравший → победитель → варианты [ru, en].
+## Вариант выбирается тем же зерном, что и победная реплика, поэтому отвечает именно на неё:
+## число вариантов совпадает с WIN[победитель][проигравший].
+const LOSE := {
+	"dracula": {
+		"ilya": [
+			["Чеснок? Как банально. Я ждал от вас большего, богатырь.", "Garlic? How banal. I expected more of you, hero."],
+			["Гроб хотя бы не разговаривает. Идите уже.", "At least a coffin doesn't talk. Just go."],
+			["На той стороне… Князь, у которого нет земли, стоит там, где ему оставили место.",
+				"The wrong side… A prince without a land stands where he's left room to stand."],
+		],
+		"dracula": [["Ничего. У меня есть ещё четыреста лет на реванш.", "No matter. I have four hundred more years for a rematch."]],
+	},
+	"ilya": {
+		"dracula": [
+			["Медовуха… Эх, сейчас бы ковшик. Только не с тобой, кровопийца.", "Mead… Could use a mug right now. Just not with you, bloodsucker."],
+			["Борода ещё отрастёт. А вот ты ко мне ещё придёшь — увидишь.", "The beard will grow back. And you'll be back for more — you'll see."],
+			["Сберегу, княже. И за тебя тоже.", "I will, prince. For you too."],
+		],
+		"ilya": [["Ладно… Пусть земля держит. Я полежу.", "Fine… Let the land hold you. I'll just lie here."]],
+	},
+	"koschei": {
+		"hercules": [["Покой… Ты так говоришь, будто он где-то есть.", "Peace… You say it as if it exists somewhere."]],
+	},
+	"hercules": {
+		"koschei": [["Тяжелее. Но я её хотя бы несу, а не прячу в яйце.", "Heavier. But at least I carry mine, not hide it in an egg."]],
+	},
+	"medusa": {
+		"athena": [["«Виновата». Тысячи лет я ждала этого слова. Повтори.", "'To blame.' I waited thousands of years for that word. Say it again."]],
+	},
+	"athena": {
+		"medusa": [["Знаю. Теперь — знаю.", "I know. Now — I know."]],
+	},
+	"sunwukong": {
+		"anubis": [["Далеко — это сколько? Я быстро бегаю!", "How far is far? I run fast!"]],
+	},
+	"anubis": {
+		"sunwukong": [["Передам. Весы терпеливы. Я — тоже.", "I will. The scales are patient. So am I."]],
+	},
+}
+
 
 static func _pick(lines: Array, seed_value: int):
 	return lines[absi(seed_value) % lines.size()]
@@ -164,5 +205,14 @@ static func win(winner: String, loser: String, seed_value: int) -> String:
 		if not GENERIC_WIN.has(winner):
 			return ""
 		lines = [GENERIC_WIN[winner]]
+	var q: Array = _pick(lines, seed_value)
+	return q[0] if Loc.lang == "ru" else q[1]
+
+
+## Ответ проигравшего на победную реплику или "".
+static func lose(loser: String, winner: String, seed_value: int) -> String:
+	var lines: Array = LOSE.get(loser, {}).get(winner, [])
+	if lines.is_empty():
+		return ""
 	var q: Array = _pick(lines, seed_value)
 	return q[0] if Loc.lang == "ru" else q[1]

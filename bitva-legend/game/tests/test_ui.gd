@@ -6,11 +6,12 @@ func _init() -> void:
 	var ok := true
 	ok = _check("вибрация: попадание и сбитие с ног — импульсы, выключена — ни одного", _test_rumble()) and ok
 	ok = _check("настройки: сохраняются в файл и читаются обратно", _test_settings()) and ok
+	ok = _check("реплики: на каждую победную фразу пары-соперников есть ответ проигравшего", _test_lose_quotes()) and ok
 	print("ИТОГ: " + ("все тесты пройдены" if ok else "есть ошибки"))
 	quit(0 if ok else 1)
 
 
-## Илья подходит и бьёт СН с разворота (сбивает с ног); считаем импульсы.
+## Илья подходит и бьёт ВН с разворота (сбивает с ног); считаем импульсы.
 func _pulses(level: int) -> int:
 	Settings.rumble = level
 	var sim := Sim.new(false)
@@ -48,6 +49,21 @@ func _test_settings() -> bool:
 	Settings.hints = keep[2]
 	Settings.save_file()
 	return ok
+
+
+func _test_lose_quotes() -> bool:
+	for loser in Quotes.LOSE:
+		for winner in Quotes.LOSE[loser]:
+			var wins: Array = Quotes.WIN.get(winner, {}).get(loser, [])
+			if wins.size() != Quotes.LOSE[loser][winner].size():
+				print("  %s → %s: побед %d, ответов %d" % [winner, loser, wins.size(), Quotes.LOSE[loser][winner].size()])
+				return false
+	for winner in Quotes.WIN:
+		for loser in Quotes.WIN[winner]:
+			if Quotes.lose(loser, winner, 0) == "":
+				print("  нет ответа: %s → %s" % [winner, loser])
+				return false
+	return true
 
 
 func _check(name: String, passed: bool) -> bool:

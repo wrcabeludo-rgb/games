@@ -36,7 +36,7 @@ func _test_deals_damage(level: LV) -> bool:
 	return sim.fighters[0].hp < sim.fighters[0].max_hp
 
 
-## Илья на дистанции джеба раз за разом бьёт ЛР; считаем урон по ИИ за 20 секунд.
+## Илья на дистанции джеба раз за разом бьёт НР; считаем урон по ИИ за 20 секунд.
 func _damage_taken(level: LV, seed_value := 7) -> int:
 	var sim := Sim.new(false)
 	sim.fighters[0].x = 900 * SUB
@@ -45,7 +45,7 @@ func _damage_taken(level: LV, seed_value := 7) -> int:
 	var total := 0
 	var last_hp := sim.fighters[1].hp
 	for i in 1200:
-		# Держит дистанцию джеба: вплотную ЛР стал бы броском (он проходит сквозь блок и мешал бы замеру).
+		# Держит дистанцию джеба: вплотную НР стал бы броском (он проходит сквозь блок и мешал бы замеру).
 		# Подходит, только если далеко; «вперёд» зажат, пока подходит (повторные тапы — это парирование).
 		var gap := absi(sim.fighters[1].x - sim.fighters[0].x) / SUB
 		var p1 := (InputBits.RIGHT if gap > 190 else 0) | (InputBits.LP if i % 24 == 0 else 0)

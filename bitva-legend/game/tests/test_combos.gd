@@ -17,9 +17,9 @@ func _init() -> void:
 	Fighter.test_max_hp = 1000
 	var ok := true
 	ok = _check("затухание урона: 100% → 90% → … не меньше 30%", _test_scaling()) and ok
-	ok = _check("строка Ильи ЛР, ЛР, СР — три удара подряд, урон с затуханием", _test_ilya_string()) and ok
-	ok = _check("строка Дракулы ЛН, ЛН, СР — три удара подряд", _test_drac_string()) and ok
-	ok = _check("строка Дракулы ЛР, ЛР, СН — три удара подряд", _test_drac_string2()) and ok
+	ok = _check("строка Ильи НР, НР, ВР — три удара подряд, урон с затуханием", _test_ilya_string()) and ok
+	ok = _check("строка Дракулы НН, НН, ВР — три удара подряд", _test_drac_string()) and ok
+	ok = _check("строка Дракулы НР, НР, ВН — три удара подряд", _test_drac_string2()) and ok
 	ok = _check("строка в блоке: все удары выходят, урона нет", _test_string_blocked()) and ok
 	ok = _check("строка выходит и при промахе (как в МК)", _test_string_whiff()) and ok
 	ok = _check("кнопка не из строки — строка обрывается", _test_string_wrong_button()) and ok
@@ -119,7 +119,7 @@ func _test_string_wrong_button() -> bool:
 	return moves == ["st_lp"]
 
 
-## Илья бьёт ЛР и сразу «назад, вперёд + ЛР» — палица вылетает раньше, чем закончился бы удар.
+## Илья бьёт НР и сразу «назад, вперёд + НР» — палица вылетает раньше, чем закончился бы удар.
 func _cancel_case(gap: int, p2: int) -> int:
 	var sim := _sim_at(900, 900 + gap)
 	var f := sim.fighters[0]
@@ -169,7 +169,7 @@ func _juggle(chars: PackedStringArray, gap: int, special: Dictionary) -> Array:
 
 
 func _test_juggle_ram() -> bool:
-	# вниз+СР, затем «вперёд, вперёд + ЛР» — таран.
+	# вниз+ВР, затем «вперёд, вперёд + НР» — таран.
 	var r := _juggle(PackedStringArray(["ilya", "dracula"]), 150, {10: R, 12: 0, 13: R | LP})
 	if r[0] != 100 + 90 or r[1] != 1:
 		print("    урон %d, добиваний %d" % r)
@@ -178,7 +178,7 @@ func _test_juggle_ram() -> bool:
 
 
 func _test_juggle_bats() -> bool:
-	# вниз+СР, затем «назад, вперёд + ЛР» — мыши.
+	# вниз+ВР, затем «назад, вперёд + НР» — мыши.
 	var r := _juggle(PackedStringArray(["dracula", "ilya"]), 150, {9: L, 11: R | LP})
 	if r[0] != 85 + 54 or r[1] != 1:
 		print("    урон %d, добиваний %d" % r)

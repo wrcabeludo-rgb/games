@@ -168,29 +168,34 @@ func _draw_medal(p: int) -> void:
 	var c := Vector2(MEDAL_X if p == 0 else size.x - MEDAL_X, BAR_Y + BAR_H / 2.0 + 4)
 	draw_circle(c, MEDAL_R + 5, Color(0.05, 0.03, 0.06))
 	draw_circle(c, MEDAL_R, f.color().darkened(0.55))
-	var face := _face(f.id)
-	if not face.is_empty():
-		var tex: Texture2D = face[0]
-		var src: Rect2 = face[1]
-		# Круглая маска: портрет — веер треугольников с UV.
-		var pts := PackedVector2Array()
-		var uvs := PackedVector2Array()
-		var flip := -1.0 if p == 1 else 1.0
-		for i in 40:
-			var a := TAU * i / 40.0
-			var v := Vector2(cos(a), sin(a))
-			pts.append(c + v * MEDAL_R)
-			var uv := src.position + src.size * (Vector2(0.5 + 0.5 * v.x * flip, 0.5 + 0.5 * v.y))
-			uvs.append(uv / tex.get_size())
-		var cols := PackedColorArray()
-		cols.resize(pts.size())
-		cols.fill(Color.WHITE)
-		draw_polygon(pts, cols, uvs, tex)
+	_draw_face_circle(f.id, c, MEDAL_R, p == 1, Color.WHITE)
 	# Кант медальона; когда шкала силы полна — светится.
 	var full := f.meter >= Fighter.METER_MAX
 	var ring := COLOR_GOLD if not full else COLOR_GOLD.lerp(Color.WHITE, 0.5 + 0.5 * sin(_sim.tick * 0.3))
 	draw_arc(c, MEDAL_R + 2, 0, TAU, 48, ring, 3.0, true)
 	draw_arc(c, MEDAL_R + 6, 0, TAU, 48, Color(0.05, 0.03, 0.06), 2.0, true)
+
+
+## Лицо бойца в круге (веер треугольников с UV); mirror — смотрит влево.
+func _draw_face_circle(id: String, c: Vector2, r: float, mirror: bool, tint: Color) -> void:
+	var face := _face(id)
+	if face.is_empty():
+		return
+	var tex: Texture2D = face[0]
+	var src: Rect2 = face[1]
+	var pts := PackedVector2Array()
+	var uvs := PackedVector2Array()
+	var flip := -1.0 if mirror else 1.0
+	for i in 40:
+		var a := TAU * i / 40.0
+		var v := Vector2(cos(a), sin(a))
+		pts.append(c + v * r)
+		var uv := src.position + src.size * (Vector2(0.5 + 0.5 * v.x * flip, 0.5 + 0.5 * v.y))
+		uvs.append(uv / tex.get_size())
+	var cols := PackedColorArray()
+	cols.resize(pts.size())
+	cols.fill(tint)
+	draw_polygon(pts, cols, uvs, tex)
 
 
 ## Лицо бойца с портрета экрана выбора: [текстура, область] или пусто.
@@ -339,7 +344,7 @@ func _draw_announcement() -> void:
 		Sim.Phase.FINISH:
 			big = "ДОБИВАЙ!"
 			color = Color(1, 0.3, 0.2)
-			small = Loc.t("Вперёд, назад + СР · %d") % ceili((Sim.FINISH_TICKS - _sim.phase_frame) / 60.0)
+			small = Loc.t("Вперёд, назад + ВР · %d") % ceili((Sim.FINISH_TICKS - _sim.phase_frame) / 60.0)
 		Sim.Phase.FINISHER:
 			if _sim.phase_frame > 20:
 				big = "ДОБИВАНИЕ!"
@@ -364,7 +369,7 @@ func _draw_announcement() -> void:
 func _draw_finish_command() -> void:
 	if paused or _sim.phase != Sim.Phase.FINISH:
 		return
-	var steps := ["→", "←", Loc.t("СР")]
+	var steps := ["→", "←", Loc.t("ВР")]
 	var cx := size.x / 2.0
 	var y := size.y * 0.3 + 100
 	for i in 3:
@@ -405,6 +410,27 @@ func _draw_win_quote() -> void:
 	var shown := q.left(mini(q.length(), int((_sim.phase_frame - 44) * 1.6)))
 	draw_multiline_string(_font, box.position + Vector2(18, 58), "«%s»" % shown if Loc.lang == "ru" else "“%s”" % shown,
 		HORIZONTAL_ALIGNMENT_LEFT, box.size.x - 36, 20, 2, COLOR_TEXT)
+	# Ответ проигравшего (только пары-соперники): над плашкой победителя, с его стороны,
+	# с маленьким затемнённым портретом. Появляется, когда победитель договорил.
+	var loser := _sim.fighters[1 - w]
+	var a := Quotes.lose(loser.id, winner.id, _sim.tick - _sim.phase_frame)
+	var start := 44 + int(q.length() / 1.6) + 40
+	if a == "" or _sim.phase_frame < start:
+		return
+	var k := smoothstep(float(start), float(start + 14), float(_sim.phase_frame))
+	var lb := Rect2(box.position.x + (0.0 if right else box.size.x * 0.22), box.position.y - 92, box.size.x * 0.78, 80)
+	# Портрет — у внешнего края плашки, со стороны проигравшего.
+	var face_c := Vector2(lb.position.x + 44 if right else lb.end.x - 44, lb.get_center().y)
+	var text_x := lb.position.x + (96.0 if right else 14.0)
+	draw_rect(lb, Color(0.03, 0.02, 0.04, 0.85 * k))
+	draw_rect(lb, Color(loser.color().darkened(0.2), 0.8 * k), false, 2.0)
+	draw_circle(face_c, 34, Color(0.05, 0.03, 0.06, k))
+	_draw_face_circle(loser.id, face_c, 31, not right, Color(0.5, 0.5, 0.56, k))
+	draw_arc(face_c, 33, 0, TAU, 40, Color(loser.color().darkened(0.2), k), 2.0, true)
+	_text(Vector2(text_x, lb.position.y + 24), loser.data.name, 15, Color(loser.color().lightened(0.2), 0.85 * k), false, false, 1, _title_font)
+	var ans := a.left(mini(a.length(), int((_sim.phase_frame - start) * 1.6)))
+	draw_multiline_string(_font, Vector2(text_x, lb.position.y + 50), "«%s»" % ans if Loc.lang == "ru" else "“%s”" % ans,
+		HORIZONTAL_ALIGNMENT_LEFT, lb.size.x - 110, 17, 2, Color(COLOR_TEXT, 0.8 * k))
 
 
 ## Портрет бойца по пояс (последний кадр радости, иначе портрет выбора); справа — зеркально, к центру.
@@ -476,10 +502,10 @@ func _draw_footer() -> void:
 	_text(Vector2(12, size.y - 98), Loc.t("сборка %s · %s · %d FPS") % [version, stage, Engine.get_frames_per_second()], 12, COLOR_DIM)
 	_text(Vector2(size.x - 12, size.y - 74), _strings_hint(_sim.fighters[0]), 13, COLOR_GOLD, true)
 	_text(Vector2(size.x - 12, size.y - 56), "Спецприёмы: назад, вперёд + рука · вниз, вниз + нога · вперёд, вперёд + рука · назад, назад + рука — захват", 13, COLOR_GOLD, true)
-	_text(Vector2(size.x - 12, size.y - 38), "Назад + ЛН — подсечка · назад + СН — с разворота · вниз + СР — апперкот · ЛР вплотную — бросок · тап «вперёд» в момент удара — парирование", 13, COLOR_GOLD, true)
+	_text(Vector2(size.x - 12, size.y - 38), "Назад + НН — подсечка · назад + ВН — с разворота · вниз + ВР — апперкот · НР вплотную — бросок · тап «вперёд» в момент удара — парирование", 13, COLOR_GOLD, true)
 
 
-## Строки ударов первого игрока: «ЛР, ЛР, СР · ЛН, СН…».
+## Строки ударов первого игрока: «НР, НР, ВР · НН, ВН…».
 static func _strings_hint(f: Fighter) -> String:
 	var parts: Array[String] = []
 	for st in f.data.get("strings", []):

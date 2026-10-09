@@ -16,7 +16,7 @@ const BL := InputBits.BLOCK
 func _init() -> void:
 	Fighter.test_max_hp = 1000
 	var ok := true
-	ok = _check("стоячий блок держит ЛР: урона нет, оглушение в блоке", _test_block_basic()) and ok
+	ok = _check("стоячий блок держит НР: урона нет, оглушение в блоке", _test_block_basic()) and ok
 	ok = _check("после блока, пока держишь кнопку, — снова блок", _test_block_return()) and ok
 	ok = _check("низкий удар пробивает стоячий блок", _test_low_vs_stand()) and ok
 	ok = _check("нижний блок держит низкий удар", _test_low_vs_crouch()) and ok
@@ -25,7 +25,7 @@ func _init() -> void:
 	ok = _check("в блоке нельзя ходить", _test_no_walk()) and ok
 	ok = _check("из блока можно сразу ударить", _test_attack_from_block()) and ok
 	ok = _check("палица Ильи в блоке — в минусе (защитник свободен раньше)", _test_heavy_unsafe()) and ok
-	ok = _check("ЛР Ильи в блоке — в плюсе", _test_light_safe()) and ok
+	ok = _check("НР Ильи в блоке — в плюсе", _test_light_safe()) and ok
 	print("ИТОГ: " + ("все тесты пройдены" if ok else "есть ошибки"))
 	quit(0 if ok else 1)
 
@@ -77,7 +77,7 @@ func _test_low_vs_crouch() -> bool:
 	return sim.fighters[1].hp == 1000 and sim.fighters[1].low_pose == 1
 
 
-## Дракула прыгает на Илью и бьёт ЛН на снижении. Возвращает здоровье Ильи.
+## Дракула прыгает на Илью и бьёт НН на снижении. Возвращает здоровье Ильи.
 func _jump_in(ilya_input: int) -> int:
 	var sim := _sim_at(900, 1150)
 	_run(sim, ilya_input, L | U)

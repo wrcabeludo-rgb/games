@@ -13,7 +13,7 @@ const STATE_NAMES := [
 	"сбит с ног", "бросает", "в захвате",
 ]
 
-## Удары по номерам: 0–3 стоя, 4–7 в приседе, 8–11 в прыжке; внутри — ЛР, ЛН, СР, СН.
+## Удары по номерам: 0–3 стоя, 4–7 в приседе, 8–11 в прыжке; внутри — НР, НН, ВР, ВН.
 const MOVES := [
 	"st_lp", "st_lk", "st_hp", "st_hk",
 	"cr_lp", "cr_lk", "cr_hp", "cr_hk",
@@ -24,10 +24,10 @@ const MOVES := [
 	"sp_bb_l", "sp_bb_h",
 	"st_sweep", "st_round", "throw", "super",
 ]
-const MOVE_SWEEP := 20      # назад + ЛН — подсечка
-const MOVE_ROUND := 21      # назад + СН — удар ногой с разворота
-const MOVE_THROW := 22      # ЛР вплотную — бросок
-const MOVE_SUPER := 23      # блок + СР + СН — суперприём (вся шкала)
+const MOVE_SWEEP := 20      # назад + НН — подсечка
+const MOVE_ROUND := 21      # назад + ВН — удар ногой с разворота
+const MOVE_THROW := 22      # НР вплотную — бросок
+const MOVE_SUPER := 23      # блок + ВР + ВН — суперприём (вся шкала)
 ## Спецприёмы: номер → ввод. Удар по номеру: SPECIAL_BASE + номер * 2 + сила (0 лёгкий, 1 сильный).
 const SPECIAL_BASE := 12
 const SPECIAL_PROJ := 0     # «назад, вперёд + удар»
@@ -41,7 +41,7 @@ const TAP_DOWN := 3
 const TAP_UP := 4
 const TAP_WINDOW := 14      # между нажатиями направлений в спецприёме, тиков
 const BUTTON_WINDOW := 10   # от последнего направления до кнопки удара, тиков
-const MOVE_LABELS := ["ЛР", "ЛН", "СР", "СН"]
+const MOVE_LABELS := ["НР", "НН", "ВР", "ВН"]
 const ATTACK_BITS := [InputBits.LP, InputBits.LK, InputBits.HP, InputBits.HK]
 
 const SUB := 100            # субпикселей в пикселе
@@ -140,11 +140,11 @@ var super_timer := TAP_TIMER_MAX  # тиков с ввода суперприё�
 var flash_request := 0
 ## Усиленные версии спецприёмов (данные приёма + поле "ex"); не состояние — считаются из данных.
 var ex_moves := {}
-## Выставляет симуляция перед тиком: соперник вплотную и его можно бросить (ЛР станет броском).
+## Выставляет симуляция перед тиком: соперник вплотную и его можно бросить (НР станет броском).
 var throw_ok := false
 ## Удар дошёл до кадра захвата — симуляция проверит, схвачен ли соперник.
 var grab_request := 0
-## Нажата ЛР в этот тик (в захвате — попытка вырваться).
+## Нажата НР в этот тик (в захвате — попытка вырваться).
 var tech_press := 0
 ## Второй боец того же персонажа — рисуется другим цветом.
 var alt := false
@@ -621,7 +621,7 @@ func read_input(bits: int, aging: bool) -> Dictionary:
 				tech_press = 1
 			special_ex = 1 if bits & InputBits.BLOCK else 0
 			_check_special(i)
-	# Суперприём: блок + СР + СН (вторая из сильных нажата, пока первая держится).
+	# Суперприём: блок + ВР + ВН (вторая из сильных нажата, пока первая держится).
 	var heavy := InputBits.HP | InputBits.HK
 	if (bits & InputBits.BLOCK) and (bits & heavy) == heavy and (prev_bits & heavy) != heavy:
 		super_timer = 0
@@ -938,7 +938,7 @@ func _is_ground_normal() -> bool:
 func _try_cancel() -> bool:
 	if not _is_ground_normal():
 		return false
-	# Блок + СР + СН нажаты не совсем одновременно: сильный удар в первые кадры превращается в суперприём.
+	# Блок + ВР + ВН нажаты не совсем одновременно: сильный удар в первые кадры превращается в суперприём.
 	if move_frame <= 3 and _super_ready():
 		_start_super()
 		return true

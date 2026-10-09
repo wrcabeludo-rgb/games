@@ -15,15 +15,15 @@ const BL := InputBits.BLOCK
 func _init() -> void:
 	Fighter.test_max_hp = 1000
 	var ok := true
-	ok = _check("вниз, вниз + ЛН → удар оземь Ильи", _test_stomp_recognized()) and ok
+	ok = _check("вниз, вниз + НН → удар оземь Ильи", _test_stomp_recognized()) and ok
 	ok = _check("вниз, вниз + рука — обычный удар в приседе", _test_stomp_punch()) and ok
 	ok = _check("волна бьёт стоящего: урон 80", _test_wave_hits()) and ok
 	ok = _check("волна пробивает стоячий блок", _test_wave_vs_stand_block()) and ok
 	ok = _check("нижний блок держит волну (8 сквозь блок)", _test_wave_vs_crouch_block()) and ok
 	ok = _check("волна исчезает, не долетев до дальнего соперника", _test_wave_life()) and ok
-	ok = _check("вперёд, вперёд + ЛР → таран: рывок и урон 100", _test_ram()) and ok
+	ok = _check("вперёд, вперёд + НР → таран: рывок и урон 100", _test_ram()) and ok
 	ok = _check("броня тарана выдерживает удар", _test_ram_armor()) and ok
-	ok = _check("вниз, вниз + ЛН → Дракула за спиной у Ильи", _test_teleport()) and ok
+	ok = _check("вниз, вниз + НН → Дракула за спиной у Ильи", _test_teleport()) and ok
 	ok = _check("в тумане Дракула неуязвим", _test_mist_intangible()) and ok
 	ok = _check("гипнотический взгляд ловит удар: Илья застыл", _test_counter()) and ok
 	ok = _check("взгляд впустую — Дракула открыт до конца приёма", _test_counter_whiff()) and ok
@@ -116,7 +116,7 @@ func _test_ram_armor() -> bool:
 	var ilya := sim.fighters[0]
 	_run(sim, R, 0, 2)
 	_run(sim, 0, 0, 2)
-	_run(sim, R | LP, LP)  # Дракула бьёт ЛР одновременно с началом тарана
+	_run(sim, R | LP, LP)  # Дракула бьёт НР одновременно с началом тарана
 	_run(sim, 0, 0, 40)
 	return ilya.hp == 1000 - 30 and sim.fighters[1].hp == 900
 
