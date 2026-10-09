@@ -11,6 +11,7 @@ func _init() -> void:
 	ok = _check("аркада: эпилог у каждого бойца на двух языках", _test_endings()) and ok
 	ok = _check("арены: у каждого бойца своя, у каждой пары свой шов, описание полное", _test_arenas()) and ok
 	ok = _check("арены: выбор в бою и в аркаде", _test_arena_choice()) and ok
+	ok = _check("реплики: у каждого героя по 3 общие до и после боя, у каждой встречи разных героев — по 2 диалога", _test_quotes_variety()) and ok
 	ok = _check("реплики: на каждую победную фразу пары-соперников есть ответ проигравшего", _test_lose_quotes()) and ok
 	print("ИТОГ: " + ("все тесты пройдены" if ok else "есть ошибки"))
 	quit(0 if ok else 1)
@@ -129,6 +130,30 @@ func _test_arena_choice() -> bool:
 		and Arenas.for_arcade("ilya", "dracula") == "crossroads" \
 		and Arenas.for_arcade("ilya", "avatar") == "den" \
 		and Arenas.for_arcade("ilya", "scroller") == "den"
+
+
+func _test_quotes_variety() -> bool:
+	var heroes: Array = MenuView.ROSTER
+	for id in heroes + Arcade.FINALS:
+		if Quotes.GENERIC_INTRO.get(id, []).size() < 3 or Quotes.GENERIC_WIN.get(id, []).size() < 3:
+			print("  мало общих реплик: ", id)
+			return false
+	for a in heroes:
+		for b in heroes + Arcade.FINALS:
+			var ids := [a, b]
+			ids.sort()
+			var key := "%s|%s" % ids
+			var need := 1 if a == b else 2
+			var dialogs: Array = Quotes.INTRO.get(key, [])
+			if dialogs.size() < need:
+				print("  мало диалогов: ", key)
+				return false
+			for dlg in dialogs:
+				for line in dlg:
+					if not line[0] in ids or line[1] == "" or line[2] == "":
+						print("  чужой или пустой голос в ", key)
+						return false
+	return true
 
 
 func _test_lose_quotes() -> bool:
