@@ -17,7 +17,7 @@ dest_files=["res://.godot/imported/j_lp_3.png-43bdd2e305970863cf7ce52c9810baf5.c
 
 compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.9
+compress/lossy_quality=0.75
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0

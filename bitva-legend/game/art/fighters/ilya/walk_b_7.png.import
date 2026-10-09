@@ -17,7 +17,7 @@ dest_files=["res://.godot/imported/walk_b_7.png-98960fb1ac9860c67957cbb9bca18ac4
 
 compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.9
+compress/lossy_quality=0.75
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0

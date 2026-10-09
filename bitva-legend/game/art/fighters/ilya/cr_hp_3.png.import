@@ -17,7 +17,7 @@ dest_files=["res://.godot/imported/cr_hp_3.png-7d84d0295592c9b7d67eea68509cbf33.
 
 compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.9
+compress/lossy_quality=0.75
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0

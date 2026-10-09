@@ -17,7 +17,7 @@ dest_files=["res://.godot/imported/st_hk_2.png-7d30372e7d755e52692c54be87bed5fb.
 
 compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.9
+compress/lossy_quality=0.75
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0

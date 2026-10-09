@@ -5,7 +5,7 @@ config_version=5
 [application]
 
 config/name="Битва легенд"
-config/version="3.17.6"
+config/version="3.17.7"
 config/description="Вся восьмёрка: Афина, Медуза, Сунь Укун, Анубис; лор и реплики"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.4", "GL Compatibility")
@@ -35,6 +35,7 @@ environment/defaults/default_clear_color=Color(0.07, 0.07, 0.1, 1)
 [importer_defaults]
 
 texture={
-"compress/lossy_quality": 0.9,
+"compress/lossy_quality": 0.75,
+"mipmaps/generate": true,
 "compress/mode": 1
 }

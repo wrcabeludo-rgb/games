@@ -17,7 +17,7 @@ dest_files=["res://.godot/imported/hit_high_4.png-410b0f0547f80fa7165db44861cae3
 
 compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.9
+compress/lossy_quality=0.75
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0

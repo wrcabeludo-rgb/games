@@ -17,7 +17,7 @@ dest_files=["res://.godot/imported/st_round_5.png-3d2a77f603770e0332072b246f716d
 
 compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.9
+compress/lossy_quality=0.75
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0

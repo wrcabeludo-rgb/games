@@ -17,7 +17,7 @@ dest_files=["res://.godot/imported/st_lk_3.png-f68d8caac38753a4c63db3d3a66dcfa9.
 
 compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.9
+compress/lossy_quality=0.75
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0

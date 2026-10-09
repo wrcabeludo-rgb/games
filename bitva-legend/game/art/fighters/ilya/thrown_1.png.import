@@ -17,7 +17,7 @@ dest_files=["res://.godot/imported/thrown_1.png-602747d0b82274556a3756ef04772f3a
 
 compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.9
+compress/lossy_quality=0.75
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
