@@ -55,6 +55,8 @@ const EN := {
 	"ПОСЛЕДНИЙ БОЙ": "LAST BOUT",
 	"ДОБИВАЙ!": "FINISH IT!",
 	"Вперёд, назад + СР вплотную · %d": "Forward, back + HP up close · %d",
+	"Вперёд, назад + СР · %d": "Forward, back + HP · %d",
+	"Подойди ближе!": "Get closer!",
 	"ДОБИВАНИЕ!": "FINISHER!",
 	"Добивание (после решающего нокаута)": "Finisher (after the deciding K.O.)",
 	"Вперёд, назад + СР вплотную": "Forward, back + HP up close",

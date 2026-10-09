@@ -27,8 +27,8 @@ const WINS_NEEDED := 2
 ## ввести «вперёд, назад + СР» вплотную. Сами добивания — заглушка, будут переписаны.
 const FINISH_DELAY := 110           # тиков после нокаута до «ДОБИВАЙ!»
 const FINISH_TICKS := 180           # время на команду
-const FINISH_STEP := 20             # между нажатиями команды — не дольше
-const FINISH_RANGE := 280           # вплотную: не дальше, px между бойцами
+const FINISH_STEP := 30             # между нажатиями команды — не дольше
+const FINISH_RANGE := 420           # дистанция удара: не дальше, px между бойцами
 const FINISHER_TICKS := 160         # ролик добивания
 const ATTACK_MASK := InputBits.LP | InputBits.LK | InputBits.HP | InputBits.HK
 
@@ -485,6 +485,13 @@ func _start_round() -> void:
 	_set_phase(Phase.INTRO)
 
 
+## Победитель стоит достаточно близко для добивания.
+func finish_in_range() -> bool:
+	if round_winner < 0 or round_winner > 1:
+		return false
+	return absi(fighters[0].x - fighters[1].x) <= FINISH_RANGE * SUB
+
+
 ## Добивание возможно: нокаут решил матч.
 func _finish_allowed() -> bool:
 	return not training and end_reason == EndReason.KO and round_winner < 2 \
@@ -517,8 +524,10 @@ func _finish_input(w: int) -> bool:
 		finish_step = 2
 		finish_wait = FINISH_STEP
 	elif press & InputBits.HP and finish_step == 2:
-		finish_step = 0
-		return absi(a.x - fighters[1 - w].x) <= FINISH_RANGE * SUB
+		if finish_in_range():
+			finish_step = 0
+			return true
+		finish_wait = FINISH_STEP  # далеко — команда не теряется: подойди и нажми СР ещё раз
 	return false
 
 

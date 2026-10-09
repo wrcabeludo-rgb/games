@@ -46,6 +46,8 @@ var t := 0.0                # время в секундах (по тикам б
 var _tex := {}
 var _clouds: Array[Texture2D] = []
 var _raven_frames: Array[Texture2D] = []
+## Ореол луны: свет плавно гаснет от края диска к краю текстуры.
+var _halo := _make_halo()
 
 
 func _init() -> void:
@@ -61,6 +63,21 @@ func _init() -> void:
 		var r := _load("raven_%d" % i)
 		if r != null:
 			_raven_frames.append(r)
+
+
+static func _make_halo() -> Texture2D:
+	var g := Gradient.new()
+	var glow := Color(0.95, 0.9, 1.0)
+	g.offsets = PackedFloat32Array([0.0, 0.3, 0.45, 0.65, 1.0])
+	g.colors = PackedColorArray([Color(glow, 0.42), Color(glow, 0.3), Color(glow, 0.15), Color(glow, 0.05), Color(glow, 0.0)])
+	var tex := GradientTexture2D.new()
+	tex.gradient = g
+	tex.fill = GradientTexture2D.FILL_RADIAL
+	tex.fill_from = Vector2(0.5, 0.5)
+	tex.fill_to = Vector2(1.0, 0.5)
+	tex.width = 256
+	tex.height = 256
+	return tex
 
 
 static func _load(name: String) -> Texture2D:
@@ -168,9 +185,9 @@ func _draw_moon(c: CanvasItem) -> void:
 	var k := K_MOON
 	var pos := Vector2(layer_x(k) + layer_w(k) * 0.8, 215)
 	var pulse := 0.5 + 0.5 * sin(t * 0.8)
-	# Ореол.
-	for i in 4:
-		c.draw_circle(pos, 70.0 + i * 22.0 + pulse * 6.0, Color(0.95, 0.9, 1.0, 0.05))
+	# Ореол: мягкий радиальный градиент (без ступенек), слегка дышит.
+	var r := 230.0 + pulse * 12.0
+	c.draw_texture_rect(_halo, Rect2(pos - Vector2(r, r), Vector2(r, r) * 2.0), false, Color(1, 1, 1, 0.85 + 0.15 * pulse))
 	if _tex.has("moon"):
 		var tex: Texture2D = _tex.moon
 		var size := 150.0

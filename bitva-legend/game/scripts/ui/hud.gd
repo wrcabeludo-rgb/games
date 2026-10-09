@@ -79,6 +79,7 @@ func _draw() -> void:
 	_draw_timer()
 	_draw_super_name()
 	_draw_announcement()
+	_draw_finish_command()
 	_draw_win_quote()
 	_draw_footer()
 	_draw_pad_notice()
@@ -338,7 +339,7 @@ func _draw_announcement() -> void:
 		Sim.Phase.FINISH:
 			big = "ДОБИВАЙ!"
 			color = Color(1, 0.3, 0.2)
-			small = Loc.t("Вперёд, назад + СР вплотную · %d") % ceili((Sim.FINISH_TICKS - _sim.phase_frame) / 60.0)
+			small = Loc.t("Вперёд, назад + СР · %d") % ceili((Sim.FINISH_TICKS - _sim.phase_frame) / 60.0)
 		Sim.Phase.FINISHER:
 			if _sim.phase_frame > 20:
 				big = "ДОБИВАНИЕ!"
@@ -359,24 +360,67 @@ func _draw_announcement() -> void:
 		_text(Vector2(size.x / 2.0, y + 46), small, 22, COLOR_TEXT, false, true, 2)
 
 
-## Победная реплика под объявлением о победе в матче.
+## Добивание: команда по шагам (введённые — золотые) и дистанция.
+func _draw_finish_command() -> void:
+	if paused or _sim.phase != Sim.Phase.FINISH:
+		return
+	var steps := ["→", "←", Loc.t("СР")]
+	var cx := size.x / 2.0
+	var y := size.y * 0.3 + 100
+	for i in 3:
+		var done := i < _sim.finish_step
+		var box := Rect2(cx - 150 + i * 105, y - 34, 90, 50)
+		draw_rect(box, Color(0.04, 0.02, 0.05, 0.85))
+		draw_rect(box, COLOR_GOLD if done else Color(0.6, 0.6, 0.65), false, 2.0)
+		_text(box.get_center() + Vector2(0, 12), steps[i], 30, COLOR_GOLD if done else COLOR_TEXT, false, true, 2)
+	if not _sim.finish_in_range():
+		_text(Vector2(cx, y + 50), "Подойди ближе!", 22, Color(1, 0.45, 0.35), false, true, 2)
+
+
+## Конец матча: портрет победителя (поза победы с экрана выбора) выезжает со своей стороны,
+## внизу — плашка с его репликой.
 func _draw_win_quote() -> void:
-	if paused or _sim.phase != Sim.Phase.MATCH_END or _sim.phase_frame < 30:
+	if paused or _sim.phase != Sim.Phase.MATCH_END or _sim.phase_frame < 20:
 		return
 	var w := _sim.match_winner()
 	if w < 0 or w > 1:
 		return
 	var winner := _sim.fighters[w]
+	var right := w == 1
+	var t := smoothstep(20.0, 44.0, float(_sim.phase_frame))
+	# Затемнение снизу, чтобы портрет и плашка читались.
+	var clear := Color(0, 0, 0, 0)
+	var dark := Color(0, 0, 0, 0.55 * t)
+	draw_polygon(PackedVector2Array([Vector2(0, size.y * 0.45), Vector2(size.x, size.y * 0.45), size, Vector2(0, size.y)]),
+		PackedColorArray([clear, clear, dark, dark]))
+	var x := size.x * (0.82 if right else 0.18) + (1.0 - t) * 420.0 * (1.0 if right else -1.0)
+	_draw_portrait(winner.id, Vector2(x, size.y), right)
 	var q := Quotes.win(winner.id, _sim.fighters[1 - w].id, _sim.tick - _sim.phase_frame)
-	if q == "":
+	if q == "" or _sim.phase_frame < 44:
 		return
-	var lines := 1 if _font.get_string_size(q, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x < 700 else 2
-	var box := Rect2(size.x / 2.0 - 380, size.y * 0.3 + 92, 760, 26 + lines * 26)
-	draw_rect(box, Color(0.04, 0.02, 0.05, 0.82))
+	var box := Rect2(size.x * (0.06 if right else 0.36), size.y - 150, size.x * 0.58, 104)
+	draw_rect(box, Color(0.04, 0.02, 0.05, 0.88))
 	draw_rect(box, winner.color().lightened(0.3), false, 2.0)
-	var shown := q.left(mini(q.length(), int((_sim.phase_frame - 30) * 1.6)))
-	draw_multiline_string(_font, box.position + Vector2(20, 36), "«%s»" % shown if Loc.lang == "ru" else "“%s”" % shown,
-		HORIZONTAL_ALIGNMENT_CENTER, box.size.x - 40, 20, 3, COLOR_TEXT)
+	_text(box.position + Vector2(18, 28), winner.data.name, 17, winner.color().lightened(0.35), false, false, 1, _title_font)
+	var shown := q.left(mini(q.length(), int((_sim.phase_frame - 44) * 1.6)))
+	draw_multiline_string(_font, box.position + Vector2(18, 58), "«%s»" % shown if Loc.lang == "ru" else "“%s”" % shown,
+		HORIZONTAL_ALIGNMENT_LEFT, box.size.x - 36, 20, 2, COLOR_TEXT)
+
+
+## Портрет бойца по пояс (последний кадр радости, иначе портрет выбора); справа — зеркально, к центру.
+func _draw_portrait(id: String, waist: Vector2, mirror: bool) -> void:
+	if _sprites == null:
+		return
+	var a := _sprites.anim(id, "select_win")
+	if a.is_empty():
+		a = _sprites.anim(id, "select")
+	if a.is_empty():
+		return
+	var n: int = a.tex.size()
+	var k := 0.42
+	draw_set_transform(waist, 0, Vector2(-k if mirror else k, k))
+	draw_texture(a.tex[n - 1], -a.pivot[n - 1])
+	draw_set_transform(Vector2.ZERO)
 
 
 ## Счётчик комбо — на стороне атакующего, пока соперник оглушён.
@@ -420,7 +464,7 @@ func _draw_pad_notice() -> void:
 func _draw_footer() -> void:
 	# По умолчанию экран чистый: подсказки — в паузе («Приёмы»), включить здесь — в настройках.
 	if not Settings.hints:
-		if not paused and _sim.phase == Sim.Phase.INTRO or _sim.phase == Sim.Phase.MATCH_END:
+		if not paused and _sim.phase == Sim.Phase.INTRO:
 			_text(Vector2(size.x / 2.0, size.y - 14), "Esc / Options — пауза, приёмы и настройки", 15, COLOR_DIM, false, true)
 		return
 	var version: String = ProjectSettings.get_setting("application/config/version")

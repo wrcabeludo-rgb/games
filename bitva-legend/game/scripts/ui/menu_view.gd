@@ -11,8 +11,10 @@ signal voice(name: String)        # фраза диктора
 enum Screen { TITLE, SELECT, VERSUS }
 
 ## Сетка выбора 4×2: пустая строка — закрытое место (боец ещё не готов).
-## Верхний ряд — свет, нижний — тьма; пары стоят друг под другом.
-const ROSTER := ["ilya", "hercules", "athena", "sunwukong", "dracula", "koschei", "medusa", "anubis"]
+## Слева — свет, справа — тьма, зеркально: соперники стоят симметрично (Илья ↔ Дракула по краям,
+## Геракл ↔ Кощей ближе к центру; во втором ряду — Афина ↔ Медуза, Сунь Укун ↔ Анубис).
+## Тьма в сетке смотрит влево — на свет.
+const ROSTER := ["ilya", "hercules", "koschei", "dracula", "athena", "sunwukong", "anubis", "medusa"]
 const COLS := 4
 const CELL := Vector2(104, 104)
 const CELL_GAP := 12.0
@@ -257,7 +259,7 @@ func _draw_grid() -> void:
 			draw_rect(r.grow(-6), Color(0.22, 0.22, 0.24))
 			_text_c(r.get_center() + Vector2(0, 16), "?", 48, Color(0.4, 0.4, 0.42))
 		else:
-			_draw_face(id, r)
+			_draw_face(id, r, i % COLS >= COLS / 2)
 		draw_rect(r, Color(0.5, 0.45, 0.35), false, 2.0)
 	# Курсоры: у первого — синяя рамка, у второго — красная (вместе — двойная).
 	for who in 2:
@@ -271,7 +273,7 @@ func _draw_grid() -> void:
 
 
 ## Лицо бойца в клетке сетки: верх портрета (или стойки, пока портрета нет).
-func _draw_face(id: String, r: Rect2) -> void:
+func _draw_face(id: String, r: Rect2, mirror := false) -> void:
 	var a := _sprites.anim(id, "select")
 	var portrait := not a.is_empty()
 	if not portrait:
@@ -281,10 +283,23 @@ func _draw_face(id: String, r: Rect2) -> void:
 		return
 	var tex: Texture2D = a.tex[0]
 	var ts := tex.get_size()
-	# Портрет по пояс, лицом к игроку: лицо — верх по центру. Стойка (пока портрета нет) — голова справа.
-	var side := minf(ts.x, ts.y * 0.5) if portrait else ts.x * 0.62
-	var src := Rect2((ts.x - side) * (0.5 if portrait else 0.55), 0, side, side)
-	draw_texture_rect_region(tex, r.grow(-4), src)
+	var src: Rect2
+	if portrait and Hud.FACES.has(id):
+		# Лицо в центре клетки, чуть видны плечи.
+		var face: Rect2 = Hud.FACES[id]
+		var side := face.size.x * 1.45
+		var c := face.get_center() + Vector2(0, face.size.y * 0.18)
+		src = Rect2(c - Vector2(side, side) / 2.0, Vector2(side, side))
+	else:
+		# Портрет по пояс без разметки лица или стойка (пока портрета нет).
+		var side := minf(ts.x, ts.y * 0.5) if portrait else ts.x * 0.62
+		src = Rect2((ts.x - side) * (0.5 if portrait else 0.55), 0, side, side)
+	src = src.intersection(Rect2(Vector2.ZERO, ts))
+	var dst := r.grow(-4)
+	if mirror:
+		draw_set_transform(Vector2(dst.position.x * 2.0 + dst.size.x, 0), 0, Vector2(-1, 1))
+	draw_texture_rect_region(tex, dst, src)
+	draw_set_transform(Vector2.ZERO)
 
 
 func _draw_preview(p: int) -> void:
