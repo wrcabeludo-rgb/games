@@ -96,7 +96,8 @@ func _draw_super_backdrop() -> void:
 			draw_circle(moon + Vector2(-30, -20), 26, Color(0.5, 0.03, 0.06, 0.8))
 			draw_circle(moon + Vector2(40, 30), 16, Color(0.5, 0.03, 0.06, 0.8))
 		else:
-			draw_circle(Vector2(size.x * 0.5, -60), 260, Color(1, 0.9, 0.5, 0.25))
+			# У остальных — сияние в цвете бойца (свой фон суперприёма появится вместе с артом).
+			draw_circle(Vector2(size.x * 0.5, -60), 260, Color(f.color().lightened(0.4), 0.3))
 		if not cinema:
 			continue
 		var t := f.state_frame
@@ -141,6 +142,8 @@ func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2, breathe := false) 
 	var tint := Color(0.75, 0.85, 1.0) if f.alt else Color.WHITE
 	if f.is_stunned() and _sim.hitstop > 0:
 		tint = Color(1.0, 0.75, 0.7)  # получил удар — краснеет на время заморозки
+	if f.hypnotized == 2:
+		tint = Color(0.6, 0.6, 0.58)  # окаменел
 	draw_set_transform(base, 0, Vector2(FighterSprites.SCALE * f.facing, FighterSprites.SCALE))
 	if breathe:
 		var phase := 0.5 - 0.5 * cos(TAU * float(_sim.tick) / FighterSprites.BREATH_TICKS)
@@ -221,6 +224,8 @@ func _draw_fighter(f: Fighter) -> void:
 	# Вспышка у получившего удар во время заморозки.
 	if f.is_stunned() and _sim.hitstop > 0:
 		color = color.lerp(Color.WHITE, 0.55)
+	if f.hypnotized == 2:
+		color = Color(0.55, 0.55, 0.52)  # окаменел
 	var body := PackedVector2Array([
 		Vector2(base.x - w / 2.0, base.y),
 		Vector2(base.x + w / 2.0, base.y),
@@ -239,6 +244,11 @@ func _draw_fighter(f: Fighter) -> void:
 		var aura := PackedVector2Array(body)
 		aura.append(body[0])
 		draw_polyline(aura, Color(1, 0.85, 0.3, 0.6 + 0.3 * sin(_sim.tick * 0.6)), 8)
+	if f.is_invulnerable():
+		# Неуязвимый взлёт — белое сияние.
+		var shine := PackedVector2Array(body)
+		shine.append(body[0])
+		draw_polyline(shine, Color(1, 1, 1, 0.8), 7)
 	if f.has_armor():
 		# Броня тарана — оранжевое свечение.
 		var glow := PackedVector2Array(body)
@@ -255,7 +265,11 @@ func _draw_fighter(f: Fighter) -> void:
 			var sp := head + Vector2(cos(a) * head_r * 1.2, -head_r - 14 + sin(a) * 6)
 			draw_circle(sp, 6, Color(1, 0.9, 0.3))
 			draw_circle(sp, 3, Color(1, 1, 0.8))
-	if f.hypnotized:
+	if f.hypnotized == 2:
+		# Окаменел — трещины по телу.
+		var mid := (body[0] + body[2]) / 2.0
+		draw_polyline(PackedVector2Array([mid + Vector2(-20, -60), mid + Vector2(0, -20), mid + Vector2(-10, 10), mid + Vector2(12, 50)]), Color(0.2, 0.2, 0.2), 3)
+	elif f.hypnotized:
 		# Загипнотизирован — спираль над головой.
 		var c := head + Vector2(0, -head_r - 26)
 		var prev := c
@@ -444,7 +458,10 @@ func _draw_projectile(pr: PackedInt32Array) -> void:
 	var c := to_screen(float(pr[Sim.Proj.X]) / Sim.SUB, float(pr[Sim.Proj.Y]) / Sim.SUB)
 	var age := pr[Sim.Proj.AGE]
 	var dir := signf(float(pr[Sim.Proj.VX]))
-	# Виды 3–5 — усиленные версии 0–2: то же, но с сиянием.
+	# Виды 3–5 — усиленные версии 0–2: то же, но с сиянием. Виды с 6 — снаряды новых бойцов, +100 — усиленные.
+	if pr[Sim.Proj.KIND] >= 6:
+		_draw_projectile_new(pr, c, age, dir)
+		return
 	var kind := pr[Sim.Proj.KIND] % 3
 	if pr[Sim.Proj.KIND] >= 3:
 		var glow_at := c if kind != 2 else to_screen(float(pr[Sim.Proj.X]) / Sim.SUB, 20)
@@ -478,6 +495,68 @@ func _draw_projectile(pr: PackedInt32Array) -> void:
 				draw_colored_polygon(PackedVector2Array([b, b + Vector2(side * 17, -flap), b + Vector2(side * 7, 6)]), ink)
 			draw_circle(b, 5, ink)
 			draw_circle(b + Vector2(dir * 3, -1), 2, Color(1, 0.3, 0.3))
+	if show_debug:
+		_debug_box(Sim._proj_box(pr), Color(1, 0.2, 0.2, 0.95))
+
+
+## Снаряды новых бойцов (пока процедурные): 6 игла, 7 валун, 8 копьё, 9 яд, 10 каменный взгляд,
+## 11 обезьянки, 12 скарабеи, 13 песчаный смерч.
+func _draw_projectile_new(pr: PackedInt32Array, c: Vector2, age: int, dir: float) -> void:
+	var kind := pr[Sim.Proj.KIND]
+	var ex := kind >= 100
+	if ex:
+		kind -= 100
+	var hw := float(pr[Sim.Proj.HW]) / Sim.SUB
+	var hh := float(pr[Sim.Proj.HH]) / Sim.SUB
+	if ex:
+		draw_circle(c, maxf(hw, hh) * 1.2, Color(1, 0.8, 0.3, 0.3))
+	match kind:
+		6:  # игла
+			draw_line(c - Vector2(dir * hw, 0), c + Vector2(dir * hw, 0), Color(0.85, 0.85, 0.9), 4)
+			draw_circle(c - Vector2(dir * hw, 0), 5, Color(0.6, 0.6, 0.65))
+			draw_line(c - Vector2(dir * (hw + 40), 0), c - Vector2(dir * hw, 0), Color(0.6, 0.9, 0.6, 0.4), 3)
+		7:  # валун
+			var a := age * 0.2 * dir
+			var pts := PackedVector2Array()
+			for i in 7:
+				pts.append(c + Vector2.from_angle(a + TAU * i / 7.0) * hw * (0.85 + 0.15 * sin(i * 2.3)))
+			draw_colored_polygon(pts, Color(0.48, 0.44, 0.4))
+			draw_polyline(pts + PackedVector2Array([pts[0]]), Color(0.28, 0.25, 0.22), 3)
+		8:  # копьё
+			draw_line(c - Vector2(dir * hw, 0), c + Vector2(dir * hw * 0.7, 0), Color(0.55, 0.4, 0.25), 6)
+			draw_colored_polygon(PackedVector2Array([c + Vector2(dir * hw * 0.6, -9), c + Vector2(dir * hw * 1.05, 0), c + Vector2(dir * hw * 0.6, 9)]), Color(0.9, 0.85, 0.6))
+		9:  # яд
+			draw_circle(c, hw * 0.8, Color(0.35, 0.8, 0.3, 0.85))
+			draw_circle(c + Vector2(-dir * hw * 0.9, -6), hw * 0.4, Color(0.35, 0.8, 0.3, 0.5))
+			draw_circle(c + Vector2(-dir * hw * 1.5, -10), hw * 0.25, Color(0.35, 0.8, 0.3, 0.3))
+		10:  # каменный взгляд — луч из глаз
+			var life := float(pr[Sim.Proj.LIFE])
+			var fade := 1.0 - float(age) / maxf(life, 1.0)
+			draw_rect(Rect2(c - Vector2(hw, hh * 0.5), Vector2(hw * 2.0, hh)), Color(0.8, 0.95, 0.6, 0.35 * fade))
+			for i in 3:
+				draw_line(c + Vector2(-hw, (i - 1) * hh * 0.25), c + Vector2(hw, (i - 1) * hh * 0.25), Color(0.9, 1.0, 0.7, 0.6 * fade), 2)
+		11:  # обезьянки
+			for i in 3:
+				var b := c + Vector2(-dir * (i * hw * 0.6 - hw * 0.5), absf(sin(age * 0.5 + i * 2.0)) * -14 + (i - 1) * 6)
+				draw_circle(b, 11, Color(0.75, 0.5, 0.25))
+				draw_circle(b + Vector2(dir * 5, -3), 6, Color(0.95, 0.8, 0.6))
+				draw_line(b - Vector2(dir * 10, 0), b - Vector2(dir * 22, -10), Color(0.75, 0.5, 0.25), 3)
+		12:  # скарабеи
+			var ground := to_screen(float(pr[Sim.Proj.X]) / Sim.SUB, 12)
+			for i in 4:
+				var b := ground + Vector2((i - 1.5) * hw * 0.45, -absf(sin(age * 0.7 + i)) * 4)
+				draw_circle(b, 10, Color(0.15, 0.3, 0.45))
+				draw_circle(b + Vector2(dir * 8, 0), 5, Color(0.1, 0.2, 0.3))
+				draw_line(b + Vector2(0, -10), b + Vector2(0, 10), Color(0.6, 0.8, 0.9, 0.6), 1.5)
+		13:  # песчаный смерч
+			for i in 6:
+				var t := float(i) / 5.0
+				var r := hw * (0.35 + 0.65 * t)
+				var y := c.y + hh * (0.8 - 1.6 * t)
+				var off := sin(age * 0.6 + i) * 8.0
+				draw_arc(Vector2(c.x + off, y), r * 0.6, 0, TAU, 20, Color(0.85, 0.72, 0.45, 0.65), 4)
+		_:
+			draw_circle(c, hw, Color(1, 1, 1, 0.6))
 	if show_debug:
 		_debug_box(Sim._proj_box(pr), Color(1, 0.2, 0.2, 0.95))
 

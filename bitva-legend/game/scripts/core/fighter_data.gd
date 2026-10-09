@@ -26,6 +26,9 @@ extends RefCounted
 ##   lunge   — рывок вперёд в активной фазе, субпиксели за тик;  armor — сколько ударов выдерживает
 ##   teleport — туман: invul_from — с какого кадра неуязвим, offset — на сколько px за спину соперника
 ##   counter — контратака в активной фазе: stun — сколько тиков атакующий загипнотизирован
+##   invul   — [с какого, до какого кадра] неуязвим к ударам, снарядам и броскам (взлёты против прыжков)
+##   proj.petrify — попавший снаряд обращает соперника в камень на столько тиков (каменный взгляд)
+##   grab.drain   — захват забирает столько шкалы силы у соперника себе
 ##
 ## Классика (у всех бойцов):
 ##   st_sweep — назад + ЛН (подсечка), st_round — назад + СН (с разворота),
@@ -211,6 +214,16 @@ const CHARACTERS := {
 			# Классика.
 			"st_sweep": {"startup": 8, "active": 3, "recovery": 19, "damage": 60, "hitstun": 20, "hitstop": 10, "push": 600, "box": [30, 0, 150, 30], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
 			"st_round": {"startup": 13, "active": 4, "recovery": 22, "damage": 105, "hitstun": 22, "hitstop": 13, "push": 1100, "box": [25, 160, 125, 100], "knockdown": 1, "launch": [600, 900], "kick": 1},
+			# Кощеева игла (назад, вперёд + рука): быстрый тонкий снаряд.
+			"sp_proj_l": {"buttons": "punch", "startup": 11, "active": 1, "recovery": 18, "proj": {"x": 60, "y": 200, "vx": 1300, "vy": 0, "gravity": 0, "w": 70, "h": 20, "kind": 6, "damage": 50, "hitstun": 16, "hitstop": 8, "push": 600, "chip": 5}, "ex": {"startup": 8, "proj": {"vx": 1700, "damage": 80, "hitstun": 24, "chip": 9, "kind": 106}}},
+			# Бессмертие (вниз, вниз + нога): удар проходит сквозь кости — ударивший застывает.
+			"sp_dd_l": {"buttons": "kick", "startup": 3, "active": 18, "recovery": 20, "counter": {"stun": 50}, "ex": {"active": 30, "counter": {"stun": 85}}},
+			# Удар кладенцом (вперёд, вперёд + рука): выпад мечом с шагом вперёд.
+			"sp_ff_l": {"buttons": "punch", "startup": 12, "active": 6, "recovery": 22, "lunge": 700, "damage": 100, "hitstun": 22, "hitstop": 12, "push": 1200, "chip": 10, "box": [40, 120, 200, 90], "ex": {"lunge": 950, "damage": 140, "chip": 16, "knockdown": 1, "launch": [500, 1200]}},
+			# Похищение (назад, назад + рука): захват, крадёт шкалу силы. Вырваться нельзя.
+			"sp_bb_l": {"buttons": "punch", "startup": 6, "active": 2, "recovery": 30, "grab": {"range": 85, "hold": 36, "damage": 110, "drain": 500, "launch": [400, 800], "tech": 0, "recovery": 12}, "ex": {"grab": {"range": 120, "damage": 150, "drain": 1000}}},
+			# «Смерть в игле» (блок + СР + СН): выпад; попал — игла ломается, и смерть достаётся сопернику.
+			"super": {"name": "СМЕРТЬ В ИГЛЕ", "startup": 7, "active": 8, "recovery": 42, "lunge": 850, "damage": 50, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 40, "box": [25, 40, 150, 230], "cinema": {"hold": 100, "damage": 310, "launch": [650, 1600], "tech": 0, "recovery": 20, "scaled": 1}},
 			"throw": {"startup": 4, "active": 2, "recovery": 18, "grab": {"range": 25, "hold": 24, "damage": 100, "launch": [450, 900], "tech": 1, "recovery": 10}},
 		},
 	},
@@ -260,6 +273,16 @@ const CHARACTERS := {
 			# Классика; бросок борца — дальше и больнее, чем у остальных.
 			"st_sweep": {"startup": 9, "active": 3, "recovery": 20, "damage": 70, "hitstun": 20, "hitstop": 11, "push": 600, "box": [30, 0, 130, 40], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
 			"st_round": {"startup": 13, "active": 4, "recovery": 23, "damage": 115, "hitstun": 22, "hitstop": 14, "push": 1200, "box": [30, 160, 130, 120], "knockdown": 1, "launch": [650, 950], "kick": 1},
+			# Валун (назад, вперёд + рука): тяжёлый камень по дуге.
+			"sp_proj_l": {"buttons": "punch", "startup": 20, "active": 1, "recovery": 24, "proj": {"x": 50, "y": 230, "vx": 600, "vy": 1200, "gravity": 75, "w": 70, "h": 70, "kind": 7, "damage": 120, "hitstun": 24, "hitstop": 14, "push": 1100, "chip": 12}, "ex": {"startup": 15, "proj": {"vx": 850, "damage": 160, "hitstun": 28, "chip": 18, "kind": 107}}},
+			# Землетрясение (вниз, вниз + нога): волна по земле — блок сидя или прыжок.
+			"sp_dd_l": {"buttons": "kick", "startup": 20, "active": 1, "recovery": 26, "proj": {"x": 60, "y": 22, "vx": 800, "vy": 0, "gravity": 0, "w": 90, "h": 44, "kind": 2, "level": "low", "life": 40, "damage": 90, "hitstun": 22, "hitstop": 12, "push": 900, "chip": 9}, "ex": {"startup": 15, "proj": {"life": 80, "w": 120, "h": 70, "damage": 130, "kind": 5}}},
+			# Немейский натиск (вперёд, вперёд + рука): рывок львом, держит два удара.
+			"sp_ff_l": {"buttons": "punch", "startup": 12, "active": 16, "recovery": 24, "lunge": 850, "armor": 2, "damage": 110, "hitstun": 24, "hitstop": 13, "push": 1400, "chip": 10, "box": [30, 60, 120, 210], "ex": {"armor": 3, "lunge": 1100, "damage": 150, "chip": 16, "knockdown": 1, "launch": [450, 1500]}},
+			# Объятия Антея (назад, назад + рука): отрывает от земли и сжимает. Вырваться нельзя.
+			"sp_bb_l": {"buttons": "punch", "startup": 6, "active": 2, "recovery": 32, "grab": {"range": 80, "hold": 50, "damage": 200, "launch": [800, 1400], "tech": 0, "recovery": 14}, "ex": {"grab": {"range": 120, "damage": 270}}},
+			# «Двенадцать подвигов» (блок + СР + СН): рывок; попал — двенадцать ударов, по одному за подвиг.
+			"super": {"name": "ДВЕНАДЦАТЬ ПОДВИГОВ", "startup": 8, "active": 8, "recovery": 45, "lunge": 750, "damage": 60, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 45, "box": [25, 40, 140, 240], "cinema": {"hold": 110, "damage": 340, "launch": [700, 1700], "tech": 0, "recovery": 20, "scaled": 1}},
 			"throw": {"startup": 4, "active": 2, "recovery": 18, "grab": {"range": 40, "hold": 30, "damage": 150, "launch": [600, 1100], "tech": 1, "recovery": 10}},
 		},
 	},
@@ -309,6 +332,16 @@ const CHARACTERS := {
 			"j_hk": {"startup": 8, "active": 5, "damage": 80, "hitstun": 19, "hitstop": 10, "push": 750, "box": [45, 70, 110, 90], "level": "overhead"},
 			"st_sweep": {"startup": 9, "active": 3, "recovery": 20, "damage": 65, "hitstun": 20, "hitstop": 10, "push": 600, "box": [30, 0, 140, 35], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
 			"st_round": {"startup": 13, "active": 4, "recovery": 22, "damage": 105, "hitstun": 22, "hitstop": 13, "push": 1150, "box": [30, 160, 125, 110], "knockdown": 1, "launch": [620, 920], "kick": 1},
+			# Копьё Паллады (назад, вперёд + рука): метает копьё — быстро и далеко.
+			"sp_proj_l": {"buttons": "punch", "startup": 14, "active": 1, "recovery": 22, "proj": {"x": 70, "y": 190, "vx": 1500, "vy": 0, "gravity": 0, "w": 110, "h": 24, "kind": 8, "damage": 75, "hitstun": 20, "hitstop": 10, "push": 900, "chip": 8}, "ex": {"startup": 10, "proj": {"vx": 1900, "damage": 110, "hitstun": 28, "chip": 12, "kind": 108}}},
+			# Эгида (вниз, вниз + нога): удар щитом с шагом, держит два удара, сильно отбрасывает.
+			"sp_dd_l": {"buttons": "kick", "startup": 8, "active": 10, "recovery": 20, "lunge": 400, "armor": 2, "damage": 70, "hitstun": 20, "hitstop": 11, "push": 1600, "chip": 8, "box": [30, 40, 90, 230], "ex": {"armor": 3, "damage": 100, "knockdown": 1, "launch": [700, 900]}},
+			# Сова Паллады (вперёд, вперёд + рука): взлёт с копьём, неуязвима на старте — против прыжков.
+			"sp_ff_l": {"buttons": "punch", "startup": 6, "active": 6, "recovery": 28, "invul": [1, 10], "damage": 110, "hitstun": 24, "hitstop": 13, "push": 800, "box": [10, 80, 120, 320], "knockdown": 1, "launch": [300, 1800], "uppercut": 1, "ex": {"invul": [1, 14], "damage": 150, "launch": [350, 2000]}},
+			# Суд мудрости (назад, назад + рука): захват и бросок через плечо. Вырваться нельзя.
+			"sp_bb_l": {"buttons": "punch", "startup": 6, "active": 2, "recovery": 30, "grab": {"range": 70, "hold": 34, "damage": 150, "launch": [700, 1200], "tech": 0, "recovery": 12}, "ex": {"grab": {"range": 110, "damage": 210}}},
+			# «Гнев Олимпа» (блок + СР + СН): выпад копьём; попал — молнии Зевса и удар эгидой.
+			"super": {"name": "ГНЕВ ОЛИМПА", "startup": 7, "active": 8, "recovery": 42, "lunge": 850, "damage": 55, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 42, "box": [25, 40, 160, 230], "cinema": {"hold": 100, "damage": 320, "launch": [700, 1650], "tech": 0, "recovery": 20, "scaled": 1}},
 			"throw": {"startup": 4, "active": 2, "recovery": 18, "grab": {"range": 25, "hold": 24, "damage": 110, "launch": [480, 950], "tech": 1, "recovery": 10}},
 		},
 	},
@@ -357,6 +390,16 @@ const CHARACTERS := {
 			"j_hk": {"startup": 7, "active": 5, "damage": 75, "hitstun": 19, "hitstop": 10, "push": 750, "box": [30, 10, 145, 55], "level": "overhead"},
 			"st_sweep": {"startup": 8, "active": 3, "recovery": 18, "damage": 60, "hitstun": 20, "hitstop": 10, "push": 600, "box": [30, 0, 145, 30], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
 			"st_round": {"startup": 12, "active": 4, "recovery": 21, "damage": 100, "hitstun": 22, "hitstop": 13, "push": 1100, "box": [25, 160, 115, 95], "knockdown": 1, "launch": [600, 900], "kick": 1},
+			# Яд (назад, вперёд + рука): змеи плюют ядом по дуге.
+			"sp_proj_l": {"buttons": "punch", "startup": 13, "active": 1, "recovery": 20, "proj": {"x": 50, "y": 210, "vx": 750, "vy": 700, "gravity": 45, "w": 50, "h": 40, "kind": 9, "damage": 70, "hitstun": 20, "hitstop": 10, "push": 700, "chip": 10}, "ex": {"startup": 10, "proj": {"vx": 950, "damage": 100, "chip": 16, "kind": 109}}},
+			# Каменный взгляд (вниз, вниз + нога): короткий луч; попал — соперник каменеет.
+			"sp_dd_l": {"buttons": "kick", "startup": 16, "active": 1, "recovery": 26, "proj": {"x": 40, "y": 230, "vx": 1100, "vy": 0, "gravity": 0, "w": 120, "h": 90, "kind": 10, "life": 22, "damage": 20, "hitstun": 14, "hitstop": 10, "push": 200, "chip": 0, "petrify": 60}, "ex": {"startup": 12, "proj": {"life": 34, "petrify": 90, "kind": 110}}},
+			# Хвост змеи (вперёд, вперёд + рука): скользит вперёд и подсекает — блок сидя.
+			"sp_ff_l": {"buttons": "punch", "startup": 9, "active": 10, "recovery": 24, "lunge": 650, "damage": 85, "hitstun": 20, "hitstop": 11, "push": 800, "chip": 8, "box": [30, 0, 170, 50], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1, "ex": {"lunge": 900, "damage": 120, "chip": 12}},
+			# Змеиные объятия (назад, назад + рука): змеи жалят схваченного, Медуза лечится. Вырваться нельзя.
+			"sp_bb_l": {"buttons": "punch", "startup": 5, "active": 2, "recovery": 28, "grab": {"range": 70, "hold": 44, "damage": 120, "heal": 40, "launch": [350, 700], "tech": 0, "recovery": 10}, "ex": {"grab": {"range": 105, "damage": 160, "heal": 80}}},
+			# «Взгляд Горгоны» (блок + СР + СН): бросок вперёд; попал — Медуза снимает повязку.
+			"super": {"name": "ВЗГЛЯД ГОРГОНЫ", "startup": 6, "active": 8, "recovery": 40, "lunge": 900, "damage": 50, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 40, "box": [20, 40, 130, 220], "cinema": {"hold": 100, "damage": 300, "heal": 50, "launch": [600, 1500], "tech": 0, "recovery": 18, "scaled": 1}},
 			"throw": {"startup": 3, "active": 2, "recovery": 18, "grab": {"range": 25, "hold": 22, "damage": 100, "launch": [450, 900], "tech": 1, "recovery": 10}},
 		},
 	},
@@ -404,6 +447,16 @@ const CHARACTERS := {
 			"j_hk": {"startup": 6, "active": 5, "damage": 70, "hitstun": 19, "hitstop": 10, "push": 700, "box": [30, 0, 140, 60], "level": "overhead"},
 			"st_sweep": {"startup": 7, "active": 3, "recovery": 17, "damage": 55, "hitstun": 20, "hitstop": 10, "push": 600, "box": [30, 0, 150, 30], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
 			"st_round": {"startup": 11, "active": 4, "recovery": 20, "damage": 95, "hitstun": 22, "hitstop": 13, "push": 1100, "box": [20, 130, 115, 100], "knockdown": 1, "launch": [600, 900], "kick": 1},
+			# Обезьянки из волосков (назад, вперёд + рука): сдувает волоски — стайка обезьянок.
+			"sp_proj_l": {"buttons": "punch", "startup": 12, "active": 1, "recovery": 20, "proj": {"x": 50, "y": 140, "vx": 1100, "vy": 0, "gravity": 0, "w": 80, "h": 50, "kind": 11, "damage": 55, "hitstun": 18, "hitstop": 9, "push": 700, "chip": 6}, "ex": {"startup": 9, "proj": {"vx": 1500, "damage": 85, "hitstun": 26, "chip": 10, "h": 80, "kind": 111}}},
+			# Облако (вниз, вниз + нога): исчезает на облаке и появляется за спиной.
+			"sp_dd_l": {"buttons": "kick", "startup": 14, "active": 1, "recovery": 12, "teleport": {"invul_from": 3, "offset": 110}, "ex": {"startup": 9, "recovery": 5, "teleport": {"invul_from": 2}}},
+			# Посох Жуи (вперёд, вперёд + рука): посох вырастает — удар через пол-арены.
+			"sp_ff_l": {"buttons": "punch", "startup": 15, "active": 5, "recovery": 26, "damage": 105, "hitstun": 22, "hitstop": 13, "push": 1300, "chip": 10, "box": [40, 130, 400, 60], "ex": {"startup": 12, "damage": 140, "chip": 15, "knockdown": 1, "launch": [500, 1000], "box": [40, 130, 520, 70]}},
+			# Прыжок Царя обезьян (назад, назад + рука): взлёт с посохом, неуязвим на старте — против прыжков.
+			"sp_bb_l": {"buttons": "punch", "startup": 5, "active": 7, "recovery": 26, "invul": [1, 9], "damage": 95, "hitstun": 22, "hitstop": 12, "push": 800, "box": [10, 90, 110, 330], "knockdown": 1, "launch": [300, 1900], "uppercut": 1, "ex": {"invul": [1, 13], "damage": 135}},
+			# «Семьдесят два превращения» (блок + СР + СН): рывок; попал — бьют все его двойники разом.
+			"super": {"name": "СЕМЬДЕСЯТ ДВА ПРЕВРАЩЕНИЯ", "startup": 6, "active": 8, "recovery": 40, "lunge": 1000, "damage": 45, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 38, "box": [20, 40, 120, 210], "cinema": {"hold": 100, "damage": 300, "launch": [600, 1600], "tech": 0, "recovery": 16, "scaled": 1}},
 			"throw": {"startup": 3, "active": 2, "recovery": 18, "grab": {"range": 25, "hold": 22, "damage": 95, "launch": [450, 900], "tech": 1, "recovery": 10}},
 		},
 	},
@@ -451,6 +504,16 @@ const CHARACTERS := {
 			"j_hk": {"startup": 8, "active": 6, "damage": 90, "hitstun": 20, "hitstop": 11, "push": 800, "box": [55, 90, 110, 100], "level": "overhead"},
 			"st_sweep": {"startup": 9, "active": 3, "recovery": 20, "damage": 70, "hitstun": 20, "hitstop": 11, "push": 600, "box": [30, 0, 145, 40], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
 			"st_round": {"startup": 14, "active": 4, "recovery": 24, "damage": 120, "hitstun": 22, "hitstop": 14, "push": 1200, "box": [30, 170, 135, 130], "knockdown": 1, "launch": [650, 950], "kick": 1},
+			# Скарабеи (назад, вперёд + рука): жуки ползут по земле — блок сидя, живут долго.
+			"sp_proj_l": {"buttons": "punch", "startup": 16, "active": 1, "recovery": 22, "proj": {"x": 60, "y": 18, "vx": 600, "vy": 0, "gravity": 0, "w": 90, "h": 36, "kind": 12, "level": "low", "life": 70, "damage": 70, "hitstun": 20, "hitstop": 10, "push": 700, "chip": 8}, "ex": {"startup": 12, "proj": {"vx": 800, "life": 90, "damage": 100, "chip": 12, "kind": 112}}},
+			# Песчаный смерч (вниз, вниз + нога): вихрь поднимается вперёд-вверх — против прыжков.
+			"sp_dd_l": {"buttons": "kick", "startup": 14, "active": 1, "recovery": 24, "proj": {"x": 80, "y": 60, "vx": 450, "vy": 1100, "gravity": 0, "w": 80, "h": 120, "kind": 13, "life": 40, "damage": 80, "hitstun": 22, "hitstop": 11, "push": 600, "chip": 8}, "ex": {"startup": 10, "proj": {"w": 110, "damage": 115, "kind": 113}}},
+			# Хопеш (вперёд, вперёд + рука): шаг с серповидным мечом, держит один удар.
+			"sp_ff_l": {"buttons": "punch", "startup": 13, "active": 12, "recovery": 24, "lunge": 700, "armor": 1, "damage": 115, "hitstun": 24, "hitstop": 13, "push": 1300, "chip": 11, "box": [40, 90, 170, 150], "ex": {"armor": 2, "lunge": 900, "damage": 155, "chip": 16, "knockdown": 1, "launch": [450, 1300]}},
+			# Взвешивание сердца (назад, назад + рука): захват, забирает секцию шкалы силы. Вырваться нельзя.
+			"sp_bb_l": {"buttons": "punch", "startup": 6, "active": 2, "recovery": 32, "grab": {"range": 80, "hold": 48, "damage": 130, "drain": 1000, "launch": [500, 900], "tech": 0, "recovery": 12}, "ex": {"grab": {"range": 115, "damage": 180}}},
+			# «Суд Осириса» (блок + СР + СН): выпад; попал — весы, перо истины и приговор.
+			"super": {"name": "СУД ОСИРИСА", "startup": 8, "active": 8, "recovery": 45, "lunge": 750, "damage": 60, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 45, "box": [25, 40, 150, 240], "cinema": {"hold": 110, "damage": 330, "launch": [700, 1700], "tech": 0, "recovery": 20, "scaled": 1}},
 			"throw": {"startup": 4, "active": 2, "recovery": 18, "grab": {"range": 30, "hold": 28, "damage": 120, "launch": [500, 1000], "tech": 1, "recovery": 10}},
 		},
 	},

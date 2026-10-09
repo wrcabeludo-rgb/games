@@ -121,7 +121,7 @@ var spawn_request := 0
 ## Туманный рывок дошёл до кадра появления — симуляция переставит бойца за спину сопернику.
 var teleport_request := 0
 var armor := 0              # сколько ударов ещё выдержит броня текущего приёма
-var hypnotized := 0         # 1 — оглушён гипнозом (для отрисовки)
+var hypnotized := 0         # 1 — оглушён гипнозом, 2 — окаменел (для отрисовки)
 var knock_on_land := 0      # приземлится — будет лежать (сбит с ног)
 var parry_timer := TAP_TIMER_MAX  # тиков с последней засчитанной попытки парирования
 var parry_cool := 0         # тиков до следующей возможной попытки
@@ -250,7 +250,7 @@ static func scaled_damage(damage: int, combo_hits: int) -> int:
 
 ## Можно ли схватить: на земле и не в оглушении/блоке (защита от бросков, как в Street Fighter).
 func is_throwable() -> bool:
-	if y != 0 or is_untouchable() or is_intangible():
+	if y != 0 or is_untouchable() or is_intangible() or is_invulnerable():
 		return false
 	return state != State.HITSTUN and state != State.BLOCKSTUN and state != State.AIR \
 		and state != State.LAND
@@ -281,6 +281,14 @@ func is_intangible() -> bool:
 		return false
 	var m := move_data()
 	return m.has("teleport") and move_frame >= m.teleport.invul_from and move_frame < m.startup
+
+
+## Неуязвимый старт приёма (взлёт против прыжков): удары, снаряды и броски проходят мимо.
+func is_invulnerable() -> bool:
+	if move < 0 or state != State.ATTACK:
+		return false
+	var m := move_data()
+	return m.has("invul") and move_frame >= m.invul[0] and move_frame < m.invul[1]
 
 
 ## Гипнотический взгляд: окно контратаки.

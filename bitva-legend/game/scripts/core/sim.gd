@@ -34,7 +34,7 @@ const ATTACK_MASK := InputBits.LP | InputBits.LK | InputBits.HP | InputBits.HK
 
 ## Поля снаряда (PackedInt32Array): владелец, позиция, скорость, гравитация, размер,
 ## урон и прочее из данных спецприёма, вид для отрисовки, возраст.
-enum Proj { OWNER, X, Y, VX, VY, GRAV, HW, HH, DMG, STUN, STOP, PUSH, CHIP, KIND, AGE, LOW, LIFE, SIZE }
+enum Proj { OWNER, X, Y, VX, VY, GRAV, HW, HH, DMG, STUN, STOP, PUSH, CHIP, KIND, AGE, LOW, LIFE, PETRIFY, SIZE }
 const TECH_WINDOW := 8              # вырваться из броска: ЛР в первые тики захвата
 const THROW_HITSTOP := 12
 const ARMOR_HITSTOP := 6            # короткая заморозка, когда удар принят бронёй
@@ -281,6 +281,10 @@ func _hold_throws() -> void:
 			d.add_meter(g.damage * METER_TAKEN)
 		if g.has("heal"):
 			a.hp = mini(a.hp + g.heal, a.max_hp)
+		if g.has("drain"):
+			var stolen := mini(d.meter, g.drain)
+			d.meter -= stolen
+			a.meter = mini(a.meter + stolen, Fighter.METER_MAX)
 		a.finish_throw(g.recovery)
 		hitstop = THROW_HITSTOP
 		hitstop_total = THROW_HITSTOP
@@ -328,6 +332,7 @@ func _spawn_projectiles() -> void:
 		pr[Proj.AGE] = 0
 		pr[Proj.LOW] = 1 if d.get("level", "high") == "low" else 0
 		pr[Proj.LIFE] = d.get("life", 0)
+		pr[Proj.PETRIFY] = d.get("petrify", 0)
 		projectiles.append(pr)
 
 
@@ -384,13 +389,14 @@ func _check_projectiles() -> void:
 		var pr := projectiles[i]
 		var p: int = pr[Proj.OWNER]
 		var d := fighters[1 - p]
-		if d.is_untouchable():
+		if d.is_untouchable() or d.is_invulnerable():
 			continue
 		var box := _proj_box(pr)
 		for hurt in d.hurtboxes():
 			if _overlap(box, hurt):
 				var m := {"damage": pr[Proj.DMG], "hitstun": pr[Proj.STUN], "hitstop": pr[Proj.STOP],
-					"push": pr[Proj.PUSH], "chip": pr[Proj.CHIP], "level": "low" if pr[Proj.LOW] else "high"}
+					"push": pr[Proj.PUSH], "chip": pr[Proj.CHIP], "level": "low" if pr[Proj.LOW] else "high",
+					"petrify": pr[Proj.PETRIFY]}
 				_apply_hit(p, m, signi(pr[Proj.VX]), pr[Proj.X], pr[Proj.Y])
 				removed[i] = true
 				break
@@ -583,7 +589,7 @@ func _check_hits() -> void:
 	for p in PLAYERS:
 		var a := fighters[p]
 		var d := fighters[1 - p]
-		if not a.is_active() or d.is_untouchable():
+		if not a.is_active() or d.is_untouchable() or d.is_invulnerable():
 			continue
 		var hb := a.hitbox()
 		for hurt in d.hurtboxes():
@@ -655,6 +661,10 @@ func _apply_hit(p: int, m: Dictionary, direction: int, spark_x: int, spark_y: in
 		_hold_position(a, d)
 	else:
 		d.take_hit(m, direction)
+		# Каменный взгляд: попавший на земле соперник каменеет (как гипноз, но дольше и серый).
+		if m.get("petrify", 0) > 0 and d.y == 0 and d.hp > 0 and d.state == Fighter.State.HITSTUN:
+			d.take_hypnosis(m.petrify)
+			d.hypnotized = 2
 		if not a.is_super():
 			a.add_meter(m.damage * METER_HIT)
 			d.add_meter(m.damage * METER_TAKEN)
