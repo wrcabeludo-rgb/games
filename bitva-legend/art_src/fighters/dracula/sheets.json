@@ -12,7 +12,7 @@
   "align_top": 0.45
  },
  "walk_b": {
-  "frames": 4,
+  "part_frames": 4,
   "fit": "inherit:idle",
   "align_to": "idle:1",
   "align_each": true,
