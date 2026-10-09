@@ -420,7 +420,7 @@ func _draw_preview(p: int) -> void:
 	var at := waist
 	if a.is_empty():
 		a = _sprites.anim(id, "idle")  # портрета ещё нет — стойка покрупнее
-		k = 0.62
+		k = 0.62 / _sprites.res(id)
 		at = feet
 	if a.is_empty():
 		_draw_silhouette(id, waist, 1.0)

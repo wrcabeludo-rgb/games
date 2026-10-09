@@ -176,10 +176,12 @@ func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2, breathe := false) 
 		tint = Color(0.6, 0.6, 0.58)  # окаменел
 	elif f.hypnotized == 3:
 		tint = Color(0.75, 1.0, 0.85)  # прилип к жвачке
-	draw_set_transform(base, 0, Vector2(FighterSprites.SCALE * f.facing, FighterSprites.SCALE))
+	var k := FighterSprites.SCALE / sprites.res(f.id)
+	draw_set_transform(base, 0, Vector2(k * f.facing, k))
 	if breathe:
 		var phase := 0.5 - 0.5 * cos(TAU * float(_sim.tick) / FighterSprites.BREATH_TICKS)
-		FighterSprites.draw_breathing(self, tex, pivot, tint, f.data.height * 2.0, phase)
+		FighterSprites.draw_breathing(self, tex, pivot, tint, f.data.height * 2.0 * sprites.res(f.id), phase,
+			7.0 * sprites.res(f.id))
 	else:
 		draw_texture(tex, -pivot, tint)
 	draw_set_transform(Vector2.ZERO)

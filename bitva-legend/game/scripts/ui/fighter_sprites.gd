@@ -24,11 +24,15 @@ const JUMP_LAND_HEIGHT := 110
 
 ## id бойца → {анимация: {"tex": Array[Texture2D], "pivot": Array[Vector2]}}
 var _bank := {}
+## id бойца → во сколько раз его кадры крупнее обычных (у новых бойцов — 2: чётко на мониторах 2K/4K).
+var _res := {}
 
 
 func _init() -> void:
 	for id in FighterData.CHARACTERS:
 		_bank[id] = _load_character(id)
+		var idle: Dictionary = _bank[id].get("idle", {})
+		_res[id] = idle.get("res", 1.0)
 
 
 static func _load_character(id: String) -> Dictionary:
@@ -57,13 +61,18 @@ static func _load_character(id: String) -> Dictionary:
 			var hit_end: int = int(meta.get("hit_end", hit + 1)) - 1
 			out[file.get_basename()] = {"tex": tex, "pivot": pivots, "hit": clampi(hit, 0, n - 1),
 				"hit_end": clampi(hit_end, hit, n - 1), "reverse": bool(meta.get("reverse", false)),
-				"air": int(meta.get("air_frames", 1))}
+				"air": int(meta.get("air_frames", 1)), "res": float(meta.get("res", 1.0))}
 	if IDLE_FROM.has(id) and out.has(IDLE_FROM[id][0]):
 		var src: Dictionary = out[IDLE_FROM[id][0]]
 		var k: int = IDLE_FROM[id][1]
 		out["idle"] = {"tex": [src.tex[k]] as Array[Texture2D], "pivot": [src.pivot[k]] as Array[Vector2],
 			"hit": 0, "hit_end": 0, "reverse": false, "air": 1}
 	return out
+
+
+## Разрешение кадров бойца: 1 — обычное, 2 — двойное (рисовать с масштабом SCALE / res).
+func res(id: String) -> float:
+	return _res.get(id, 1.0)
 
 
 func has_any(id: String) -> bool:

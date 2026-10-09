@@ -48,6 +48,9 @@ from process_arena_art import chroma_key, split_objects, sharpen  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 # Рост бойца стоя в пикселях 1440p (= рост в игре × 2, см. FighterData "height").
 HEIGHT = {"ilya": 600, "dracula": 620, "koschei": 640}
+# Двойное разрешение: исходники увеличиваются нейросетью (tools/upscale.py), кадры хранятся вдвое крупнее,
+# игра рисует их с масштабом SCALE / res — на экране тот же размер, на 2K/4K — чётче.
+RES = {"koschei": 2}
 FEET_BAND = 0.06   # опорная точка по x — центр непрозрачных пикселей в нижних 6% кадра
 
 
@@ -59,6 +62,19 @@ def clear_border(img: Image.Image, px: int = 3) -> Image.Image:
     a[:, :px, 3] = 0
     a[:, -px:, 3] = 0
     return Image.fromarray(a, "RGBA")
+
+
+def src_image(p: Path, who: str) -> Image.Image:
+    """Исходник листа; для бойцов с двойным разрешением — увеличенный нейросетью (кэш в <папка>/.x2/)."""
+    if RES.get(who, 1) == 1:
+        return Image.open(p)
+    cache = p.parent / ".x2" / (p.stem + ".png")
+    if not cache.exists() or cache.stat().st_mtime < p.stat().st_mtime:
+        from upscale import upscale
+        print(f"    {p.name}: увеличиваю нейросетью ×2…")
+        cache.parent.mkdir(exist_ok=True)
+        upscale(Image.open(p)).save(cache)
+    return Image.open(cache)
 
 
 def frames_of(sheet: Image.Image, expected: int, grid=None):
@@ -199,7 +215,7 @@ def match_scale(frame: Image.Image, ref: Image.Image, top: float = 0.45) -> floa
     for k in np.arange(0.90, 1.105, 0.01):
         B = head(frame.resize((max(1, int(frame.width * k)), max(1, int(frame.height * k)))))
         h = min(A.shape[0], B.shape[0])
-        for dx in range(-40, 41, 2):
+        for dx in range(-80, 81, 2):
             b = np.zeros((h, A.shape[1]), bool)
             x0 = max(0, dx)
             w = min(A.shape[1] - x0, B.shape[1])
@@ -272,7 +288,7 @@ def main() -> int:
         name = p.stem
         opt = cfg.get(name, {})
         group = [f for _, f in sorted(parts[name])]
-        raw = Image.open(group[0])
+        raw = src_image(group[0], who)
         heights[name] = raw.height
         if len(group) == 1:
             frames = frames_of(chroma_key(raw), opt.get("frames", 0), opt.get("grid"))
@@ -283,7 +299,7 @@ def main() -> int:
             pf = opt.get("part_frames", 0)
             for i, f in enumerate(group):
                 n = pf[i] if isinstance(pf, list) else pf
-                part = frames_of(chroma_key(Image.open(f)), n, opt.get("grid"))
+                part = frames_of(chroma_key(src_image(f, who)), n, opt.get("grid"))
                 if "parts_fit" in opt:
                     k = _fit_scale(opt["parts_fit"][i], part, who)
                     part = [x.resize((max(1, round(x.width * k)), max(1, round(x.height * k))), Image.LANCZOS)
@@ -303,7 +319,7 @@ def main() -> int:
         elif str(fit).startswith("h:"):
             # h:<кадр>:<px> — кадр № такой-то должен быть такой высоты (присед, блок с поднятой палицей…).
             _, idx, px = str(fit).split(":")
-            scale = float(px) / frames[int(idx) - 1].height
+            scale = float(px) * RES.get(who, 1) / frames[int(idx) - 1].height
         elif str(fit).startswith("inherit:"):
             base = fit.split(":", 1)[1]
             if base not in scales:
@@ -311,7 +327,7 @@ def main() -> int:
                 continue
             scale = scales[base] * heights[base] / raw.height
         else:
-            scale = HEIGHT[who] / float(np.median([f.height for f in frames]))
+            scale = HEIGHT[who] * RES.get(who, 1) / float(np.median([f.height for f in frames]))
         if opt.get("match_scale") and "align_to" in opt:
             # Масштаб листа подгоняем по голове и плечам образца (кадр align_frame против кадра align_to).
             base, idx = opt["align_to"].split(":")
@@ -323,6 +339,8 @@ def main() -> int:
             scale *= k
         scales[name] = scale
         meta = {"frames": []}
+        if RES.get(who, 1) != 1:
+            meta["res"] = RES[who]
         # Ударные кадры (с 1): hit — первый кадр активной фазы, hit_end — последний.
         for k in ("hit", "hit_end", "reverse", "air_frames"):
             if k in opt:
