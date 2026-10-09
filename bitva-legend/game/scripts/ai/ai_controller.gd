@@ -38,6 +38,7 @@ const STYLES := {
 	"medusa": {"ideal": 360, "aggro": 0.45, "jump": 0.1, "zone": 0.5, "special": 0.45},     # контроль: яд, взгляд
 	"sunwukong": {"ideal": 230, "aggro": 0.65, "jump": 0.4, "zone": 0.3, "special": 0.4},   # прыгает, дразнит, посох
 	"anubis": {"ideal": 400, "aggro": 0.35, "jump": 0.05, "zone": 0.55, "special": 0.4},    # терпеливый: скарабеи, смерч
+	"lenta": {"ideal": 300, "aggro": 0.65, "jump": 0.2, "zone": 0.5, "special": 0.6},       # босс: всё сразу и без пауз
 }
 const DEFAULT_STYLE := {"ideal": 300, "aggro": 0.5, "jump": 0.15, "zone": 0.35, "special": 0.3}
 ## Насколько часто уровень пользуется спецприёмами и суперприёмом.

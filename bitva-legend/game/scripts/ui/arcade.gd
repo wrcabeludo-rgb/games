@@ -1,8 +1,8 @@
 class_name Arcade
 extends RefCounted
-## Режим «Аркада»: игрок проходит лестницу из семи боёв против ИИ.
-## Порядок соперников случайный, последним всегда выходит соперник из пары (docs/LORE.md).
-## ИИ крепчает от боя к бою. После последней победы — эпилог у камня (Endings).
+## Режим «Аркада»: игрок проходит лестницу из восьми боёв против ИИ.
+## Порядок соперников случайный, седьмым всегда выходит соперник из пары, восьмой бой — с Лентой (босс,
+## docs/LORE.md). ИИ крепчает от боя к бою. После победы над Лентой — эпилог (Endings).
 
 ## Пары-соперники.
 const RIVALS := {
@@ -11,11 +11,12 @@ const RIVALS := {
 	"athena": "medusa", "medusa": "athena",
 	"sunwukong": "anubis", "anubis": "sunwukong",
 }
+const BOSS := "lenta"
 ## Уровень ИИ на каждом бою лестницы.
 const STAGE_LEVELS := [
 	AiController.Level.EASY, AiController.Level.EASY,
 	AiController.Level.MEDIUM, AiController.Level.MEDIUM, AiController.Level.MEDIUM,
-	AiController.Level.HARD, AiController.Level.HARD,
+	AiController.Level.HARD, AiController.Level.HARD, AiController.Level.HARD,
 ]
 
 var player := ""
@@ -42,6 +43,7 @@ func _init(id: String, roster: Array, seed_value: int) -> void:
 	ladder = rest
 	if rival != "":
 		ladder.append(rival)
+	ladder.append(BOSS)
 
 
 func opponent() -> String:

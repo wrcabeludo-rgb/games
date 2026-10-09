@@ -142,7 +142,7 @@ func _physics_process(_delta: float) -> void:
 	raw[1] &= ~_mask
 	if in_menu:
 		menu.vs_ai = reader.single_player
-		menu.ai_label = Loc.t("Аркада: семь боёв против ИИ") if menu.arcade else Loc.t("Соперник: %s   ·   F3 — сменить   ·   Options / F10 — настройки") % \
+		menu.ai_label = Loc.t("Аркада: восемь боёв против ИИ") if menu.arcade else Loc.t("Соперник: %s   ·   F3 — сменить   ·   Options / F10 — настройки") % \
 			(Loc.t("второй игрок") if ai.level == AiController.Level.OFF else Loc.t("ИИ, ") + Loc.t(ai.level_name()))
 		menu.step(raw)
 		if _screenshot_path != "" and menu.tick == _shot_at:

@@ -517,6 +517,65 @@ const CHARACTERS := {
 			"throw": {"startup": 4, "active": 2, "recovery": 18, "grab": {"range": 30, "hold": 28, "damage": 120, "launch": [500, 1000], "tech": 1, "recovery": 10}},
 		},
 	},
+	"lenta": {
+		# Лента — босс (docs/LORE.md): безликая фигура из вертикальных экранов, вместо головы — экран с роликами.
+		# Быстрая для своего роста, бьёт «свайпами»; здоровья больше всех. В выборе бойца её нет — только в аркаде.
+		"name": "ЛЕНТА",
+		"color": Color(0.2, 0.75, 0.95),
+		"boss": 1,
+		"max_hp": 1300,
+		"height": 340,
+		"crouch_height": 210,
+		"push_half": 46,
+		"walk_f": 330,
+		"walk_b": 300,
+		"prejump": 3,
+		"jump_vy": 2000,
+		"gravity": 105,
+		"jump_vx_f": 440,
+		"jump_vx_b": 400,
+		"landing": 3,
+		"run_speed": 800,
+		"run_accel": 240,
+		"run_stop": 3,
+		"run_jump_bonus": 200,
+		"backdash_v0": 1600,
+		"backdash_decel": 115,
+		"backdash_recovery": 3,
+		"strings": [
+			{"name": "Свайп-свайп", "moves": ["st_lp", "st_lp", "st_hp"]},
+			{"name": "Кликбейт", "moves": ["st_lk", "st_hk"]},
+			{"name": "Досмотри до конца", "moves": ["st_lp", "st_lk", "cr_hk"]},
+		],
+		"moves": {
+			# Свайпы ладонью — быстрые и длинные.
+			"st_lp": {"startup": 4, "active": 3, "recovery": 8, "damage": 35, "hitstun": 15, "hitstop": 7, "push": 700, "box": [70, 210, 150, 45]},
+			"st_lk": {"startup": 6, "active": 3, "recovery": 10, "damage": 42, "hitstun": 16, "hitstop": 8, "push": 800, "box": [50, 110, 125, 50]},
+			"st_hp": {"startup": 10, "active": 4, "recovery": 19, "damage": 100, "hitstun": 22, "hitstop": 12, "push": 1100, "box": [70, 120, 215, 110]},
+			"st_hk": {"startup": 10, "active": 4, "recovery": 18, "damage": 88, "hitstun": 20, "hitstop": 11, "push": 1050, "box": [45, 160, 140, 95]},
+			"cr_lp": {"startup": 4, "active": 3, "recovery": 8, "damage": 30, "hitstun": 14, "hitstop": 7, "push": 650, "box": [65, 125, 125, 45]},
+			"cr_lk": {"startup": 5, "active": 3, "recovery": 9, "damage": 33, "hitstun": 14, "hitstop": 7, "push": 650, "box": [55, 0, 145, 40], "level": "low"},
+			"cr_hp": {"startup": 8, "active": 5, "recovery": 22, "damage": 95, "hitstun": 22, "hitstop": 13, "push": 900, "box": [20, 60, 150, 270], "knockdown": 1, "launch": [240, 1700], "uppercut": 1},
+			"cr_hk": {"startup": 10, "active": 4, "recovery": 22, "damage": 78, "hitstun": 20, "hitstop": 11, "push": 1000, "box": [45, 0, 180, 38], "level": "low"},
+			"j_lp": {"startup": 5, "active": 6, "damage": 36, "hitstun": 15, "hitstop": 8, "push": 600, "box": [55, 130, 120, 55], "level": "overhead"},
+			"j_lk": {"startup": 6, "active": 8, "damage": 42, "hitstun": 16, "hitstop": 8, "push": 600, "box": [55, 60, 120, 65], "level": "overhead"},
+			"j_hp": {"startup": 8, "active": 5, "damage": 95, "hitstun": 22, "hitstop": 13, "push": 800, "box": [40, 0, 145, 120], "level": "overhead"},
+			"j_hk": {"startup": 8, "active": 6, "damage": 85, "hitstun": 20, "hitstop": 11, "push": 800, "box": [55, 90, 110, 100], "level": "overhead"},
+			"st_sweep": {"startup": 8, "active": 3, "recovery": 19, "damage": 65, "hitstun": 20, "hitstop": 11, "push": 600, "box": [30, 0, 150, 40], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
+			"st_round": {"startup": 13, "active": 4, "recovery": 22, "damage": 115, "hitstun": 22, "hitstop": 14, "push": 1200, "box": [30, 170, 135, 130], "knockdown": 1, "launch": [650, 950], "kick": 1},
+			# Рилс (назад, вперёд + рука): вертикальный экран-ролик летит вперёд.
+			"sp_proj_l": {"buttons": "punch", "startup": 11, "active": 1, "recovery": 18, "proj": {"x": 60, "y": 150, "vx": 1200, "vy": 0, "gravity": 0, "w": 50, "h": 110, "kind": 14, "damage": 65, "hitstun": 18, "hitstop": 9, "push": 700, "chip": 7}, "ex": {"startup": 8, "proj": {"vx": 1600, "damage": 95, "hitstun": 26, "chip": 11, "kind": 114}}},
+			# Свайп (вниз, вниз + нога): смахивает себя с экрана и появляется за спиной.
+			"sp_dd_l": {"buttons": "kick", "startup": 12, "active": 1, "recovery": 10, "teleport": {"invul_from": 3, "offset": 110}, "ex": {"startup": 8, "recovery": 4, "teleport": {"invul_from": 2}}},
+			# Автоплей (вперёд, вперёд + рука): ролики идут один за другим — рывок с бронёй.
+			"sp_ff_l": {"buttons": "punch", "startup": 10, "active": 16, "recovery": 22, "lunge": 900, "armor": 1, "damage": 105, "hitstun": 24, "hitstop": 12, "push": 1300, "chip": 10, "box": [30, 60, 120, 230], "ex": {"armor": 2, "lunge": 1150, "damage": 145, "chip": 16, "knockdown": 1, "launch": [450, 1400]}},
+			# Алгоритм (назад, назад + рука): захват, забирает всю шкалу силы — внимание. Вырваться нельзя.
+			"sp_bb_l": {"buttons": "punch", "startup": 5, "active": 2, "recovery": 28, "grab": {"range": 85, "hold": 44, "damage": 120, "drain": 3000, "launch": [450, 900], "tech": 0, "recovery": 10}, "ex": {"grab": {"range": 120, "damage": 160}}},
+			# «Бесконечная прокрутка» (блок + СР + СН): рывок; попал — соперника затягивает в ленту роликов.
+			"super": {"name": "БЕСКОНЕЧНАЯ ПРОКРУТКА", "startup": 6, "active": 8, "recovery": 40, "lunge": 950, "damage": 55, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 42, "box": [20, 40, 130, 230], "cinema": {"hold": 110, "damage": 330, "launch": [650, 1600], "tech": 0, "recovery": 18, "scaled": 1}},
+			"throw": {"startup": 3, "active": 2, "recovery": 18, "grab": {"range": 30, "hold": 24, "damage": 110, "launch": [480, 950], "tech": 1, "recovery": 10}},
+		},
+	},
 }
 
 

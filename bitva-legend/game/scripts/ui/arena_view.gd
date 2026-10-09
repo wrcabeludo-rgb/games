@@ -500,7 +500,7 @@ func _draw_projectile(pr: PackedInt32Array) -> void:
 
 
 ## Снаряды новых бойцов (пока процедурные): 6 игла, 7 валун, 8 копьё, 9 яд, 10 каменный взгляд,
-## 11 обезьянки, 12 скарабеи, 13 песчаный смерч.
+## 11 обезьянки, 12 скарабеи, 13 песчаный смерч, 14 рилс (вертикальный экран Ленты).
 func _draw_projectile_new(pr: PackedInt32Array, c: Vector2, age: int, dir: float) -> void:
 	var kind := pr[Sim.Proj.KIND]
 	var ex := kind >= 100
@@ -555,10 +555,26 @@ func _draw_projectile_new(pr: PackedInt32Array, c: Vector2, age: int, dir: float
 				var y := c.y + hh * (0.8 - 1.6 * t)
 				var off := sin(age * 0.6 + i) * 8.0
 				draw_arc(Vector2(c.x + off, y), r * 0.6, 0, TAU, 20, Color(0.85, 0.72, 0.45, 0.65), 4)
+		14:  # рилс: светящийся вертикальный экран с кнопкой «играть» и полоской прогресса
+			var r := Rect2(c - Vector2(hw, hh), Vector2(hw * 2.0, hh * 2.0))
+			c_glitch(r, age)
+			draw_rect(r, Color(0.08, 0.1, 0.16))
+			draw_rect(r.grow(-4), Color(0.2, 0.75, 0.95, 0.85))
+			draw_rect(r, Color(0.85, 0.95, 1.0), false, 3)
+			var mid := r.get_center()
+			draw_colored_polygon(PackedVector2Array([mid + Vector2(-9, -13), mid + Vector2(13, 0), mid + Vector2(-9, 13)]), Color(1, 1, 1, 0.9))
+			draw_rect(Rect2(r.position.x + 5, r.end.y - 10, (r.size.x - 10) * fmod(age / 20.0, 1.0), 4), Color(1, 0.25, 0.3))
 		_:
 			draw_circle(c, hw, Color(1, 1, 1, 0.6))
 	if show_debug:
 		_debug_box(Sim._proj_box(pr), Color(1, 0.2, 0.2, 0.95))
+
+
+## Рилс оставляет за собой «помехи» — цветные полоски со сдвигом.
+func c_glitch(r: Rect2, age: int) -> void:
+	for i in 3:
+		var y := r.position.y + fmod(age * 7.0 + i * 37.0, r.size.y)
+		draw_rect(Rect2(r.position.x - 10 + (i - 1) * 6, y, r.size.x + 20, 3), [Color(1, 0.2, 0.3, 0.5), Color(0.2, 1, 0.9, 0.5), Color(0.9, 0.9, 1, 0.4)][i])
 
 
 ## Искра попадания: вспышка-звезда, у сильных ударов крупнее.

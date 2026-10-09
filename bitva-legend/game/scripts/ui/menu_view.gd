@@ -476,8 +476,8 @@ func _draw_arcade_panel() -> void:
 	draw_rect(panel, Color(0, 0, 0, 0.35))
 	draw_rect(panel, COLOR_P[1], false, 3.0)
 	_text_c(Vector2(x, 122), "АРКАДА", 34, COLOR_P[1].lightened(0.2), _title_font, 2)
-	var lines := ["Семь боёв подряд", "против ИИ.", "", "Последним выйдет", "твой заклятый соперник.", "",
-		"Победишь — камень", "исполнит желание."]
+	var lines := ["Семь боёв на швах миров", "против ИИ, седьмой —", "с заклятым соперником.", "",
+		"Восьмой — с Лентой,", "которая пожирает", "легенды."]
 	for i in lines.size():
 		_text_c(Vector2(x, 200 + i * 30), lines[i], 20, COLOR_TEXT)
 	_text_c(Vector2(x, 520), "?", 120, Color(COLOR_P[1], 0.35), _title_font, 2)
@@ -501,8 +501,8 @@ func _draw_ladder() -> void:
 	_text_c(Vector2(size.x * 0.2, 130), FighterData.get_data(run.player).name, 30, COLOR_P[0].lightened(0.2))
 	# Башня.
 	var tx := size.x * 0.52
-	var cell := 66.0
-	var step := 76.0
+	var cell := 60.0
+	var step := 68.0
 	var bottom := size.y - 40.0
 	for i in run.ladder.size():
 		var id: String = run.ladder[i]
@@ -523,7 +523,10 @@ func _draw_ladder() -> void:
 		var name_col := COLOR_DIM if beaten else (COLOR_GOLD if current else COLOR_TEXT)
 		var nm := Loc.t(FighterData.get_data(id).name)
 		draw_string(_font, Vector2(r.end.x + 16, r.get_center().y + 7), nm, HORIZONTAL_ALIGNMENT_LEFT, -1, 19, name_col)
-		if i == run.ladder.size() - 1 and Arcade.RIVALS.get(run.player, "") == id:
+		if id == Arcade.BOSS:
+			draw_string(_font, Vector2(r.end.x + 16, r.get_center().y + 28), Loc.t("источник всех бед"),
+				HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.3, 0.85, 1.0))
+		elif Arcade.RIVALS.get(run.player, "") == id:
 			draw_string(_font, Vector2(r.end.x + 16, r.get_center().y + 28), Loc.t("заклятый соперник"),
 				HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(1, 0.4, 0.3))
 	# Справа — номер боя и сложность.

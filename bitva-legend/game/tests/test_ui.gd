@@ -7,7 +7,7 @@ func _init() -> void:
 	ok = _check("вибрация: попадание и сбитие с ног — импульсы, выключена — ни одного", _test_rumble()) and ok
 	ok = _check("настройки: сохраняются в файл и читаются обратно", _test_settings()) and ok
 	ok = _check("управление: кнопка меняется местами с занятой, раскладка сохраняется", _test_controls()) and ok
-	ok = _check("аркада: семь разных соперников, последний — соперник пары", _test_arcade()) and ok
+	ok = _check("аркада: семь разных соперников, седьмой — соперник пары, восьмой — Лента", _test_arcade()) and ok
 	ok = _check("аркада: эпилог у каждого бойца на двух языках", _test_endings()) and ok
 	ok = _check("реплики: на каждую победную фразу пары-соперников есть ответ проигравшего", _test_lose_quotes()) and ok
 	print("ИТОГ: " + ("все тесты пройдены" if ok else "есть ошибки"))
@@ -75,10 +75,11 @@ func _test_arcade() -> bool:
 			var uniq := {}
 			for o in run.ladder:
 				uniq[o] = true
-			if run.ladder.size() != 7 or uniq.size() != 7 or uniq.has(id) or run.ladder[6] != Arcade.RIVALS[id]:
+			if run.ladder.size() != 8 or uniq.size() != 8 or uniq.has(id) or run.ladder[6] != Arcade.RIVALS[id] \
+					or run.ladder[7] != Arcade.BOSS:
 				print("  ", id, run.ladder)
 				return false
-			for i in 6:
+			for i in 7:
 				if run.advance():
 					return false
 			if not run.is_final() or not run.advance():

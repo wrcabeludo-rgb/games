@@ -11,7 +11,7 @@ const LK := InputBits.LK
 const HP := InputBits.HP
 const HK := InputBits.HK
 const BL := InputBits.BLOCK
-const NEW := ["koschei", "hercules", "athena", "medusa", "sunwukong", "anubis"]
+const NEW := ["koschei", "hercules", "athena", "medusa", "sunwukong", "anubis", "lenta"]
 
 
 func _init() -> void:

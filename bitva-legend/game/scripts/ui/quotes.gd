@@ -46,6 +46,55 @@ const INTRO := {
 		["anubis", "Все бегут от смерти. Ни один ещё не добежал.",
 			"Everyone runs from death. No one has ever made it."]],
 	],
+	# Лента против каждого героя.
+	"ilya|lenta": [
+		[["lenta", "ТЫ НЕ ПОВЕРИШЬ, что случилось с Ильёй Муромцем дальше! Досмотри до конца!",
+			"YOU WON'T BELIEVE what happened to Ilya Muromets next! Watch till the end!"],
+		["ilya", "Это ты, что ли, внуков моих от сказок отвадила? Ну, держись, балаболка.",
+			"So you're the one who stole my grandchildren's bedtime tales? Brace yourself, chatterbox."]],
+	],
+	"dracula|lenta": [
+		[["lenta", "Граф! Вампиры снова в тренде. Пятнадцать секунд славы — и в следующий ролик.",
+			"Count! Vampires are trending again. Fifteen seconds of fame — then on to the next clip."],
+		["dracula", "Я пятьсот лет пью чужие жизни. Но даже я не пью их, не распробовав.",
+			"I have drunk lives for five hundred years. But even I never drank one without tasting it."]],
+	],
+	"koschei|lenta": [
+		[["lenta", "Бессмертный и пустой. Мы с тобой — одно и то же, дедушка. Подпишись на меня.",
+			"Deathless and empty. You and I are the same, old man. Subscribe to me."],
+		["koschei", "Потому и бью. Смотреть на тебя — как в зеркало, а я своё отражение ненавижу.",
+			"That's why I'll strike. Looking at you is like a mirror — and I hate my reflection."]],
+	],
+	"hercules|lenta": [
+		[["lenta", "«12 самых эпичных подвигов Геракла»! Без скучных подробностей, без вины — только хайлайты!",
+			"\"Hercules' 12 most epic labours\"! No boring details, no guilt — just highlights!"],
+		["hercules", "Скучные подробности — это и есть моя жизнь. Тринадцатым подвигом будешь ты.",
+			"The boring details ARE my life. You'll be my thirteenth labour."]],
+	],
+	"athena|lenta": [
+		[["lenta", "Богиня мудрости! Сколько лайков стоит мудрость? Давай проверим.",
+			"The goddess of wisdom! How many likes is wisdom worth? Let's find out."],
+		["athena", "Мудрость не измеряют. Её слушают. Тебе этого не понять — ты не умеешь молчать.",
+			"Wisdom isn't measured. It's listened to. You wouldn't understand — you can't be silent."]],
+	],
+	"lenta|medusa": [
+		[["lenta", "Медуза! «Монстр, которого убил Персей» — восемь миллионов просмотров! Повторим?",
+			"Medusa! \"The monster Perseus slew\" — eight million views! Shall we run it again?"],
+		["medusa", "Ты рассказала мою историю миллион раз — и ни разу правильно. Посмотри мне в глаза.",
+			"You've told my story a million times — and never once right. Look me in the eye."]],
+	],
+	"lenta|sunwukong": [
+		[["lenta", "Царь обезьян! На тебя смотрят все! Хочешь, будешь смотреть только ты — вечно?",
+			"Monkey King! Everyone's watching you! Want to be the only thing they ever watch — forever?"],
+		["sunwukong", "Ха! Я на облаке облетал всю Поднебесную. А ты — пятнадцать секунд и свайп. Скука!",
+			"Ha! I've circled the whole world on a cloud. You're fifteen seconds and a swipe. Boring!"]],
+	],
+	"anubis|lenta": [
+		[["lenta", "Проводник мёртвых! У меня никто не умирает — истории просто листаются. Удобно, правда?",
+			"Guide of the dead! Nothing dies with me — stories just scroll by. Convenient, isn't it?"],
+		["anubis", "Ни жизни, ни смерти. Ты нарушаешь равновесие сильнее, чем Царь обезьян. Весы ждут.",
+			"Neither life nor death. You break the balance worse than the Monkey King. The scales are waiting."]],
+	],
 	"ilya|ilya": [
 		[["ilya", "Ты кто таков? Я — Илья Муромец!", "And who might you be? I am Ilya Muromets!"],
 		["ilya", "Врёшь! Это я Илья Муромец. А ты, видать, Илья Подмосковец.",
@@ -76,6 +125,8 @@ const GENERIC_INTRO := {
 		"Another hero. Don't look into my eyes — or do. I no longer care."],
 	"anubis": ["Не бойся. Я взвешиваю сердца, а не вырываю их.",
 		"Do not fear. I weigh hearts, I do not tear them out."],
+	"lenta": ["Новый контент! Пятнадцать секунд — и ты в тренде. Не переключайся!",
+		"New content! Fifteen seconds and you're trending. Don't switch!"],
 }
 const GENERIC_WIN := {
 	"ilya": ["Отдохни, полежи. А я пойду — ещё не всех чудищ перебил.", "Lie down, rest. I'm off — plenty of monsters left."],
@@ -86,11 +137,13 @@ const GENERIC_WIN := {
 	"koschei": ["Опять победил. Опять не умер. Опять ничего не почувствовал.", "Won again. Didn't die again. Felt nothing again."],
 	"medusa": ["Ещё одна статуя в саду. Красивая. Все они красивые.", "One more statue for the garden. Beautiful. They all are."],
 	"anubis": ["Твоё сердце легче, чем ты думал. Иди с миром.", "Your heart is lighter than you thought. Go in peace."],
+	"lenta": ["Следующее видео через три… два… один…", "Next video in three… two… one…"],
 }
 
 ## Победа: победитель → проигравший → варианты [ru, en].
 const WIN := {
 	"ilya": {
+		"lenta": [["Вот так-то. А теперь — сказку. С начала и до конца.", "There. Now — a story. From the beginning to the end."]],
 		"dracula": [
 			["Вот и вся заморская наука. Чесночку тебе на дорожку!", "So much for foreign learning. Have some garlic for the road!"],
 			["Лежи, отдыхай. Гроб-то, небось, помягче был?", "Lie down, rest. Your coffin was comfier, I bet?"],
@@ -101,6 +154,7 @@ const WIN := {
 		],
 	},
 	"dracula": {
+		"lenta": [["Безвкусно. Совершенно безвкусно.", "Tasteless. Utterly tasteless."]],
 		"ilya": [
 			["Крепкий старик. Кровь — как медовуха: с ног сшибает.", "A sturdy old man. Blood like mead — knocks you off your feet."],
 			["Ваша борода — единственное, что оказало мне сопротивление.", "Your beard was the only thing that put up a fight."],
@@ -111,26 +165,32 @@ const WIN := {
 		],
 	},
 	"hercules": {
+		"lenta": [["Тринадцатый. Этот я расскажу целиком.", "The thirteenth. This one I'll tell in full."]],
 		"koschei": [["Вставай, костлявый. Смерть свою найдёшь — приходи, вместе поищем покой.",
 			"Get up, bony. When you find your death, come — we'll look for peace together."]],
 	},
 	"koschei": {
+		"lenta": [["Погасла. А я — нет. Странно: впервые этому рад.", "It went dark. I didn't. Strange — for once I'm glad."]],
 		"hercules": [["Сильный… А вину свою так и не поднял. Тяжелее палицы, а?",
 			"Strong… Yet you never lifted your guilt. Heavier than a club, eh?"]],
 	},
 	"athena": {
+		"lenta": [["Тишина. Вот теперь можно думать.", "Silence. Now we can think."]],
 		"medusa": [["Ты права. Я виновата. Но я не могу позволить тебе мстить миру.",
 			"You are right. I am to blame. But I cannot let you take revenge on the world."]],
 	},
 	"medusa": {
+		"lenta": [["Окаменела. Красивая статуя. Первая, которую не жалко.", "Turned to stone. A fine statue. The first one I don't regret."]],
 		"athena": [["Теперь ты знаешь, каково это — проиграть ни за что.",
 			"Now you know what it's like to lose for nothing."]],
 	},
 	"anubis": {
+		"lenta": [["Сердца не нашлось. Приговор вынесен.", "No heart was found. The verdict is given."]],
 		"sunwukong": [["Твоё имя снова в книге. Не бойся — до твоей страницы ещё далеко.",
 			"Your name is back in the book. Fear not — your page is still far off."]],
 	},
 	"sunwukong": {
+		"lenta": [["Пролистал! Свайп влево, Лента!", "Scrolled past! Swipe left, Feed!"]],
 		"anubis": [["Передай весам: Царь обезьян ещё погуляет!", "Tell your scales: the Monkey King isn't done playing!"]],
 	},
 }
@@ -139,6 +199,16 @@ const WIN := {
 ## Вариант выбирается тем же зерном, что и победная реплика, поэтому отвечает именно на неё:
 ## число вариантов совпадает с WIN[победитель][проигравший].
 const LOSE := {
+	"lenta": {
+		"ilya": [["Это видео больше недоступно…", "This video is no longer available…"]],
+		"dracula": [["Ошибка воспроизведения. Повторите попытку…", "Playback error. Please try again…"]],
+		"koschei": [["Нет подключения. Нет… подключения…", "No connection. No… connection…"]],
+		"hercules": [["Ролик удалён по жалобе героя…", "Video removed after a hero's complaint…"]],
+		"athena": [["Звук… выключен…", "Sound… muted…"]],
+		"medusa": [["Буферизация… буфериза…", "Buffering… buffer…"]],
+		"sunwukong": [["Вы смотрели это видео 72 раза. Продолжить?..", "You've watched this video 72 times. Continue?.."]],
+		"anubis": [["Аккаунт… удалён…", "Account… deleted…"]],
+	},
 	"dracula": {
 		"ilya": [
 			["Чеснок? Как банально. Я ждал от вас большего, богатырь.", "Garlic? How banal. I expected more of you, hero."],
