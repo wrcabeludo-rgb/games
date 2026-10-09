@@ -24,5 +24,29 @@
   "pivot_y": "body_ground",
   "align_to": "idle:1",
   "match_scale": true
+ },
+ "block": {
+  "frames": 2,
+  "fit": "inherit:idle",
+  "align_to": "idle:1",
+  "match_scale": true
+ },
+ "crouch": {
+  "frames": 2,
+  "fit": "h:2:405"
+ },
+ "backdash": {
+  "frames": 3,
+  "fit": "inherit:idle",
+  "pivot_y": "body_ground",
+  "align_to": "idle:1",
+  "match_scale": true
+ },
+ "run": {
+  "part_frames": 4,
+  "fit": "inherit:idle",
+  "pivot_y": "body_ground",
+  "match_scale": true,
+  "align_to": "idle:1"
  }
 }
