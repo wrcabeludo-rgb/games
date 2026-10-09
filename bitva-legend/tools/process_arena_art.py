@@ -31,12 +31,26 @@ EDGE_PX = 10       # ширина полосы у краёв, где убира�
 SKY_SIZE = (1980, 1080)
 # Полосы — в двойном разрешении 720p (= 1440p): на большом мониторе во весь экран не мылятся.
 # Лес шире слоя: в игре он рисуется крупнее, края уходят за кадр (см. ArenaScenery.FOREST_HEIGHT).
-STRIP_WIDTH = {"mountains": 5400, "forest": 6000, "ground": 4000, "foreground": 4432}
+STRIP_WIDTH = {"mountains": 5400, "forest": 7600, "ground": 4000, "foreground": 4432}
 MOON_SIZE = 320
 STONE_HEIGHT = 520  # 2× высоты в игре (STONE_H в arena_scenery.gd) — надпись читается
-STITCH_OVERLAP = {"ground": 0.12, "mountains": 0.15}  # перетекание соседних панелей сплошных полос
+STITCH_OVERLAP = {"ground": 0.12, "mountains": 0.15, "forest": 0.03}  # перетекание соседних панелей сплошных полос
 CLOUD_MAX_WIDTH = 720
 RAVEN_HEIGHT = 220
+
+
+def despill_red(img: Image.Image) -> Image.Image:
+    """Пурпурный фон просвечивает в тенях листвы и после хромакея становится красной каймой.
+    Красноватые пиксели (G заметно меньше R) возвращаем к тёплому золотисто-оливковому."""
+    a = np.asarray(img.convert("RGBA")).astype(np.float32)
+    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    m = (r > 70) & (g < 0.62 * r)
+    red = np.clip((0.62 * r - g) / (0.3 * r + 1.0), 0.0, 1.0)
+    ng = np.where(m, np.maximum(g, 0.6 * r), g)
+    a[..., 0] = np.where(m, r * (1.0 - 0.25 * red), r)
+    a[..., 1] = ng
+    a[..., 2] = np.where(m, np.minimum(b, ng * 0.5), b)
+    return Image.fromarray(a.clip(0, 255).astype(np.uint8), "RGBA")
 
 
 def find(src: Path, name: str):
@@ -309,6 +323,8 @@ def main() -> int:
         else:
             continue
         strip = trim_vertical(strip)
+        if name == "forest":
+            strip = despill_red(strip)
         if strip.width > width:
             strip = resize_w(strip, width)
         save(sharpen(strip), name)
