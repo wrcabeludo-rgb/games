@@ -12,7 +12,7 @@ const BL := InputBits.BLOCK
 const SUPER := BL | HP | HK
 
 
-## Суперприём и встречный НР в один тик (баг 3.7: схваченный навсегда оставался в захвате).
+## Суперприём и встречный ЛР в один тик (баг 3.7: схваченный навсегда оставался в захвате).
 func _test_super_vs_jab(chars: PackedStringArray, sup: int) -> bool:
 	for delay in range(0, 12):
 		var sim := Sim.new(false, chars)
@@ -66,7 +66,7 @@ func _init() -> void:
 	ok = _check("суперприём поймал в прыжке: схваченный опускается на землю, не висит", _test_super_air_catch()) and ok
 	for who in [["dracula", "ilya"], ["ilya", "dracula"]]:
 		for sup in [0, 1]:
-			ok = _check("суперприём %s против НР в упор: никто не застревает в захвате" % who[sup],
+			ok = _check("суперприём %s против ЛР в упор: никто не застревает в захвате" % who[sup],
 				_test_super_vs_jab(PackedStringArray(who), sup)) and ok
 	ok = _check("блок: атакующему — урон, защитнику ничего", _test_gain_block()) and ok
 	ok = _check("шкала переходит в следующий раунд, в новом матче — с нуля", _test_carry()) and ok
@@ -123,7 +123,7 @@ func _test_carry() -> bool:
 	return kept and sim.fighters[0].meter == 0 and sim.fighters[1].meter == 0
 
 
-## Дракула (игрок 1) выпускает мышей в Илью: «назад, вперёд + НР», блок — по желанию.
+## Дракула (игрок 1) выпускает мышей в Илью: «назад, вперёд + ЛР», блок — по желанию.
 func _bats(meter: int, block: int) -> Array:
 	var sim := _sim_at(900, 1300, PackedStringArray(["dracula", "ilya"]))
 	var f := sim.fighters[0]

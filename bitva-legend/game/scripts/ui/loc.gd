@@ -47,19 +47,19 @@ const EN := {
 	"Когти ночи": "Claws of the Night",
 	"Взмах плаща": "Cape Sweep",
 	"Вальс": "Waltz",
-	"НР": "LP", "НН": "LK", "ВР": "HP", "ВН": "HK",
+	"ЛР": "LP", "ЛН": "LK", "СР": "HP", "СН": "HK",
 	" (низ)": " (low)",
 	# Бой
 	"РАУНД %d": "ROUND %d",
 	"ФИНАЛЬНЫЙ РАУНД": "FINAL ROUND",
 	"ПОСЛЕДНИЙ БОЙ": "LAST BOUT",
 	"ДОБИВАЙ!": "FINISH IT!",
-	"Вперёд, назад + ВР вплотную · %d": "Forward, back + HP up close · %d",
-	"Вперёд, назад + ВР · %d": "Forward, back + HP · %d",
+	"Вперёд, назад + СР вплотную · %d": "Forward, back + HP up close · %d",
+	"Вперёд, назад + СР · %d": "Forward, back + HP · %d",
 	"Подойди ближе!": "Get closer!",
 	"ДОБИВАНИЕ!": "FINISHER!",
 	"Добивание (после решающего нокаута)": "Finisher (after the deciding K.O.)",
-	"Вперёд, назад + ВР": "Forward, back + HP",
+	"Вперёд, назад + СР": "Forward, back + HP",
 	"БОЙ!": "FIGHT!",
 	"НОКАУТ!": "K.O.!",
 	"ДВОЙНОЙ НОКАУТ!": "DOUBLE K.O.!",
@@ -81,7 +81,7 @@ const EN := {
 	"Строки: %s — попавший удар (и в блок) отменяется в спецприём": "Strings: %s — a connecting hit (or blocked) cancels into a special",
 	"Спецприёмы: назад, вперёд + рука · вниз, вниз + нога · вперёд, вперёд + рука · назад, назад + рука — захват":
 		"Specials: back, forward + punch · down, down + kick · forward, forward + punch · back, back + punch — grab",
-	"Назад + НН — подсечка · назад + ВН — с разворота · вниз + ВР — апперкот · НР вплотную — бросок · тап «вперёд» в момент удара — парирование":
+	"Назад + ЛН — подсечка · назад + СН — с разворота · вниз + СР — апперкот · ЛР вплотную — бросок · тап «вперёд» в момент удара — парирование":
 		"Back + LK — sweep · back + HK — roundhouse · down + HP — uppercut · LP up close — throw · tap forward as a hit lands — parry",
 	"R1/L — блок · F3/Options — ИИ · F4/F5/тачпад — бойцы · F6/R1+тачпад — тренировка · F7 — спрайты · F1 — ввод · F2 — хитбоксы · R/Create — заново · F11 · Esc":
 		"R1/L — block · F3 — CPU · F4/F5/touchpad — fighters · F6/R1+touchpad — training · F7 — sprites · F1 — inputs · F2 — hitboxes · R/Create — restart · F11 · Esc",
@@ -146,7 +146,7 @@ const EN := {
 	"Вниз, вниз + нога": "Down, down + kick",
 	"Вперёд, вперёд + рука": "Forward, forward + punch",
 	"Назад, назад + рука": "Back, back + punch",
-	"Бросок палицы — снаряд по дуге (НР ближе, ВР дальше)": "Mace Toss — arcing projectile (LP near, HP far)",
+	"Бросок палицы — снаряд по дуге (ЛР ближе, СР дальше)": "Mace Toss — arcing projectile (LP near, HP far)",
 	"Удар оземь — волна по земле, блок сидя или прыжок": "Ground Slam — shockwave, block low or jump",
 	"Богатырский таран — рывок, держит один удар": "Bogatyr Charge — dash that absorbs one hit",
 	"Мельница — дальний захват, вырваться нельзя": "Windmill — long-range grab, can't be broken",
@@ -154,15 +154,15 @@ const EN := {
 	"Туманный рывок — неуязвим, появляется за спиной": "Mist Dash — invulnerable, reappears behind",
 	"Гипнотический взгляд — ударивший застывает": "Hypnotic Gaze — the attacker freezes",
 	"Укус — захват, лечит Дракулу": "Bite — grab that heals Dracula",
-	"Назад + НН": "Back + LK", "подсечка": "sweep",
-	"Назад + ВН": "Back + HK", "удар с разворота": "spinning roundhouse",
-	"Вниз + ВР": "Down + HP", "апперкот": "uppercut",
-	"НР вплотную": "LP up close", "бросок (вырваться — НР)": "throw (break — LP)",
+	"Назад + ЛН": "Back + LK", "подсечка": "sweep",
+	"Назад + СН": "Back + HK", "удар с разворота": "spinning roundhouse",
+	"Вниз + СР": "Down + HP", "апперкот": "uppercut",
+	"ЛР вплотную": "LP up close", "бросок (вырваться — ЛР)": "throw (break — LP)",
 	"Тап «вперёд» в момент удара": "Tap forward as a hit lands", "парирование": "parry",
 	"Спецприём + блок": "Special + block", "усиленный (1 секция)": "enhanced (1 bar)",
-	"Блок + ВР + ВН": "Block + HP + HK", "суперприём (вся шкала)": "super (full meter)",
-	"НР, ВР, НН, ВН — низкий (слабый) и высокий (сильный) удар рукой и ногой · попавшая строка (и в блок) отменяется в спецприём":
-		"LP, HP, LK, HK — light and heavy punch and kick · a connecting string (or blocked) cancels into a special",
+	"Блок + СР + СН": "Block + HP + HK", "суперприём (вся шкала)": "super (full meter)",
+	"ЛР, ЛН, СР, СН — лёгкий и сильный удар рукой и ногой · попавшая строка (и в блок) отменяется в спецприём":
+		"LP, LK, HP, HK — light and heavy punch and kick · a connecting string (or blocked) cancels into a special",
 }
 
 

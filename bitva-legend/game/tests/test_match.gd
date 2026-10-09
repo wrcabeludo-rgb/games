@@ -38,7 +38,7 @@ func _run(sim: Sim, p1: int, p2: int, ticks := 1) -> void:
 		sim.step(PackedInt32Array([p1, p2]))
 
 
-## Бой без вступления, бойцы вплотную; у Дракулы мало здоровья — Илья добивает НР.
+## Бой без вступления, бойцы вплотную; у Дракулы мало здоровья — Илья добивает ЛР.
 func _ko_sim() -> Sim:
 	var sim := Sim.new(false)
 	sim.fighters[0].x = 900 * SUB

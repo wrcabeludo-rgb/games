@@ -19,7 +19,7 @@ func _init() -> void:
 	ok = _check("окно — до 6 кадров до удара: раньше — уже поздно", _test_window()) and ok
 	ok = _check("просто держать «вперёд» — не парирование", _test_hold()) and ok
 	ok = _check("долбить «вперёд» нельзя: попытка не чаще раза в 20 кадров", _test_mash()) and ok
-	ok = _check("после парирования успевает полное комбо (строка НР, НР, ВН)", _test_punish()) and ok
+	ok = _check("после парирования успевает полное комбо (строка ЛР, ЛР, СН)", _test_punish()) and ok
 	ok = _check("парируется и низкий удар (подсечка)", _test_parry_low()) and ok
 	ok = _check("снаряд парируется: гаснет, бросивший не ошеломлён", _test_parry_projectile()) and ok
 	ok = _check("в оглушении блока парировать нельзя", _test_no_parry_in_blockstun()) and ok
@@ -40,7 +40,7 @@ func _sim_at(p1_px: int, p2_px: int) -> Sim:
 	return sim
 
 
-## Илья бьёт ВР в тик 0 (попадает на 12-м кадре — тик 11), Дракула (смотрит влево, «вперёд» — L)
+## Илья бьёт СР в тик 0 (попадает на 12-м кадре — тик 11), Дракула (смотрит влево, «вперёд» — L)
 ## подаёт свои нажатия по расписанию. Возвращает sim после 40 тиков.
 func _heavy_vs(drac: Dictionary, ilya_move := HP, gap := 150) -> Sim:
 	var sim := _sim_at(900, 900 + gap)
@@ -119,7 +119,7 @@ func _test_parry_low() -> bool:
 
 
 func _test_parry_projectile() -> bool:
-	# Дракула пускает мышей («назад, вперёд + НР»), Илья вдалеке тапает «вперёд» в момент попадания.
+	# Дракула пускает мышей («назад, вперёд + ЛР»), Илья вдалеке тапает «вперёд» в момент попадания.
 	var chars := PackedStringArray(["dracula", "ilya"])
 	var script := {0: L, 2: R | LP}
 	var hit := -1

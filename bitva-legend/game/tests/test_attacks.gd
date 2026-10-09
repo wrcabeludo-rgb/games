@@ -16,13 +16,13 @@ const HK := InputBits.HK
 func _init() -> void:
 	Fighter.test_max_hp = 1000
 	var ok := true
-	ok = _check("НР Ильи попадает ровно на 5-м тике, урон 40", _test_startup_and_damage()) and ok
+	ok = _check("ЛР Ильи попадает ровно на 5-м тике, урон 40", _test_startup_and_damage()) and ok
 	ok = _check("промах издалека: урона нет, возврат в стойку", _test_whiff()) and ok
 	ok = _check("заморозка: бойцы стоят 8 тиков после попадания", _test_hitstop()) and ok
 	ok = _check("удар попадает только один раз", _test_single_hit()) and ok
 	ok = _check("буфер: нажатие за 3 тика до конца удара срабатывает", _test_buffer()) and ok
 	ok = _check("буфер: нажатие за 7 тиков до конца — нет", _test_buffer_expired()) and ok
-	ok = _check("вниз + НН → удар в приседе", _test_crouch_attack()) and ok
+	ok = _check("вниз + ЛН → удар в приседе", _test_crouch_attack()) and ok
 	ok = _check("удар в прыжке попадает по стоящему", _test_air_attack()) and ok
 	ok = _check("размен: быстрый удар Дракулы прерывает Илью", _test_trade()) and ok
 	ok = _check("у стены отбрасывает атакующего", _test_wall_pushback()) and ok
@@ -87,8 +87,8 @@ func _test_single_hit() -> bool:
 	return sim.fighters[1].hp == 1000 - 90
 
 
-## Удар Ильи НР длится 15 тиков (5 + 3 − 1 + 8). Второе нажатие — на тике press_at.
-## НР, потом ВН (не продолжение строки — значит, выйдет только после конца НР, из буфера).
+## Удар Ильи ЛР длится 15 тиков (5 + 3 − 1 + 8). Второе нажатие — на тике press_at.
+## ЛР, потом СН (не продолжение строки — значит, выйдет только после конца ЛР, из буфера).
 func _second_attack_started(press_at: int) -> bool:
 	var sim := _sim_at(600, 1400)
 	var f := sim.fighters[0]

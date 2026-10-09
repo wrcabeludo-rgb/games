@@ -11,7 +11,7 @@ func _init() -> void:
 	quit(0 if ok else 1)
 
 
-## Илья подходит и бьёт ВН с разворота (сбивает с ног); считаем импульсы.
+## Илья подходит и бьёт СН с разворота (сбивает с ног); считаем импульсы.
 func _pulses(level: int) -> int:
 	Settings.rumble = level
 	var sim := Sim.new(false)

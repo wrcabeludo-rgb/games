@@ -344,7 +344,7 @@ func _draw_announcement() -> void:
 		Sim.Phase.FINISH:
 			big = "ДОБИВАЙ!"
 			color = Color(1, 0.3, 0.2)
-			small = Loc.t("Вперёд, назад + ВР · %d") % ceili((Sim.FINISH_TICKS - _sim.phase_frame) / 60.0)
+			small = Loc.t("Вперёд, назад + СР · %d") % ceili((Sim.FINISH_TICKS - _sim.phase_frame) / 60.0)
 		Sim.Phase.FINISHER:
 			if _sim.phase_frame > 20:
 				big = "ДОБИВАНИЕ!"
@@ -369,7 +369,7 @@ func _draw_announcement() -> void:
 func _draw_finish_command() -> void:
 	if paused or _sim.phase != Sim.Phase.FINISH:
 		return
-	var steps := ["→", "←", Loc.t("ВР")]
+	var steps := ["→", "←", Loc.t("СР")]
 	var cx := size.x / 2.0
 	var y := size.y * 0.3 + 100
 	for i in 3:
@@ -502,10 +502,10 @@ func _draw_footer() -> void:
 	_text(Vector2(12, size.y - 98), Loc.t("сборка %s · %s · %d FPS") % [version, stage, Engine.get_frames_per_second()], 12, COLOR_DIM)
 	_text(Vector2(size.x - 12, size.y - 74), _strings_hint(_sim.fighters[0]), 13, COLOR_GOLD, true)
 	_text(Vector2(size.x - 12, size.y - 56), "Спецприёмы: назад, вперёд + рука · вниз, вниз + нога · вперёд, вперёд + рука · назад, назад + рука — захват", 13, COLOR_GOLD, true)
-	_text(Vector2(size.x - 12, size.y - 38), "Назад + НН — подсечка · назад + ВН — с разворота · вниз + ВР — апперкот · НР вплотную — бросок · тап «вперёд» в момент удара — парирование", 13, COLOR_GOLD, true)
+	_text(Vector2(size.x - 12, size.y - 38), "Назад + ЛН — подсечка · назад + СН — с разворота · вниз + СР — апперкот · ЛР вплотную — бросок · тап «вперёд» в момент удара — парирование", 13, COLOR_GOLD, true)
 
 
-## Строки ударов первого игрока: «НР, НР, ВР · НН, ВН…».
+## Строки ударов первого игрока: «ЛР, ЛР, СР · ЛН, СН…».
 static func _strings_hint(f: Fighter) -> String:
 	var parts: Array[String] = []
 	for st in f.data.get("strings", []):

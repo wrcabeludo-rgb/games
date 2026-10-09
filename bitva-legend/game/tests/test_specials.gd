@@ -14,8 +14,8 @@ const BL := InputBits.BLOCK
 func _init() -> void:
 	Fighter.test_max_hp = 1000
 	var ok := true
-	ok = _check("назад, вперёд + НР → снаряд Дракулы (лёгкий)", _test_recognized()) and ok
-	ok = _check("у мышей одна версия: и ВР даёт тот же приём", _test_heavy_version()) and ok
+	ok = _check("назад, вперёд + ЛР → снаряд Дракулы (лёгкий)", _test_recognized()) and ok
+	ok = _check("у мышей одна версия: и СР даёт тот же приём", _test_heavy_version()) and ok
 	ok = _check("снаряд появляется на 12-м кадре", _test_spawn_frame()) and ok
 	ok = _check("мыши попадают издалека: урон 60", _test_hits()) and ok
 	ok = _check("в блоке — 6 урона сквозь блок", _test_chip()) and ok
@@ -26,8 +26,8 @@ func _init() -> void:
 	ok = _check("вперёд, назад + удар — обычный удар", _test_wrong_order()) and ok
 	ok = _check("слишком медленный ввод — обычный удар", _test_too_slow()) and ok
 	ok = _check("урон сквозь блок может добить", _test_chip_ko()) and ok
-	ok = _check("палица — только руками: назад, вперёд + НН — обычный удар ногой", _test_mace_punch_only()) and ok
-	ok = _check("назад, вперёд + ВР у Ильи — сильная палица", _test_mace_heavy_punch()) and ok
+	ok = _check("палица — только руками: назад, вперёд + ЛН — обычный удар ногой", _test_mace_punch_only()) and ok
+	ok = _check("назад, вперёд + СР у Ильи — сильная палица", _test_mace_heavy_punch()) and ok
 	print("ИТОГ: " + ("все тесты пройдены" if ok else "есть ошибки"))
 	quit(0 if ok else 1)
 
