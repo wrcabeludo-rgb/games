@@ -12,6 +12,9 @@ func _init() -> void:
 	ok = _check("сложный ИИ пропускает меньше ударов, чем лёгкий", _test_hard_blocks_more()) and ok
 	ok = _check("бой двух ИИ доходит до конца матча", _test_ai_vs_ai()) and ok
 	ok = _check("ИИ с одинаковым зерном играет одинаково", _test_ai_deterministic()) and ok
+	for id in FighterData.CHARACTERS:
+		ok = _check("ИИ за %s применяет свои спецприёмы" % id, _test_uses_specials(id)) and ok
+	ok = _check("манера: Дракула и Анубис держатся дальше, чем Геракл и Илья", _test_styles_distance()) and ok
 	print("ИТОГ: " + ("все тесты пройдены" if ok else "есть ошибки"))
 	quit(0 if ok else 1)
 
@@ -90,3 +93,40 @@ func _test_ai_deterministic() -> bool:
 			sim.step(PackedInt32Array([a.get_input(sim, 0), b.get_input(sim, 1)]))
 		sums.append(sim.checksum())
 	return sums[0] == sums[1]
+
+
+## Бой сложных ИИ: боец хоть раз начинает спецприём.
+func _test_uses_specials(id: String) -> bool:
+	var sim := Sim.new(false, PackedStringArray([id, "ilya"]))
+	var a := _ai(LV.HARD, 3)
+	var b := _ai(LV.MEDIUM, 4)
+	for i in 3600:
+		sim.step(PackedInt32Array([a.get_input(sim, 0), b.get_input(sim, 1)]))
+		var f := sim.fighters[0]
+		if f.state == Fighter.State.ATTACK and f.move >= Fighter.SPECIAL_BASE and f.move < Fighter.MOVE_SWEEP:
+			return true
+	return false
+
+
+## Средняя дистанция до одного и того же соперника за минуту боя, px.
+func _mean_distance(id: String) -> float:
+	var total := 0.0
+	var n := 0
+	for seed_value in [1, 2]:
+		var sim := Sim.new(false, PackedStringArray([id, "athena"]))
+		var a := _ai(LV.HARD, seed_value)
+		var b := _ai(LV.MEDIUM, seed_value + 10)
+		for i in 3600:
+			sim.step(PackedInt32Array([a.get_input(sim, 0), b.get_input(sim, 1)]))
+			if sim.phase == Sim.Phase.FIGHT:
+				total += absi(sim.fighters[0].x - sim.fighters[1].x) / float(SUB)
+				n += 1
+	return total / maxi(n, 1)
+
+
+func _test_styles_distance() -> bool:
+	var far := (_mean_distance("dracula") + _mean_distance("anubis")) / 2.0
+	var near := (_mean_distance("hercules") + _mean_distance("ilya")) / 2.0
+	print("    дистанция: дальние %d px, ближние %d px" % [far, near])
+	return far > near + 30
+

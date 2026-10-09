@@ -21,10 +21,12 @@ func _test_pair(a: String, b: String) -> bool:
 	var ai1 := AiController.new(2)
 	ai0.level = AiController.Level.HARD
 	ai1.level = AiController.Level.HARD
+	# Урон отмечаем в любой момент: к концу может начаться новый раунд с полным здоровьем.
+	var hurt := false
 	for i in 2400:
 		sim.step(PackedInt32Array([ai0.get_input(sim, 0), ai1.get_input(sim, 1)]))
-	var hurt := sim.fighters[0].hp < sim.fighters[0].max_hp or sim.fighters[1].hp < sim.fighters[1].max_hp \
-		or sim.phase != Sim.Phase.FIGHT
+		hurt = hurt or sim.fighters[0].hp < sim.fighters[0].max_hp or sim.fighters[1].hp < sim.fighters[1].max_hp \
+			or sim.phase != Sim.Phase.FIGHT
 	return hurt
 
 
