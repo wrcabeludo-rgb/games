@@ -17,5 +17,12 @@
   "align_each": true,
   "align_top": 0.45,
   "match_scale": true
+ },
+ "jump": {
+  "part_frames": 4,
+  "fit": "inherit:idle",
+  "pivot_y": "body_ground",
+  "align_to": "idle:1",
+  "match_scale": true
  }
 }
