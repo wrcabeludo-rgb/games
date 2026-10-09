@@ -29,6 +29,7 @@
   frame_scale: {"<кадр с 1>": множитель} — поправка масштаба отдельных кадров (нейросеть рисует лежащего
            мельче стоящего: сравнивайте размер головы со стойкой).
   align_top: доля высоты фигуры сверху, по которой совмещать (0.55 — голова и корпус, для ударов ногой).
+  match_scale: true — подогнать масштаб листа по голове и плечам кадра align_to (единый рост бойца).
   align_each: true — совместить с образцом каждый кадр по отдельности (по горизонтали; шаг: корпус на месте).
   align_frame: какой кадр листа (с 1) совмещать с образцом — по умолчанию первый (у вставания — последний,
            он совпадает со стойкой).
@@ -46,14 +47,25 @@ from process_arena_art import chroma_key, split_objects, sharpen  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 # Рост бойца стоя в пикселях 1440p (= рост в игре × 2, см. FighterData "height").
-HEIGHT = {"ilya": 600, "dracula": 620}
+HEIGHT = {"ilya": 600, "dracula": 620, "koschei": 640}
 FEET_BAND = 0.06   # опорная точка по x — центр непрозрачных пикселей в нижних 6% кадра
+
+
+def clear_border(img: Image.Image, px: int = 3) -> Image.Image:
+    """Нейросеть иногда оставляет у края картинки полосу не пурпурного цвета — делаем край прозрачным."""
+    a = np.asarray(img).copy()
+    a[:px, :, 3] = 0
+    a[-px:, :, 3] = 0
+    a[:, :px, 3] = 0
+    a[:, -px:, 3] = 0
+    return Image.fromarray(a, "RGBA")
 
 
 def frames_of(sheet: Image.Image, expected: int, grid=None):
     """Кадры листа (слева направо, сверху вниз): по пустому месту между ними. Если нейросеть нарисовала
     кадры вплотную — режем каждый ряд по самым «тонким» столбцам возле равных долей и чистим чужие обрезки.
     grid = [столбцов, рядов] — для листов сеткой (8 кадров = 4 × 2, 12 = 4 × 3)."""
+    sheet = clear_border(sheet.convert("RGBA"))
     frames = list(split_objects(sheet, min_gap=10))
     if not expected or len(frames) == expected:
         return frames
@@ -173,6 +185,33 @@ def pivot(frame: Image.Image, mode: str, ref: dict):
     return rear + ref["center_offset"], bottom
 
 
+def match_scale(frame: Image.Image, ref: Image.Image, top: float = 0.45) -> float:
+    """Во сколько раз увеличить frame, чтобы его голова и плечи (верхние top фигуры) совпали по размеру с ref:
+    нейросеть рисует листы чуть разного масштаба — так рост бойца остаётся единым."""
+    def head(im):
+        a = np.asarray(im.getchannel("A")) > 24
+        ys = np.where(a.any(1))[0]
+        a = a[ys.min():ys.min() + int((ys.max() - ys.min()) * top)]
+        xs = np.where(a.any(0))[0]
+        return a[:, xs.min():xs.max() + 1]
+    A = head(ref)
+    best = (0.0, 1.0)
+    for k in np.arange(0.90, 1.105, 0.01):
+        B = head(frame.resize((max(1, int(frame.width * k)), max(1, int(frame.height * k)))))
+        h = min(A.shape[0], B.shape[0])
+        for dx in range(-40, 41, 2):
+            b = np.zeros((h, A.shape[1]), bool)
+            x0 = max(0, dx)
+            w = min(A.shape[1] - x0, B.shape[1])
+            if w <= 0:
+                continue
+            b[:, x0:x0 + w] = B[:h, :w]
+            iou = (A[:h] & b).sum() / max((A[:h] | b).sum(), 1)
+            if iou > best[0]:
+                best = (iou, float(k))
+    return best[1]
+
+
 def align_shift(frame: Image.Image, ref: Image.Image, top: float = 1.0):
     """Сдвиг (dx, dy), при котором силуэт frame лучше всего совпадает с силуэтом ref (кросс-корреляция масок).
     top < 1 — сравнивать только верхнюю часть фигур (голова и корпус: в ударе ногой ноги в другом положении)."""
@@ -273,6 +312,15 @@ def main() -> int:
             scale = scales[base] * heights[base] / raw.height
         else:
             scale = HEIGHT[who] / float(np.median([f.height for f in frames]))
+        if opt.get("match_scale") and "align_to" in opt:
+            # Масштаб листа подгоняем по голове и плечам образца (кадр align_frame против кадра align_to).
+            base, idx = opt["align_to"].split(":")
+            bmeta = json.loads((out / f"{base}.json").read_text())["frames"][int(idx) - 1]
+            f0 = frames[int(opt.get("align_frame", 1)) - 1]
+            f0 = f0.resize((max(1, round(f0.width * scale)), max(1, round(f0.height * scale))), Image.LANCZOS)
+            k = match_scale(f0, Image.open(out / bmeta["file"]).convert("RGBA"))
+            print(f"  {name}: масштаб подогнан по голове образца ×{k:.2f}")
+            scale *= k
         scales[name] = scale
         meta = {"frames": []}
         # Ударные кадры (с 1): hit — первый кадр активной фазы, hit_end — последний.
