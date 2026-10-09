@@ -70,6 +70,28 @@ func _draw() -> void:
 		_draw_fighter(f)
 	for pr in _sim.projectiles:
 		_draw_projectile(pr)
+	for f in _sim.fighters:
+		if f.state == Fighter.State.ATTACK and f.move >= 0 and f.move_data().has("rehit") and f.move_phase() == 1:
+			# «Листает ленту»: перед бойцом бежит полупрозрачная лента роликов — это и есть зона ударов.
+			var b := f.hitbox()
+			var a := to_screen(float(b[0]) / Sim.SUB, float(b[3]) / Sim.SUB)
+			var c := to_screen(float(b[1]) / Sim.SUB, float(b[2]) / Sim.SUB)
+			var zone := Rect2(a, c - a)
+			draw_rect(zone, Color(0.2, 0.75, 0.95, 0.12))
+			for i in 7:
+				var cw := 46.0
+				var cx := zone.position.x + fmod(i * 70.0 - _sim.tick * 9.0 * f.facing, zone.size.x + 70.0) - 35.0
+				if cx < zone.position.x - 10 or cx + cw > zone.end.x + 10:
+					continue
+				var cy := zone.position.y + 30 + (i % 3) * 70
+				draw_rect(Rect2(cx, cy, cw, 70), Color(0.08, 0.1, 0.16, 0.7))
+				draw_rect(Rect2(cx + 4, cy + 4, cw - 8, 62), Color(0.2, 0.75, 0.95, 0.5))
+				draw_colored_polygon(PackedVector2Array([Vector2(cx + 17, cy + 25), Vector2(cx + 31, cy + 35), Vector2(cx + 17, cy + 45)]), Color(1, 1, 1, 0.85))
+		if f.inverted > 0:
+			# Перехват: над головой нить и стрелки «⇄» — управление перевёрнуто.
+			var top := to_screen(float(f.x) / Sim.SUB, f.data.height + 40)
+			draw_line(Vector2(top.x, -10), top, Color(0.85, 0.85, 0.9, 0.8), 2)
+			_text_centered(top + Vector2(0, 8), "⇄", 34, Color(0.3, 0.85, 1.0))
 	_scenery.draw_front(self)
 	for p in Sim.PLAYERS:
 		_draw_spark(p)
@@ -152,6 +174,8 @@ func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2, breathe := false) 
 		tint = Color(1.0, 0.75, 0.7)  # получил удар — краснеет на время заморозки
 	if f.hypnotized == 2:
 		tint = Color(0.6, 0.6, 0.58)  # окаменел
+	elif f.hypnotized == 3:
+		tint = Color(0.75, 1.0, 0.85)  # прилип к жвачке
 	draw_set_transform(base, 0, Vector2(FighterSprites.SCALE * f.facing, FighterSprites.SCALE))
 	if breathe:
 		var phase := 0.5 - 0.5 * cos(TAU * float(_sim.tick) / FighterSprites.BREATH_TICKS)
@@ -234,6 +258,8 @@ func _draw_fighter(f: Fighter) -> void:
 		color = color.lerp(Color.WHITE, 0.55)
 	if f.hypnotized == 2:
 		color = Color(0.55, 0.55, 0.52)  # окаменел
+	elif f.hypnotized == 3:
+		color = color.lerp(Color(0.55, 0.95, 0.75), 0.5)  # прилип к жвачке
 	var body := PackedVector2Array([
 		Vector2(base.x - w / 2.0, base.y),
 		Vector2(base.x + w / 2.0, base.y),
@@ -273,6 +299,10 @@ func _draw_fighter(f: Fighter) -> void:
 			var sp := head + Vector2(cos(a) * head_r * 1.2, -head_r - 14 + sin(a) * 6)
 			draw_circle(sp, 6, Color(1, 0.9, 0.3))
 			draw_circle(sp, 3, Color(1, 1, 0.8))
+	if f.hypnotized == 3:
+		# Прилип — мятные нити жвачки от ног к земле.
+		for k in 4:
+			draw_line(Vector2(base.x - w / 2 + k * w / 3, base.y), Vector2(base.x - w / 2 + k * w / 3 + sin(_sim.tick * 0.2 + k) * 6, base.y - 50), Color(0.55, 0.95, 0.75), 4)
 	if f.hypnotized == 2:
 		# Окаменел — трещины по телу.
 		var mid := (body[0] + body[2]) / 2.0
@@ -508,7 +538,7 @@ func _draw_projectile(pr: PackedInt32Array) -> void:
 
 
 ## Снаряды новых бойцов (пока процедурные): 6 игла, 7 валун, 8 копьё, 9 яд, 10 каменный взгляд,
-## 11 обезьянки, 12 скарабеи, 13 песчаный смерч, 14 рилс (вертикальный экран Ленты).
+## 11 обезьянки, 12 скарабеи, 13 песчаный смерч, 15 банка колы, 16 жвачка, 17 смайл-бомба, 18 нить Скроллера.
 func _draw_projectile_new(pr: PackedInt32Array, c: Vector2, age: int, dir: float) -> void:
 	var kind := pr[Sim.Proj.KIND]
 	var ex := kind >= 100
@@ -563,26 +593,34 @@ func _draw_projectile_new(pr: PackedInt32Array, c: Vector2, age: int, dir: float
 				var y := c.y + hh * (0.8 - 1.6 * t)
 				var off := sin(age * 0.6 + i) * 8.0
 				draw_arc(Vector2(c.x + off, y), r * 0.6, 0, TAU, 20, Color(0.85, 0.72, 0.45, 0.65), 4)
-		14:  # рилс: светящийся вертикальный экран с кнопкой «играть» и полоской прогресса
-			var r := Rect2(c - Vector2(hw, hh), Vector2(hw * 2.0, hh * 2.0))
-			c_glitch(r, age)
-			draw_rect(r, Color(0.08, 0.1, 0.16))
-			draw_rect(r.grow(-4), Color(0.2, 0.75, 0.95, 0.85))
-			draw_rect(r, Color(0.85, 0.95, 1.0), false, 3)
-			var mid := r.get_center()
-			draw_colored_polygon(PackedVector2Array([mid + Vector2(-9, -13), mid + Vector2(13, 0), mid + Vector2(-9, 13)]), Color(1, 1, 1, 0.9))
-			draw_rect(Rect2(r.position.x + 5, r.end.y - 10, (r.size.x - 10) * fmod(age / 20.0, 1.0), 4), Color(1, 0.25, 0.3))
+		15:  # банка колы: крутится в полёте
+			draw_set_transform(c, age * 0.3 * dir, Vector2.ONE)
+			draw_rect(Rect2(-hw * 0.6, -hh, hw * 1.2, hh * 2.0), Color(0.75, 0.1, 0.12))
+			draw_rect(Rect2(-hw * 0.6, -hh * 0.2, hw * 1.2, hh * 0.4), Color(0.95, 0.95, 0.95))
+			draw_rect(Rect2(-hw * 0.5, -hh - 4, hw, 4), Color(0.75, 0.75, 0.78))
+			draw_set_transform(Vector2.ZERO)
+			draw_circle(c - Vector2(dir * hw * 1.4, 0), 5, Color(0.45, 0.25, 0.1, 0.6))
+		16:  # жвачка: мятный липкий комок с нитями
+			draw_circle(c, hw * 0.75, Color(0.55, 0.95, 0.75))
+			draw_circle(c + Vector2(-dir * 6, -5), hw * 0.3, Color(0.8, 1.0, 0.9))
+			draw_line(c - Vector2(dir * hw * 0.7, 0), c - Vector2(dir * hw * 1.6, 4), Color(0.55, 0.95, 0.75, 0.7), 3)
+		17:  # смайл-бомба: жёлтый смайлик с фитилём
+			draw_circle(c, hw * 0.8, Color(1.0, 0.85, 0.2))
+			draw_circle(c + Vector2(-hw * 0.28, -hw * 0.2), 4, Color(0.15, 0.1, 0.05))
+			draw_circle(c + Vector2(hw * 0.28, -hw * 0.2), 4, Color(0.15, 0.1, 0.05))
+			draw_arc(c + Vector2(0, hw * 0.05), hw * 0.45, 0.3, PI - 0.3, 12, Color(0.15, 0.1, 0.05), 3)
+			draw_line(c + Vector2(0, -hw * 0.8), c + Vector2(6, -hw * 1.2), Color(0.3, 0.25, 0.2), 3)
+			draw_circle(c + Vector2(6, -hw * 1.2), 4 + 2 * sin(age), Color(1, 0.6, 0.2))
+		18:  # нить-провод Скроллера: тянется от руки, на конце штекер
+			var owner := _sim.fighters[pr[Sim.Proj.OWNER]]
+			var hand := to_screen(float(owner.x) / Sim.SUB + owner.facing * 50, owner.data.height * 0.62)
+			draw_line(hand, c, Color(0.85, 0.85, 0.9), 3)
+			draw_line(hand, c, Color(0.3, 0.85, 1.0, 0.5), 7)
+			draw_rect(Rect2(c - Vector2(8, 6), Vector2(16, 12)), Color(0.9, 0.9, 0.92))
 		_:
 			draw_circle(c, hw, Color(1, 1, 1, 0.6))
 	if show_debug:
 		_debug_box(Sim._proj_box(pr), Color(1, 0.2, 0.2, 0.95))
-
-
-## Рилс оставляет за собой «помехи» — цветные полоски со сдвигом.
-func c_glitch(r: Rect2, age: int) -> void:
-	for i in 3:
-		var y := r.position.y + fmod(age * 7.0 + i * 37.0, r.size.y)
-		draw_rect(Rect2(r.position.x - 10 + (i - 1) * 6, y, r.size.x + 20, 3), [Color(1, 0.2, 0.3, 0.5), Color(0.2, 1, 0.9, 0.5), Color(0.9, 0.9, 1, 0.4)][i])
 
 
 ## Искра попадания: вспышка-звезда, у сильных ударов крупнее.

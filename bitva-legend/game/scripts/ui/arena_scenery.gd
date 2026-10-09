@@ -379,6 +379,12 @@ func _draw_mark(c: CanvasItem, kind: String, p: Vector2, k: float, col: Color) -
 				var pan := top + Vector2(side * 110, -side * tilt + 70) * k
 				c.draw_line(top + Vector2(side * 110, -side * tilt) * k, pan, Color(0.85, 0.7, 0.3), 2)
 				c.draw_colored_polygon(PackedVector2Array([pan + Vector2(-34, 0) * k, pan + Vector2(34, 0) * k, pan + Vector2(0, 20) * k]), Color(0.85, 0.7, 0.3))
+		"boxes":
+			# Стопки коробок из-под пиццы и банки.
+			for i in 5:
+				c.draw_rect(Rect2(p + Vector2(-60 + (i % 2) * 8, -18 - i * 18) * k, Vector2(120, 16) * k), Color(0.75, 0.6, 0.38).darkened(0.08 * (i % 2)))
+			for i in 4:
+				c.draw_rect(Rect2(p + Vector2(70 + i * 22, -36) * k, Vector2(16, 36) * k), [Color(0.75, 0.1, 0.12), Color(0.2, 0.5, 0.8)][i % 2])
 		"screens":
 			for i in 9:
 				var r := Rect2(p + Vector2((i % 3 - 1) * 70 - 28, -110 - (i / 3) * 120) * k, Vector2(56, 100) * k)
@@ -528,7 +534,7 @@ func _draw_ground(c: CanvasItem) -> void:
 	c.draw_rect(Rect2(0, ground_y, view.x, view.y - ground_y), gcol)
 	c.draw_line(Vector2(0, ground_y), Vector2(view.x, ground_y), gcol.lightened(0.2), 3)
 	if _d.get("glitch", false):
-		# Пол Ленты: светящаяся сетка, уходящая вдаль.
+		# Пол логова: светящаяся сетка, уходящая вдаль.
 		for gx in range(-10, 30):
 			var px := x0 + gx * 120.0
 			c.draw_line(Vector2(px, ground_y), Vector2(px - 60, view.y), Color(0.2, 0.75, 0.95, 0.35), 2)
@@ -600,6 +606,12 @@ func _draw_tree(c: CanvasItem, kind: String, base: Vector2, hgt: float, sway: fl
 			c.draw_rect(Rect2(base + Vector2(-30, -hgt - 130), Vector2(60, 14)), col.lightened(0.1))
 			for f in 3:
 				c.draw_line(base + Vector2(-12 + f * 12, -hgt - 116), base + Vector2(-12 + f * 12, 0), col.darkened(0.15), 2)
+		"cable":
+			# Провода свисают с потолка — нити Скроллера.
+			var top := Vector2(base.x + sway * 3.0, -20)
+			c.draw_line(top, base + Vector2(sway * 6.0, -hgt * 0.4), Color(0.12, 0.12, 0.14), 5)
+			c.draw_line(top, base + Vector2(sway * 6.0, -hgt * 0.4), Color(0.3, 0.85, 1.0, 0.25), 9)
+			c.draw_rect(Rect2(base + Vector2(sway * 6.0 - 6, -hgt * 0.4), Vector2(12, 16)), Color(0.85, 0.85, 0.88))
 		"screen":
 			var r := Rect2(base + Vector2(-30, -hgt), Vector2(60, hgt * 0.8))
 			var flick := 0.5 + 0.5 * sin(t * 4.0 + i)
@@ -625,7 +637,7 @@ func _draw_hall_wall(c: CanvasItem) -> void:
 			x += 140.0
 
 
-## Лента: поверх бойцов — бегущие строки помех и поднимающаяся пиксельная пыль (мир рассыпается).
+## Логово Скроллера: поверх бойцов — бегущие строки помех и поднимающаяся пиксельная пыль (мир рассыпается).
 func _draw_glitch_front(c: CanvasItem) -> void:
 	for i in 40:
 		var px := fmod(i * 97.0 + sin(i) * 300.0, view.x)

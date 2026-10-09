@@ -162,7 +162,7 @@ func _on_phase(sim: Sim, vs_ai: bool) -> void:
 		Sim.Phase.INTRO:
 			if sim.round_num == 1 and sim.wins[0] == 0 and sim.wins[1] == 0:
 				new_match()
-			var last := sim.wins[0] == Sim.WINS_NEEDED - 1 and sim.wins[1] == Sim.WINS_NEEDED - 1
+			var last := sim.wins[0] == sim.wins_needed - 1 and sim.wins[1] == sim.wins_needed - 1
 			say(["final_round" if last or sim.last_bout or sim.round_num > 3 else "round_%d" % sim.round_num] as Array[String])
 		Sim.Phase.FIGHT:
 			if sim.training:

@@ -38,7 +38,8 @@ const STYLES := {
 	"medusa": {"ideal": 360, "aggro": 0.45, "jump": 0.1, "zone": 0.5, "special": 0.45},     # контроль: яд, взгляд
 	"sunwukong": {"ideal": 230, "aggro": 0.65, "jump": 0.4, "zone": 0.3, "special": 0.4},   # прыгает, дразнит, посох
 	"anubis": {"ideal": 400, "aggro": 0.35, "jump": 0.05, "zone": 0.55, "special": 0.4},    # терпеливый: скарабеи, смерч
-	"lenta": {"ideal": 300, "aggro": 0.65, "jump": 0.2, "zone": 0.5, "special": 0.6},       # босс: всё сразу и без пауз
+	"avatar": {"ideal": 330, "aggro": 0.5, "jump": 0.25, "zone": 0.55, "special": 0.55},     # Аватар: кола и жвачка, лента вблизи
+	"scroller": {"ideal": 360, "aggro": 0.55, "jump": 0.05, "zone": 0.6, "special": 0.6},    # Скроллер: нити, перехват, отрыжка
 }
 const DEFAULT_STYLE := {"ideal": 300, "aggro": 0.5, "jump": 0.15, "zone": 0.35, "special": 0.3}
 ## Насколько часто уровень пользуется спецприёмами и суперприёмом.
@@ -55,6 +56,10 @@ var _cooldown := 0
 var _seen: Array = []           # что ИИ «видел» о сопернике в прошлые тики
 var _guarding := 0              # сколько ещё тиков держать блок
 var _roles := {}                # боец → роли его спецприёмов (кэш)
+## Сколько раз подряд ИИ выбрал «просто постоять в блоке» без повода. Два осторожных ИИ иначе
+## могут простоять в блоке друг против друга весь бой — после GUARD_STREAK_MAX он обязан действовать.
+var _guard_streak := 0
+const GUARD_STREAK_MAX := 3
 
 
 func _init(seed_value := 1) -> void:
@@ -71,6 +76,7 @@ func reset() -> void:
 	_seen.clear()
 	_cooldown = 30
 	_guarding = 0
+	_guard_streak = 0
 
 
 ## Докуда достаёт лёгкий удар рукой соперника (между центрами бойцов), px.
@@ -111,8 +117,9 @@ func get_input(sim: Sim, p: int) -> int:
 
 	# Вблизи от соперника — иногда заранее в блок.
 	if me.is_grounded_actionable() and _plan.is_empty() and dist < _jab_reach(op, me) \
-			and _rng.randf() < cfg.wary:
+			and _guard_streak < GUARD_STREAK_MAX and _rng.randf() < cfg.wary:
 		_guarding = 10
+		_guard_streak += 1
 		return InputBits.BLOCK
 
 	var style: Dictionary = STYLES.get(me.id, DEFAULT_STYLE)
@@ -151,11 +158,14 @@ func get_input(sim: Sim, p: int) -> int:
 		_cooldown -= 1
 		if _cooldown <= 0 and me.is_grounded_actionable():
 			# В досягаемости джеба опытный ИИ сначала думает о защите (общая логика), а не о манере.
-			var cautious: bool = dist < _jab_reach(op, me) and _rng.randf() < cfg.wary * 5.0
+			var cautious: bool = dist < _jab_reach(op, me) and _guard_streak < GUARD_STREAK_MAX \
+				and _rng.randf() < cfg.wary * 5.0
 			if cautious:
 				_plan = [[InputBits.BLOCK, _rng.randi_range(15, 28)]]
 			elif not _decide_style(sim, p, dist, fwd, back, style, roles, sp_chance):
-				_decide(dist, fwd, back, cfg, dist < _jab_reach(op, me))
+				_decide(dist, fwd, back, cfg, dist < _jab_reach(op, me) and _guard_streak < GUARD_STREAK_MAX)
+			var only_block: bool = not _plan.is_empty() and _plan[0][0] == InputBits.BLOCK
+			_guard_streak = _guard_streak + 1 if only_block else 0
 			_cooldown = _rng.randi_range(cfg.think[0], cfg.think[1])
 		elif me.is_grounded_actionable() and dist > maxi(MID, int(style.ideal) + 60):
 			return fwd  # между решениями подходит ближе

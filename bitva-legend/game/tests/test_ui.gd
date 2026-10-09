@@ -7,7 +7,7 @@ func _init() -> void:
 	ok = _check("вибрация: попадание и сбитие с ног — импульсы, выключена — ни одного", _test_rumble()) and ok
 	ok = _check("настройки: сохраняются в файл и читаются обратно", _test_settings()) and ok
 	ok = _check("управление: кнопка меняется местами с занятой, раскладка сохраняется", _test_controls()) and ok
-	ok = _check("аркада: семь разных соперников, седьмой — соперник пары, восьмой — Лента", _test_arcade()) and ok
+	ok = _check("аркада: семь разных соперников, седьмой — соперник пары, потом Аватар и Скроллер", _test_arcade()) and ok
 	ok = _check("аркада: эпилог у каждого бойца на двух языках", _test_endings()) and ok
 	ok = _check("арены: у каждого бойца своя, у каждой пары свой шов, описание полное", _test_arenas()) and ok
 	ok = _check("арены: выбор в бою и в аркаде", _test_arena_choice()) and ok
@@ -77,11 +77,11 @@ func _test_arcade() -> bool:
 			var uniq := {}
 			for o in run.ladder:
 				uniq[o] = true
-			if run.ladder.size() != 8 or uniq.size() != 8 or uniq.has(id) or run.ladder[6] != Arcade.RIVALS[id] \
-					or run.ladder[7] != Arcade.BOSS:
+			if run.ladder.size() != 9 or uniq.size() != 9 or uniq.has(id) or run.ladder[6] != Arcade.RIVALS[id] \
+					or run.ladder[7] != Arcade.AVATAR or run.ladder[8] != Arcade.BOSS:
 				print("  ", id, run.ladder)
 				return false
-			for i in 7:
+			for i in 8:
 				if run.advance():
 					return false
 			if not run.is_final() or not run.advance():
@@ -127,7 +127,8 @@ func _test_arena_choice() -> bool:
 		and Arenas.for_versus("ilya", "medusa", 0) == "zastava" \
 		and Arenas.for_arcade("ilya", "anubis") == "duat" \
 		and Arenas.for_arcade("ilya", "dracula") == "crossroads" \
-		and Arenas.for_arcade("ilya", "lenta") == "feed"
+		and Arenas.for_arcade("ilya", "avatar") == "den" \
+		and Arenas.for_arcade("ilya", "scroller") == "den"
 
 
 func _test_lose_quotes() -> bool:

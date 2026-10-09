@@ -459,6 +459,10 @@ func _draw_versus() -> void:
 		else:
 			_draw_silhouette(id, Vector2(x, size.y), 1.2)
 		_text_c(Vector2(x, 84), FighterData.get_data(id).name, 36, COLOR_P[p].lightened(0.2), _title_font, 3)
+	# Скроллер объявляет ивент; в финале — «ФИНАЛ».
+	var finale := _id(1) in Arcade.FINALS or _id(0) in Arcade.FINALS
+	if (tick / 12) % 4 != 3:
+		_text_c(Vector2(cx, 220), "ФИНАЛ" if finale else "НОВЫЙ ИВЕНТ!", 30, Color(0.3, 0.85, 1.0), _title_font, 2)
 	var pop := 1.0 + 0.6 * (1.0 - smoothstep(10.0, 26.0, float(tick)))
 	_text_c(Vector2(cx, 300), "ПРОТИВ", int(64 * pop), COLOR_GOLD, _title_font, 4)
 	_text_c(Vector2(cx, 350), Loc.t("Арена: %s") % Loc.t(Arenas.data(arena).name), 18, COLOR_DIM)
@@ -489,8 +493,8 @@ func _draw_arcade_panel() -> void:
 	draw_rect(panel, Color(0, 0, 0, 0.35))
 	draw_rect(panel, COLOR_P[1], false, 3.0)
 	_text_c(Vector2(x, 122), "АРКАДА", 34, COLOR_P[1].lightened(0.2), _title_font, 2)
-	var lines := ["Семь боёв на швах миров", "против ИИ, седьмой —", "с заклятым соперником.", "",
-		"Восьмой — с Лентой,", "которая пожирает", "легенды."]
+	var lines := ["Скроллер объявляет ивенты.", "Семь боёв, седьмой —", "с заклятым соперником.", "",
+		"Потом — твоя цифровая", "копия и сам Скроллер.", "", "Порви нити."]
 	for i in lines.size():
 		_text_c(Vector2(x, 200 + i * 30), lines[i], 20, COLOR_TEXT)
 	_text_c(Vector2(x, 520), "?", 120, Color(COLOR_P[1], 0.35), _title_font, 2)
@@ -514,8 +518,8 @@ func _draw_ladder() -> void:
 	_text_c(Vector2(size.x * 0.2, 130), FighterData.get_data(run.player).name, 30, COLOR_P[0].lightened(0.2))
 	# Башня.
 	var tx := size.x * 0.52
-	var cell := 60.0
-	var step := 68.0
+	var cell := 54.0
+	var step := 60.0
 	var bottom := size.y - 40.0
 	for i in run.ladder.size():
 		var id: String = run.ladder[i]
@@ -536,8 +540,9 @@ func _draw_ladder() -> void:
 		var name_col := COLOR_DIM if beaten else (COLOR_GOLD if current else COLOR_TEXT)
 		var nm := Loc.t(FighterData.get_data(id).name)
 		draw_string(_font, Vector2(r.end.x + 16, r.get_center().y + 7), nm, HORIZONTAL_ALIGNMENT_LEFT, -1, 19, name_col)
-		if id == Arcade.BOSS:
-			draw_string(_font, Vector2(r.end.x + 16, r.get_center().y + 28), Loc.t("источник всех бед"),
+		if id in Arcade.FINALS:
+			draw_string(_font, Vector2(r.end.x + 16, r.get_center().y + 26),
+				Loc.t("твоя цифровая копия" if id == Arcade.AVATAR else "хозяин шоу"),
 				HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.3, 0.85, 1.0))
 		elif Arcade.RIVALS.get(run.player, "") == id:
 			draw_string(_font, Vector2(r.end.x + 16, r.get_center().y + 28), Loc.t("заклятый соперник"),

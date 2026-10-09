@@ -166,7 +166,7 @@ func _draw_bar(p: int) -> void:
 		tag = Loc.t("Игрок %d · %s") % [p + 1, _reader.device_label(p)]
 	if tag != "":
 		_text(Vector2(name_x, r.end.y + 46), tag, 13, COLOR_GOLD if cpu else COLOR_DIM, right)
-	for i in Sim.WINS_NEEDED:
+	for i in _sim.wins_needed:
 		var cx := r.end.x - 22 - i * 26 if not right else r.position.x + 22 + i * 26
 		_draw_gem(Vector2(cx, r.end.y + 17), i < _sim.wins[p])
 

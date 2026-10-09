@@ -121,7 +121,8 @@ var spawn_request := 0
 ## Туманный рывок дошёл до кадра появления — симуляция переставит бойца за спину сопернику.
 var teleport_request := 0
 var armor := 0              # сколько ударов ещё выдержит броня текущего приёма
-var hypnotized := 0         # 1 — оглушён гипнозом, 2 — окаменел (для отрисовки)
+var hypnotized := 0         # 1 — оглушён гипнозом, 2 — окаменел, 3 — прилип к жвачке (для отрисовки)
+var inverted := 0           # тиков до конца «перехвата»: лево и право поменялись местами
 var knock_on_land := 0      # приземлится — будет лежать (сбит с ног)
 var parry_timer := TAP_TIMER_MAX  # тиков с последней засчитанной попытки парирования
 var parry_cool := 0         # тиков до следующей возможной попытки
@@ -173,7 +174,7 @@ func save() -> PackedInt32Array:
 	s.append_array(PackedInt32Array([special_buf, special_strength, special_timer, armor, hypnotized, knock_on_land]))
 	s.append_array(chain)
 	s.append_array(PackedInt32Array([juggle, combo_damage, meter, ex, special_ex, super_timer,
-		parry_timer, parry_cool, staggered]))
+		parry_timer, parry_cool, staggered, inverted]))
 	return s
 
 
@@ -191,7 +192,7 @@ func load(s: PackedInt32Array) -> void:
 	chain = s.slice(39, 43)
 	juggle = s[43]; combo_damage = s[44]
 	meter = s[45]; ex = s[46]; special_ex = s[47]; super_timer = s[48]
-	parry_timer = s[49]; parry_cool = s[50]; staggered = s[51]
+	parry_timer = s[49]; parry_cool = s[50]; staggered = s[51]; inverted = s[52]
 
 
 # --- Вопросы о состоянии --------------------------------------------------
@@ -594,6 +595,9 @@ func mark_hit() -> void:
 ## Обновляет таймеры нажатий. aging = false во время заморозки (hitstop):
 ## нажатия запоминаются, но не «протухают».
 func read_input(bits: int, aging: bool) -> Dictionary:
+	if inverted > 0 and (bits & (InputBits.LEFT | InputBits.RIGHT)) != 0 \
+			and (bits & (InputBits.LEFT | InputBits.RIGHT)) != (InputBits.LEFT | InputBits.RIGHT):
+		bits ^= InputBits.LEFT | InputBits.RIGHT  # перехват: нажал вправо — пошёл влево
 	var fwd_bit := InputBits.RIGHT if facing > 0 else InputBits.LEFT
 	var back_bit := InputBits.LEFT if facing > 0 else InputBits.RIGHT
 	if aging:
@@ -747,6 +751,7 @@ func _consume_button(i: int) -> void:
 
 func step(bits: int) -> void:
 	var inp := read_input(bits, true)
+	inverted = maxi(inverted - 1, 0)
 	state_frame += 1
 	match state:
 		State.PREJUMP:
@@ -811,6 +816,10 @@ func step(bits: int) -> void:
 				teleport_request = 1
 			if m.has("grab") and move_frame == m.startup:
 				grab_request = 1
+			# Многократный удар (лента Аватара): каждые rehit тиков активной фазы бьёт снова.
+			if m.has("rehit") and has_hit and move_frame > m.startup and move_frame < m.startup + m.active \
+					and (move_frame - m.startup) % int(m.rehit) == 0:
+				has_hit = 0
 			# Рывок вперёд в активной фазе (таран), пока не попал.
 			if m.has("lunge") and has_hit == 0 and move_frame >= m.startup and move_frame < m.startup + m.active:
 				x += m.lunge * facing

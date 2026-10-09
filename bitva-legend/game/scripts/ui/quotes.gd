@@ -46,54 +46,102 @@ const INTRO := {
 		["anubis", "Все бегут от смерти. Ни один ещё не добежал.",
 			"Everyone runs from death. No one has ever made it."]],
 	],
-	# Лента против каждого героя.
-	"ilya|lenta": [
-		[["lenta", "ТЫ НЕ ПОВЕРИШЬ, что случилось с Ильёй Муромцем дальше! Досмотри до конца!",
-			"YOU WON'T BELIEVE what happened to Ilya Muromets next! Watch till the end!"],
-		["ilya", "Это ты, что ли, внуков моих от сказок отвадила? Ну, держись, балаболка.",
-			"So you're the one who stole my grandchildren's bedtime tales? Brace yourself, chatterbox."]],
+	# Финал: Аватар (цифровой Саша) и Скроллер против каждого героя.
+	"avatar|ilya": [
+		[["avatar", "Отстань, дед. У меня видос не досмотрен.",
+			"Leave me alone, old man. My video isn't finished."],
+		["ilya", "Эх, Сашка… Я тридцать три года на печи сиднем сидел — знаю, каково это. Вставай!",
+			"Oh, Sasha… I sat on a stove for thirty-three years — I know how it feels. Get up!"]],
 	],
-	"dracula|lenta": [
-		[["lenta", "Граф! Вампиры снова в тренде. Пятнадцать секунд славы — и в следующий ролик.",
-			"Count! Vampires are trending again. Fifteen seconds of fame — then on to the next clip."],
-		["dracula", "Я пятьсот лет пью чужие жизни. Но даже я не пью их, не распробовав.",
-			"I have drunk lives for five hundred years. But even I never drank one without tasting it."]],
+	"avatar|dracula": [
+		[["avatar", "Ты кто? А, вампир. Видел тебя в рилсе. Скучно.",
+			"Who are you? Oh, the vampire. Saw you in a reel. Boring."],
+		["dracula", "Я пятьсот лет не видел своего отражения. А ты смотришь в своё — и не узнаёшь себя.",
+			"I haven't seen my reflection in five hundred years. You stare at yours — and don't recognise yourself."]],
 	],
-	"koschei|lenta": [
-		[["lenta", "Бессмертный и пустой. Мы с тобой — одно и то же, дедушка. Подпишись на меня.",
-			"Deathless and empty. You and I are the same, old man. Subscribe to me."],
-		["koschei", "Потому и бью. Смотреть на тебя — как в зеркало, а я своё отражение ненавижу.",
-			"That's why I'll strike. Looking at you is like a mirror — and I hate my reflection."]],
+	"avatar|koschei": [
+		[["avatar", "Можно я тут навсегда останусь? Тут ничего не болит.",
+			"Can I just stay here forever? Nothing hurts here."],
+		["koschei", "Я тоже так думал. Тысячу лет назад. Не повторяй моей ошибки.",
+			"I thought so too. A thousand years ago. Don't repeat my mistake."]],
 	],
-	"hercules|lenta": [
-		[["lenta", "«12 самых эпичных подвигов Геракла»! Без скучных подробностей, без вины — только хайлайты!",
-			"\"Hercules' 12 most epic labours\"! No boring details, no guilt — just highlights!"],
-		["hercules", "Скучные подробности — это и есть моя жизнь. Тринадцатым подвигом будешь ты.",
-			"The boring details ARE my life. You'll be my thirteenth labour."]],
+	"avatar|hercules": [
+		[["avatar", "Двенадцать подвигов? Я за вечер двенадцать уровней прошёл.",
+			"Twelve labours? I beat twelve levels in one evening."],
+		["hercules", "А я свои — двенадцать лет. Поэтому и помню каждый.",
+			"Mine took twelve years. That's why I remember every one."]],
 	],
-	"athena|lenta": [
-		[["lenta", "Богиня мудрости! Сколько лайков стоит мудрость? Давай проверим.",
-			"The goddess of wisdom! How many likes is wisdom worth? Let's find out."],
-		["athena", "Мудрость не измеряют. Её слушают. Тебе этого не понять — ты не умеешь молчать.",
-			"Wisdom isn't measured. It's listened to. You wouldn't understand — you can't be silent."]],
+	"athena|avatar": [
+		[["avatar", "Зачем читать, если есть краткий пересказ за минуту?",
+			"Why read when there's a one-minute summary?"],
+		["athena", "Пересказ даёт ответы. Книга учит задавать вопросы.",
+			"A summary gives answers. A book teaches you to ask questions."]],
 	],
-	"lenta|medusa": [
-		[["lenta", "Медуза! «Монстр, которого убил Персей» — восемь миллионов просмотров! Повторим?",
-			"Medusa! \"The monster Perseus slew\" — eight million views! Shall we run it again?"],
-		["medusa", "Ты рассказала мою историю миллион раз — и ни разу правильно. Посмотри мне в глаза.",
-			"You've told my story a million times — and never once right. Look me in the eye."]],
+	"avatar|medusa": [
+		[["avatar", "Не смотри на меня. Я в телефоне.",
+			"Don't look at me. I'm on my phone."],
+		["medusa", "Вот так и каменеют, мальчик. Не от моего взгляда — от своего.",
+			"That's how people turn to stone, boy. Not from my gaze — from their own."]],
 	],
-	"lenta|sunwukong": [
-		[["lenta", "Царь обезьян! На тебя смотрят все! Хочешь, будешь смотреть только ты — вечно?",
-			"Monkey King! Everyone's watching you! Want to be the only thing they ever watch — forever?"],
-		["sunwukong", "Ха! Я на облаке облетал всю Поднебесную. А ты — пятнадцать секунд и свайп. Скука!",
-			"Ha! I've circled the whole world on a cloud. You're fifteen seconds and a swipe. Boring!"]],
+	"avatar|sunwukong": [
+		[["avatar", "Семьдесят два превращения? У меня сто скинов.",
+			"Seventy-two transformations? I've got a hundred skins."],
+		["sunwukong", "Скин меняет одёжку, а я меняю себя! Давай, догоняй!",
+			"A skin changes your clothes — I change myself! Come on, keep up!"]],
 	],
-	"anubis|lenta": [
-		[["lenta", "Проводник мёртвых! У меня никто не умирает — истории просто листаются. Удобно, правда?",
-			"Guide of the dead! Nothing dies with me — stories just scroll by. Convenient, isn't it?"],
-		["anubis", "Ни жизни, ни смерти. Ты нарушаешь равновесие сильнее, чем Царь обезьян. Весы ждут.",
-			"Neither life nor death. You break the balance worse than the Monkey King. The scales are waiting."]],
+	"anubis|avatar": [
+		[["avatar", "Тут никто не умирает. Тут просто листают.",
+			"Nobody dies here. They just scroll."],
+		["anubis", "Поэтому тут никто и не живёт.",
+			"That is why nobody lives here either."]],
+	],
+	"ilya|scroller": [
+		[["scroller", "НОВЫЙ ИВЕНТ! Илья Муромец против… меня! Ставьте лайки, не переключайтесь!",
+			"NEW EVENT! Ilya Muromets versus… me! Smash that like, don't switch!"],
+		["ilya", "Так это ты нитки дёргаешь? Ну, сейчас я их посрываю.",
+			"So you're the one pulling the strings? Well, I'll tear them off."]],
+	],
+	"dracula|scroller": [
+		[["scroller", "Граф! Ты мой самый популярный персонаж. Подпишешь контракт навечно?",
+			"Count! You're my most popular character. Sign a contract — forever?"],
+		["dracula", "Я уже подписал один договор навечно. Больше не подписываю.",
+			"I have already signed one contract for eternity. I sign no more."]],
+	],
+	"koschei|scroller": [
+		[["scroller", "Кощеюшка, мы с тобой похожи: оба бессмертные, оба никуда не выходим.",
+			"Koschei, old pal, we're alike: both deathless, both never go outside."],
+		["koschei", "Я хотя бы чахну над златом. А ты — над крошками от чипсов.",
+			"At least I waste away over gold. You — over chip crumbs."]],
+	],
+	"hercules|scroller": [
+		[["scroller", "Тринадцатый подвиг — пройти меня! Донаты приветствуются.",
+			"Labour thirteen — beat me! Donations welcome."],
+		["hercules", "Я вычистил Авгиевы конюшни. Твою берлогу тоже вычищу.",
+			"I cleaned the Augean stables. I'll clean out your den too."]],
+	],
+	"athena|scroller": [
+		[["scroller", "Богиня мудрости! Лайкни мой стрим, а?",
+			"Goddess of wisdom! Like my stream, yeah?"],
+		["athena", "Мудрость — это знать, когда выключить.",
+			"Wisdom is knowing when to switch it off."]],
+	],
+	"medusa|scroller": [
+		[["scroller", "Медуза! На тебя смотрят миллионы! Ну скажи, приятно?",
+			"Medusa! Millions are watching you! Feels good, right?"],
+		["medusa", "Миллионы смотрят — никто не видит. Я знаю разницу.",
+			"Millions watch — nobody sees. I know the difference."]],
+	],
+	"scroller|sunwukong": [
+		[["scroller", "Царь обезьян! Ты же любишь веселье — оставайся тут навсегда!",
+			"Monkey King! You love fun — stay here forever!"],
+		["sunwukong", "Я пятьсот лет просидел под горой. Хватит с меня клеток — даже весёлых.",
+			"I spent five hundred years under a mountain. No more cages — not even fun ones."]],
+	],
+	"anubis|scroller": [
+		[["scroller", "Тут у меня никто не умирает, пёсик. Вечный контент.",
+			"Nobody dies in here, doggy. Eternal content."],
+		["anubis", "Вечный — значит, мёртвый. Весы ждут.",
+			"Eternal means dead. The scales are waiting."]],
 	],
 	"ilya|ilya": [
 		[["ilya", "Ты кто таков? Я — Илья Муромец!", "And who might you be? I am Ilya Muromets!"],
@@ -125,8 +173,8 @@ const GENERIC_INTRO := {
 		"Another hero. Don't look into my eyes — or do. I no longer care."],
 	"anubis": ["Не бойся. Я взвешиваю сердца, а не вырываю их.",
 		"Do not fear. I weigh hearts, I do not tear them out."],
-	"lenta": ["Новый контент! Пятнадцать секунд — и ты в тренде. Не переключайся!",
-		"New content! Fifteen seconds and you're trending. Don't switch!"],
+	"avatar": ["Подожди, щас досмотрю…", "Hang on, almost done watching…"],
+	"scroller": ["НОВЫЙ ИВЕНТ! Не переключайтесь!", "NEW EVENT! Don't switch!"],
 }
 const GENERIC_WIN := {
 	"ilya": ["Отдохни, полежи. А я пойду — ещё не всех чудищ перебил.", "Lie down, rest. I'm off — plenty of monsters left."],
@@ -137,13 +185,15 @@ const GENERIC_WIN := {
 	"koschei": ["Опять победил. Опять не умер. Опять ничего не почувствовал.", "Won again. Didn't die again. Felt nothing again."],
 	"medusa": ["Ещё одна статуя в саду. Красивая. Все они красивые.", "One more statue for the garden. Beautiful. They all are."],
 	"anubis": ["Твоё сердце легче, чем ты думал. Иди с миром.", "Your heart is lighter than you thought. Go in peace."],
-	"lenta": ["Следующее видео через три… два… один…", "Next video in three… two… one…"],
+	"avatar": ["Ещё одно видео — и спать. Честно.", "One more video and then bed. Honest."],
+	"scroller": ["Ну вот. Ещё одну катку? Ещё одну… навсегда.", "There. One more match? One more… forever."],
 }
 
 ## Победа: победитель → проигравший → варианты [ru, en].
 const WIN := {
 	"ilya": {
-		"lenta": [["Вот так-то. А теперь — сказку. С начала и до конца.", "There. Now — a story. From the beginning to the end."]],
+		"avatar": [["Вставай, Сашка. Ты ж богатырь, а не лежебока.", "Up you get, Sasha. You're a bogatyr, not a couch potato."]],
+		"scroller": [["Всё, кукольник. Нитки кончились.", "That's it, puppeteer. You're out of string."]],
 		"dracula": [
 			["Вот и вся заморская наука. Чесночку тебе на дорожку!", "So much for foreign learning. Have some garlic for the road!"],
 			["Лежи, отдыхай. Гроб-то, небось, помягче был?", "Lie down, rest. Your coffin was comfier, I bet?"],
@@ -154,7 +204,8 @@ const WIN := {
 		],
 	},
 	"dracula": {
-		"lenta": [["Безвкусно. Совершенно безвкусно.", "Tasteless. Utterly tasteless."]],
+		"avatar": [["Посмотри в зеркало, юноша. Видишь? Это ты. Не потеряй его.", "Look in the mirror, young man. See? That's you. Don't lose him."]],
+		"scroller": [["Твоя публика разошлась, хозяин. Даже я знаю, когда уйти со сцены.", "Your audience has left, host. Even I know when to leave the stage."]],
 		"ilya": [
 			["Крепкий старик. Кровь — как медовуха: с ног сшибает.", "A sturdy old man. Blood like mead — knocks you off your feet."],
 			["Ваша борода — единственное, что оказало мне сопротивление.", "Your beard was the only thing that put up a fight."],
@@ -165,32 +216,38 @@ const WIN := {
 		],
 	},
 	"hercules": {
-		"lenta": [["Тринадцатый. Этот я расскажу целиком.", "The thirteenth. This one I'll tell in full."]],
+		"avatar": [["Тринадцатый подвиг — вернуть мальчика домой. Беру.", "Labour thirteen: bring the boy home. I'll take it."]],
+		"scroller": [["Берлога вычищена. Окна открыть, крошки вымести.", "The den is clean. Open the windows, sweep the crumbs."]],
 		"koschei": [["Вставай, костлявый. Смерть свою найдёшь — приходи, вместе поищем покой.",
 			"Get up, bony. When you find your death, come — we'll look for peace together."]],
 	},
 	"koschei": {
-		"lenta": [["Погасла. А я — нет. Странно: впервые этому рад.", "It went dark. I didn't. Strange — for once I'm glad."]],
+		"avatar": [["Больно? Хорошо. Значит, живой.", "Does it hurt? Good. That means you're alive."]],
+		"scroller": [["Смерть моя в игле, а твоя — в розетке. Выдернул.", "My death is in a needle — yours is in a socket. Unplugged."]],
 		"hercules": [["Сильный… А вину свою так и не поднял. Тяжелее палицы, а?",
 			"Strong… Yet you never lifted your guilt. Heavier than a club, eh?"]],
 	},
 	"athena": {
-		"lenta": [["Тишина. Вот теперь можно думать.", "Silence. Now we can think."]],
+		"avatar": [["Вопрос был не «что посмотреть», а «кем стать».", "The question was never 'what to watch', but 'who to become'."]],
+		"scroller": [["Выключено.", "Switched off."]],
 		"medusa": [["Ты права. Я виновата. Но я не могу позволить тебе мстить миру.",
 			"You are right. I am to blame. But I cannot let you take revenge on the world."]],
 	},
 	"medusa": {
-		"lenta": [["Окаменела. Красивая статуя. Первая, которую не жалко.", "Turned to stone. A fine statue. The first one I don't regret."]],
+		"avatar": [["Посмотри на меня. Видишь — не окаменел. Значит, ещё не поздно.", "Look at me. See — you didn't turn to stone. It's not too late."]],
+		"scroller": [["Посмотри мне в глаза. А, у тебя нет глаз. Только экран.", "Look me in the eye. Ah, you have no eyes. Only a screen."]],
 		"athena": [["Теперь ты знаешь, каково это — проиграть ни за что.",
 			"Now you know what it's like to lose for nothing."]],
 	},
 	"anubis": {
-		"lenta": [["Сердца не нашлось. Приговор вынесен.", "No heart was found. The verdict is given."]],
+		"avatar": [["Сердце бьётся. Значит, твоя страница ещё не дописана.", "Your heart is beating. Your page is not finished yet."]],
+		"scroller": [["На весах — пусто. Приговор: выключить.", "The scale holds nothing. Verdict: switch off."]],
 		"sunwukong": [["Твоё имя снова в книге. Не бойся — до твоей страницы ещё далеко.",
 			"Your name is back in the book. Fear not — your page is still far off."]],
 	},
 	"sunwukong": {
-		"lenta": [["Пролистал! Свайп влево, Лента!", "Scrolled past! Swipe left, Feed!"]],
+		"avatar": [["Ха! Догнал! А теперь — бегом из этой клетки!", "Ha! Caught you! Now — run out of this cage!"]],
+		"scroller": [["Ивент окончен! Награда — свобода!", "Event over! The reward is freedom!"]],
 		"anubis": [["Передай весам: Царь обезьян ещё погуляет!", "Tell your scales: the Monkey King isn't done playing!"]],
 	},
 }
@@ -199,14 +256,24 @@ const WIN := {
 ## Вариант выбирается тем же зерном, что и победная реплика, поэтому отвечает именно на неё:
 ## число вариантов совпадает с WIN[победитель][проигравший].
 const LOSE := {
-	"lenta": {
-		"ilya": [["Это видео больше недоступно…", "This video is no longer available…"]],
-		"dracula": [["Ошибка воспроизведения. Повторите попытку…", "Playback error. Please try again…"]],
-		"koschei": [["Нет подключения. Нет… подключения…", "No connection. No… connection…"]],
-		"hercules": [["Ролик удалён по жалобе героя…", "Video removed after a hero's complaint…"]],
+	"avatar": {
+		"ilya": [["…Дед, а чем там у тебя с Соловьём-разбойником кончилось?", "…Grandpa, how did it end with the Nightingale Robber?"]],
+		"dracula": [["…А в зеркале правда я?", "…Is that really me in the mirror?"]],
+		"koschei": [["…Ай. Больно. Это… хорошо?", "…Ow. That hurts. Is that… good?"]],
+		"hercules": [["…А можно я сам свою комнату уберу?", "…Can I tidy my room myself?"]],
+		"athena": [["…А можно вопрос?", "…Can I ask a question?"]],
+		"medusa": [["…Не окаменел. Значит, можно смотреть по-настоящему.", "…I didn't turn to stone. So I can really look."]],
+		"sunwukong": [["…Ладно. Кто последний до выхода — тот нуб!", "…Fine. Last one to the exit is a noob!"]],
+		"anubis": [["…Значит, я ещё не дочитан.", "…So my story isn't finished yet."]],
+	},
+	"scroller": {
+		"ilya": [["Э-эй… кто выключил стрим?..", "He-ey… who turned off the stream?.."]],
+		"dracula": [["Не уходите… щас самое интересное…", "Don't go… the best part is coming…"]],
+		"koschei": [["Розетка… моя розетка…", "My socket… my socket…"]],
+		"hercules": [["Мои подписчики… где мои подписчики?..", "My followers… where are my followers?.."]],
 		"athena": [["Звук… выключен…", "Sound… muted…"]],
-		"medusa": [["Буферизация… буфериза…", "Buffering… buffer…"]],
-		"sunwukong": [["Вы смотрели это видео 72 раза. Продолжить?..", "You've watched this video 72 times. Continue?.."]],
+		"medusa": [["Нет сигнала… нет… сигнала…", "No signal… no… signal…"]],
+		"sunwukong": [["Ивент… отменён…", "Event… cancelled…"]],
 		"anubis": [["Аккаунт… удалён…", "Account… deleted…"]],
 	},
 	"dracula": {

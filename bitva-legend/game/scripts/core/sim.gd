@@ -23,6 +23,7 @@ const ROUND_END_TICKS := 200        # пауза после конца раун�
 const REMATCH_DELAY := 60           # после конца матча кнопки работают не сразу
 const KO_FREEZE := 40               # драматичная заморозка на нокауте
 const WINS_NEEDED := 2
+const ONE_ROUND_TICKS := 99 * 60     # один длинный раунд финального босса
 ## Добивание: после решающего нокаута проигравший встаёт оглушённым, у победителя есть время
 ## ввести «вперёд, назад + СР» вплотную. Сами добивания — заглушка, будут переписаны.
 const FINISH_DELAY := 110           # тиков после нокаута до «ДОБИВАЙ!»
@@ -34,7 +35,7 @@ const ATTACK_MASK := InputBits.LP | InputBits.LK | InputBits.HP | InputBits.HK
 
 ## Поля снаряда (PackedInt32Array): владелец, позиция, скорость, гравитация, размер,
 ## урон и прочее из данных спецприёма, вид для отрисовки, возраст.
-enum Proj { OWNER, X, Y, VX, VY, GRAV, HW, HH, DMG, STUN, STOP, PUSH, CHIP, KIND, AGE, LOW, LIFE, PETRIFY, SIZE }
+enum Proj { OWNER, X, Y, VX, VY, GRAV, HW, HH, DMG, STUN, STOP, PUSH, CHIP, KIND, AGE, LOW, LIFE, PETRIFY, HOLD, INVERT, SIZE }
 const TECH_WINDOW := 8              # вырваться из броска: ЛР в первые тики захвата
 const THROW_HITSTOP := 12
 const ARMOR_HITSTOP := 6            # короткая заморозка, когда удар принят бронёй
@@ -68,6 +69,9 @@ var phase_frame := 0
 var round_num := 1
 var wins := PackedInt32Array([0, 0])
 var timer := ROUND_TICKS
+## Побед для матча и длина раунда: у финального босса (Скроллер) — один длинный раунд (поле «one_round»).
+var wins_needed := WINS_NEEDED
+var round_ticks := ROUND_TICKS
 var round_winner := -1              # -1 ещё нет, 0/1 — игрок, 2 — ничья
 var end_reason := EndReason.NONE
 var prev_inputs := PackedInt32Array([0, 0])
@@ -91,6 +95,11 @@ var chars := PackedStringArray(["ilya", "dracula"])
 ## with_intro = false — сразу бой (для тестов и тренировки).
 func _init(with_intro := true, characters := PackedStringArray(["ilya", "dracula"])) -> void:
 	chars = characters
+	for id in chars:
+		if FighterData.get_data(id).get("one_round", 0):
+			wins_needed = 1
+			round_ticks = ONE_ROUND_TICKS
+	timer = round_ticks
 	_reset_fighters(false)
 	if not with_intro:
 		phase = Phase.FIGHT
@@ -141,7 +150,7 @@ func step(frame_inputs: PackedInt32Array) -> void:
 		Phase.ROUND_END:
 			_combat_step(idle, false)
 			if phase_frame >= ROUND_END_TICKS:
-				if wins[0] >= WINS_NEEDED or wins[1] >= WINS_NEEDED:
+				if wins[0] >= wins_needed or wins[1] >= wins_needed:
 					_set_phase(Phase.MATCH_END)
 				else:
 					_next_round()
@@ -332,7 +341,9 @@ func _spawn_projectiles() -> void:
 		pr[Proj.AGE] = 0
 		pr[Proj.LOW] = 1 if d.get("level", "high") == "low" else 0
 		pr[Proj.LIFE] = d.get("life", 0)
-		pr[Proj.PETRIFY] = d.get("petrify", 0)
+		pr[Proj.PETRIFY] = d.get("petrify", d.get("stick", 0))
+		pr[Proj.HOLD] = 3 if d.has("stick") else 2
+		pr[Proj.INVERT] = d.get("invert", 0)
 		projectiles.append(pr)
 
 
@@ -396,7 +407,7 @@ func _check_projectiles() -> void:
 			if _overlap(box, hurt):
 				var m := {"damage": pr[Proj.DMG], "hitstun": pr[Proj.STUN], "hitstop": pr[Proj.STOP],
 					"push": pr[Proj.PUSH], "chip": pr[Proj.CHIP], "level": "low" if pr[Proj.LOW] else "high",
-					"petrify": pr[Proj.PETRIFY]}
+					"petrify": pr[Proj.PETRIFY], "hold": pr[Proj.HOLD], "invert": pr[Proj.INVERT]}
 				_apply_hit(p, m, signi(pr[Proj.VX]), pr[Proj.X], pr[Proj.Y])
 				removed[i] = true
 				break
@@ -415,7 +426,7 @@ func set_training(on: bool) -> void:
 	round_num = 1
 	wins = PackedInt32Array([0, 0])
 	_reset_fighters(false)
-	timer = ROUND_TICKS
+	timer = round_ticks
 	round_winner = -1
 	end_reason = EndReason.NONE
 	refill_wait = PackedInt32Array([0, 0])
@@ -460,7 +471,7 @@ func _check_round_end() -> void:
 func _end_round(winner: int, reason: EndReason) -> void:
 	round_winner = winner
 	end_reason = reason
-	if winner == 2 and wins[0] == WINS_NEEDED - 1 and wins[1] == WINS_NEEDED - 1:
+	if winner == 2 and wins[0] == wins_needed - 1 and wins[1] == wins_needed - 1:
 		last_bout = true  # без ничьей в матче: следующий раунд — «Последний бой»
 	elif winner == 2:
 		wins[0] += 1
@@ -487,7 +498,7 @@ func _new_match() -> void:
 
 func _start_round() -> void:
 	_reset_fighters()
-	timer = ROUND_TICKS
+	timer = round_ticks
 	round_winner = -1
 	end_reason = EndReason.NONE
 	_set_phase(Phase.INTRO)
@@ -503,7 +514,7 @@ func finish_in_range() -> bool:
 ## Добивание возможно: нокаут решил матч.
 func _finish_allowed() -> bool:
 	return not training and end_reason == EndReason.KO and round_winner < 2 \
-		and wins[round_winner] >= WINS_NEEDED
+		and wins[round_winner] >= wins_needed
 
 
 func _start_finish() -> void:
@@ -661,10 +672,13 @@ func _apply_hit(p: int, m: Dictionary, direction: int, spark_x: int, spark_y: in
 		_hold_position(a, d)
 	else:
 		d.take_hit(m, direction)
-		# Каменный взгляд: попавший на земле соперник каменеет (как гипноз, но дольше и серый).
+		# Каменный взгляд и жвачка: попавший на земле соперник застывает (2 — камень, 3 — прилип).
 		if m.get("petrify", 0) > 0 and d.y == 0 and d.hp > 0 and d.state == Fighter.State.HITSTUN:
 			d.take_hypnosis(m.petrify)
-			d.hypnotized = 2
+			d.hypnotized = m.get("hold", 2)
+		# Перехват: нить Скроллера — у попавшего на время лево и право меняются местами.
+		if m.get("invert", 0) > 0 and d.hp > 0:
+			d.inverted = m.invert
 		if not a.is_super():
 			a.add_meter(m.damage * METER_HIT)
 			d.add_meter(m.damage * METER_TAKEN)

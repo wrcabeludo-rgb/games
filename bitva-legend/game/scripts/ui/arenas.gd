@@ -1,7 +1,8 @@
 class_name Arenas
 extends RefCounted
-## Арены (docs/LORE.md): у каждой пары — общий «шов», где срослись их миры, у каждого бойца — своя арена,
-## у Ленты — арена-распад. Арт лежит в dir (слои как у «Перепутья», docs/ART_ARENA.md); пока его нет —
+## Арены — карты ивентов Скроллера, собранные из страниц Сашиной книги (docs/LORE.md): у каждого бойца —
+## своя карта (страница его истории), у каждой пары — кроссовер-карта (две страницы, склеенные скотчем),
+## у Скроллера — логово. Арт лежит в dir (слои как у «Перепутья», docs/ART_ARENA.md); пока его нет —
 ## заглушка, нарисованная по описанию ниже. На ход боя арена не влияет.
 ##
 ## Описание заглушки:
@@ -9,15 +10,15 @@ extends RefCounted
 ##   light      — "sun" / "moon" / "none" и где (доля ширины слоя)
 ##   hills      — цвет дальнего плана; shape — [слева, справа]: soft, sharp, flat, dunes, sea
 ##   marks      — ориентиры на дальнем плане: [вид, доля ширины, масштаб]
-##   trees      — [слева, справа]: birch, dead, cypress, olive, palm, pine, column, peach, apple, screen, none
+##   trees      — [слева, справа]: birch, dead, cypress, olive, palm, pine, column, peach, apple, screen, cable, none
 ##   ground     — цвет земли; birds — ravens, gulls, bats, none; indoor — зал (стены вместо неба)
-##   stone      — камень на перепутье в центре; glitch — помехи и пиксельная пыль (Лента)
+##   stone      — камень на перепутье в центре; glitch — помехи и пиксельная пыль (логово Скроллера)
 ##   still      — средний план не качается на ветру (колонны, статуи, экраны)
 
 const DEFAULT := "crossroads"
 
 const LIST := {
-	# --- Швы пар ---
+	# --- Кроссовер-карты пар ---
 	"crossroads": {
 		"name": "Перепутье", "dir": "res://art/arena/",
 		"sky": [Color(0.08, 0.07, 0.15), Color(0.98, 0.74, 0.4), Color(0.3, 0.07, 0.17)], "stars": true,
@@ -103,17 +104,17 @@ const LIST := {
 		"marks": [["scales", 0.5, 1.3]], "trees": ["column", "column"],
 		"ground": Color(0.3, 0.25, 0.18), "birds": "none",
 	},
-	# --- Босс ---
-	"feed": {
-		"name": "Лента", "still": true, "dir": "res://art/arenas/feed/", "glitch": true,
-		"sky": [Color(0.02, 0.02, 0.05), Color(0.1, 0.05, 0.2), Color(0.02, 0.15, 0.25)], "stars": false,
-		"light": ["none", 0.5], "hills": Color(0.15, 0.12, 0.25), "shape": ["sharp", "flat"],
-		"marks": [["church", 0.1, 0.8], ["temple", 0.3, 0.8], ["pyramid", 0.55, 0.7], ["screens", 0.8, 1.4]], "trees": ["screen", "screen"],
-		"ground": Color(0.1, 0.1, 0.16), "birds": "none",
+	# --- Финал: логово Скроллера ---
+	"den": {
+		"name": "Логово Скроллера", "still": true, "dir": "res://art/arenas/den/", "indoor": true, "glitch": true,
+		"sky": [Color(0.04, 0.05, 0.08), Color(0.16, 0.2, 0.22), Color(0.1, 0.22, 0.3)], "stars": false,
+		"light": ["none", 0.5], "hills": Color(0.2, 0.18, 0.15), "shape": ["flat", "flat"],
+		"marks": [["boxes", 0.15, 1.0], ["screens", 0.5, 1.4], ["boxes", 0.85, 1.2]], "trees": ["cable", "cable"],
+		"ground": Color(0.2, 0.18, 0.14), "birds": "none",
 	},
 }
 
-## Шов пары (порядок бойцов не важен).
+## Кроссовер-карта пары (порядок бойцов не важен).
 const SEAMS := {
 	"dracula|ilya": "crossroads", "athena|medusa": "coast", "hercules|koschei": "pass", "anubis|sunwukong": "nile",
 }
@@ -121,7 +122,7 @@ const SEAMS := {
 const HOME := {
 	"ilya": "zastava", "dracula": "castle_hall", "athena": "temple", "medusa": "gorgon_isle",
 	"hercules": "hesperides", "koschei": "koschei_realm", "sunwukong": "flower_mountain", "anubis": "duat",
-	"lenta": "feed",
+	"avatar": "den", "scroller": "den",
 }
 
 
@@ -139,20 +140,22 @@ static func home(id: String) -> String:
 	return HOME.get(id, DEFAULT)
 
 
-## Арена обычного боя: соперники из пары — на своём шве, зеркальный бой — дома,
+## Арена обычного боя: соперники из пары — на своей кроссовер-карте, зеркальный бой — дома,
 ## иначе — дома у одного из двоих (choice: 0 или 1 — у кого).
 static func for_versus(a: String, b: String, choice: int) -> String:
-	if a == Arcade.BOSS or b == Arcade.BOSS:
-		return home(Arcade.BOSS)
+	for id in [a, b]:
+		if id in Arcade.FINALS:
+			return home(id)
 	var s := seam(a, b)
 	if s != "":
 		return s
 	return home(b if choice == 1 else a)
 
 
-## Арена боя аркады: босс — у себя, заклятый соперник — на шве, остальные — дома у соперника.
+## Арена боя аркады: финал — в логове Скроллера, заклятый соперник — на кроссовер-карте пары,
+## остальные — на своей карте соперника.
 static func for_arcade(player: String, opponent: String) -> String:
-	if opponent == Arcade.BOSS:
-		return home(Arcade.BOSS)
+	if opponent in Arcade.FINALS:
+		return home(opponent)
 	var s := seam(player, opponent)
 	return s if s != "" else home(opponent)

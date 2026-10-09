@@ -11,7 +11,7 @@ const LK := InputBits.LK
 const HP := InputBits.HP
 const HK := InputBits.HK
 const BL := InputBits.BLOCK
-const NEW := ["koschei", "hercules", "athena", "medusa", "sunwukong", "anubis", "lenta"]
+const NEW := ["koschei", "hercules", "athena", "medusa", "sunwukong", "anubis", "avatar", "scroller"]
 
 
 func _init() -> void:
@@ -27,6 +27,11 @@ func _init() -> void:
 	ok = _check("Похищение Кощея крадёт шкалу силы", _test_drain()) and ok
 	ok = _check("Бессмертие Кощея ловит удар: ударивший застыл", _test_counter()) and ok
 	ok = _check("Облако: Сунь Укун за спиной соперника", _test_cloud()) and ok
+	ok = _check("Жвачка Аватара: попавший прилип", _test_gum()) and ok
+	ok = _check("Листает ленту: зона бьёт несколько раз", _test_feed_zone()) and ok
+	ok = _check("Перехват Скроллера: «вправо» ведёт влево", _test_invert()) and ok
+	ok = _check("Рывок за нить: героя тянет к Скроллеру", _test_pull()) and ok
+	ok = _check("Скроллер: один длинный раунд", _test_one_round()) and ok
 	print("ИТОГ: " + ("все тесты пройдены" if ok else "есть ошибки"))
 	quit(0 if ok else 1)
 
@@ -92,6 +97,8 @@ func _test_special_hits(id: String, sp: String) -> bool:
 			return false
 		if m.has("counter") or m.has("teleport"):
 			return true
+		if m.has("proj") and m.proj.get("push", 0) < 0:
+			gap = mini(gap, 300)  # нить тянет к себе — проверим попадание вблизи
 		_run(sim, 0, 0, 150)
 		if sim.fighters[1].hp < 1000:
 			return true
@@ -154,3 +161,58 @@ func _test_cloud() -> bool:
 	_input(sim, "sp_dd_l")
 	_run(sim, 0, 0, 40)
 	return sim.fighters[0].x > sim.fighters[1].x
+
+
+func _test_gum() -> bool:
+	var sim := _sim("avatar", 300)
+	_input(sim, "sp_dd_l")
+	for i in 60:
+		_run(sim, 0, 0)
+		if sim.fighters[1].hypnotized == 3:
+			return true
+	return false
+
+
+func _test_feed_zone() -> bool:
+	var sim := _sim("avatar", 300)
+	_input(sim, "sp_ff_l")
+	var hits := 0
+	var last := sim.fighters[1].hp
+	for i in 80:
+		_run(sim, 0, 0)
+		if sim.fighters[1].hp < last:
+			hits += 1
+		last = sim.fighters[1].hp
+	return hits >= 3
+
+
+func _test_invert() -> bool:
+	var sim := _sim("scroller", 300)
+	_input(sim, "sp_dd_l")
+	var caught := false
+	for i in 30:
+		_run(sim, 0, 0)
+		if sim.fighters[1].inverted > 0:
+			caught = true
+			break
+	if not caught:
+		return false
+	_run(sim, 0, 0, 20)  # оглушение проходит
+	var x0 := sim.fighters[1].x
+	_run(sim, 0, R, 20)   # Илья жмёт «вправо» (от Скроллера) — а идёт влево, к нему
+	return sim.fighters[1].x < x0
+
+
+func _test_pull() -> bool:
+	var sim := _sim("scroller", 380)
+	var gap0 := sim.fighters[1].x - sim.fighters[0].x
+	_input(sim, "sp_ff_l")
+	_run(sim, 0, 0, 50)
+	return sim.fighters[1].hp < 1000 and sim.fighters[1].x - sim.fighters[0].x < gap0 - 100 * SUB
+
+
+func _test_one_round() -> bool:
+	var sim := Sim.new(false, PackedStringArray(["ilya", "scroller"]))
+	return sim.wins_needed == 1 and sim.timer == Sim.ONE_ROUND_TICKS \
+		and Sim.new(false, PackedStringArray(["ilya", "dracula"])).wins_needed == 2
+
