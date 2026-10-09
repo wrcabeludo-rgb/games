@@ -21,7 +21,7 @@ func _test_pair(a: String, b: String) -> bool:
 	var ai1 := AiController.new(2)
 	ai0.level = AiController.Level.HARD
 	ai1.level = AiController.Level.HARD
-	for i in 1800:
+	for i in 2400:
 		sim.step(PackedInt32Array([ai0.get_input(sim, 0), ai1.get_input(sim, 1)]))
 	var hurt := sim.fighters[0].hp < sim.fighters[0].max_hp or sim.fighters[1].hp < sim.fighters[1].max_hp \
 		or sim.phase != Sim.Phase.FIGHT

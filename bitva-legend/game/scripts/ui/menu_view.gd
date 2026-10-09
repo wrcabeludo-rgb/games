@@ -11,7 +11,8 @@ signal voice(name: String)        # фраза диктора
 enum Screen { TITLE, SELECT, VERSUS }
 
 ## Сетка выбора 4×2: пустая строка — закрытое место (боец ещё не готов).
-const ROSTER := ["ilya", "dracula", "hercules", "koschei", "", "", "", ""]
+## Верхний ряд — свет, нижний — тьма; пары стоят друг под другом.
+const ROSTER := ["ilya", "hercules", "athena", "sunwukong", "dracula", "koschei", "medusa", "anubis"]
 const COLS := 4
 const CELL := Vector2(104, 104)
 const CELL_GAP := 12.0

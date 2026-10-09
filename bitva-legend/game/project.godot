@@ -5,8 +5,8 @@ config_version=5
 [application]
 
 config/name="Битва легенд"
-config/version="3.12"
-config/description="Геракл и Кощей: базовые удары и движения"
+config/version="3.13"
+config/description="Вся восьмёрка: Афина, Медуза, Сунь Укун, Анубис; лор и реплики"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="res://icon.svg"
