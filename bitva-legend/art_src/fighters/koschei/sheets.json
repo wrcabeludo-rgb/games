@@ -48,5 +48,31 @@
   "pivot_y": "body_ground",
   "match_scale": true,
   "align_to": "idle:1"
+ },
+ "hit_high": {
+  "frames": 4,
+  "fit": "inherit:idle",
+  "align_to": "idle:1",
+  "align_frame": 4,
+  "match_scale": true
+ },
+ "hit_low": {
+  "frames": 4,
+  "fit": "inherit:idle"
+ },
+ "block_low": {
+  "frames": 2,
+  "fit": 0.8
+ },
+ "fall": {
+  "part_frames": 4,
+  "fit": "inherit:idle",
+  "pivot_y": "bottom_center",
+  "air_frames": 4,
+  "frame_scale": {
+   "6": 1.15,
+   "7": 1.15,
+   "8": 1.15
+  }
  }
 }
