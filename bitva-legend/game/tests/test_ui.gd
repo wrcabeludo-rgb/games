@@ -7,6 +7,8 @@ func _init() -> void:
 	ok = _check("вибрация: попадание и сбитие с ног — импульсы, выключена — ни одного", _test_rumble()) and ok
 	ok = _check("настройки: сохраняются в файл и читаются обратно", _test_settings()) and ok
 	ok = _check("управление: кнопка меняется местами с занятой, раскладка сохраняется", _test_controls()) and ok
+	ok = _check("аркада: семь разных соперников, последний — соперник пары", _test_arcade()) and ok
+	ok = _check("аркада: эпилог у каждого бойца на двух языках", _test_endings()) and ok
 	ok = _check("реплики: на каждую победную фразу пары-соперников есть ответ проигравшего", _test_lose_quotes()) and ok
 	print("ИТОГ: " + ("все тесты пройдены" if ok else "есть ошибки"))
 	quit(0 if ok else 1)
@@ -64,6 +66,35 @@ func _test_controls() -> bool:
 	Settings.reset_controls()
 	Settings.save_file()
 	return ok
+
+
+func _test_arcade() -> bool:
+	for id in MenuView.ROSTER:
+		for seed_value in [1, 2, 3]:
+			var run := Arcade.new(id, MenuView.ROSTER, seed_value)
+			var uniq := {}
+			for o in run.ladder:
+				uniq[o] = true
+			if run.ladder.size() != 7 or uniq.size() != 7 or uniq.has(id) or run.ladder[6] != Arcade.RIVALS[id]:
+				print("  ", id, run.ladder)
+				return false
+			for i in 6:
+				if run.advance():
+					return false
+			if not run.is_final() or not run.advance():
+				return false
+	return true
+
+
+func _test_endings() -> bool:
+	for id in MenuView.ROSTER:
+		var rows: Array = Endings.ENDINGS.get(id, [])
+		if rows.size() < 2:
+			return false
+		for row in rows:
+			if row.size() != 2 or row[0] == "" or row[1] == "":
+				return false
+	return true
 
 
 func _test_lose_quotes() -> bool:

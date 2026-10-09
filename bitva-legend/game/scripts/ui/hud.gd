@@ -24,6 +24,9 @@ const TRAIL_SPEED := 6.0    # и тает со скоростью столько
 
 var show_inputs := false
 var paused := false          # открыта пауза — своя подсказка внизу не нужна
+## Аркада: подпись «бой N из 7» и своя подсказка после матча (пусто — обычный бой).
+var arcade_label := ""
+var match_hint := ""
 var _font: Font = load("res://fonts/RussoOne-Regular.ttf")
 var _title_font: Font = load("res://fonts/RuslanDisplay-Regular.ttf")
 var _sprites: FighterSprites
@@ -77,6 +80,8 @@ func _draw() -> void:
 		_draw_parry(p, p == 1)
 		_draw_meter(p)
 	_draw_timer()
+	if arcade_label != "" and _sim.phase != Sim.Phase.MATCH_END:
+		_text(Vector2(size.x / 2.0, 104), arcade_label, 15, Color(1, 0.85, 0.3, 0.8), false, true, 1)
 	_draw_super_name()
 	_draw_announcement()
 	_draw_finish_command()
@@ -355,7 +360,7 @@ func _draw_announcement() -> void:
 			if w != 2:
 				color = _sim.fighters[w].color().lightened(0.35)
 			if _sim.phase_frame >= Sim.REMATCH_DELAY:
-				small = "Удар — реванш   ·   Enter или Options — выбор бойца"
+				small = match_hint if match_hint != "" else "Удар — реванш   ·   Enter или Options — выбор бойца"
 	if big == "":
 		return
 	var y := size.y * 0.3

@@ -7,8 +7,14 @@ extends Control
 signal fight_requested(chars: PackedStringArray)
 signal sound(name: String)        # звук интерфейса: ui_move, ui_confirm, ui_back
 signal voice(name: String)        # фраза диктора
+signal arcade_picked(id: String)  # аркада: игрок выбрал бойца
+signal ending_done                # аркада: эпилог дочитан
 
-enum Screen { TITLE, SELECT, VERSUS }
+enum Screen { TITLE, SELECT, VERSUS, LADDER, ENDING }
+
+const TITLE_ITEMS := ["Аркада", "Бой"]
+const LADDER_TICKS := 240        # экран башни аркады — до экрана «ПРОТИВ»
+const LADDER_SKIP_AFTER := 20
 
 ## Сетка выбора 4×2: пустая строка — закрытое место (боец ещё не готов).
 ## Слева — свет, справа — тьма, зеркально: соперники стоят симметрично (Илья ↔ Дракула по краям,
@@ -43,6 +49,14 @@ var picked_at := PackedInt32Array([0, 0])
 ## Против ИИ первый игрок выбирает обоих бойцов по очереди.
 var vs_ai := false
 var ai_label := ""
+## Стартовый экран: выбранный режим (0 — аркада, 1 — бой). Аркада: выбирает только первый игрок.
+var title_cursor := 0
+var arcade := false
+## Аркада: текущая лестница (экран башни) и эпилог.
+var run: Arcade
+var _ending: Array[String] = []
+var _para := 0
+var _para_tick := 0
 
 var _font: Font = load("res://fonts/RussoOne-Regular.ttf")
 var _title_font: Font = load("res://fonts/RuslanDisplay-Regular.ttf")
@@ -86,10 +100,20 @@ func step(bits: PackedInt32Array) -> void:
 	_prev = bits
 	if tick > 1:
 		if screen == Screen.TITLE:
-			if (press[0] | press[1]) & (CONFIRM | InputBits.HP):
+			var any := press[0] | press[1]
+			if any & (InputBits.LEFT | InputBits.RIGHT | InputBits.UP | InputBits.DOWN):
+				title_cursor = 1 - title_cursor
+				sound.emit("ui_move")
+			elif any & (CONFIRM | InputBits.HP):
 				sound.emit("ui_confirm")
+				arcade = title_cursor == 0
 				open(Screen.SELECT)
 				voice.emit("choose_your_character")
+		elif screen == Screen.LADDER:
+			if tick >= LADDER_TICKS or (tick > LADDER_SKIP_AFTER and (press[0] | press[1]) & CONFIRM):
+				start_versus()
+		elif screen == Screen.ENDING:
+			_step_ending(press[0] | press[1])
 		elif screen == Screen.VERSUS:
 			var total := VS_LINE_START + _dialog.size() * VS_LINE_TICKS + VS_TAIL
 			if tick >= total or (tick > VS_SKIP_AFTER and (press[0] | press[1]) & CONFIRM):
@@ -109,10 +133,45 @@ func start_versus() -> void:
 	queue_redraw()
 
 
+## Аркада: экран башни перед очередным боем (main ставит курсоры на игрока и соперника).
+func open_ladder(r: Arcade) -> void:
+	run = r
+	open(Screen.LADDER)
+
+
+## Аркада: эпилог бойца.
+func open_ending(id: String) -> void:
+	_ending = Endings.lines(id)
+	_para = 0
+	_para_tick = 0
+	cursor[0] = ROSTER.find(id)
+	open(Screen.ENDING)
+
+
+func _step_ending(press: int) -> void:
+	_para_tick += 1
+	if tick <= VS_SKIP_AFTER or not press & CONFIRM:
+		return
+	var full := int(_para_tick * TYPE_SPEED) >= _ending[_para].length()
+	if not full:
+		_para_tick = 100000
+		return
+	sound.emit("ui_confirm")
+	_para += 1
+	_para_tick = 0
+	if _para >= _ending.size():
+		_para = _ending.size() - 1
+		ending_done.emit()
+
+
 func _step_select(press: PackedInt32Array) -> void:
 	if _ready_tick >= 0:
 		if tick - _ready_tick >= READY_TICKS:
-			start_versus()
+			if arcade:
+				_ready_tick = -1
+				arcade_picked.emit(ROSTER[cursor[0]])
+			else:
+				start_versus()
 		return
 	for p in 2:
 		var who := _chooser(p)
@@ -137,12 +196,14 @@ func _step_select(press: PackedInt32Array) -> void:
 			picked[who] = true
 			picked_at[who] = tick
 			sound.emit("ui_confirm")
-	if picked[0] and picked[1]:
+	if picked[0] and (picked[1] or arcade):
 		_ready_tick = tick
 
 
 ## Чей курсор двигает игрок p: против ИИ первый ведёт сначала своего бойца, потом соперника.
 func _chooser(p: int) -> int:
+	if arcade:
+		return 0 if p == 0 else -1
 	if not vs_ai:
 		return p
 	if p != 0:
@@ -168,6 +229,10 @@ func _draw() -> void:
 		_draw_title()
 	elif screen == Screen.VERSUS:
 		_draw_versus()
+	elif screen == Screen.LADDER:
+		_draw_ladder()
+	elif screen == Screen.ENDING:
+		_draw_ending()
 	else:
 		_draw_select()
 
@@ -187,7 +252,7 @@ func _draw_background() -> void:
 		return
 	if screen != Screen.TITLE and _sky != null:
 		draw_texture_rect(_sky, _cover(_sky.get_size()), false, Color(0.55, 0.55, 0.65))
-		if _moon != null:
+		if _moon != null and screen in [Screen.SELECT, Screen.VERSUS]:
 			var ms := _moon.get_size() * (220.0 / _moon.get_height())
 			draw_texture_rect(_moon, Rect2(Vector2(size.x / 2.0, 230) - ms / 2.0, ms), false, Color(0.8, 0.8, 0.85))
 		return
@@ -223,8 +288,14 @@ func _draw_title() -> void:
 	_text_c(Vector2(cx, y), "БИТВА ЛЕГЕНД", 84, COLOR_GOLD, _title_font, 4)
 	if Loc.lang == "ru":
 		_text_c(Vector2(cx, y + 38), "CLASH OF LEGENDS", 22, COLOR_TEXT)
-	if (tick / 30) % 2 == 0:
-		_text_c(Vector2(cx, size.y - 62), "Нажмите Enter или крест", 26, COLOR_TEXT)
+	for i in TITLE_ITEMS.size():
+		var x := cx + (i - 0.5) * 260.0
+		var sel := i == title_cursor
+		if sel:
+			var w := 220.0
+			draw_rect(Rect2(x - w / 2.0, size.y - 92, w, 42), Color(1, 0.85, 0.3, 0.18 + 0.08 * float((tick / 20) % 2)))
+			draw_rect(Rect2(x - w / 2.0, size.y - 92, w, 42), COLOR_GOLD, false, 2.0)
+		_text_c(Vector2(x, size.y - 61), TITLE_ITEMS[i], 28, COLOR_GOLD if sel else COLOR_TEXT)
 	_text_c(Vector2(cx, size.y - 30), "Options / F10 — настройки   ·   Esc — выход   ·   F11 — полный экран", 16, COLOR_DIM)
 
 
@@ -261,8 +332,8 @@ func _draw_grid() -> void:
 		else:
 			_draw_face(id, r, i % COLS >= COLS / 2)
 		draw_rect(r, Color(0.5, 0.45, 0.35), false, 2.0)
-	# Курсоры: у первого — синяя рамка, у второго — красная (вместе — двойная).
-	for who in 2:
+	# Курсоры: у первого — синяя рамка, у второго — красная (вместе — двойная). В аркаде — только первый.
+	for who in (1 if arcade else 2):
 		var r := _cell_rect(cursor[who]).grow(4.0 + who * 5.0 * float(cursor[0] == cursor[1]))
 		var col: Color = COLOR_P[who]
 		if not picked[who] and (tick / 10) % 3 == 0:
@@ -279,7 +350,8 @@ func _draw_face(id: String, r: Rect2, mirror := false) -> void:
 	if not portrait:
 		a = _sprites.anim(id, "idle")
 	if a.is_empty():
-		_text_c(r.get_center(), FighterData.get_data(id).name, 12, COLOR_TEXT)
+		draw_rect(r.grow(-4), FighterData.get_data(id).color.darkened(0.6))
+		_text_c(r.get_center() + Vector2(0, 5), FighterData.get_data(id).name, 11, COLOR_TEXT)
 		return
 	var tex: Texture2D = a.tex[0]
 	var ts := tex.get_size()
@@ -303,6 +375,9 @@ func _draw_face(id: String, r: Rect2, mirror := false) -> void:
 
 
 func _draw_preview(p: int) -> void:
+	if arcade and p == 1:
+		_draw_arcade_panel()
+		return
 	var id: String = ROSTER[cursor[p]] if ROSTER[cursor[p]] != "" else ""
 	var x := size.x * (0.16 if p == 0 else 0.84)
 	var feet := Vector2(x, size.y - 70)
@@ -392,6 +467,107 @@ func _draw_versus() -> void:
 		draw_multiline_string(_font, box.position + Vector2(16, 52), shown, HORIZONTAL_ALIGNMENT_LEFT, box.size.x - 32, 19, 3, COLOR_TEXT)
 	if tick > VS_SKIP_AFTER:
 		_text_c(Vector2(cx, size.y - 20), "Enter / крест — пропустить", 15, COLOR_DIM)
+
+
+## Аркада, экран выбора: вместо второго игрока — описание режима.
+func _draw_arcade_panel() -> void:
+	var x := size.x * 0.84
+	var panel := Rect2(x - 190, 84, 380, size.y - 64 - 84)
+	draw_rect(panel, Color(0, 0, 0, 0.35))
+	draw_rect(panel, COLOR_P[1], false, 3.0)
+	_text_c(Vector2(x, 122), "АРКАДА", 34, COLOR_P[1].lightened(0.2), _title_font, 2)
+	var lines := ["Семь боёв подряд", "против ИИ.", "", "Последним выйдет", "твой заклятый соперник.", "",
+		"Победишь — камень", "исполнит желание."]
+	for i in lines.size():
+		_text_c(Vector2(x, 200 + i * 30), lines[i], 20, COLOR_TEXT)
+	_text_c(Vector2(x, 520), "?", 120, Color(COLOR_P[1], 0.35), _title_font, 2)
+
+
+## Аркада: башня соперников (снизу вверх), текущий бой подсвечен.
+func _draw_ladder() -> void:
+	var cx := size.x / 2.0
+	draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, 0.35))
+	_text_c(Vector2(cx, 56), "АРКАДА", 44, COLOR_GOLD, _title_font, 3)
+	# Игрок — слева, по пояс.
+	var a := _sprites.anim(run.player, "select")
+	var waist := Vector2(size.x * 0.2, size.y)
+	if not a.is_empty():
+		draw_set_transform(waist, 0, Vector2(PORTRAIT_SCALE, PORTRAIT_SCALE))
+		FighterSprites.draw_breathing(self, a.tex[0], a.pivot[0], Color.WHITE, a.tex[0].get_height() * 0.9,
+			0.5 - 0.5 * cos(TAU * float(tick) / FighterSprites.BREATH_TICKS), 8.0)
+		draw_set_transform(Vector2.ZERO)
+	else:
+		_draw_silhouette(run.player, waist, 1.0)
+	_text_c(Vector2(size.x * 0.2, 130), FighterData.get_data(run.player).name, 30, COLOR_P[0].lightened(0.2))
+	# Башня.
+	var tx := size.x * 0.52
+	var cell := 66.0
+	var step := 76.0
+	var bottom := size.y - 40.0
+	for i in run.ladder.size():
+		var id: String = run.ladder[i]
+		var r := Rect2(tx - cell / 2.0, bottom - (i + 1) * step + (step - cell), cell, cell)
+		var beaten: bool = i < run.stage
+		var current: bool = i == run.stage
+		draw_rect(r, Color(0.08, 0.08, 0.1, 0.9))
+		_draw_face(id, r, true)
+		if beaten:
+			draw_rect(r, Color(0, 0, 0, 0.6))
+			draw_line(r.position + Vector2(10, 10), r.end - Vector2(10, 10), Color(0.85, 0.2, 0.15), 4.0)
+			draw_line(Vector2(r.end.x - 10, r.position.y + 10), Vector2(r.position.x + 10, r.end.y - 10), Color(0.85, 0.2, 0.15), 4.0)
+		var border := Color(0.5, 0.45, 0.35)
+		if current:
+			border = COLOR_GOLD if (tick / 10) % 3 != 0 else COLOR_GOLD.lightened(0.5)
+			_text_c(Vector2(r.position.x - 26, r.get_center().y + 10), "▶", 26, COLOR_GOLD)
+		draw_rect(r.grow(3.0 if current else 0.0), border, false, 4.0 if current else 2.0)
+		var name_col := COLOR_DIM if beaten else (COLOR_GOLD if current else COLOR_TEXT)
+		var nm := Loc.t(FighterData.get_data(id).name)
+		draw_string(_font, Vector2(r.end.x + 16, r.get_center().y + 7), nm, HORIZONTAL_ALIGNMENT_LEFT, -1, 19, name_col)
+		if i == run.ladder.size() - 1 and Arcade.RIVALS.get(run.player, "") == id:
+			draw_string(_font, Vector2(r.end.x + 16, r.get_center().y + 28), Loc.t("заклятый соперник"),
+				HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(1, 0.4, 0.3))
+	# Справа — номер боя и сложность.
+	var rx := size.x * 0.82
+	_text_c(Vector2(rx, 300), Loc.t("БОЙ %d ИЗ %d") % [run.stage + 1, run.ladder.size()], 34, COLOR_GOLD, _title_font, 2)
+	_text_c(Vector2(rx, 350), FighterData.get_data(run.opponent()).name, 26, COLOR_P[1].lightened(0.25))
+	_text_c(Vector2(rx, 386), Loc.t("ИИ: %s") % Loc.t(AiController.LEVEL_NAMES[run.ai_level()]), 18, COLOR_DIM)
+	if run.continues > 0:
+		_text_c(Vector2(rx, 416), Loc.t("Продолжений: %d") % run.continues, 16, COLOR_DIM)
+	if tick > LADDER_SKIP_AFTER:
+		_text_c(Vector2(cx, size.y - 12), "Enter / крест — в бой", 15, COLOR_DIM)
+
+
+## Аркада: эпилог — портрет победителя и абзацы, печатаются по очереди.
+func _draw_ending() -> void:
+	var id: String = ROSTER[cursor[0]]
+	draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, 0.5))
+	var a := _sprites.anim(id, "select_win")
+	if a.is_empty():
+		a = _sprites.anim(id, "select")
+	var waist := Vector2(size.x * 0.22, size.y)
+	if not a.is_empty():
+		var n: int = a.tex.size()
+		draw_set_transform(waist, 0, Vector2(0.5, 0.5))
+		draw_texture(a.tex[n - 1], -a.pivot[n - 1])
+		draw_set_transform(Vector2.ZERO)
+	else:
+		_draw_silhouette(id, waist, 1.1)
+	var x0 := size.x * 0.44
+	var w := size.x * 0.5
+	_text_c(Vector2(x0 + w / 2.0, 70), "ЭПИЛОГ", 46, COLOR_GOLD, _title_font, 3)
+	_text_c(Vector2(x0 + w / 2.0, 110), FighterData.get_data(id).name, 24, FighterData.get_data(id).color.lightened(0.3))
+	var y := 160.0
+	for i in mini(_para + 1, _ending.size()):
+		var text: String = _ending[i]
+		if i == _para:
+			text = text.left(mini(text.length(), int(_para_tick * TYPE_SPEED)))
+		var h := _font.get_multiline_string_size(_ending[i], HORIZONTAL_ALIGNMENT_LEFT, w, 21).y
+		draw_multiline_string(_font, Vector2(x0, y + 21), text, HORIZONTAL_ALIGNMENT_LEFT, w, 21, -1,
+			COLOR_TEXT if i == _para else COLOR_DIM)
+		y += h + 22.0
+	if tick > VS_SKIP_AFTER:
+		var last := _para >= _ending.size() - 1 and int(_para_tick * TYPE_SPEED) >= _ending[_para].length()
+		_text_c(Vector2(size.x / 2.0, size.y - 20), "Enter / крест — в главное меню" if last else "Enter / крест — дальше", 15, COLOR_DIM)
 
 
 ## Силуэт бойца, пока нет портрета: тело по пояс в цвете бойца и «?».

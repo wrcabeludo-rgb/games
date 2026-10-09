@@ -27,6 +27,9 @@ var pause := PauseView.new()
 ## Кнопки, зажатые в момент закрытия паузы: не считаются, пока их не отпустят
 ## (иначе «Продолжить» крестом сразу дал бы удар ЛН).
 var _mask := 0
+## Аркада: текущая лестница (null — обычный бой) и кнопки прошлого тика (для нажатий после матча).
+var arcade: Arcade = null
+var _arcade_prev := 0
 
 
 func _ready() -> void:
@@ -38,8 +41,12 @@ func _ready() -> void:
 	pause.set_anchors_preset(Control.PRESET_FULL_RECT)
 	pause.sound.connect(func(n: String): sound.play(n))
 	pause.restart.connect(_reset)
-	pause.to_select.connect(func(): _open_menu(MenuView.Screen.SELECT))
-	pause.to_title.connect(func(): _open_menu(MenuView.Screen.TITLE))
+	pause.to_select.connect(func():
+		_end_arcade()
+		_open_menu(MenuView.Screen.SELECT))
+	pause.to_title.connect(func():
+		_end_arcade()
+		_open_menu(MenuView.Screen.TITLE))
 	pause.ai_changed.connect(_set_ai)
 	pause.visibility_changed.connect(func():
 		hud.paused = pause.visible
@@ -51,6 +58,10 @@ func _ready() -> void:
 	menu.setup(arena.sprites)
 	hud.setup(arena.sprites)
 	menu.fight_requested.connect(_start_fight)
+	menu.arcade_picked.connect(_start_arcade)
+	menu.ending_done.connect(func():
+		_end_arcade()
+		_open_menu(MenuView.Screen.TITLE))
 	var start_screen := MenuView.Screen.TITLE
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--screenshot=") or arg.begins_with("--demo") or arg.begins_with("--chars=") \
@@ -105,6 +116,15 @@ func _ready() -> void:
 			menu.picked = [true, true]
 		if "--screen=versus" in OS.get_cmdline_user_args():
 			menu.start_versus()
+		# «--screen=ladder [--stage=N]» и «--screen=ending» — снимки аркады за бойца chars[0].
+		if "--screen=ladder" in OS.get_cmdline_user_args():
+			_start_arcade(chars[0])
+			for arg in OS.get_cmdline_user_args():
+				if arg.begins_with("--stage="):
+					arcade.stage = int(arg.trim_prefix("--stage="))
+			_show_ladder()
+		if "--screen=ending" in OS.get_cmdline_user_args():
+			menu.open_ending(chars[0])
 	else:
 		menu.visible = false
 
@@ -122,7 +142,7 @@ func _physics_process(_delta: float) -> void:
 	raw[1] &= ~_mask
 	if in_menu:
 		menu.vs_ai = reader.single_player
-		menu.ai_label = Loc.t("Соперник: %s   ·   F3 — сменить   ·   Options / F10 — настройки") % \
+		menu.ai_label = Loc.t("Аркада: семь боёв против ИИ") if menu.arcade else Loc.t("Соперник: %s   ·   F3 — сменить   ·   Options / F10 — настройки") % \
 			(Loc.t("второй игрок") if ai.level == AiController.Level.OFF else Loc.t("ИИ, ") + Loc.t(ai.level_name()))
 		menu.step(raw)
 		if _screenshot_path != "" and menu.tick == _shot_at:
@@ -134,6 +154,8 @@ func _physics_process(_delta: float) -> void:
 	if ai.level != AiController.Level.OFF:
 		frame[1] = ai.get_input(sim, 1)
 	sim.step(frame)
+	if arcade != null:
+		_arcade_step(raw[0] | raw[1])
 	sound.update(sim, ai.level != AiController.Level.OFF)
 	rumble.update(sim, reader)
 	arena.show_state(sim)
@@ -169,6 +191,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		_reset()
 		return
 	if pad != null and pad.pressed and pad.button_index == JOY_BUTTON_START:
+		if sim.phase == Sim.Phase.MATCH_END and arcade != null:
+			return
 		if sim.phase == Sim.Phase.MATCH_END:
 			_open_menu(MenuView.Screen.SELECT)
 		else:
@@ -176,7 +200,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if in_menu and pad != null:
 		return
-	if pad != null and pad.pressed and pad.button_index == JOY_BUTTON_TOUCHPAD:
+	if pad != null and pad.pressed and pad.button_index == JOY_BUTTON_TOUCHPAD and arcade == null:
 		var r1 := Input.is_joy_button_pressed(pad.device, JOY_BUTTON_RIGHT_SHOULDER) \
 			or Input.get_joy_axis(pad.device, JOY_AXIS_TRIGGER_RIGHT) >= 0.5
 		if r1:
@@ -195,10 +219,13 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_F11:
 				_toggle_fullscreen()
 			KEY_ESCAPE:
-				if menu.screen == MenuView.Screen.SELECT:
+				if menu.screen != MenuView.Screen.TITLE:
+					_end_arcade()
 					menu.open(MenuView.Screen.TITLE)
 				else:
 					get_tree().quit()
+		return
+	if arcade != null and key.physical_keycode in [KEY_ENTER, KEY_KP_ENTER, KEY_F3, KEY_F4, KEY_F5, KEY_F6]:
 		return
 	if key.physical_keycode in [KEY_ENTER, KEY_KP_ENTER] and sim.phase == Sim.Phase.MATCH_END:
 		_open_menu(MenuView.Screen.SELECT)
@@ -251,6 +278,8 @@ func _open_menu(screen: MenuView.Screen) -> void:
 
 func _start_fight(picked: PackedStringArray) -> void:
 	chars = picked
+	if arcade != null:
+		ai.level = arcade.ai_level()
 	in_menu = false
 	menu.visible = false
 	arena.visible = true
@@ -260,9 +289,72 @@ func _start_fight(picked: PackedStringArray) -> void:
 
 func _reset() -> void:
 	sim = Sim.new(true, chars)
-	if training:
+	sim.auto_rematch = arcade == null
+	if training and arcade == null:
 		sim.set_training(true)
 	ai.reset()
+	hud.arcade_label = "" if arcade == null else Loc.t("АРКАДА · БОЙ %d ИЗ %d") % [arcade.stage + 1, arcade.ladder.size()]
+	hud.match_hint = ""
+
+
+## Аркада: игрок выбрал бойца — строим лестницу и показываем башню.
+func _start_arcade(id: String) -> void:
+	arcade = Arcade.new(id, MenuView.ROSTER, Time.get_ticks_usec())
+	training = false
+	_show_ladder()
+
+
+func _show_ladder() -> void:
+	in_menu = true
+	arena.visible = false
+	hud.visible = false
+	menu.cursor = PackedInt32Array([MenuView.ROSTER.find(arcade.player), MenuView.ROSTER.find(arcade.opponent())])
+	menu.open_ladder(arcade)
+	sound.menu()
+
+
+## Аркада закончилась (пройдена или брошена): ИИ — снова как в настройках.
+func _end_arcade() -> void:
+	if arcade == null:
+		return
+	arcade = null
+	menu.arcade = false
+	ai.level = clampi(Settings.ai_level, 0, AiController.LEVEL_NAMES.size() - 1) as AiController.Level
+	ai.reset()
+	hud.arcade_label = ""
+	hud.match_hint = ""
+
+
+## Аркада после матча: удар — дальше (победа) или ещё раз (поражение); Enter / Options после поражения — выход.
+func _arcade_step(bits: int) -> void:
+	var press := bits & ~_arcade_prev
+	_arcade_prev = bits
+	if sim.phase != Sim.Phase.MATCH_END:
+		return
+	var won := sim.match_winner() == 0
+	if won:
+		hud.match_hint = "Удар — эпилог" if arcade.is_final() else "Удар — следующий бой"
+	else:
+		hud.match_hint = "Удар — ещё раз   ·   Enter или Options — выйти"
+	if sim.phase_frame < Sim.REMATCH_DELAY:
+		return
+	var attack := InputBits.LP | InputBits.LK | InputBits.HP | InputBits.HK
+	if won and press & (attack | InputBits.START):
+		if arcade.advance():
+			var id: String = arcade.player
+			in_menu = true
+			arena.visible = false
+			hud.visible = false
+			menu.open_ending(id)
+			sound.menu()
+		else:
+			_show_ladder()
+	elif not won and press & attack:
+		arcade.continues += 1
+		_reset()
+	elif not won and press & InputBits.START:
+		_end_arcade()
+		_open_menu(MenuView.Screen.TITLE)
 
 
 func _toggle_training() -> void:

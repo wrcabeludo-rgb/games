@@ -73,6 +73,8 @@ var end_reason := EndReason.NONE
 var prev_inputs := PackedInt32Array([0, 0])
 var projectiles: Array[PackedInt32Array] = []
 var training := false
+## После конца матча удар начинает реванш. В аркаде выключено: что дальше, решает main.
+var auto_rematch := true
 ## Ничья в решающем раунде (1:1): следующий — «Последний бой», пока кто-то не победит.
 var last_bout := false
 ## Добивание: этап ввода команды (0 — ждём «вперёд», 1 — «назад», 2 — СР), сколько ждать, было ли.
@@ -163,7 +165,7 @@ func step(frame_inputs: PackedInt32Array) -> void:
 				_set_phase(Phase.MATCH_END)
 		Phase.MATCH_END:
 			_combat_step(idle, false)
-			if phase_frame >= REMATCH_DELAY and _any_attack_pressed():
+			if auto_rematch and phase_frame >= REMATCH_DELAY and _any_attack_pressed():
 				_new_match()
 	tick += 1
 
