@@ -15,6 +15,14 @@ const BREATH_TICKS := 110  # один вдох-выдох в стойке (ды�
 const GET_UP_TICKS := 18   # вставание — последние столько тиков лежания
 const PING_PONG_MAX := 5    # до стольких кадров стойка идёт туда-обратно (1-2-3-2), больше — нарисован цикл
 
+## Стойка из кадра другой анимации: [анимация, кадр с 0]. У Дракулы нарисованная стойка — прямая поза,
+## а все удары начинаются из боевой: стойкой служит первый кадр лёгкого удара рукой, пока не нарисована
+## боевая стойка (docs/ART_FIGHTERS.md, «Дракула: полировка»).
+const IDLE_FROM := {"dracula": ["st_lp", 0]}
+## Прыжок из 4 кадров (присед, взлёт, верх, приземление): при падении держим кадр верхней точки,
+## а кадр приземления — только у самой земли, px.
+const JUMP_LAND_HEIGHT := 110
+
 ## id бойца → {анимация: {"tex": Array[Texture2D], "pivot": Array[Vector2]}}
 var _bank := {}
 
@@ -51,6 +59,11 @@ static func _load_character(id: String) -> Dictionary:
 			out[file.get_basename()] = {"tex": tex, "pivot": pivots, "hit": clampi(hit, 0, n - 1),
 				"hit_end": clampi(hit_end, hit, n - 1), "reverse": bool(meta.get("reverse", false)),
 				"air": int(meta.get("air_frames", 1))}
+	if IDLE_FROM.has(id) and out.has(IDLE_FROM[id][0]):
+		var src: Dictionary = out[IDLE_FROM[id][0]]
+		var k: int = IDLE_FROM[id][1]
+		out["idle"] = {"tex": [src.tex[k]] as Array[Texture2D], "pivot": [src.pivot[k]] as Array[Vector2],
+			"hit": 0, "hit_end": 0, "reverse": false, "air": 1}
 	return out
 
 
@@ -179,7 +192,8 @@ func frame_for(f: Fighter, tick: int) -> Array:
 				if absi(f.vy) < 500:
 					i = 2
 				elif f.vy < 0:
-					i = 3
+					# Падение: в листе из 4 кадров последний — приземление, его показываем у самой земли.
+					i = 3 if n > 4 or f.y < JUMP_LAND_HEIGHT * Fighter.SUB else 2
 				return _pick(anims.jump, mini(i, n - 1))
 		Fighter.State.LAND:
 			if anims.has("jump"):
