@@ -5,11 +5,12 @@ config_version=5
 [application]
 
 config/name="Битва легенд"
-config/version="3.17.7"
+config/version="3.17.8"
 config/description="Вся восьмёрка: Афина, Медуза, Сунь Укун, Анубис; лор и реплики"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.4", "GL Compatibility")
-config/icon="res://icon.svg"
+config/icon="res://icon.png"
+config/windows_native_icon="res://icon.ico"
 
 [display]
 
@@ -31,6 +32,10 @@ textures/default_filters/texture_mipmap_bias=-0.5
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 environment/defaults/default_clear_color=Color(0.07, 0.07, 0.1, 1)
+
+[autoload]
+
+Packs="*res://scripts/core/packs.gd"
 
 [importer_defaults]
 

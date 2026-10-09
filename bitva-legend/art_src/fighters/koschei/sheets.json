@@ -133,5 +133,68 @@
   "align_to": "crouch:2",
   "match_scale": true,
   "align_head": true
+ },
+ "j_lp": {
+  "frames": 4,
+  "fit": "inherit:idle",
+  "pivot_y": "body_ground",
+  "align_to": "jump:5",
+  "match_scale": true
+ },
+ "j_lk": {
+  "frames": 4,
+  "fit": "inherit:idle",
+  "pivot_y": "body_ground",
+  "align_to": "jump:5",
+  "match_scale": true
+ },
+ "j_hp": {
+  "frames": 4,
+  "fit": "inherit:idle",
+  "pivot_y": "body_ground",
+  "align_to": "jump:5",
+  "match_scale": true
+ },
+ "j_hk": {
+  "frames": 4,
+  "fit": "inherit:idle",
+  "pivot_y": "body_ground",
+  "align_to": "jump:5",
+  "match_scale": true
+ },
+ "cr_lk": {
+  "frames": 4,
+  "fit": "inherit:idle",
+  "align_to": "crouch:2",
+  "match_scale": true,
+  "align_head": true
+ },
+ "cr_hp": {
+  "frames": 4,
+  "fit": "inherit:idle",
+  "align_to": "crouch:2",
+  "match_scale": true,
+  "align_head": true
+ },
+ "cr_hk": {
+  "frames": 4,
+  "fit": "inherit:idle",
+  "align_to": "crouch:2",
+  "match_scale": true,
+  "align_head": true
+ },
+ "st_sweep": {
+  "frames": 4,
+  "fit": "inherit:idle",
+  "align_to": "idle:1",
+  "match_scale": true,
+  "align_head": true
+ },
+ "st_round": {
+  "frames": 4,
+  "fit": "inherit:idle",
+  "align_to": "idle:1",
+  "match_scale": true,
+  "align_head": true
  }
 }

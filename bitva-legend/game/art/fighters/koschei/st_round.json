@@ -1,0 +1,49 @@
+{
+ "frames": [
+  {
+   "file": "st_round_1.png",
+   "pivot": [
+    512,
+    722
+   ],
+   "size": [
+    1005,
+    723
+   ]
+  },
+  {
+   "file": "st_round_2.png",
+   "pivot": [
+    628,
+    965
+   ],
+   "size": [
+    956,
+    966
+   ]
+  },
+  {
+   "file": "st_round_3.png",
+   "pivot": [
+    566,
+    809
+   ],
+   "size": [
+    1335,
+    810
+   ]
+  },
+  {
+   "file": "st_round_4.png",
+   "pivot": [
+    514,
+    728
+   ],
+   "size": [
+    1006,
+    729
+   ]
+  }
+ ],
+ "res": 2
+}

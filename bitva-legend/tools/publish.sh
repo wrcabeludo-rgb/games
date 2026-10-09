@@ -15,18 +15,29 @@ EXE_SHA="$(sha256sum "$ROOT/build/BitvaLegend/BitvaLegend.exe" | cut -d' ' -f1)"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 cp "$ZIP" "$TMP/BitvaLegend-windows.zip"
+# Дополнительные пакеты бойцов (см. EXTRA_PACKS в build.sh) — отдельными архивами.
+EXTRA=""
+for z in "$ROOT"/build/BitvaLegend-"$VERSION"-*.zip; do
+	id="${z##*-}"; id="${id%.zip}"
+	[ "$id" = "windows" ] && continue
+	cp "$z" "$TMP/BitvaLegend-$id.zip"
+	EXTRA="$EXTRA
+- [BitvaLegend-$id.zip](BitvaLegend-$id.zip?raw=1)"
+done
 cat > "$TMP/README.md" <<EOF
 # Битва легенд — последняя сборка
 
 **Версия:** $VERSION · **Собрано:** $(date -u '+%Y-%m-%d %H:%M UTC')
 
-[Скачать BitvaLegend-windows.zip](BitvaLegend-windows.zip?raw=1) — распаковать и запустить \`BitvaLegend.exe\`.
+1. [Скачать BitvaLegend-windows.zip](BitvaLegend-windows.zip?raw=1) — сама игра.
+2. Дополнительные бойцы в высоком разрешении (распаковать в ту же папку, что и игру):$EXTRA
+
+Запускать \`BitvaLegend.exe\`. Без дополнительных архивов игра работает, но эти бойцы будут заглушками.
 
 Если Windows покажет «Windows защитила ваш компьютер»: «Подробнее» → «Выполнить в любом случае».
 
-В архиве два файла: \`BitvaLegend.exe\` — официальный запускатель Godot 4.4.1 без изменений
-(байт в байт совпадает с шаблоном экспорта Godot), и \`BitvaLegend.pck\` — данные игры.
-Держи их в одной папке.
+\`BitvaLegend.exe\` — официальный запускатель Godot 4.4.1 (изменена только иконка), \`*.pck\` — данные игры.
+Держи все файлы в одной папке.
 
 SHA-256 \`BitvaLegend.exe\`: \`$EXE_SHA\`
 EOF
@@ -38,4 +49,5 @@ git -c user.name="$(git -C "$ROOT" config user.name)" -c user.email="$(git -C "$
 	commit -q -m "Сборка $VERSION"
 git push -q -f "$REMOTE" builds
 echo "Опубликовано: версия $VERSION"
+for f in "$TMP"/*.zip; do echo "https://github.com/wrcabeludo-rgb/games/raw/builds/$(basename "$f")"; done
 echo "https://github.com/wrcabeludo-rgb/games/raw/builds/BitvaLegend-windows.zip"

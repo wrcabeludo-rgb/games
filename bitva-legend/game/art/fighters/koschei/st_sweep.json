@@ -1,0 +1,49 @@
+{
+ "frames": [
+  {
+   "file": "st_sweep_1.png",
+   "pivot": [
+    512,
+    725
+   ],
+   "size": [
+    1005,
+    726
+   ]
+  },
+  {
+   "file": "st_sweep_2.png",
+   "pivot": [
+    880,
+    628
+   ],
+   "size": [
+    986,
+    629
+   ]
+  },
+  {
+   "file": "st_sweep_3.png",
+   "pivot": [
+    630,
+    548
+   ],
+   "size": [
+    1319,
+    549
+   ]
+  },
+  {
+   "file": "st_sweep_4.png",
+   "pivot": [
+    513,
+    728
+   ],
+   "size": [
+    1005,
+    729
+   ]
+  }
+ ],
+ "res": 2
+}
