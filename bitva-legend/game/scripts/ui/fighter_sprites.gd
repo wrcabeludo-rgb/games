@@ -145,16 +145,22 @@ func frame_for(f: Fighter, tick: int) -> Array:
 		Fighter.State.THROWING:
 			# Бросает: держит → поднял → швыряет (по ходу удержания).
 			if anims.has("throw") and f.move >= 0:
+				# Единый сценарий (Sim.throw_progress): держит за ворот → поднимает над головой → бросает.
 				var n: int = anims.throw.tex.size()
 				var m := f.move_data()
 				var g: Dictionary = m.grab if m.has("grab") else m.get("cinema", {"hold": 30})
 				var hold: int = maxi(int(g.hold), 1)
-				var t := clampf(1.0 - float(f.stun) / hold, 0.0, 0.999)
-				return _pick(anims.throw, mini(1 + int(t * (n - 1)), n - 1))
+				var t := clampf(1.0 - float(f.stun) / hold, 0.0, 1.0)
+				var i := 1 if t < Sim.THROW_GRIP else (2 if t < 0.92 else 3)
+				return _pick(anims.throw, mini(i, n - 1))
 		Fighter.State.THROWN:
 			if anims.has("thrown"):
+				# Схвачен за ворот (на земле) → поднят над землёй.
 				var n: int = anims.thrown.tex.size()
-				return _pick(anims.thrown, mini(f.state_frame / 10, n - 2))
+				return _pick(anims.thrown, mini(0 if f.y < 20 * Fighter.SUB else 1, n - 1))
+		Fighter.State.AIR_HIT when f.thrown_air and anims.has("thrown") and anims.thrown.tex.size() >= 4:
+			# Летит после броска: кувырок → вниз головой у земли.
+			return _pick(anims.thrown, 2 if f.vy > 0 or f.y > 140 * Fighter.SUB else 3)
 		Fighter.State.AIR_HIT:
 			# Полёт после удара: кадры полёта по очереди (откинуло → летит → почти лёг).
 			if anims.has("fall"):
@@ -209,6 +215,9 @@ func frame_for(f: Fighter, tick: int) -> Array:
 					# Падение: в листе из 4 кадров последний — приземление, его показываем у самой земли.
 					i = 3 if n > 4 or f.y < JUMP_LAND_HEIGHT * Fighter.SUB else 2
 				return _pick(anims.jump, mini(i, n - 1))
+		Fighter.State.LAND when f.throw_follow and anims.has("throw"):
+			# Только что бросил — доводит движение (последний кадр броска).
+			return _pick(anims.throw, anims.throw.tex.size() - 1)
 		Fighter.State.LAND:
 			if anims.has("jump"):
 				return _pick(anims.jump, anims.jump.tex.size() - 1)

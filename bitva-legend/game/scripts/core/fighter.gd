@@ -123,6 +123,8 @@ var teleport_request := 0
 var armor := 0              # сколько ударов ещё выдержит броня текущего приёма
 var hypnotized := 0         # 1 — оглушён гипнозом, 2 — окаменел, 3 — прилип к жвачке (для отрисовки)
 var inverted := 0           # тиков до конца «перехвата»: лево и право поменялись местами
+var thrown_air := 0         # 1 — летит после броска (для отрисовки: кадры «его бросают», а не падения)
+var throw_follow := 0       # 1 — только что бросил (для отрисовки: последний кадр броска вместо приземления)
 var knock_on_land := 0      # приземлится — будет лежать (сбит с ног)
 var parry_timer := TAP_TIMER_MAX  # тиков с последней засчитанной попытки парирования
 var parry_cool := 0         # тиков до следующей возможной попытки
@@ -174,7 +176,7 @@ func save() -> PackedInt32Array:
 	s.append_array(PackedInt32Array([special_buf, special_strength, special_timer, armor, hypnotized, knock_on_land]))
 	s.append_array(chain)
 	s.append_array(PackedInt32Array([juggle, combo_damage, meter, ex, special_ex, super_timer,
-		parry_timer, parry_cool, staggered, inverted]))
+		parry_timer, parry_cool, staggered, inverted, thrown_air, throw_follow]))
 	return s
 
 
@@ -193,6 +195,7 @@ func load(s: PackedInt32Array) -> void:
 	juggle = s[43]; combo_damage = s[44]
 	meter = s[45]; ex = s[46]; special_ex = s[47]; super_timer = s[48]
 	parry_timer = s[49]; parry_cool = s[50]; staggered = s[51]; inverted = s[52]
+	thrown_air = s[53]; throw_follow = s[54]
 
 
 # --- Вопросы о состоянии --------------------------------------------------
@@ -515,6 +518,7 @@ func take_throw(grab: Dictionary, direction: int) -> void:
 		return
 	_launch_knockdown(grab.launch, direction)
 	juggle = JUGGLE_MAX  # после броска не добить
+	thrown_air = 1
 
 
 ## Вырвался из захвата (или бросающий, у которого вырвались): разлёт в стороны.
@@ -531,6 +535,7 @@ func finish_throw(recovery: int) -> void:
 	move = -1
 	landing_frames = recovery
 	_set_state(State.LAND)
+	throw_follow = 1
 
 
 ## Попробовать заблокировать удар. Стоя не держится низкий удар, сидя — удар сверху.
@@ -1049,3 +1054,7 @@ func _set_state(s: State) -> void:
 	if s != state:
 		state = s
 		state_frame = 0
+		if s != State.AIR_HIT:
+			thrown_air = 0
+		if s != State.LAND:
+			throw_follow = 0

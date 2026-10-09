@@ -258,9 +258,31 @@ func _process_grabs() -> void:
 const HOLD_DROP := 40               # схваченный в прыжке (суперприём) опускается на землю, px за тик
 
 
+## Единый сценарий броска для всех бойцов (у каждого — свои листы «бросает» и «его бросают», а не на каждую пару):
+## захват — соперник перед бросающим на земле; подъём — он поднимается вместе с руками бросающего
+## до THROW_LIFT; бросок — летит вперёд с этой высоты.
+const THROW_LIFT := 110             # высота подъёма в броске, px
+const THROW_GRIP := 0.35            # доля удержания, пока держит за ворот (дальше — поднимает)
+const THROW_UP := 0.8               # к этой доле удержания соперник поднят полностью
+
+
+## Доля удержания в броске 0…1 (по оставшимся тикам бросающего) или -1, если это не обычный захват.
+static func throw_progress(a: Fighter) -> float:
+	if a.state != Fighter.State.THROWING or a.move < 0:
+		return -1.0
+	var m := a.move_data()
+	if not m.has("grab"):
+		return -1.0
+	return clampf(1.0 - float(a.stun) / maxi(int(m.grab.hold), 1), 0.0, 1.0)
+
+
 func _hold_position(a: Fighter, d: Fighter) -> void:
 	d.x = a.x + a.facing * (a.push_half() + d.push_half())
-	d.y = maxi(d.y - HOLD_DROP * SUB, 0)
+	var t := throw_progress(a)
+	if t >= 0.0 and a.y == 0:
+		d.y = int(THROW_LIFT * SUB * smoothstep(THROW_GRIP, THROW_UP, t))
+	else:
+		d.y = maxi(d.y - HOLD_DROP * SUB, 0)
 	d.x = clampi(d.x, d.push_half(), ARENA_WIDTH * SUB - d.push_half())
 
 

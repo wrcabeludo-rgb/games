@@ -26,6 +26,10 @@
            первый кадр листа совмещается с образцом по силуэту, сдвиг применяется ко всем кадрам листа.
            Например, новая стойка — по первому кадру удара, иначе при переходе стойка → удар боец прыгает вбок.
   align_axes: "x" (по умолчанию) или "xy".
+  frame_scale: {"<кадр с 1>": множитель} — поправка масштаба отдельных кадров (нейросеть рисует лежащего
+           мельче стоящего: сравнивайте размер головы со стойкой).
+  align_frame: какой кадр листа (с 1) совмещать с образцом — по умолчанию первый (у вставания — последний,
+           он совпадает со стойкой).
 """
 import json
 import re
@@ -263,31 +267,41 @@ def main() -> int:
             scale = HEIGHT[who] / float(np.median([f.height for f in frames]))
         scales[name] = scale
         meta = {"frames": []}
-        shift = None   # поправка опорных точек по образцу (align_to)
         # Ударные кадры (с 1): hit — первый кадр активной фазы, hit_end — последний.
         for k in ("hit", "hit_end", "reverse", "air_frames"):
             if k in opt:
                 meta[k] = opt[k]
+        done = []
         for i, f in enumerate(frames, 1):
-            f = f.resize((max(1, round(f.width * scale)), max(1, round(f.height * scale))), Image.LANCZOS)
+            k_i = scale * float(opt.get("frame_scale", {}).get(str(i), 1.0))
+            f = f.resize((max(1, round(f.width * k_i)), max(1, round(f.height * k_i))), Image.LANCZOS)
             f = sharpen(f)
             if ref is None:
                 rear, mid, bottom = feet(f)
                 cx, cy = centroid(f)
                 ref = {"center_offset": mid - rear, "body_dx": mid - cx, "body_dy": bottom - cy}
             px, py = pivot(f, opt.get("pivot_y", "feet"), ref)
-            if "align_to" in opt and shift is None:
-                base, idx = opt["align_to"].split(":")
-                bmeta = json.loads((out / f"{base}.json").read_text())["frames"][int(idx) - 1]
-                bimg = Image.open(out / bmeta["file"]).convert("RGBA")
-                dx, dy = align_shift(f, bimg)
-                # Точка образца bmeta.pivot в координатах этого кадра — (pivot - (dx, dy)).
-                shift = (bmeta["pivot"][0] - dx - px, bmeta["pivot"][1] - dy - py)
-                if opt.get("align_axes", "x") == "x":
-                    shift = (shift[0], 0.0)
-                print(f"  {name}: выровнен по {opt['align_to']}, сдвиг опорной точки {shift[0]:+.0f}, {shift[1]:+.0f}")
-            if shift is not None:
-                px, py = px + shift[0], py + shift[1]
+            done.append([f, px, py])
+        if "align_to" in opt:
+            k = int(opt.get("align_frame", 1)) - 1
+            f, px, py = done[k]
+            base, idx = opt["align_to"].split(":")
+            bmeta = json.loads((out / f"{base}.json").read_text())["frames"][int(idx) - 1]
+            bimg = Image.open(out / bmeta["file"]).convert("RGBA")
+            dx, dy = align_shift(f, bimg)
+            # Точка образца bmeta.pivot в координатах этого кадра — (pivot - (dx, dy)).
+            shift = (bmeta["pivot"][0] - dx - px, bmeta["pivot"][1] - dy - py)
+            if opt.get("align_axes", "x") == "x":
+                shift = (shift[0], 0.0)
+            print(f"  {name}: кадр {k + 1} выровнен по {opt['align_to']}, сдвиг опорной точки {shift[0]:+.0f}, {shift[1]:+.0f}")
+            for d in done:
+                d[1] += shift[0]
+                d[2] += shift[1]
+            if name == "idle":
+                # Стойку выровняли по старому образцу — остальные листы считаем в той же системе.
+                ref["center_offset"] += shift[0]
+                ref["body_dx"] += shift[0]
+        for i, (f, px, py) in enumerate(done, 1):
             f.save(out / f"{name}_{i}.png", optimize=True)
             meta["frames"].append({"file": f"{name}_{i}.png", "pivot": [round(px), round(py)],
                                    "size": [f.width, f.height]})

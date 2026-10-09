@@ -1,0 +1,48 @@
+{
+ "frames": [
+  {
+   "file": "thrown_1.png",
+   "pivot": [
+    168,
+    596
+   ],
+   "size": [
+    338,
+    601
+   ]
+  },
+  {
+   "file": "thrown_2.png",
+   "pivot": [
+    164,
+    557
+   ],
+   "size": [
+    329,
+    562
+   ]
+  },
+  {
+   "file": "thrown_3.png",
+   "pivot": [
+    324,
+    429
+   ],
+   "size": [
+    650,
+    434
+   ]
+  },
+  {
+   "file": "thrown_4.png",
+   "pivot": [
+    182,
+    617
+   ],
+   "size": [
+    366,
+    618
+   ]
+  }
+ ]
+}
