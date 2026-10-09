@@ -28,6 +28,7 @@
   align_axes: "x" (по умолчанию) или "xy".
   frame_scale: {"<кадр с 1>": множитель} — поправка масштаба отдельных кадров (нейросеть рисует лежащего
            мельче стоящего: сравнивайте размер головы со стойкой).
+  align_top: доля высоты фигуры сверху, по которой совмещать (0.55 — голова и корпус, для ударов ногой).
   align_frame: какой кадр листа (с 1) совмещать с образцом — по умолчанию первый (у вставания — последний,
            он совпадает со стойкой).
 """
@@ -171,10 +172,16 @@ def pivot(frame: Image.Image, mode: str, ref: dict):
     return rear + ref["center_offset"], bottom
 
 
-def align_shift(frame: Image.Image, ref: Image.Image):
-    """Сдвиг (dx, dy), при котором силуэт frame лучше всего совпадает с силуэтом ref (кросс-корреляция масок)."""
+def align_shift(frame: Image.Image, ref: Image.Image, top: float = 1.0):
+    """Сдвиг (dx, dy), при котором силуэт frame лучше всего совпадает с силуэтом ref (кросс-корреляция масок).
+    top < 1 — сравнивать только верхнюю часть фигур (голова и корпус: в ударе ногой ноги в другом положении)."""
     a = (np.asarray(frame.getchannel("A")) > 24).astype(np.float32)
     b = (np.asarray(ref.getchannel("A")) > 24).astype(np.float32)
+    if top < 1.0:
+        for m in (a, b):
+            ys = np.where(m.any(1))[0]
+            if len(ys):
+                m[int(ys.min() + (ys.max() - ys.min()) * top):] = 0
     h = a.shape[0] + b.shape[0]
     w = a.shape[1] + b.shape[1]
     fa = np.fft.rfft2(a, (h, w))
@@ -288,7 +295,7 @@ def main() -> int:
             base, idx = opt["align_to"].split(":")
             bmeta = json.loads((out / f"{base}.json").read_text())["frames"][int(idx) - 1]
             bimg = Image.open(out / bmeta["file"]).convert("RGBA")
-            dx, dy = align_shift(f, bimg)
+            dx, dy = align_shift(f, bimg, float(opt.get("align_top", 1.0)))
             # Точка образца bmeta.pivot в координатах этого кадра — (pivot - (dx, dy)).
             shift = (bmeta["pivot"][0] - dx - px, bmeta["pivot"][1] - dy - py)
             if opt.get("align_axes", "x") == "x":
