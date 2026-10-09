@@ -29,6 +29,8 @@ var pause := PauseView.new()
 var _mask := 0
 ## Аркада: текущая лестница (null — обычный бой) и кнопки прошлого тика (для нажатий после матча).
 var arcade: Arcade = null
+## Арена текущего боя (Arenas): «--arena=id» для снимков, иначе выбирается на экране «ПРОТИВ».
+var arena_id := ""
 var _arcade_prev := 0
 
 
@@ -92,6 +94,8 @@ func _ready() -> void:
 		elif arg.begins_with("--lang="):
 			Settings.lang = arg.trim_prefix("--lang=")
 			Settings.apply()
+		elif arg.begins_with("--arena="):
+			arena_id = arg.trim_prefix("--arena=")
 		elif arg.begins_with("--demo-ai="):
 			ai.level = int(arg.trim_prefix("--demo-ai=")) as AiController.Level
 	# «--screen=title|select [--picked]» — снимок меню (вместе с --screenshot).
@@ -127,6 +131,9 @@ func _ready() -> void:
 			menu.open_ending(chars[0])
 	else:
 		menu.visible = false
+	if arena_id == "":
+		arena_id = Arenas.for_versus(chars[0], chars[1], 1)
+	_apply_arena()
 
 
 func _physics_process(_delta: float) -> void:
@@ -278,6 +285,7 @@ func _open_menu(screen: MenuView.Screen) -> void:
 
 func _start_fight(picked: PackedStringArray) -> void:
 	chars = picked
+	arena_id = menu.arena
 	if arcade != null:
 		ai.level = arcade.ai_level()
 	in_menu = false
@@ -287,7 +295,13 @@ func _start_fight(picked: PackedStringArray) -> void:
 	_reset()
 
 
+func _apply_arena() -> void:
+	arena.set_arena(arena_id)
+	hud.arena_label = Loc.t(Arenas.data(arena_id).name)
+
+
 func _reset() -> void:
+	_apply_arena()
 	sim = Sim.new(true, chars)
 	sim.auto_rematch = arcade == null
 	if training and arcade == null:

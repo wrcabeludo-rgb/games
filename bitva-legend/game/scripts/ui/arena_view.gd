@@ -11,6 +11,8 @@ var _sim: Sim
 var _cam_x := 0.0
 var _shake := Vector2.ZERO
 var _scenery := ArenaScenery.new()
+## Текущая арена (Arenas); фон пересоздаётся только при смене.
+var arena_id := Arenas.DEFAULT
 var sprites := FighterSprites.new()
 ## Спрайты бойцов (где они уже есть); F7 — переключить на заглушки и обратно.
 var use_sprites := true
@@ -21,6 +23,12 @@ func _ready() -> void:
 	# (когти, кружево, края плаща) рвутся лесенкой и мерцают.
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	_font.font_names = PackedStringArray(["Segoe UI", "Arial", "DejaVu Sans", "Noto Sans"])
+
+
+func set_arena(id: String) -> void:
+	if id != _scenery.id:
+		_scenery = ArenaScenery.new(id)
+	arena_id = _scenery.id
 
 
 func show_state(sim: Sim) -> void:

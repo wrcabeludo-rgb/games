@@ -1,16 +1,15 @@
 class_name ArenaScenery
 extends RefCounted
-## Арена «Перекрёсток миров»: слои фона с параллаксом и анимацией.
-## Слева — светлая Русь (закат, берёзы, холмы с куполами), справа — тёмные Карпаты
-## (луна, звёзды, сухие деревья, замок). Посередине — камень на перепутье.
+## Фон арены: слои с параллаксом и анимацией. Какая арена — Arenas (у каждой своя папка арта).
+## Первая арена, «Перепутье»: слева светлая Русь (закат, берёзы, холмы с куполами), справа тёмные Карпаты
+## (луна, звёзды, сухие деревья, замок), посередине — камень на перепутье.
 ##
-## Если в res://art/arena/ лежит картинка слоя — рисуется она (см. docs/ART_ARENA.md),
-## иначе — заглушка из фигур. Всё только для красоты: в симуляции боя не участвует.
+## Если в папке арены лежит картинка слоя — рисуется она (см. docs/ART_ARENA.md),
+## иначе — заглушка из фигур по описанию арены (Arenas.LIST). В симуляции боя не участвует.
 ##
 ## Параллакс: слой с коэффициентом k сдвигается на k от движения камеры.
 ## k = 0 — неподвижен (небо), k = 1 — вместе с бойцами (земля), k > 1 — передний план.
 
-const ART_DIR := "res://art/arena/"
 const K_SKY := 0.04
 const K_MOON := 0.07
 const K_CLOUDS := 0.14
@@ -31,10 +30,14 @@ const STONE_BACK := 26.0    # насколько выше линии бойцо�
 const STONE_SINK := 16.0    # камень утоплен в землю, px
 const FRONT_RISE := 95.0    # передний план поднимается над линией земли, px
 
-const SKY_LIGHT := Color(0.98, 0.74, 0.4)    # закат над Русью
-const SKY_DARK := Color(0.3, 0.07, 0.17)     # ночь над Карпатами
-const SKY_TOP := Color(0.08, 0.07, 0.15)
 const INK := Color(0.1, 0.06, 0.1)
+
+## Какая арена и её описание (цвета заглушки, ориентиры, деревья).
+var id := Arenas.DEFAULT
+var _d: Dictionary = Arenas.data(Arenas.DEFAULT)
+var _sky_top := Color(0.08, 0.07, 0.15)
+var _sky_light := Color(0.98, 0.74, 0.4)     # горизонт слева
+var _sky_dark := Color(0.3, 0.07, 0.17)      # горизонт справа
 
 var ground_y := 620.0
 var view := Vector2(1280, 720)
@@ -50,7 +53,12 @@ var _raven_frames: Array[Texture2D] = []
 var _halo := _make_halo()
 
 
-func _init() -> void:
+func _init(arena_id := Arenas.DEFAULT) -> void:
+	id = arena_id if Arenas.LIST.has(arena_id) else Arenas.DEFAULT
+	_d = Arenas.data(id)
+	_sky_top = _d.sky[0]
+	_sky_light = _d.sky[1]
+	_sky_dark = _d.sky[2]
 	for name in ["sky", "moon", "mountains", "forest", "stone", "ground", "foreground"]:
 		var tex := _load(name)
 		if tex != null:
@@ -80,8 +88,8 @@ static func _make_halo() -> Texture2D:
 	return tex
 
 
-static func _load(name: String) -> Texture2D:
-	var path := ART_DIR + name + ".png"
+func _load(name: String) -> Texture2D:
+	var path: String = _d.dir + name + ".png"
 	return load(path) if ResourceLoader.exists(path) else null
 
 
@@ -136,13 +144,19 @@ func draw_front(c: CanvasItem) -> void:
 		var top := maxf(ground_y - FRONT_RISE, view.y - h + 4.0)
 		_draw_swaying(c, tex, Rect2(x0, top, w, h), Color(0.78, 0.76, 0.8), 7.0, 1.9)
 		return
+	if _d.get("glitch", false):
+		_draw_glitch_front(c)
+		return
+	if _d.get("indoor", false):
+		return
+	var grass: Color = (_d.ground as Color).lerp(Color(0.16, 0.24, 0.1), 0.6).darkened(0.3)
 	var i := 0
 	var x := 0.0
 	while x < w:
 		var sx := x0 + x
 		if sx > -80 and sx < view.x + 80:
 			var dark := darkness(k, x)
-			var col := Color(0.16, 0.22, 0.12).lerp(Color(0.09, 0.06, 0.09), dark)
+			var col := grass.lerp(grass.darkened(0.4), dark)
 			var sway := sin(t * 1.6 + i * 0.7) * 6.0
 			for b in 5:
 				var bx := sx + (b - 2) * 7.0
@@ -166,12 +180,15 @@ func _draw_sky(c: CanvasItem) -> void:
 	var w := view.x / steps
 	for i in steps:
 		var lx := (i + 0.5) * w - layer_x(k)
-		var horizon := SKY_LIGHT.lerp(SKY_DARK, darkness(k, lx))
-		c.draw_rect(Rect2(i * w, 0, w + 1, ground_y * 0.35), SKY_TOP.lerp(horizon, 0.25))
-		c.draw_rect(Rect2(i * w, ground_y * 0.35, w + 1, ground_y * 0.35), SKY_TOP.lerp(horizon, 0.6))
-		c.draw_rect(Rect2(i * w, ground_y * 0.7, w + 1, ground_y * 0.3), SKY_TOP.lerp(horizon, 0.9))
+		var horizon := _sky_light.lerp(_sky_dark, darkness(k, lx))
+		c.draw_rect(Rect2(i * w, 0, w + 1, ground_y * 0.35), _sky_top.lerp(horizon, 0.25))
+		c.draw_rect(Rect2(i * w, ground_y * 0.35, w + 1, ground_y * 0.35), _sky_top.lerp(horizon, 0.6))
+		c.draw_rect(Rect2(i * w, ground_y * 0.7, w + 1, ground_y * 0.3), _sky_top.lerp(horizon, 0.9))
+	if _d.get("indoor", false):
+		_draw_hall_wall(c)
+		return
 	# Звёзды на тёмной стороне мерцают.
-	for s in 60:
+	for s in (60 if _d.stars else 0):
 		var lx := float((s * 7919) % 1000) / 1000.0 * layer_w(k)
 		var ly := float((s * 104729) % 1000) / 1000.0 * ground_y * 0.55
 		var dark := darkness(k, lx)
@@ -183,7 +200,15 @@ func _draw_sky(c: CanvasItem) -> void:
 
 func _draw_moon(c: CanvasItem) -> void:
 	var k := K_MOON
-	var pos := Vector2(layer_x(k) + layer_w(k) * 0.8, 215)
+	var kind: String = _d.light[0]
+	if kind == "none" or (_d.get("indoor", false) and not _tex.has("moon")):
+		return
+	var pos := Vector2(layer_x(k) + layer_w(k) * float(_d.light[1]), 215)
+	if kind == "sun" and not _tex.has("moon"):
+		var glow := Color(1.0, 0.9, 0.65)
+		c.draw_texture_rect(_halo, Rect2(pos - Vector2(260, 260), Vector2(520, 520)), false, Color(glow, 0.9))
+		c.draw_circle(pos, 58, Color(1.0, 0.93, 0.7))
+		return
 	var pulse := 0.5 + 0.5 * sin(t * 0.8)
 	# Ореол: мягкий радиальный градиент (без ступенек), слегка дышит.
 	var r := 230.0 + pulse * 12.0
@@ -201,6 +226,8 @@ func _draw_moon(c: CanvasItem) -> void:
 
 ## Тучи плывут вправо (к тьме) и по кругу возвращаются.
 func _draw_clouds(c: CanvasItem) -> void:
+	if _d.get("indoor", false) or _d.get("glitch", false):
+		return
 	var k := K_CLOUDS
 	var w := layer_w(k)
 	for i in 8:
@@ -232,24 +259,136 @@ func _draw_mountains(c: CanvasItem) -> void:
 		var wide: bool = float(_tex.mountains.get_width()) / _tex.mountains.get_height() > 5.0
 		_draw_strip(c, _tex.mountains, k, ground_y - 95 if wide else ground_y + 70)
 		return
-	var pts := PackedVector2Array([Vector2(x0, ground_y)])
-	var x := 0.0
-	while x <= w:
-		var dark := darkness(k, x)
-		# Слева пологие холмы, справа — острые пики.
-		var soft := 90.0 + 35.0 * sin(x * 0.009) + 20.0 * sin(x * 0.023 + 1.1)
-		var sharp := 150.0 + 70.0 * absf(sin(x * 0.012)) + 35.0 * absf(sin(x * 0.037 + 0.5))
-		pts.append(Vector2(x0 + x, ground_y - lerpf(soft, sharp, smoothstep(0.35, 0.75, dark))))
-		x += 16.0
-	pts.append(Vector2(x0 + w, ground_y))
+	var col: Color = _d.hills
+	if not _d.get("indoor", false):
+		var pts := PackedVector2Array([Vector2(x0, ground_y)])
+		var x := 0.0
+		while x <= w:
+			var dark := darkness(k, x)
+			var left := _hill_height(_d.shape[0], x)
+			var right := _hill_height(_d.shape[1], x)
+			pts.append(Vector2(x0 + x, ground_y - lerpf(left, right, smoothstep(0.35, 0.75, dark))))
+			x += 16.0
+		pts.append(Vector2(x0 + w, ground_y))
+		c.draw_colored_polygon(pts, col)
+		# Море: блики на воде.
+		for side in 2:
+			if _d.shape[side] == "sea":
+				for i in 14:
+					var wx := x0 + w * (0.04 + 0.03 * i + 0.55 * side)
+					var wy := ground_y - 30.0 - 12.0 * (i % 3)
+					c.draw_line(Vector2(wx + sin(t + i) * 6, wy), Vector2(wx + 26 + sin(t + i) * 6, wy), Color(1, 1, 1, 0.35), 2)
+	for m in _d.marks:
+		_draw_mark(c, m[0], Vector2(x0 + w * float(m[1]), ground_y), float(m[2]), col.darkened(0.25))
+
+
+## Высота дальнего плана заглушки в точке x слоя для вида рельефа.
+func _hill_height(shape: String, x: float) -> float:
+	match shape:
+		"sharp":
+			return 150.0 + 70.0 * absf(sin(x * 0.012)) + 35.0 * absf(sin(x * 0.037 + 0.5))
+		"flat":
+			return 40.0 + 6.0 * sin(x * 0.01)
+		"dunes":
+			return 70.0 + 30.0 * sin(x * 0.006) + 12.0 * sin(x * 0.019 + 1.3)
+		"sea":
+			return 55.0 + 3.0 * sin(x * 0.05 + t)
+	return 90.0 + 35.0 * sin(x * 0.009) + 20.0 * sin(x * 0.023 + 1.1)
+
+
+## Ориентир дальнего плана (силуэт): p — точка на линии земли.
+func _draw_mark(c: CanvasItem, kind: String, p: Vector2, k: float, col: Color) -> void:
+	var dark := INK.lerp(col, 0.4)
+	match kind:
+		"church":
+			var church := p + Vector2(0, -112)
+			c.draw_rect(Rect2(church + Vector2(-16, -30), Vector2(32, 30)), col.darkened(0.15))
+			c.draw_circle(church + Vector2(0, -36), 13, col.darkened(0.15))
+			c.draw_line(church + Vector2(0, -49), church + Vector2(0, -64), col.darkened(0.15), 3)
+		"castle":
+			_draw_castle(c, p + Vector2(0, -190))
+		"temple", "ruins":
+			var base := p + Vector2(0, -60 * k)
+			var wdt := 150.0 * k
+			c.draw_rect(Rect2(base + Vector2(-wdt / 2, 0), Vector2(wdt, 12 * k)), col.lightened(0.35))
+			for i in 6:
+				var cx := base.x - wdt / 2 + 10 * k + i * (wdt - 20 * k) / 5.0
+				var hgt := 90.0 * k * (1.0 if kind == "temple" or i % 2 == 0 else 0.5)
+				c.draw_rect(Rect2(cx - 5 * k, base.y - hgt, 10 * k, hgt), col.lightened(0.35))
+			if kind == "temple":
+				c.draw_colored_polygon(PackedVector2Array([base + Vector2(-wdt / 2 - 8, -90 * k), base + Vector2(0, -130 * k),
+					base + Vector2(wdt / 2 + 8, -90 * k)]), col.lightened(0.3))
+		"rocks":
+			c.draw_colored_polygon(PackedVector2Array([p + Vector2(-90, 0) * k, p + Vector2(-40, -170) * k, p + Vector2(10, -120) * k,
+				p + Vector2(60, -200) * k, p + Vector2(110, 0) * k]), dark)
+		"tower":
+			c.draw_rect(Rect2(p + Vector2(-18, -260) * k, Vector2(36, 260) * k), dark)
+			c.draw_colored_polygon(PackedVector2Array([p + Vector2(-26, -260) * k, p + Vector2(0, -330) * k, p + Vector2(26, -260) * k]), dark)
+			c.draw_rect(Rect2(p + Vector2(-4, -220) * k, Vector2(8, 12) * k), Color(0.6, 1.0, 0.5, 0.5 + 0.4 * sin(t * 2.0)))
+		"pyramid":
+			c.draw_colored_polygon(PackedVector2Array([p + Vector2(-150, 0) * k, p + Vector2(0, -170) * k, p + Vector2(150, 0) * k]),
+				col.darkened(0.1))
+			c.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -170) * k, p + Vector2(150, 0) * k, p + Vector2(30, 0) * k]),
+				col.darkened(0.3))
+		"cloud_palace":
+			var cp := p + Vector2(0, -330)
+			for i in 5:
+				c.draw_circle(cp + Vector2((i - 2) * 40, 10 + absf(i - 2.0) * 6), 34, Color(1, 1, 1, 0.7))
+			c.draw_rect(Rect2(cp + Vector2(-40, -50), Vector2(80, 40)), Color(0.85, 0.3, 0.2))
+			c.draw_colored_polygon(PackedVector2Array([cp + Vector2(-62, -48), cp + Vector2(0, -82), cp + Vector2(62, -48)]), Color(0.95, 0.75, 0.3))
+		"fort":
+			for i in 14:
+				var px := p.x + (i - 7) * 22.0 * k
+				c.draw_colored_polygon(PackedVector2Array([Vector2(px - 10 * k, p.y), Vector2(px - 10 * k, p.y - 80 * k),
+					Vector2(px, p.y - 96 * k), Vector2(px + 10 * k, p.y - 80 * k), Vector2(px + 10 * k, p.y)]), Color(0.42, 0.3, 0.2))
+			c.draw_rect(Rect2(p + Vector2(-30, -190) * k, Vector2(60, 110) * k), Color(0.38, 0.26, 0.18))
+			c.draw_colored_polygon(PackedVector2Array([p + Vector2(-42, -190) * k, p + Vector2(0, -235) * k, p + Vector2(42, -190) * k]), Color(0.3, 0.2, 0.14))
+		"window":
+			var wc := p + Vector2(0, -330)
+			c.draw_rect(Rect2(wc + Vector2(-45, 0), Vector2(90, 170)), Color(0.15, 0.12, 0.3))
+			c.draw_circle(wc, 45, Color(0.15, 0.12, 0.3))
+			c.draw_circle(wc + Vector2(10, 40), 22, Color(0.9, 0.88, 0.8, 0.9))
+			c.draw_line(wc + Vector2(0, -45), wc + Vector2(0, 170), dark, 5)
+		"throne":
+			c.draw_rect(Rect2(p + Vector2(-40, -170), Vector2(80, 170)), Color(0.4, 0.06, 0.1))
+			c.draw_colored_polygon(PackedVector2Array([p + Vector2(-40, -170), p + Vector2(0, -230), p + Vector2(40, -170)]), Color(0.4, 0.06, 0.1))
+		"statue":
+			c.draw_rect(Rect2(p + Vector2(-30, -40) * k, Vector2(60, 40) * k), col.lightened(0.2))
+			c.draw_rect(Rect2(p + Vector2(-16, -170) * k, Vector2(32, 130) * k), col.lightened(0.3))
+			c.draw_circle(p + Vector2(0, -186) * k, 18 * k, col.lightened(0.3))
+		"cave":
+			c.draw_circle(p + Vector2(0, -60), 120, dark)
+			c.draw_circle(p + Vector2(0, -40), 80, Color(0.03, 0.05, 0.05))
+		"giant":
+			c.draw_rect(Rect2(p + Vector2(-30, -220), Vector2(60, 220)), col.darkened(0.2))
+			c.draw_circle(p + Vector2(0, -320), 90, Color(0.35, 0.45, 0.7, 0.8))
+		"gold":
+			for i in 7:
+				c.draw_circle(p + Vector2((i - 3) * 22, -12 - (3 - absi(i - 3)) * 14), 18, Color(0.9, 0.72, 0.2))
+		"waterfall":
+			c.draw_rect(Rect2(p + Vector2(-40, -380), Vector2(80, 380)), Color(0.6, 0.85, 1.0, 0.75))
+			for i in 6:
+				var yy := fmod(t * 120.0 + i * 60.0, 380.0)
+				c.draw_line(p + Vector2(-30 + i * 12, -380 + yy), p + Vector2(-30 + i * 12, -350 + yy), Color(1, 1, 1, 0.6), 3)
+		"scales":
+			var top := p + Vector2(0, -300) * k
+			c.draw_line(p, top, Color(0.85, 0.7, 0.3), 8)
+			var tilt := sin(t * 0.7) * 10.0
+			c.draw_line(top + Vector2(-110, tilt) * k, top + Vector2(110, -tilt) * k, Color(0.85, 0.7, 0.3), 6)
+			for side in [-1.0, 1.0]:
+				var pan := top + Vector2(side * 110, -side * tilt + 70) * k
+				c.draw_line(top + Vector2(side * 110, -side * tilt) * k, pan, Color(0.85, 0.7, 0.3), 2)
+				c.draw_colored_polygon(PackedVector2Array([pan + Vector2(-34, 0) * k, pan + Vector2(34, 0) * k, pan + Vector2(0, 20) * k]), Color(0.85, 0.7, 0.3))
+		"screens":
+			for i in 9:
+				var r := Rect2(p + Vector2((i % 3 - 1) * 70 - 28, -110 - (i / 3) * 120) * k, Vector2(56, 100) * k)
+				var flick := 0.5 + 0.5 * sin(t * 3.0 + i * 1.7)
+				c.draw_rect(r, Color(0.05, 0.05, 0.1))
+				c.draw_rect(r.grow(-4), Color(0.2, 0.75, 0.95, 0.3 + 0.5 * flick))
+
+
+func _draw_castle(c: CanvasItem, castle: Vector2) -> void:
 	var col := Color(0.42, 0.3, 0.32).lerp(Color(0.15, 0.1, 0.17), 0.5)
-	c.draw_colored_polygon(pts, col)
-	# Купола церкви на светлом холме и замок на тёмной скале.
-	var church := Vector2(x0 + w * 0.12, ground_y - 112)
-	c.draw_rect(Rect2(church + Vector2(-16, -30), Vector2(32, 30)), col.darkened(0.15))
-	c.draw_circle(church + Vector2(0, -36), 13, col.darkened(0.15))
-	c.draw_line(church + Vector2(0, -49), church + Vector2(0, -64), col.darkened(0.15), 3)
-	var castle := Vector2(x0 + w * 0.86, ground_y - 190)
 	for i in 3:
 		var tx := castle.x + (i - 1) * 34.0
 		var th := 60.0 + 25.0 * (i % 2)
@@ -262,6 +401,9 @@ func _draw_mountains(c: CanvasItem) -> void:
 
 ## Вороны кружат над лесом; часть летит в другую сторону.
 func _draw_ravens(c: CanvasItem) -> void:
+	var birds: String = _d.birds
+	if birds == "none":
+		return
 	var k := K_RAVENS
 	var w := layer_w(k)
 	for i in 5:
@@ -274,6 +416,17 @@ func _draw_ravens(c: CanvasItem) -> void:
 		var y := 150.0 + 45.0 * i + sin(t * 1.3 + i) * 18.0
 		var pos := Vector2(layer_x(k) + lx, y)
 		var scale := 0.7 + 0.12 * (i % 3)
+		if birds == "gulls":
+			# Чайки: светлая «галочка», медленный взмах.
+			var fl := sin(t * 4.0 + i * 1.3)
+			for side in [-1.0, 1.0]:
+				c.draw_line(pos, pos + Vector2(side * 18.0, -8.0 * fl - 4.0) * scale, Color(0.95, 0.95, 0.92), 3)
+			continue
+		if birds == "bats":
+			var fb := sin(t * 14.0 + i * 1.7)
+			for side in [-1.0, 1.0]:
+				c.draw_colored_polygon(PackedVector2Array([pos, pos + Vector2(side * 16, -10 * fb) * scale, pos + Vector2(side * 6, 6) * scale]), INK)
+			continue
 		if not _raven_frames.is_empty():
 			var tex := _raven_frames[int(t * 1.6 * _raven_frames.size() + i * 2) % _raven_frames.size()]  # взмах ≈ 0,6 с при любом числе кадров
 			var sz := Vector2(tex.get_width(), tex.get_height()) * 0.24 * scale
@@ -309,7 +462,10 @@ func _draw_forest(c: CanvasItem) -> void:
 		if base.x > -150 and base.x < view.x + 150:
 			var hgt := 170.0 + 50.0 * ((i * 13) % 4)
 			var sway := sin(t * 1.1 + i * 0.9) * 5.0
-			if dark < 0.5:
+			var kind: String = _d.trees[0] if dark < 0.5 else _d.trees[1]
+			if kind != "birch" and kind != "dead":
+				_draw_tree(c, kind, base, hgt, sway, i)
+			elif kind == "birch":
 				# Берёза: белый ствол, крона.
 				var crown := Color(0.32, 0.42, 0.2).lerp(Color(0.5, 0.38, 0.2), 0.3)
 				c.draw_line(base, base + Vector2(0, -hgt), Color(0.85, 0.82, 0.74), 9)
@@ -335,6 +491,8 @@ func _draw_forest(c: CanvasItem) -> void:
 
 ## Низкий туман у земли медленно ползёт.
 func _draw_fog(c: CanvasItem) -> void:
+	if _d.get("glitch", false):
+		return
 	var k := K_FOG
 	var w := layer_w(k)
 	for i in 9:
@@ -366,8 +524,18 @@ func _draw_ground(c: CanvasItem) -> void:
 		if bottom < view.y:
 			c.draw_rect(Rect2(0, bottom, view.x, view.y - bottom + 1), Color(0.15, 0.12, 0.1))
 		return
-	c.draw_rect(Rect2(0, ground_y, view.x, view.y - ground_y), Color(0.2, 0.17, 0.16))
-	c.draw_line(Vector2(0, ground_y), Vector2(view.x, ground_y), Color(0.32, 0.28, 0.26), 3)
+	var gcol: Color = _d.ground
+	c.draw_rect(Rect2(0, ground_y, view.x, view.y - ground_y), gcol)
+	c.draw_line(Vector2(0, ground_y), Vector2(view.x, ground_y), gcol.lightened(0.2), 3)
+	if _d.get("glitch", false):
+		# Пол Ленты: светящаяся сетка, уходящая вдаль.
+		for gx in range(-10, 30):
+			var px := x0 + gx * 120.0
+			c.draw_line(Vector2(px, ground_y), Vector2(px - 60, view.y), Color(0.2, 0.75, 0.95, 0.35), 2)
+		for gy in 4:
+			var py := ground_y + 12.0 + gy * gy * 10.0
+			c.draw_line(Vector2(0, py), Vector2(view.x, py), Color(0.2, 0.75, 0.95, 0.25), 2)
+		return
 	# Колеи дороги и метки — видно движение камеры.
 	var first := int(floor((cam_x - view.x / 2.0) / 100.0)) * 100
 	for wx in range(first, int(cam_x + view.x / 2.0) + 100, 100):
@@ -377,6 +545,8 @@ func _draw_ground(c: CanvasItem) -> void:
 
 ## Камень на перепутье — в центре арены, на линии бойцов.
 func _draw_stone(c: CanvasItem) -> void:
+	if not _d.get("stone", false):
+		return
 	# Камень дальше, за спиной бойцов: свой параллакс, стоит выше по дороге, чуть меньше и в дымке.
 	var p := Vector2(layer_x(K_STONE) + layer_w(K_STONE) / 2.0, ground_y - STONE_BACK)
 	if _tex.has("stone"):
@@ -399,6 +569,72 @@ func _draw_stone(c: CanvasItem) -> void:
 	c.draw_circle(p + Vector2(-34, -20), 14, Color(0.3, 0.42, 0.22, 0.8))  # мох
 	for i in 4:
 		c.draw_line(p + Vector2(-30, -116 + i * 18), p + Vector2(30, -116 + i * 18), Color(0.28, 0.27, 0.29), 2)
+
+
+## Дерево заглушки по виду (кроме берёзы и сухого дерева — они рисуются на месте).
+func _draw_tree(c: CanvasItem, kind: String, base: Vector2, hgt: float, sway: float, i: int) -> void:
+	match kind:
+		"cypress", "pine":
+			var col := Color(0.12, 0.22, 0.14) if kind == "cypress" else Color(0.1, 0.2, 0.16)
+			c.draw_line(base, base + Vector2(0, -30), Color(0.25, 0.16, 0.1), 8)
+			var wdt := 26.0 if kind == "cypress" else 60.0
+			c.draw_colored_polygon(PackedVector2Array([base + Vector2(-wdt, -20), base + Vector2(sway, -hgt - 20), base + Vector2(wdt, -20)]), col)
+		"olive", "apple", "peach":
+			var crown := {"olive": Color(0.45, 0.5, 0.35), "apple": Color(0.25, 0.42, 0.18), "peach": Color(0.3, 0.45, 0.2)}[kind] as Color
+			c.draw_line(base, base + Vector2(sway * 0.3 + (8 if kind == "olive" else 0), -hgt * 0.6), Color(0.35, 0.25, 0.18), 10)
+			for b in 4:
+				c.draw_circle(base + Vector2(sway + (b - 1.5) * 26.0, -hgt * 0.65 - (b % 2) * 24.0), 36, crown.darkened(0.06 * b))
+			if kind != "olive":
+				var fruit := Color(1.0, 0.8, 0.2) if kind == "apple" else Color(1.0, 0.6, 0.35)
+				for f in 5:
+					c.draw_circle(base + Vector2(sway + (f - 2) * 20.0, -hgt * 0.62 - (f % 3) * 16.0), 6, fruit)
+		"palm":
+			var top := base + Vector2(sway + 20, -hgt)
+			c.draw_line(base, top, Color(0.5, 0.36, 0.22), 9)
+			for b in 5:
+				var a := PI + PI * b / 4.0
+				c.draw_line(top, top + Vector2.from_angle(a) * 60.0 + Vector2(0, 20), Color(0.25, 0.45, 0.2), 6)
+		"column":
+			var col := (_d.hills as Color).lightened(0.25)
+			c.draw_rect(Rect2(base + Vector2(-22, -hgt - 120), Vector2(44, hgt + 120)), col)
+			c.draw_rect(Rect2(base + Vector2(-30, -hgt - 130), Vector2(60, 14)), col.lightened(0.1))
+			for f in 3:
+				c.draw_line(base + Vector2(-12 + f * 12, -hgt - 116), base + Vector2(-12 + f * 12, 0), col.darkened(0.15), 2)
+		"screen":
+			var r := Rect2(base + Vector2(-30, -hgt), Vector2(60, hgt * 0.8))
+			var flick := 0.5 + 0.5 * sin(t * 4.0 + i)
+			c.draw_rect(r, Color(0.05, 0.05, 0.1))
+			c.draw_rect(r.grow(-5), Color(0.2, 0.75, 0.95, 0.2 + 0.4 * flick))
+
+
+## Зал (храм, замок, Дуат): вместо неба — стена с мягким светом сверху.
+func _draw_hall_wall(c: CanvasItem) -> void:
+	var steps := 12
+	for i in steps:
+		var y0 := ground_y * i / steps
+		c.draw_rect(Rect2(0, y0, view.x, ground_y / steps + 1), _sky_top.lerp(_sky_light, float(i) / steps))
+	# Кладка — сдвигается с параллаксом стены.
+	var x0 := layer_x(K_MOUNTAINS)
+	for row in 10:
+		var y := ground_y - 60.0 - row * 56.0
+		c.draw_line(Vector2(0, y), Vector2(view.x, y), Color(0, 0, 0, 0.12), 2)
+		var off := fmod(x0 + (row % 2) * 70.0, 140.0)
+		var x := off - 140.0
+		while x < view.x:
+			c.draw_line(Vector2(x, y), Vector2(x, y + 56), Color(0, 0, 0, 0.1), 2)
+			x += 140.0
+
+
+## Лента: поверх бойцов — бегущие строки помех и поднимающаяся пиксельная пыль (мир рассыпается).
+func _draw_glitch_front(c: CanvasItem) -> void:
+	for i in 40:
+		var px := fmod(i * 97.0 + sin(i) * 300.0, view.x)
+		var py := view.y - fmod(t * (40.0 + i % 7 * 12.0) + i * 53.0, view.y)
+		var sz := 4.0 + (i % 4) * 3.0
+		var col := [Color(0.2, 0.75, 0.95, 0.6), Color(1, 0.25, 0.35, 0.5), Color(0.95, 0.95, 1, 0.45)][i % 3] as Color
+		c.draw_rect(Rect2(px, py, sz, sz), col)
+	var band := fmod(t * 160.0, view.y + 60.0) - 30.0
+	c.draw_rect(Rect2(0, band, view.x, 3), Color(1, 1, 1, 0.08))
 
 
 ## Слой-полоса: растянут по ширине слоя, низ — у bottom_y.

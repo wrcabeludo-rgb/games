@@ -26,6 +26,8 @@ var show_inputs := false
 var paused := false          # открыта пауза — своя подсказка внизу не нужна
 ## Аркада: подпись «бой N из 7» и своя подсказка после матча (пусто — обычный бой).
 var arcade_label := ""
+## Название арены — показывается во вступлении первого раунда.
+var arena_label := ""
 var match_hint := ""
 var _font: Font = load("res://fonts/RussoOne-Regular.ttf")
 var _title_font: Font = load("res://fonts/RuslanDisplay-Regular.ttf")
@@ -80,6 +82,8 @@ func _draw() -> void:
 		_draw_parry(p, p == 1)
 		_draw_meter(p)
 	_draw_timer()
+	if arena_label != "" and _sim.phase == Sim.Phase.INTRO and _sim.round_num == 1:
+		_text(Vector2(size.x / 2.0, 150), arena_label, 22, Color(1, 1, 1, 0.85), false, true, 2, _title_font)
 	if arcade_label != "" and _sim.phase != Sim.Phase.MATCH_END:
 		_text(Vector2(size.x / 2.0, 104), arcade_label, 15, Color(1, 0.85, 0.3, 0.8), false, true, 1)
 	_draw_super_name()

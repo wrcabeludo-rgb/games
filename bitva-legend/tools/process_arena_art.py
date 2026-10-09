@@ -6,7 +6,9 @@
   - режет листы (тучи, вороны) на отдельные объекты по пустому месту между ними и обрезает поля;
   - приводит размеры к нужным для 1080p.
 
-Запуск: python3 tools/process_arena_art.py <папка с исходниками>
+Запуск: python3 tools/process_arena_art.py <папка с исходниками> [арена]
+Арена — id из game/scripts/ui/arenas.gd (coast, pass, nile, zastava, …, feed); без неё — «Перепутье»
+(game/art/arena/), с ней — game/art/arenas/<арена>/.
 Ожидаемые имена: sky, moon, clouds, mountains, forest, stone, ground, foreground, ravens (.png/.jpg/.webp).
 Полосу (mountains, forest, ground, foreground) можно прислать панелями: forest_1, forest_2, forest_3 — склеятся.
 Отсутствующие слои пропускаются — в игре вместо них останутся заглушки.
@@ -282,10 +284,13 @@ def save(img: Image.Image, name: str) -> None:
 
 
 def main() -> int:
-    if len(sys.argv) != 2:
+    global OUT
+    if len(sys.argv) not in (2, 3):
         print(__doc__)
         return 1
     src = Path(sys.argv[1])
+    if len(sys.argv) == 3 and sys.argv[2] != "crossroads" and "ART_OUT" not in os.environ:
+        OUT = OUT.parent / "arenas" / sys.argv[2]
     done = 0
     if p := find(src, "sky"):
         save(cover(Image.open(p).convert("RGB"), SKY_SIZE), "sky")

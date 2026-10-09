@@ -9,6 +9,8 @@ func _init() -> void:
 	ok = _check("управление: кнопка меняется местами с занятой, раскладка сохраняется", _test_controls()) and ok
 	ok = _check("аркада: семь разных соперников, седьмой — соперник пары, восьмой — Лента", _test_arcade()) and ok
 	ok = _check("аркада: эпилог у каждого бойца на двух языках", _test_endings()) and ok
+	ok = _check("арены: у каждого бойца своя, у каждой пары свой шов, описание полное", _test_arenas()) and ok
+	ok = _check("арены: выбор в бою и в аркаде", _test_arena_choice()) and ok
 	ok = _check("реплики: на каждую победную фразу пары-соперников есть ответ проигравшего", _test_lose_quotes()) and ok
 	print("ИТОГ: " + ("все тесты пройдены" if ok else "есть ошибки"))
 	quit(0 if ok else 1)
@@ -96,6 +98,36 @@ func _test_endings() -> bool:
 			if row.size() != 2 or row[0] == "" or row[1] == "":
 				return false
 	return true
+
+
+func _test_arenas() -> bool:
+	for id in FighterData.CHARACTERS:
+		if not Arenas.LIST.has(Arenas.home(id)) or Arenas.home(id) == Arenas.DEFAULT:
+			return false
+	for key in Arenas.SEAMS:
+		if not Arenas.LIST.has(Arenas.SEAMS[key]):
+			return false
+	for id in Arenas.LIST:
+		var d: Dictionary = Arenas.LIST[id]
+		for field in ["name", "dir", "sky", "light", "hills", "shape", "marks", "trees", "ground", "birds"]:
+			if not d.has(field):
+				print("  у арены %s нет поля %s" % [id, field])
+				return false
+		if Loc.EN.get(d.name, "") == "":
+			print("  нет перевода названия арены %s" % id)
+			return false
+	return true
+
+
+func _test_arena_choice() -> bool:
+	return Arenas.for_versus("ilya", "dracula", 0) == "crossroads" \
+		and Arenas.for_versus("medusa", "athena", 1) == "coast" \
+		and Arenas.for_versus("ilya", "ilya", 0) == "zastava" \
+		and Arenas.for_versus("ilya", "medusa", 1) == "gorgon_isle" \
+		and Arenas.for_versus("ilya", "medusa", 0) == "zastava" \
+		and Arenas.for_arcade("ilya", "anubis") == "duat" \
+		and Arenas.for_arcade("ilya", "dracula") == "crossroads" \
+		and Arenas.for_arcade("ilya", "lenta") == "feed"
 
 
 func _test_lose_quotes() -> bool:

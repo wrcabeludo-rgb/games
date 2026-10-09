@@ -54,6 +54,8 @@ var title_cursor := 0
 var arcade := false
 ## Аркада: текущая лестница (экран башни) и эпилог.
 var run: Arcade
+## Арена ближайшего боя — выбирается на экране «ПРОТИВ» (Arenas), main берёт её отсюда.
+var arena := Arenas.DEFAULT
 var _ending: Array[String] = []
 var _para := 0
 var _para_tick := 0
@@ -117,7 +119,7 @@ func step(bits: PackedInt32Array) -> void:
 		elif screen == Screen.VERSUS:
 			var total := VS_LINE_START + _dialog.size() * VS_LINE_TICKS + VS_TAIL
 			if tick >= total or (tick > VS_SKIP_AFTER and (press[0] | press[1]) & CONFIRM):
-				fight_requested.emit(PackedStringArray([ROSTER[cursor[0]], ROSTER[cursor[1]]]))
+				fight_requested.emit(PackedStringArray([_id(0), _id(1)]))
 		else:
 			_step_select(press)
 	queue_redraw()
@@ -126,7 +128,10 @@ func step(bits: PackedInt32Array) -> void:
 ## Экран «ПРОТИВ» с репликами бойцов перед боем.
 func start_versus() -> void:
 	picked = [true, true]
-	_dialog = Quotes.intro(ROSTER[cursor[0]], ROSTER[cursor[1]], Time.get_ticks_msec() / 7)
+	var a := _id(0)
+	var b := _id(1)
+	_dialog = Quotes.intro(a, b, Time.get_ticks_msec() / 7)
+	arena = Arenas.for_arcade(a, b) if arcade and run != null else Arenas.for_versus(a, b, Time.get_ticks_msec() % 2)
 	screen = Screen.VERSUS
 	tick = 0
 	visible = true
@@ -162,6 +167,13 @@ func _step_ending(press: int) -> void:
 	if _para >= _ending.size():
 		_para = _ending.size() - 1
 		ending_done.emit()
+
+
+## Боец игрока p на экране «ПРОТИВ»: из сетки, а в аркаде соперник — из лестницы (там есть и босс).
+func _id(p: int) -> String:
+	if p == 1 and arcade and run != null:
+		return run.opponent()
+	return ROSTER[cursor[p]]
 
 
 func _step_select(press: PackedInt32Array) -> void:
@@ -432,7 +444,7 @@ func _draw_versus() -> void:
 	var cx := size.x / 2.0
 	draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, 0.35))
 	for p in 2:
-		var id: String = ROSTER[cursor[p]]
+		var id: String = _id(p)
 		var x := size.x * (0.22 if p == 0 else 0.78)
 		var a := _sprites.anim(id, "select")
 		if not a.is_empty():
@@ -449,6 +461,7 @@ func _draw_versus() -> void:
 		_text_c(Vector2(x, 84), FighterData.get_data(id).name, 36, COLOR_P[p].lightened(0.2), _title_font, 3)
 	var pop := 1.0 + 0.6 * (1.0 - smoothstep(10.0, 26.0, float(tick)))
 	_text_c(Vector2(cx, 300), "ПРОТИВ", int(64 * pop), COLOR_GOLD, _title_font, 4)
+	_text_c(Vector2(cx, 350), Loc.t("Арена: %s") % Loc.t(Arenas.data(arena).name), 18, COLOR_DIM)
 	# Реплики: печатаются по очереди, у края говорящего.
 	for i in _dialog.size():
 		var t0 := VS_LINE_START + i * VS_LINE_TICKS
@@ -456,8 +469,8 @@ func _draw_versus() -> void:
 			break
 		var who: String = _dialog[i][0]
 		var p := i % 2
-		if ROSTER[cursor[0]] != ROSTER[cursor[1]]:
-			p = 0 if ROSTER[cursor[0]] == who else 1
+		if _id(0) != _id(1):
+			p = 0 if _id(0) == who else 1
 		var text: String = _dialog[i][1]
 		var shown := text.left(mini(text.length(), int((tick - t0) * TYPE_SPEED)))
 		var box := Rect2(Vector2(40 if p == 0 else size.x - 40 - 560, 400 + i * 120), Vector2(560, 104))
