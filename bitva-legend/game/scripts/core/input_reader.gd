@@ -4,14 +4,13 @@ extends RefCounted
 ## Это единственное место, где игра обращается к устройствам ввода.
 ## Клавиши проверяются по физическому положению, поэтому работают при любой раскладке.
 
-## Клавиатура: [бит, клавиша] для каждого игрока.
+## Клавиатура: [бит, клавиша] для каждого игрока. Удары и блок первого игрока — из Settings.key_map
+## (переназначаются в настройках), у второго — постоянные.
 const KEYS := [
 	[
 		[InputBits.UP, KEY_W], [InputBits.DOWN, KEY_S],
 		[InputBits.LEFT, KEY_A], [InputBits.RIGHT, KEY_D],
-		[InputBits.LP, KEY_U], [InputBits.HP, KEY_I],
-		[InputBits.LK, KEY_J], [InputBits.HK, KEY_K],
-		[InputBits.BLOCK, KEY_L], [InputBits.START, KEY_ENTER],
+		[InputBits.START, KEY_ENTER],
 	],
 	[
 		[InputBits.UP, KEY_UP], [InputBits.DOWN, KEY_DOWN],
@@ -22,14 +21,8 @@ const KEYS := [
 	],
 ]
 
-## Геймпад (раскладка DualSense / Xbox): [бит, кнопка].
-## Квадрат — ЛР, крест — ЛН, треугольник — СР, круг — СН, R1 — блок.
+## Геймпад (раскладка DualSense / Xbox): [бит, кнопка]. Удары и блок — из Settings.pad_map.
 const PAD_BUTTONS := [
-	[InputBits.LP, JOY_BUTTON_X],
-	[InputBits.LK, JOY_BUTTON_A],
-	[InputBits.HP, JOY_BUTTON_Y],
-	[InputBits.HK, JOY_BUTTON_B],
-	[InputBits.BLOCK, JOY_BUTTON_RIGHT_SHOULDER],
 	[InputBits.START, JOY_BUTTON_START],
 	[InputBits.UP, JOY_BUTTON_DPAD_UP],
 	[InputBits.DOWN, JOY_BUTTON_DPAD_DOWN],
@@ -81,6 +74,10 @@ func read(player: int) -> int:
 	for pair in KEYS[player]:
 		if Input.is_physical_key_pressed(pair[1]):
 			bits |= pair[0]
+	if player == 0:
+		for bit in Settings.key_map:
+			if Input.is_physical_key_pressed(Settings.key_map[bit]):
+				bits |= bit
 	if single_player:
 		if player == 0:
 			for pad in Input.get_connected_joypads():
@@ -113,6 +110,19 @@ func _read_pad(pad: int) -> int:
 	for pair in PAD_BUTTONS:
 		if Input.is_joy_button_pressed(pad, pair[1]):
 			bits |= pair[0]
+	var r2_bound := false
+	for bit in Settings.pad_map:
+		var code: int = Settings.pad_map[bit]
+		r2_bound = r2_bound or code == Settings.PAD_R2
+		var down := false
+		if code == Settings.PAD_L2:
+			down = Input.get_joy_axis(pad, JOY_AXIS_TRIGGER_LEFT) >= TRIGGER_THRESHOLD
+		elif code == Settings.PAD_R2:
+			down = Input.get_joy_axis(pad, JOY_AXIS_TRIGGER_RIGHT) >= TRIGGER_THRESHOLD
+		else:
+			down = Input.is_joy_button_pressed(pad, code)
+		if down:
+			bits |= bit
 	var x := Input.get_joy_axis(pad, JOY_AXIS_LEFT_X)
 	var y := Input.get_joy_axis(pad, JOY_AXIS_LEFT_Y)
 	if x <= -STICK_DEADZONE:
@@ -123,6 +133,7 @@ func _read_pad(pad: int) -> int:
 		bits |= InputBits.UP
 	elif y >= STICK_DEADZONE:
 		bits |= InputBits.DOWN
-	if Input.get_joy_axis(pad, JOY_AXIS_TRIGGER_RIGHT) >= TRIGGER_THRESHOLD:
+	# R2 — запасной блок, пока он не назначен другому действию.
+	if not r2_bound and Input.get_joy_axis(pad, JOY_AXIS_TRIGGER_RIGHT) >= TRIGGER_THRESHOLD:
 		bits |= InputBits.BLOCK
 	return bits

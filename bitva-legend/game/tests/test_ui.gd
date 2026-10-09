@@ -6,6 +6,7 @@ func _init() -> void:
 	var ok := true
 	ok = _check("вибрация: попадание и сбитие с ног — импульсы, выключена — ни одного", _test_rumble()) and ok
 	ok = _check("настройки: сохраняются в файл и читаются обратно", _test_settings()) and ok
+	ok = _check("управление: кнопка меняется местами с занятой, раскладка сохраняется", _test_controls()) and ok
 	ok = _check("реплики: на каждую победную фразу пары-соперников есть ответ проигравшего", _test_lose_quotes()) and ok
 	print("ИТОГ: " + ("все тесты пройдены" if ok else "есть ошибки"))
 	quit(0 if ok else 1)
@@ -47,6 +48,20 @@ func _test_settings() -> bool:
 	Settings.music = keep[0]
 	Settings.rumble = keep[1]
 	Settings.hints = keep[2]
+	Settings.save_file()
+	return ok
+
+
+func _test_controls() -> bool:
+	Settings.reset_controls()
+	Settings.bind(Settings.pad_map, InputBits.LP, JOY_BUTTON_A)       # крест был у ЛН
+	Settings.bind(Settings.key_map, InputBits.BLOCK, KEY_SPACE)
+	var swapped: bool = Settings.pad_map[InputBits.LP] == JOY_BUTTON_A and Settings.pad_map[InputBits.LK] == JOY_BUTTON_X
+	Settings.save_file()
+	Settings.reset_controls()
+	Settings.load_file()
+	var ok: bool = swapped and Settings.pad_map[InputBits.LP] == JOY_BUTTON_A and Settings.key_map[InputBits.BLOCK] == KEY_SPACE
+	Settings.reset_controls()
 	Settings.save_file()
 	return ok
 

@@ -11,11 +11,14 @@ signal to_title
 signal ai_changed(level: int)
 signal sound(name: String)
 
-enum Page { MAIN, SETTINGS, MOVES }
+enum Page { MAIN, SETTINGS, MOVES, CONTROLS }
 
 const MAIN_ITEMS := ["Продолжить", "Заново", "Приёмы", "Настройки", "Выбор бойца", "Главное меню"]
 const SETTING_ITEMS := ["Музыка", "Звуки", "Диктор", "Вибрация", "Соперник", "Полный экран",
-	"Подсказки на экране", "Язык", "Назад"]
+	"Подсказки на экране", "Язык", "Управление", "Назад"]
+const CONTROL_ITEMS := ["ЛР — лёгкий удар рукой", "ЛН — лёгкий удар ногой", "СР — сильный удар рукой",
+	"СН — сильный удар ногой", "Блок", "Сбросить", "Назад"]
+const CONTROLS_ITEM := 8          # пункт «Управление» в настройках
 const CONFIRM := InputBits.LP | InputBits.LK | InputBits.START
 const BACK := InputBits.HK
 const COLOR_GOLD := Color(1, 0.85, 0.3)
@@ -57,6 +60,9 @@ var chars := PackedStringArray(["ilya", "dracula"])
 var ai_level := 0
 ## Открыто из меню (без боя): только страница настроек, «Назад» закрывает.
 var settings_only := false
+## Управление: столбец (0 — геймпад, 1 — клавиатура) и ожидание новой кнопки.
+var control_col := 0
+var waiting := false
 
 var _font: Font = load("res://fonts/RussoOne-Regular.ttf")
 var _title_font: Font = load("res://fonts/RuslanDisplay-Regular.ttf")
@@ -81,13 +87,17 @@ func open(only_settings := false) -> void:
 
 
 func close() -> void:
-	if page == Page.SETTINGS:
+	waiting = false
+	if page == Page.SETTINGS or page == Page.CONTROLS:
 		Settings.save_file()
 	visible = false
 
 
 ## Один тик паузы: bits — ввод обоих игроков вместе.
 func step(bits: int) -> void:
+	if waiting:
+		_prev = bits
+		return
 	if _prev < 0:
 		_prev = bits
 		return
@@ -111,7 +121,10 @@ func step(bits: int) -> void:
 	elif press & InputBits.DOWN:
 		cursor = (cursor + 1) % items.size()
 		sound.emit("ui_move")
-	if page == Page.SETTINGS and press & (InputBits.LEFT | InputBits.RIGHT):
+	if page == Page.CONTROLS and press & (InputBits.LEFT | InputBits.RIGHT):
+		control_col = 1 - control_col
+		sound.emit("ui_move")
+	elif page == Page.SETTINGS and press & (InputBits.LEFT | InputBits.RIGHT) and cursor < CONTROLS_ITEM:
 		_change(cursor, 1 if press & InputBits.RIGHT else -1)
 	elif press & CONFIRM:
 		_confirm()
@@ -119,7 +132,51 @@ func step(bits: int) -> void:
 
 ## Esc / Options: с главной страницы — продолжить бой, с остальных — назад.
 func back_or_resume() -> void:
+	if waiting:
+		waiting = false
+		queue_redraw()
+		return
 	_back()
+
+
+## Ожидание новой кнопки: ловим событие устройства раньше игры. Esc / Options — отмена.
+func _input(event: InputEvent) -> void:
+	if not visible or not waiting:
+		return
+	var bit: int = Settings.ACTIONS[cursor]
+	var key := event as InputEventKey
+	var btn := event as InputEventJoypadButton
+	var axis := event as InputEventJoypadMotion
+	var done := false
+	if key != null and key.pressed and not key.echo:
+		if key.physical_keycode in [KEY_ESCAPE, KEY_F10, KEY_ENTER, KEY_KP_ENTER] or control_col != 1:
+			if key.physical_keycode == KEY_ESCAPE:
+				waiting = false
+			get_viewport().set_input_as_handled()
+			queue_redraw()
+			return
+		Settings.bind(Settings.key_map, bit, key.physical_keycode)
+		done = true
+	elif btn != null and btn.pressed and control_col == 0:
+		if btn.button_index in [JOY_BUTTON_START, JOY_BUTTON_BACK, JOY_BUTTON_GUIDE, JOY_BUTTON_TOUCHPAD] \
+				or btn.button_index >= JOY_BUTTON_DPAD_UP and btn.button_index <= JOY_BUTTON_DPAD_RIGHT:
+			if btn.button_index == JOY_BUTTON_START:
+				waiting = false
+			get_viewport().set_input_as_handled()
+			queue_redraw()
+			return
+		Settings.bind(Settings.pad_map, bit, btn.button_index)
+		done = true
+	elif axis != null and control_col == 0 and axis.axis_value >= 0.6 \
+			and axis.axis in [JOY_AXIS_TRIGGER_LEFT, JOY_AXIS_TRIGGER_RIGHT]:
+		Settings.bind(Settings.pad_map, bit, Settings.PAD_L2 if axis.axis == JOY_AXIS_TRIGGER_LEFT else Settings.PAD_R2)
+		done = true
+	if done:
+		waiting = false
+		_prev = -1     # новая кнопка ещё зажата — не считать её нажатием в меню
+		sound.emit("ui_confirm")
+		get_viewport().set_input_as_handled()
+		queue_redraw()
 
 
 func _items() -> Array:
@@ -128,6 +185,8 @@ func _items() -> Array:
 			return MAIN_ITEMS
 		Page.SETTINGS:
 			return SETTING_ITEMS
+		Page.CONTROLS:
+			return CONTROL_ITEMS
 	return ["Назад"]
 
 
@@ -136,6 +195,12 @@ func _back() -> void:
 	if page == Page.MAIN or (page == Page.SETTINGS and settings_only):
 		close()
 		resume.emit()
+		return
+	if page == Page.CONTROLS:
+		Settings.save_file()
+		page = Page.SETTINGS
+		cursor = CONTROLS_ITEM
+		queue_redraw()
 		return
 	if page == Page.SETTINGS:
 		Settings.save_file()
@@ -170,8 +235,18 @@ func _confirm() -> void:
 		Page.SETTINGS:
 			if cursor == SETTING_ITEMS.size() - 1:
 				_back()
+			elif cursor == CONTROLS_ITEM:
+				page = Page.CONTROLS
+				cursor = 0
 			else:
 				_change(cursor, 1)
+		Page.CONTROLS:
+			if cursor == CONTROL_ITEMS.size() - 1:
+				_back()
+			elif cursor == CONTROL_ITEMS.size() - 2:
+				Settings.reset_controls()
+			else:
+				waiting = true
 		Page.MOVES:
 			_back()
 
@@ -248,7 +323,12 @@ func _draw() -> void:
 			_list(SETTING_ITEMS, cx, 196, true)
 		Page.MOVES:
 			_draw_moves()
+		Page.CONTROLS:
+			_draw_controls()
 	var hint := "↑↓ — пункт   ·   ←→ — изменить   ·   Enter / крест — выбрать   ·   Esc / круг — назад"
+	if page == Page.CONTROLS:
+		hint = "Нажмите новую кнопку   ·   Esc / Options — отмена" if waiting \
+			else "↑↓ — действие   ·   ←→ — геймпад / клавиатура   ·   Enter / крест — назначить   ·   Esc / круг — назад"
 	_text(Vector2(cx, size.y - 24), hint, 16, COLOR_DIM, 0)
 
 
@@ -264,12 +344,46 @@ func _list(items: Array, cx: float, y0: float, values: bool) -> void:
 			draw_rect(Rect2(cx - 330, y - 34, 660, 46), Color(1, 0.85, 0.3, 0.18))
 			draw_rect(Rect2(cx - 330, y - 34, 660, 46), COLOR_GOLD, false, 2.0)
 		var col := COLOR_GOLD if sel else COLOR_TEXT
-		if values and i < items.size() - 1:
+		if values and i < items.size() - 1 and _value(i) != "":
 			_text(Vector2(cx - 300, y), items[i], 26, col, -1)
 			var v := _value(i)
 			_text(Vector2(cx + 300, y), ("◀ " + v + " ▶") if sel else v, 24, col, 1)
 		else:
 			_text(Vector2(cx, y), items[i], 28, col, 0)
+
+
+func _draw_controls() -> void:
+	var cx := size.x / 2.0
+	_title(cx, "УПРАВЛЕНИЕ")
+	var y0 := 210.0
+	_text(Vector2(cx + 150, y0 - 44), "Геймпад", 20, COLOR_GOLD if control_col == 0 else COLOR_DIM, 0)
+	_text(Vector2(cx + 380, y0 - 44), "Клавиатура (игрок 1)", 20, COLOR_GOLD if control_col == 1 else COLOR_DIM, 0)
+	for i in CONTROL_ITEMS.size():
+		var y := y0 + i * 48.0
+		var sel := i == cursor
+		var col := COLOR_GOLD if sel else COLOR_TEXT
+		if sel:
+			draw_rect(Rect2(cx - 520, y - 34, 1040, 46), Color(1, 0.85, 0.3, 0.18))
+			draw_rect(Rect2(cx - 520, y - 34, 1040, 46), COLOR_GOLD, false, 2.0)
+		if i >= Settings.ACTIONS.size():
+			_text(Vector2(cx, y), CONTROL_ITEMS[i], 26, col, 0)
+			continue
+		_text(Vector2(cx - 490, y), CONTROL_ITEMS[i], 24, col, -1)
+		var bit: int = Settings.ACTIONS[i]
+		for c in 2:
+			var v := Settings.pad_name(Settings.pad_map[bit]) if c == 0 else Settings.key_name(Settings.key_map[bit])
+			var here := sel and c == control_col
+			if here and waiting:
+				v = "…" if (Engine.get_process_frames() / 20) % 2 == 0 else "?"
+			var x := cx + (150.0 if c == 0 else 380.0)
+			if here:
+				draw_rect(Rect2(x - 100, y - 30, 200, 38), Color(1, 0.85, 0.3, 0.35 if waiting else 0.2))
+			_text(Vector2(x, y), v, 22, COLOR_GOLD if here else COLOR_TEXT, 0)
+
+
+func _process(_delta: float) -> void:
+	if visible and waiting:
+		queue_redraw()
 
 
 func _draw_moves() -> void:

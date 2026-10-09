@@ -98,7 +98,7 @@ func _ready() -> void:
 			hud.show_state(sim, reader, ai)
 			_open_pause(false)
 			pause.page = {"main": PauseView.Page.MAIN, "settings": PauseView.Page.SETTINGS,
-				"moves": PauseView.Page.MOVES}[arg.trim_prefix("--pause=")]
+				"moves": PauseView.Page.MOVES, "controls": PauseView.Page.CONTROLS}[arg.trim_prefix("--pause=")]
 	if in_menu:
 		_open_menu(start_screen)
 		if "--picked" in OS.get_cmdline_user_args():
