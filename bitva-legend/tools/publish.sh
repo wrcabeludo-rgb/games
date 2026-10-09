@@ -50,4 +50,3 @@ git -c user.name="$(git -C "$ROOT" config user.name)" -c user.email="$(git -C "$
 git push -q -f "$REMOTE" builds
 echo "Опубликовано: версия $VERSION"
 for f in "$TMP"/*.zip; do echo "https://github.com/wrcabeludo-rgb/games/raw/builds/$(basename "$f")"; done
-echo "https://github.com/wrcabeludo-rgb/games/raw/builds/BitvaLegend-windows.zip"
