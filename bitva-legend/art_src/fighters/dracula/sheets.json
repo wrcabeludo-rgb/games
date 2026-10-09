@@ -6,11 +6,10 @@
  },
  "walk_f": {
   "part_frames": 4,
-  "parts_fit": [
-   "h:1:574",
-   "h:1:574"
-  ],
-  "pivot_y": "body_ground"
+  "fit": "inherit:idle",
+  "align_to": "idle:1",
+  "align_each": true,
+  "align_top": 0.45
  },
  "walk_b": {
   "part_frames": 4,
@@ -49,9 +48,8 @@
  },
  "st_lk": {
   "frames": 4,
-  "fit": "h:3:600",
-  "align_to": "idle:1",
-  "align_top": 0.5
+  "fit": "inherit:idle",
+  "align_to": "idle:1"
  },
  "backdash": {
   "frames": 3,
@@ -72,9 +70,8 @@
  },
  "st_hk": {
   "frames": 4,
-  "fit": 1.0,
-  "align_to": "idle:1",
-  "align_top": 0.5
+  "fit": "inherit:idle",
+  "align_to": "idle:1"
  },
  "cr_lk": {
   "frames": 4,
@@ -170,13 +167,7 @@
   "frames": 4,
   "fit": "inherit:idle",
   "hit": 1,
-  "hit_end": 1,
-  "order": [
-   1,
-   2,
-   3,
-   1
-  ]
+  "hit_end": 1
  },
  "thrown": {
   "frames": 4,
