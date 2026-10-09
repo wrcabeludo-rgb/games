@@ -30,6 +30,7 @@
            мельче стоящего: сравнивайте размер головы со стойкой).
   align_top: доля высоты фигуры сверху, по которой совмещать (0.55 — голова и корпус, для ударов ногой).
   match_scale: true — подогнать масштаб листа по голове и плечам кадра align_to (единый рост бойца).
+  align_head: true — совмещать по голове (корона и лоб), а не по силуэту.
   align_each: true — совместить с образцом каждый кадр по отдельности (по горизонтали; шаг: корпус на месте).
   align_frame: какой кадр листа (с 1) совмещать с образцом — по умолчанию первый (у вставания — последний,
            он совпадает со стойкой).
@@ -362,7 +363,18 @@ def main() -> int:
             base, idx = opt["align_to"].split(":")
             bmeta = json.loads((out / f"{base}.json").read_text())["frames"][int(idx) - 1]
             bimg = Image.open(out / bmeta["file"]).convert("RGBA")
-            dx, dy = align_shift(f, bimg, float(opt.get("align_top", 1.0)))
+            if opt.get("align_head"):
+                # По голове: верхние 6% фигуры (корона и лоб) — для поз с другим силуэтом (присед, блок сидя).
+                def head_x(im):
+                    a = np.asarray(im.getchannel("A")) > 24
+                    ys = np.where(a.any(1))[0]
+                    band = a[ys.min():ys.min() + max(8, int((ys.max() - ys.min()) * 0.06))]
+                    return float(np.where(band.any(0))[0].max())  # передний край короны (волосы развеваются назад)
+                # Нужная опорная точка: голова на том же расстоянии от неё, что у образца.
+                target = head_x(f) - (head_x(bimg) - bmeta["pivot"][0])
+                dx, dy = bmeta["pivot"][0] - target, 0.0
+            else:
+                dx, dy = align_shift(f, bimg, float(opt.get("align_top", 1.0)))
             # Точка образца bmeta.pivot в координатах этого кадра — (pivot - (dx, dy)).
             shift = (bmeta["pivot"][0] - dx - px, bmeta["pivot"][1] - dy - py)
             if opt.get("align_axes", "x") == "x":

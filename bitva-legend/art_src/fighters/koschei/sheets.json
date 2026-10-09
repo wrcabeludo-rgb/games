@@ -33,7 +33,10 @@
  },
  "crouch": {
   "frames": 2,
-  "fit": "h:2:371"
+  "fit": "h:2:371",
+  "align_to": "idle:1",
+  "align_frame": 2,
+  "align_head": true
  },
  "backdash": {
   "frames": 3,
@@ -58,11 +61,16 @@
  },
  "hit_low": {
   "frames": 4,
-  "fit": "inherit:idle"
+  "fit": "inherit:idle",
+  "align_to": "crouch:2",
+  "align_head": true,
+  "align_frame": 4
  },
  "block_low": {
   "frames": 2,
-  "fit": 0.733
+  "fit": 0.733,
+  "align_to": "crouch:2",
+  "align_head": true
  },
  "fall": {
   "part_frames": 4,
@@ -94,5 +102,36 @@
   "frames": 4,
   "fit": "inherit:idle",
   "pivot_y": "bottom_center"
+ },
+ "st_lp": {
+  "frames": 4,
+  "fit": "inherit:idle",
+  "align_to": "idle:1",
+  "match_scale": true
+ },
+ "st_lk": {
+  "frames": 4,
+  "fit": "inherit:idle",
+  "align_to": "idle:1",
+  "match_scale": true
+ },
+ "st_hp": {
+  "frames": 4,
+  "fit": "inherit:idle",
+  "align_to": "idle:1",
+  "match_scale": true
+ },
+ "st_hk": {
+  "frames": 4,
+  "fit": "inherit:idle",
+  "align_to": "idle:1",
+  "match_scale": true
+ },
+ "cr_lp": {
+  "frames": 4,
+  "fit": "inherit:idle",
+  "align_to": "crouch:2",
+  "match_scale": true,
+  "align_head": true
  }
 }
