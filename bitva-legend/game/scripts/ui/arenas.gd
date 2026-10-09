@@ -12,6 +12,7 @@ extends RefCounted
 ##   trees      — [слева, справа]: birch, dead, cypress, olive, palm, pine, column, peach, apple, screen, none
 ##   ground     — цвет земли; birds — ravens, gulls, bats, none; indoor — зал (стены вместо неба)
 ##   stone      — камень на перепутье в центре; glitch — помехи и пиксельная пыль (Лента)
+##   still      — средний план не качается на ветру (колонны, статуи, экраны)
 
 const DEFAULT := "crossroads"
 
@@ -54,14 +55,14 @@ const LIST := {
 		"ground": Color(0.38, 0.32, 0.22), "birds": "none",
 	},
 	"castle_hall": {
-		"name": "Замок графа", "dir": "res://art/arenas/castle_hall/", "indoor": true,
+		"name": "Замок графа", "still": true, "dir": "res://art/arenas/castle_hall/", "indoor": true,
 		"sky": [Color(0.08, 0.03, 0.06), Color(0.3, 0.06, 0.1), Color(0.3, 0.06, 0.1)], "stars": false,
 		"light": ["moon", 0.5], "hills": Color(0.18, 0.1, 0.14), "shape": ["flat", "flat"],
 		"marks": [["window", 0.3, 1.0], ["throne", 0.5, 1.0], ["window", 0.7, 1.0]], "trees": ["column", "column"],
 		"ground": Color(0.22, 0.12, 0.14), "birds": "bats",
 	},
 	"temple": {
-		"name": "Храм Афины", "dir": "res://art/arenas/temple/", "indoor": true,
+		"name": "Храм Афины", "still": true, "dir": "res://art/arenas/temple/", "indoor": true,
 		"sky": [Color(0.55, 0.6, 0.7), Color(0.95, 0.9, 0.8), Color(0.95, 0.9, 0.8)], "stars": false,
 		"light": ["none", 0.5], "hills": Color(0.85, 0.82, 0.75), "shape": ["flat", "flat"],
 		"marks": [["statue", 0.5, 1.2]], "trees": ["column", "column"],
@@ -96,7 +97,7 @@ const LIST := {
 		"ground": Color(0.45, 0.5, 0.3), "birds": "none",
 	},
 	"duat": {
-		"name": "Зал суда Дуата", "dir": "res://art/arenas/duat/", "indoor": true,
+		"name": "Зал суда Дуата", "still": true, "dir": "res://art/arenas/duat/", "indoor": true,
 		"sky": [Color(0.05, 0.06, 0.12), Color(0.2, 0.18, 0.3), Color(0.2, 0.18, 0.3)], "stars": true,
 		"light": ["none", 0.5], "hills": Color(0.25, 0.2, 0.15), "shape": ["flat", "flat"],
 		"marks": [["scales", 0.5, 1.3]], "trees": ["column", "column"],
@@ -104,7 +105,7 @@ const LIST := {
 	},
 	# --- Босс ---
 	"feed": {
-		"name": "Лента", "dir": "res://art/arenas/feed/", "glitch": true,
+		"name": "Лента", "still": true, "dir": "res://art/arenas/feed/", "glitch": true,
 		"sky": [Color(0.02, 0.02, 0.05), Color(0.1, 0.05, 0.2), Color(0.02, 0.15, 0.25)], "stars": false,
 		"light": ["none", 0.5], "hills": Color(0.15, 0.12, 0.25), "shape": ["sharp", "flat"],
 		"marks": [["church", 0.1, 0.8], ["temple", 0.3, 0.8], ["pyramid", 0.55, 0.7], ["screens", 0.8, 1.4]], "trees": ["screen", "screen"],

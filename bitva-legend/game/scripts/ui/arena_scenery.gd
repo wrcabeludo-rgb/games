@@ -452,7 +452,7 @@ func _draw_forest(c: CanvasItem) -> void:
 		var fh := FOREST_HEIGHT
 		var fw := fh * tex.get_width() / tex.get_height()
 		var fx := layer_x(k) + (layer_w(k) - fw) / 2.0
-		_draw_swaying(c, tex, Rect2(fx, ground_y + 30 - fh, fw, fh), Color(0.82, 0.8, 0.88), 5.0, 1.1)
+		_draw_swaying(c, tex, Rect2(fx, ground_y + 30 - fh, fw, fh), Color(0.82, 0.8, 0.88), 0.0 if _d.get("still", false) else 5.0, 1.1)
 		return
 	var i := 0
 	var x := 30.0
