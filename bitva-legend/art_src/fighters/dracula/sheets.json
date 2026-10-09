@@ -1,7 +1,8 @@
 {
  "idle": {
-  "frames": 1,
-  "fit": "h:1:620"
+  "frames": 4,
+  "fit": "h:1:546",
+  "align_to": "st_lp:1"
  },
  "walk_f": {
   "part_frames": 4,
@@ -29,9 +30,10 @@
   "fit": "h:2:390"
  },
  "jump": {
-  "frames": 4,
-  "fit": "h:1:436",
-  "pivot_y": "body"
+  "part_frames": 4,
+  "fit": "inherit:idle",
+  "pivot_y": "body_ground",
+  "align_to": "idle:1"
  },
  "block": {
   "frames": 2,

@@ -22,6 +22,10 @@
   part_frames: сколько кадров в каждой части (лист прислан частями <имя>_p1, <имя>_p2, …).
   pivot_y: "feet" (по умолчанию — задняя ступня стоит на месте), "body" (по центру фигуры — ходьба, бег)
            или "center" (кадры в воздухе).
+  align_to: "<лист>:<кадр>" — выровнять лист по уже готовому кадру другого листа (тот же боец в той же позе):
+           первый кадр листа совмещается с образцом по силуэту, сдвиг применяется ко всем кадрам листа.
+           Например, новая стойка — по первому кадру удара, иначе при переходе стойка → удар боец прыгает вбок.
+  align_axes: "x" (по умолчанию) или "xy".
 """
 import json
 import re
@@ -163,6 +167,23 @@ def pivot(frame: Image.Image, mode: str, ref: dict):
     return rear + ref["center_offset"], bottom
 
 
+def align_shift(frame: Image.Image, ref: Image.Image):
+    """Сдвиг (dx, dy), при котором силуэт frame лучше всего совпадает с силуэтом ref (кросс-корреляция масок)."""
+    a = (np.asarray(frame.getchannel("A")) > 24).astype(np.float32)
+    b = (np.asarray(ref.getchannel("A")) > 24).astype(np.float32)
+    h = a.shape[0] + b.shape[0]
+    w = a.shape[1] + b.shape[1]
+    fa = np.fft.rfft2(a, (h, w))
+    fb = np.fft.rfft2(b, (h, w))
+    corr = np.fft.irfft2(fb * np.conj(fa), (h, w))
+    y, x = np.unravel_index(np.argmax(corr), corr.shape)
+    if y > h // 2:
+        y -= h
+    if x > w // 2:
+        x -= w
+    return float(x), float(y)   # координата в ref = координата в frame + (x, y)
+
+
 def _fit_scale(fit, frames, who) -> float:
     """Масштаб части по правилу fit: число или "h:<кадр>:<px>" (кадр с 1 внутри части)."""
     if isinstance(fit, (int, float)):
@@ -242,6 +263,7 @@ def main() -> int:
             scale = HEIGHT[who] / float(np.median([f.height for f in frames]))
         scales[name] = scale
         meta = {"frames": []}
+        shift = None   # поправка опорных точек по образцу (align_to)
         # Ударные кадры (с 1): hit — первый кадр активной фазы, hit_end — последний.
         for k in ("hit", "hit_end", "reverse", "air_frames"):
             if k in opt:
@@ -254,6 +276,18 @@ def main() -> int:
                 cx, cy = centroid(f)
                 ref = {"center_offset": mid - rear, "body_dx": mid - cx, "body_dy": bottom - cy}
             px, py = pivot(f, opt.get("pivot_y", "feet"), ref)
+            if "align_to" in opt and shift is None:
+                base, idx = opt["align_to"].split(":")
+                bmeta = json.loads((out / f"{base}.json").read_text())["frames"][int(idx) - 1]
+                bimg = Image.open(out / bmeta["file"]).convert("RGBA")
+                dx, dy = align_shift(f, bimg)
+                # Точка образца bmeta.pivot в координатах этого кадра — (pivot - (dx, dy)).
+                shift = (bmeta["pivot"][0] - dx - px, bmeta["pivot"][1] - dy - py)
+                if opt.get("align_axes", "x") == "x":
+                    shift = (shift[0], 0.0)
+                print(f"  {name}: выровнен по {opt['align_to']}, сдвиг опорной точки {shift[0]:+.0f}, {shift[1]:+.0f}")
+            if shift is not None:
+                px, py = px + shift[0], py + shift[1]
             f.save(out / f"{name}_{i}.png", optimize=True)
             meta["frames"].append({"file": f"{name}_{i}.png", "pivot": [round(px), round(py)],
                                    "size": [f.width, f.height]})

@@ -15,10 +15,9 @@ const BREATH_TICKS := 110  # один вдох-выдох в стойке (ды�
 const GET_UP_TICKS := 18   # вставание — последние столько тиков лежания
 const PING_PONG_MAX := 5    # до стольких кадров стойка идёт туда-обратно (1-2-3-2), больше — нарисован цикл
 
-## Стойка из кадра другой анимации: [анимация, кадр с 0]. У Дракулы нарисованная стойка — прямая поза,
-## а все удары начинаются из боевой: стойкой служит первый кадр лёгкого удара рукой, пока не нарисована
-## боевая стойка (docs/ART_FIGHTERS.md, «Дракула: полировка»).
-const IDLE_FROM := {"dracula": ["st_lp", 0]}
+## Стойка из кадра другой анимации: [анимация, кадр с 0] — временная мера, пока у бойца нарисованная
+## стойка не совпадает с позой, из которой начинаются удары. Сейчас не нужна никому.
+const IDLE_FROM := {}
 ## Прыжок из 4 кадров (присед, взлёт, верх, приземление): при падении держим кадр верхней точки,
 ## а кадр приземления — только у самой земли, px.
 const JUMP_LAND_HEIGHT := 110
@@ -179,13 +178,28 @@ func frame_for(f: Fighter, tick: int) -> Array:
 				return _pick(anims.fall, mini(i, n - 1))
 		Fighter.State.PREJUMP:
 			if anims.has("jump"):
-				return _pick(anims.jump, 0)
+				# Прыжок из 8 кадров: присед, потом толчок.
+				var n0: int = anims.jump.tex.size()
+				return _pick(anims.jump, 1 if n0 >= 8 and f.state_frame * 2 >= f.data.prejump else 0)
 		Fighter.State.AIR:
 			# Удар в прыжке — свои кадры, если нарисованы.
 			if f.move >= 0 and anims.has(Fighter.MOVES[f.move]):
 				var air: Dictionary = anims[Fighter.MOVES[f.move]]
 				return _pick(air, _attack_index(f, air))
 			# Прыжок: взлёт → верх (сгруппировался) → падение.
+			if anims.has("jump") and f.move < 0 and anims.jump.tex.size() >= 8:
+				# 8 кадров: 2 взлёт, 3 группировка, 4 верх, 5 раскрылся, 6 падает, (7 приземление — в LAND).
+				var up: float = float(f.vy) / f.data.jump_vy
+				var i8 := 2
+				if up < 0.55:
+					i8 = 3
+				if up < 0.2:
+					i8 = 4
+				if up < -0.2:
+					i8 = 5
+				if up < -0.5 or (f.vy < 0 and f.y < JUMP_LAND_HEIGHT * Fighter.SUB):
+					i8 = 6
+				return _pick(anims.jump, i8)
 			if anims.has("jump") and f.move < 0:
 				var n: int = anims.jump.tex.size()
 				var i := 1
