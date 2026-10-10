@@ -226,6 +226,8 @@ func _on_fighter(f: Fighter, p: int) -> void:
 			Fighter.State.KNOCKDOWN:
 				play("fall", 0.85 if f.id == "ilya" else 1.0)
 			Fighter.State.BACKDASH:
+				if _load("sfx/%s_backdash" % f.id) != null:
+					play("%s_backdash" % f.id, 1.0, -9.0)
 				if f.id == "dracula":
 					play("cape", 1.1, -6.0)
 	_last_state[p] = st

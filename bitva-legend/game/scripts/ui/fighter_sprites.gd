@@ -157,7 +157,8 @@ func frame_for(f: Fighter, tick: int) -> Array:
 				return _walk(anims[key], n - 1 - i if reverse else i, 1.0 - phase if reverse else phase)
 		Fighter.State.RUN:
 			if anims.has("run"):
-				return _pick(anims.run, _cycle(f.state_frame, RUN_CYCLE, anims.run.tex.size()))
+				var cycle := _walk_cycle(anims.run, f.data.run_speed, RUN_CYCLE)
+				return _pick(anims.run, _cycle(f.state_frame, cycle, anims.run.tex.size()))
 		Fighter.State.CROUCH:
 			if anims.has("crouch"):
 				return _pick(anims.crouch, 0 if f.state_frame < 3 else anims.crouch.tex.size() - 1)
@@ -258,6 +259,10 @@ func frame_for(f: Fighter, tick: int) -> Array:
 			if anims.has("backdash"):
 				var n: int = anims.backdash.tex.size()
 				var moving: int = (f.data.backdash_v0 + f.data.backdash_decel - 1) / f.data.backdash_decel
+				if n > 3:
+					# Отскок из видео: все кадры на весь отскок (полёт и приземление).
+					var total: int = moving + f.data.backdash_recovery
+					return _pick(anims.backdash, clampi(f.state_frame * n / maxi(total, 1), 0, n - 1))
 				var i := 0 if f.state_frame < 3 else (1 if f.state_frame < moving else n - 1)
 				return _pick(anims.backdash, mini(i, n - 1))
 	match f.state:
@@ -279,9 +284,9 @@ func frame_for(f: Fighter, tick: int) -> Array:
 
 
 ## Цикл шага, тиков: если у листа задано stride (px за цикл) — под скорость бойца, чтобы ступни не скользили.
-static func _walk_cycle(anim: Dictionary, speed: int) -> int:
+static func _walk_cycle(anim: Dictionary, speed: int, fallback := WALK_CYCLE) -> int:
 	if anim.stride <= 0.0 or speed <= 0:
-		return WALK_CYCLE
+		return fallback
 	return maxi(int(round(anim.stride * Fighter.SUB / speed)), 1)
 
 
