@@ -61,7 +61,7 @@
   "align_to": "idle:1"
  },
  "crouch": {
-  "fit": 1.112,
+  "fit": 0.556,
   "fixed_pivot": true,
   "align_to": "crouch_prev:1",
   "align_head": true,
@@ -70,7 +70,8 @@
    8,
    7
   ],
-  "cycle": 140
+  "cycle": 140,
+  "upscale": true
  },
  "block": {
   "fit": 1.112,
@@ -147,7 +148,17 @@
    5
   ],
   "hit": 12,
-  "hit_end": 13
+  "hit_end": 13,
+  "skip": [
+   12,
+   13,
+   14,
+   15,
+   23,
+   24,
+   25,
+   26
+  ]
  },
  "cr_hk": {
   "frames": 4,
