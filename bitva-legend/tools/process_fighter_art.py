@@ -17,6 +17,7 @@
   grid: [столбцов, рядов] — лист сеткой (8 кадров = [4, 2], 12 = [4, 3]); порядок — слева направо, сверху вниз.
   fixed_pivot: true — лист из видео (tools/video_sheet.py, рядом .cells.json): кадры режутся по клеткам,
            опорная точка у всех кадров одна (по 1-му кадру) — сдвиги бойца в ролике сохраняются.
+  --draft (в командной строке): листы с upscale берутся без апскейла — черновик движения для утверждения.
   upscale: true — увеличить исходник нейросетью (tools/upscale.py) и у бойца обычного разрешения:
            кадры чётче, размер в игре тот же.
   cycle: 60 — стойка из видео: цикл кадров в тиках (60 = 1 с); без него стойка — один кадр с дыханием игры.
@@ -269,6 +270,9 @@ def _fit_scale(fit, frames, who) -> float:
     return float(px) / frames[int(idx) - 1].height
 
 
+DRAFT = "--draft" in sys.argv
+
+
 def main() -> int:
     if len(sys.argv) < 2 or sys.argv[1] not in HEIGHT:
         print(__doc__)
@@ -287,7 +291,7 @@ def main() -> int:
         m = re.match(r"^(.*)_p(\d+)$", f.stem)
         parts.setdefault(m.group(1) if m else f.stem, []).append((int(m.group(2)) if m else 0, f))
     # Можно обработать только часть листов: process_fighter_art.py ilya select select_win
-    only = set(sys.argv[2:])
+    only = set(a for a in sys.argv[2:] if not a.startswith("--"))
     sheets = [Path(name) for name in parts if not only or name in only or name == "idle"]
     # Сначала стойка (по ней — центр бойца), потом листы с собственным масштабом, потом наследующие.
     sheets.sort(key=lambda p: (p.stem != "idle", str(cfg.get(p.stem, {}).get("fit", "stand")).startswith("inherit")))
@@ -298,7 +302,10 @@ def main() -> int:
         name = p.stem
         opt = cfg.get(name, {})
         group = [f for _, f in sorted(parts[name])]
-        raw = src_image(group[0], who, opt.get("upscale", False))
+        # Черновик (--draft): без апскейла — быстро посмотреть движение в игре; масштаб тот же.
+        draft = DRAFT and name in only  # стойка (обрабатывается всегда) — в чистовом виде
+        up = opt.get("upscale", False) and not draft
+        raw = src_image(group[0], who, up)
         heights[name] = raw.height
         cells = group[0].with_suffix(".cells.json")
         fixed = opt.get("fixed_pivot") and cells.exists() and len(group) == 1
@@ -322,7 +329,7 @@ def main() -> int:
             pf = opt.get("part_frames", 0)
             for i, f in enumerate(group):
                 n = pf[i] if isinstance(pf, list) else pf
-                part = frames_of(chroma_key(src_image(f, who, opt.get("upscale", False))), n, opt.get("grid"))
+                part = frames_of(chroma_key(src_image(f, who, up)), n, opt.get("grid"))
                 if "parts_fit" in opt:
                     k = _fit_scale(opt["parts_fit"][i], part, who)
                     part = [x.resize((max(1, round(x.width * k)), max(1, round(x.height * k))), Image.LANCZOS)
@@ -338,7 +345,8 @@ def main() -> int:
             opt = dict(opt, fit=1.0)
         fit = opt.get("fit", "stand")
         if isinstance(fit, (int, float)):
-            scale = float(fit)
+            # Числовой масштаб у листа с upscale подобран под увеличенный ×2 исходник.
+            scale = float(fit) * (2.0 if opt.get("upscale") and draft else 1.0)
         elif str(fit).startswith("h:"):
             # h:<кадр>:<px> — кадр № такой-то должен быть такой высоты (присед, блок с поднятой палицей…).
             _, idx, px = str(fit).split(":")
