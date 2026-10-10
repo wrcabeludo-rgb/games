@@ -19,8 +19,8 @@
   "fit": "h:1:620",
   "upscale": true,
   "align_to": "idle:1",
-  "hit": 7,
-  "hit_end": 9
+  "hit": 8,
+  "hit_end": 10
  },
  "walk_f": {
   "frames": 40,

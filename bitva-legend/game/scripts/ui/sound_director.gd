@@ -210,6 +210,9 @@ func _on_fighter(f: Fighter, p: int) -> void:
 		var name: String = Fighter.MOVES[f.move]
 		if f.move == Fighter.MOVE_SUPER:
 			play("super")
+		elif _load("sfx/%s_%s" % [f.id, name]) != null:
+			# Свой звук удара бойца (вырезан из видео, см. CLAUDE.md) — вместо общего взмаха.
+			play("%s_%s" % [f.id, name], 1.0, -9.0)
 		elif f.id == "dracula" and name in CLAWS:
 			play("slash", 1.1 if name in HEAVY else 1.4, -4.0)
 		else:
