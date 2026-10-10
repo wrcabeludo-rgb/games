@@ -74,6 +74,13 @@ func _load(name: String) -> AudioStream:
 	return _cache[name]
 
 
+## Захват-приём (мельница): у него свой звук раскрутки, обычный звук броска не нужен.
+func _spin_grab(f: Fighter, move: int) -> bool:
+	if move < 0 or move == Fighter.MOVE_THROW or move == Fighter.MOVE_SUPER:
+		return false
+	return f.data.moves.get(Fighter.MOVES[move], {}).has("grab")
+
+
 ## Свой звук бойца из видео (sfx/<боец>_<событие>.ogg), если есть; true — сыграл.
 func _own(f: Fighter, event: String) -> bool:
 	var name := "%s_%s" % [f.id, event]
@@ -239,7 +246,7 @@ func _on_fighter(f: Fighter, p: int) -> void:
 				if f.throw_follow:
 					if _grab_move[p] == Fighter.MOVE_SUPER:
 						thrown = _own(f, "super_smash")
-					elif _grab_move[p] >= 0 and str(Fighter.MOVES[_grab_move[p]]).begins_with("sp_bb"):
+					elif _spin_grab(f, _grab_move[p]):
 						thrown = true
 					else:
 						thrown = _own(f, "throw")
@@ -247,7 +254,7 @@ func _on_fighter(f: Fighter, p: int) -> void:
 					play("land", 0.9 if f.id == "ilya" else 1.2, -6.0)
 			Fighter.State.THROWING:
 				_grab_move[p] = f.move
-				if f.move != Fighter.MOVE_SUPER and not str(Fighter.MOVES[f.move]).begins_with("sp_bb"):
+				if f.move != Fighter.MOVE_SUPER and not _spin_grab(f, f.move):
 					_own(f, "throw_grab")
 			Fighter.State.HITSTUN:
 				_own(f, "hurt")

@@ -169,8 +169,8 @@ func _juggle(chars: PackedStringArray, gap: int, special: Dictionary) -> Array:
 
 
 func _test_juggle_ram() -> bool:
-	# вниз+СР, затем «вперёд, вперёд + ЛР» — таран.
-	var r := _juggle(PackedStringArray(["ilya", "dracula"]), 150, {10: R, 12: 0, 13: R | LP})
+	# вниз+СР, затем «назад, назад + ЛР» — таран (с 3.17.20).
+	var r := _juggle(PackedStringArray(["ilya", "dracula"]), 150, {10: L, 12: 0, 13: L | LP})
 	if r[0] != 100 + 90 or r[1] != 1:
 		print("    урон %d, добиваний %d" % r)
 		return false

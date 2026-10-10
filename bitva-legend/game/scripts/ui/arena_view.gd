@@ -442,7 +442,7 @@ func _draw_attack(f: Fighter, shoulder: Vector2, hip: Vector2, color: Color) -> 
 	var limb_color := color.darkened(0.3)
 	draw_line(origin, end, limb_color, 18.0 if is_kick else 14.0)
 	draw_circle(end, 10.0 if is_kick else 9.0, limb_color.darkened(0.2))
-	var with_mace: bool = button == 2 or Fighter.MOVES[f.move] == "sp_ff_l" or f.is_super()
+	var with_mace: bool = button == 2 or f.move_data().has("lunge") or f.is_super()
 	if with_mace and f.id == "ilya" and not _sim.has_projectile(_sim.fighters.find(f)):
 		# Палица.
 		draw_circle(end, 24, Color(0.36, 0.3, 0.26))

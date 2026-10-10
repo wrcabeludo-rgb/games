@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ctr8n7hn7vsul"
-path="res://.godot/imported/sp_bb_l_40.png-37fd81aa5690f31640bb3f506819e5a2.ctex"
+uid="uid://cdgqs7gyg6vkh"
+path="res://.godot/imported/sp_ff_l_36.png-df1e440c6786aaa53e68dd02ab404504.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/fighters/ilya/sp_bb_l_40.png"
-dest_files=["res://.godot/imported/sp_bb_l_40.png-37fd81aa5690f31640bb3f506819e5a2.ctex"]
+source_file="res://art/fighters/ilya/sp_ff_l_36.png"
+dest_files=["res://.godot/imported/sp_ff_l_36.png-df1e440c6786aaa53e68dd02ab404504.ctex"]
 
 [params]
 

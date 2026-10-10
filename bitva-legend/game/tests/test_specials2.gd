@@ -21,7 +21,7 @@ func _init() -> void:
 	ok = _check("волна пробивает стоячий блок", _test_wave_vs_stand_block()) and ok
 	ok = _check("нижний блок держит волну (8 сквозь блок)", _test_wave_vs_crouch_block()) and ok
 	ok = _check("волна исчезает, не долетев до дальнего соперника", _test_wave_life()) and ok
-	ok = _check("вперёд, вперёд + ЛР → таран: рывок и урон 100", _test_ram()) and ok
+	ok = _check("назад, назад + ЛР → таран: рывок и урон 100", _test_ram()) and ok
 	ok = _check("броня тарана выдерживает удар", _test_ram_armor()) and ok
 	ok = _check("вниз, вниз + ЛН → Дракула за спиной у Ильи", _test_teleport()) and ok
 	ok = _check("в тумане Дракула неуязвим", _test_mist_intangible()) and ok
@@ -103,10 +103,11 @@ func _test_ram() -> bool:
 	var sim := _sim_at(800, 1100)
 	var ilya := sim.fighters[0]
 	var x0 := ilya.x
-	_run(sim, R, 0, 2)
+	# Таран Ильи — «назад, назад + рука» (с 3.17.20; «вперёд, вперёд» — мельница).
+	_run(sim, L, 0, 2)
 	_run(sim, 0, 0, 2)
-	_run(sim, R | LP, 0)
-	var started := _move_name(ilya) == "sp_ff_l"
+	_run(sim, L | LP, 0)
+	var started := _move_name(ilya) == "sp_bb_l"
 	_run(sim, 0, 0, 40)
 	return started and sim.fighters[1].hp == 900 and ilya.x > x0 + 50 * SUB
 
@@ -114,9 +115,9 @@ func _test_ram() -> bool:
 func _test_ram_armor() -> bool:
 	var sim := _sim_at(900, 1040)
 	var ilya := sim.fighters[0]
-	_run(sim, R, 0, 2)
+	_run(sim, L, 0, 2)
 	_run(sim, 0, 0, 2)
-	_run(sim, R | LP, LP)  # Дракула бьёт ЛР одновременно с началом тарана
+	_run(sim, L | LP, LP)  # Дракула бьёт ЛР одновременно с началом тарана
 	_run(sim, 0, 0, 40)
 	return ilya.hp == 1000 - 30 and sim.fighters[1].hp == 900
 

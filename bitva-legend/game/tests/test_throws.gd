@@ -140,14 +140,15 @@ func _test_no_throw_in_blockstun() -> bool:
 
 func _test_windmill() -> bool:
 	var sim := _sim_at(900, 1040)
-	_run(sim, L, 0, 2)
+	# Мельница Ильи — «вперёд, вперёд + рука» (с 3.17.20).
+	_run(sim, R, 0, 2)
 	_run(sim, 0, 0, 2)
-	_run(sim, L | LP, 0)
+	_run(sim, R | LP, 0)
 	var name := _move_name(sim.fighters[0])
 	_run(sim, 0, 0, 8)
 	_run(sim, 0, LP)  # пытается вырваться — у Мельницы нельзя
 	_run(sim, 0, 0, 60)
-	return name == "sp_bb_l" and sim.fighters[1].hp == 1000 - 170
+	return name == "sp_ff_l" and sim.fighters[1].hp == 1000 - 170
 
 
 func _test_bite() -> bool:

@@ -158,7 +158,7 @@ func _test_ex_ram() -> bool:
 	sim.fighters[0].meter = 1000
 	var knocked := false
 	for t in 80:
-		var bits := {0: R, 2: R | LP | BL}.get(t, 0) as int
+		var bits := {0: L, 2: L | LP | BL}.get(t, 0) as int  # таран Ильи — «назад, назад + рука»
 		sim.step(PackedInt32Array([bits, 0]))
 		knocked = knocked or sim.fighters[1].state == S.KNOCKDOWN
 	return knocked and sim.fighters[1].hp == 1000 - 140

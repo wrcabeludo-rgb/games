@@ -334,18 +334,6 @@
   "fit": 1.162,
   "fixed_pivot": true,
   "align_to": "idle:1",
-  "frames": 32,
-  "grid": [
-   8,
-   4
-  ],
-  "hit": 10,
-  "hit_end": 22
- },
- "sp_bb_l": {
-  "fit": 1.162,
-  "fixed_pivot": true,
-  "align_to": "idle:1",
   "frames": 40,
   "grid": [
    8,
@@ -354,6 +342,18 @@
   "hit": 7,
   "hit_end": 7,
   "release": 32
+ },
+ "sp_bb_l": {
+  "fit": 1.162,
+  "fixed_pivot": true,
+  "align_to": "idle:1",
+  "frames": 32,
+  "grid": [
+   8,
+   4
+  ],
+  "hit": 10,
+  "hit_end": 22
  },
  "super": {
   "fit": 1.184,
