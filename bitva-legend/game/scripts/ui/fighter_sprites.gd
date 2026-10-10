@@ -26,6 +26,10 @@ const IDLE_FROM := {}
 ## а кадр приземления — только у самой земли, px.
 const JUMP_LAND_HEIGHT := 110
 
+## Одинаковые анимации (решение владельца): удары в прыжке рукой — одна на ЛР и СР, ногой — одна на ЛН и СН;
+## удары ногой сидя — одна на ЛН и СН. Если у бойца нет своей анимации удара — берётся анимация-пара.
+const ANIM_ALIAS := {"j_hp": "j_lp", "j_lp": "j_hp", "j_hk": "j_lk", "j_lk": "j_hk", "cr_hk": "cr_lk", "cr_lk": "cr_hk"}
+
 ## id бойца → {анимация: {"tex": Array[Texture2D], "pivot": Array[Vector2]}}
 var _bank := {}
 ## id бойца → во сколько раз его кадры крупнее обычных (у новых бойцов — 2: чётко на мониторах 2K/4K).
@@ -68,6 +72,9 @@ static func _load_character(id: String) -> Dictionary:
 				"air": int(meta.get("air_frames", 1)), "res": float(meta.get("res", 1.0)),
 				"bob": float(meta.get("bob", 0.0)), "stride": float(meta.get("stride", 0.0)),
 				"cycle": int(meta.get("cycle", 0)), "release": int(meta.get("release", 0))}
+	for a in ANIM_ALIAS:
+		if not out.has(a) and out.has(ANIM_ALIAS[a]):
+			out[a] = out[ANIM_ALIAS[a]]
 	if IDLE_FROM.has(id) and out.has(IDLE_FROM[id][0]):
 		var src: Dictionary = out[IDLE_FROM[id][0]]
 		var k: int = IDLE_FROM[id][1]
