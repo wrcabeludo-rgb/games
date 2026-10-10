@@ -1,0 +1,48 @@
+# «Битва легенд»: сборка для Windows и публикация в GitHub Releases.
+# Запускается при пуше изменений игры и вручную (Actions → «Битва легенд — релиз» → Run workflow).
+name: Битва легенд — релиз
+
+on:
+  push:
+    paths:
+      - "bitva-legend/game/**"
+      - "bitva-legend/tools/build.sh"
+      - "bitva-legend/tools/publish_release.sh"
+      - ".github/workflows/bitva-release.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bitva-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      GODOT: ${{ github.workspace }}/godot/Godot_v4.4.1-stable_linux.x86_64
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Godot 4.4.1 и шаблоны экспорта
+        run: |
+          mkdir -p godot && cd godot
+          base=https://github.com/godotengine/godot/releases/download/4.4.1-stable
+          curl -sSLf -o godot.zip "$base/Godot_v4.4.1-stable_linux.x86_64.zip" && unzip -q godot.zip
+          curl -sSLf -o tpl.tpz "$base/Godot_v4.4.1-stable_export_templates.tpz" && unzip -q tpl.tpz
+          T="$HOME/.local/share/godot/export_templates/4.4.1.stable"
+          mkdir -p "$T" && cp templates/windows_release_x86_64.exe templates/windows_debug_x86_64.exe templates/version.txt "$T/"
+          rm -rf templates tpl.tpz godot.zip
+
+      - name: peresed (иконка в .exe)
+        run: pip install uv && uv tool install --python 3.11 pe_tools
+
+      - name: Сборка
+        run: bitva-legend/tools/build.sh
+
+      - name: Публикация
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bitva-legend/tools/publish_release.sh
