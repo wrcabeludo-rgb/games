@@ -67,12 +67,12 @@ static func _load_character(id: String) -> Dictionary:
 				"hit_end": clampi(hit_end, hit, n - 1), "reverse": bool(meta.get("reverse", false)),
 				"air": int(meta.get("air_frames", 1)), "res": float(meta.get("res", 1.0)),
 				"bob": float(meta.get("bob", 0.0)), "stride": float(meta.get("stride", 0.0)),
-				"cycle": int(meta.get("cycle", 0))}
+				"cycle": int(meta.get("cycle", 0)), "release": int(meta.get("release", 0))}
 	if IDLE_FROM.has(id) and out.has(IDLE_FROM[id][0]):
 		var src: Dictionary = out[IDLE_FROM[id][0]]
 		var k: int = IDLE_FROM[id][1]
 		out["idle"] = {"tex": [src.tex[k]] as Array[Texture2D], "pivot": [src.pivot[k]] as Array[Vector2],
-			"hit": 0, "hit_end": 0, "reverse": false, "air": 1, "bob": 0.0, "stride": 0.0, "cycle": 0}
+			"hit": 0, "hit_end": 0, "reverse": false, "air": 1, "bob": 0.0, "stride": 0.0, "cycle": 0, "release": 0}
 	return out
 
 
@@ -167,12 +167,18 @@ func frame_for(f: Fighter, tick: int) -> Array:
 			var key := "block_low" if f.low_pose else "block"
 			if anims.has(key):
 				var n: int = anims[key].tex.size()
+				if n > 2 and f.state == Fighter.State.BLOCKSTUN:
+					# Блок из видео: 1-й кадр — защита, остальные — принял удар и выровнялся (по ходу оглушения).
+					return _pick(anims[key], 1 + _progress(f, n - 1))
 				return _pick(anims[key], mini(1 if f.state == Fighter.State.BLOCKSTUN else 0, n - 1))
 		Fighter.State.HITSTUN:
 			# Получил удар: удар → откинулся → сильнее всего откинулся; в конце оглушения — приходит в себя.
 			var key := "hit_low" if f.low_pose else "hit_high"
 			if anims.has(key):
 				var n: int = anims[key].tex.size()
+				if n > 4:
+					# Из видео: откинуло → пришёл в себя, по ходу оглушения.
+					return _pick(anims[key], _progress(f, n))
 				if f.stun <= 4:
 					return _pick(anims[key], n - 1)
 				return _pick(anims[key], mini(f.state_frame / 4, n - 2))
@@ -185,6 +191,11 @@ func frame_for(f: Fighter, tick: int) -> Array:
 				var g: Dictionary = m.grab if m.has("grab") else m.get("cinema", {"hold": 30})
 				var hold: int = maxi(int(g.hold), 1)
 				var t := clampf(1.0 - float(f.stun) / hold, 0.0, 1.0)
+				if anims.throw.release > 0:
+					# Бросок из видео: от захвата (hit) до кадра, где соперник брошен (release), по ходу удержания.
+					var a0: int = anims.throw.hit
+					var rel: int = mini(anims.throw.release - 1, n - 1)
+					return _pick(anims.throw, a0 + roundi(t * (rel - a0)))
 				var i := 1 if t < Sim.THROW_GRIP else (2 if t < 0.92 else 3)
 				return _pick(anims.throw, mini(i, n - 1))
 		Fighter.State.THROWN:
@@ -250,8 +261,13 @@ func frame_for(f: Fighter, tick: int) -> Array:
 					i = 3 if n > 4 or f.y < JUMP_LAND_HEIGHT * Fighter.SUB else 2
 				return _pick(anims.jump, mini(i, n - 1))
 		Fighter.State.LAND when f.throw_follow and anims.has("throw"):
-			# Только что бросил — доводит движение (последний кадр броска).
-			return _pick(anims.throw, anims.throw.tex.size() - 1)
+			# Только что бросил — доводит движение (у броска из видео — кадры после release, иначе последний).
+			var nt: int = anims.throw.tex.size()
+			if anims.throw.release > 0:
+				var rel: int = mini(anims.throw.release - 1, nt - 1)
+				var rest: int = nt - 1 - rel
+				return _pick(anims.throw, rel + clampi(f.state_frame * rest / maxi(f.landing_frames, 1), 0, rest))
+			return _pick(anims.throw, nt - 1)
 		Fighter.State.LAND:
 			if anims.has("jump"):
 				return _pick(anims.jump, anims.jump.tex.size() - 1)
@@ -288,6 +304,11 @@ static func _walk_cycle(anim: Dictionary, speed: int, fallback := WALK_CYCLE) ->
 	if anim.stride <= 0.0 or speed <= 0:
 		return fallback
 	return maxi(int(round(anim.stride * Fighter.SUB / speed)), 1)
+
+
+## Кадр 0…n-1 по ходу оглушения (удар или блок): прошло state_frame из state_frame + stun тиков.
+static func _progress(f: Fighter, n: int) -> int:
+	return clampi(f.state_frame * n / maxi(f.state_frame + f.stun, 1), 0, n - 1)
 
 
 ## Кадр цикла длиной cycle тиков из n кадров.

@@ -108,7 +108,7 @@ func _test_throw_through_block() -> bool:
 	var sim := _sim_at(900, 995)
 	_run(sim, LP, BL)
 	var name := _move_name(sim.fighters[0])
-	_run(sim, 0, BL, 40)
+	_run(sim, 0, BL, 60)  # бросок Ильи держит 40 тиков (через плечо)
 	return name == "throw" and sim.fighters[1].hp == 1000 - 120
 
 

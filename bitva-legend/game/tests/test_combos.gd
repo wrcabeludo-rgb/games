@@ -201,7 +201,7 @@ func _test_no_juggle_after_throw() -> bool:
 	var sim := _sim_at(900, 995)
 	var d := sim.fighters[1]
 	sim.step(PackedInt32Array([LP, 0]))
-	for t in 40:
+	for t in 60:  # бросок Ильи держит 40 тиков (через плечо)
 		sim.step(PackedInt32Array([0, 0]))
 		if d.state == S.AIR_HIT:
 			return d.is_untouchable()

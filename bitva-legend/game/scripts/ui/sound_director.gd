@@ -72,6 +72,15 @@ func _load(name: String) -> AudioStream:
 	return _cache[name]
 
 
+## Свой звук бойца из видео (sfx/<боец>_<событие>.ogg), если есть; true — сыграл.
+func _own(f: Fighter, event: String) -> bool:
+	var name := "%s_%s" % [f.id, event]
+	if _load("sfx/" + name) == null:
+		return false
+	play(name, 1.0, -9.0)
+	return true
+
+
 ## Звук; если вариантов несколько (name_0 … name_4) — случайный, чтобы удары не звучали одинаково.
 func play(name: String, pitch := 1.0, db := 0.0) -> void:
 	if _silent:
@@ -222,12 +231,18 @@ func _on_fighter(f: Fighter, p: int) -> void:
 	if st != _last_state[p]:
 		match st:
 			Fighter.State.LAND:
-				play("land", 0.9 if f.id == "ilya" else 1.2, -6.0)
+				if not (f.throw_follow and _own(f, "throw")):
+					play("land", 0.9 if f.id == "ilya" else 1.2, -6.0)
+			Fighter.State.THROWING:
+				_own(f, "throw_grab")
+			Fighter.State.HITSTUN:
+				_own(f, "hurt")
+			Fighter.State.BLOCKSTUN:
+				_own(f, "block")
 			Fighter.State.KNOCKDOWN:
 				play("fall", 0.85 if f.id == "ilya" else 1.0)
 			Fighter.State.BACKDASH:
-				if _load("sfx/%s_backdash" % f.id) != null:
-					play("%s_backdash" % f.id, 1.0, -9.0)
+				_own(f, "backdash")
 				if f.id == "dracula":
 					play("cape", 1.1, -6.0)
 	_last_state[p] = st

@@ -263,6 +263,8 @@ const HOLD_DROP := 40               # схваченный в прыжке (су
 ## до THROW_LIFT; бросок — летит вперёд с этой высоты.
 const THROW_LIFT := 110             # высота подъёма в броске, px
 const THROW_GRIP := 0.35            # доля удержания, пока держит за ворот (дальше — поднимает)
+const THROW_OVER_LIFT := 260        # бросок через плечо: высота дуги над головой бросающего, px
+const THROW_OVER_ARC := 0.85         # …и докуда дуга доходит к броску (доля полуокружности: за спиной)
 const THROW_UP := 0.8               # к этой доле удержания соперник поднят полностью
 
 
@@ -279,7 +281,13 @@ static func throw_progress(a: Fighter) -> float:
 func _hold_position(a: Fighter, d: Fighter) -> void:
 	d.x = a.x + a.facing * (a.push_half() + d.push_half())
 	var t := throw_progress(a)
-	if t >= 0.0 and a.y == 0:
+	var m := a.move_data()
+	if t >= 0.0 and a.y == 0 and m.has("grab") and m.grab.get("over", 0):
+		# Через плечо: держит за ворот, потом соперник по дуге над головой уходит за спину.
+		var ang := PI * THROW_OVER_ARC * smoothstep(THROW_GRIP, 1.0, t)
+		d.x = a.x + int(a.facing * (a.push_half() + d.push_half()) * cos(ang))
+		d.y = int(THROW_OVER_LIFT * SUB * sin(ang))
+	elif t >= 0.0 and a.y == 0:
 		d.y = int(THROW_LIFT * SUB * smoothstep(THROW_GRIP, THROW_UP, t))
 	else:
 		d.y = maxi(d.y - HOLD_DROP * SUB, 0)
@@ -306,7 +314,7 @@ func _hold_throws() -> void:
 		a.stun -= 1
 		if a.stun > 0:
 			continue
-		d.take_throw(g, a.facing)
+		d.take_throw(g, -a.facing if g.get("over", 0) else a.facing)
 		if not g.has("scaled"):
 			a.add_meter(g.damage * METER_HIT)
 			d.add_meter(g.damage * METER_TAKEN)
