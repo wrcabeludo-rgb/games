@@ -48,6 +48,8 @@ def main() -> int:
         m = ~is_bg(a)
         m[int(h * 0.9):, int(w * 0.8):] = False
         ys, xs = np.nonzero(m)
+        if len(xs) == 0:
+            continue  # пустой кадр (боец за краем кадра — прыжок за облака): в листе останется пустой клеткой
         y0, y1, x0, x1 = min(y0, ys.min()), max(y1, ys.max()), min(x0, xs.min()), max(x1, xs.max())
     y0, x0 = max(0, y0 - MARGIN), max(0, x0 - MARGIN)
     y1, x1 = min(h, y1 + MARGIN + 1), min(w, x1 + MARGIN + 1)
