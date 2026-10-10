@@ -104,7 +104,10 @@ func _draw() -> void:
 ## Кратер от «Удара с небес»: появляется, когда палица бьёт в землю (доводка после суперприёма из видео),
 ## держится 3 с и тает за 1 с. Только картинка — на бой не влияет.
 const CRATER_TEX := preload("res://art/fx/crater.png")
-const MACE_TEX := preload("res://art/fx/mace.png")  # брошенная палица Ильи, в масштабе его кадров
+const MACE_TEX := preload("res://art/fx/mace.png")
+const STOMP_WAVE: Array[Texture2D] = [preload("res://art/fx/stomp_wave_1.png"), preload("res://art/fx/stomp_wave_2.png"),
+	preload("res://art/fx/stomp_wave_3.png"), preload("res://art/fx/stomp_wave_4.png")]
+const STOMP_OFFSET := 70.0        # снаряд волны появляется на 70 px впереди Ильи (fighter_data "proj.x")  # брошенная палица Ильи, в масштабе его кадров
 const CRATER_WIDTH := 520.0       # ширина на экране, px (720p)
 const CRATER_GROUND := 101.0      # линия земли в текстуре, px от верха
 const CRATER_HOLD := 180
@@ -524,6 +527,38 @@ func _draw_throw(f: Fighter, shoulder: Vector2, color: Color) -> void:
 		draw_circle(hand, 10 + 6 * t, Color(0.55, 0.1, 0.2, 0.6))  # тёмная сила в ладони
 
 
+## Удар оземь: от ноги Ильи в обе стороны расходятся гребни земли и камней (art/fx/stomp_wave_*.png —
+## 4 кадра симметричной волны, точка удара в центре кадра, низ кадра — земля). Вперёд гребень идёт со снарядом,
+## назад — его зеркало (только картинка) и гаснет; у ноги в начале — всплеск (1-й кадр целиком).
+func _draw_stomp_wave(pr: PackedInt32Array, age: int, dir: float) -> void:
+	var ex := pr[Sim.Proj.KIND] >= 3
+	var s := 1.05 if ex else 0.85
+	var x := float(pr[Sim.Proj.X]) / Sim.SUB
+	var front := x + dir * float(pr[Sim.Proj.HW]) / Sim.SUB
+	var stomp := x - float(pr[Sim.Proj.VX]) * age / Sim.SUB - dir * STOMP_OFFSET
+	var life := maxf(float(pr[Sim.Proj.LIFE]), 1.0)
+	var t := float(age) / life
+	var tex: Texture2D = STOMP_WAVE[0 if age < 3 else (1 if t < 0.2 else (2 if t < 0.8 else 3))]
+	if age < 8:
+		var burst: Texture2D = STOMP_WAVE[0]
+		var bs := burst.get_size()
+		draw_set_transform(to_screen(stomp, 0), 0, Vector2(s * dir, s))
+		draw_texture(burst, Vector2(-bs.x * 0.5, -bs.y), Color(1, 1, 1, 1.0 - age / 8.0))
+	if age >= 3:
+		var sz := tex.get_size()
+		var half := Rect2(sz.x * 0.5, 0, sz.x * 0.5, sz.y)
+		var back_fade := clampf(1.0 - age / 26.0, 0.0, 1.0)
+		for side in [1.0, -1.0]:
+			var fade := 1.0 if side > 0 else back_fade
+			if fade <= 0.0:
+				continue
+			# Передний край гребня — у переднего края снаряда; задний гребень — его зеркало относительно ноги.
+			var at := front if side > 0 else stomp - (front - stomp)
+			draw_set_transform(to_screen(at, 0), 0, Vector2(s * dir * side, s))
+			draw_texture_rect_region(tex, Rect2(-half.size.x, -sz.y, half.size.x, sz.y), half, Color(1, 1, 1, fade))
+	draw_set_transform(Vector2.ZERO)
+
+
 ## Снаряд: палица крутится в полёте, летучие мыши машут крыльями.
 func _draw_projectile(pr: PackedInt32Array) -> void:
 	var c := to_screen(float(pr[Sim.Proj.X]) / Sim.SUB, float(pr[Sim.Proj.Y]) / Sim.SUB)
@@ -534,19 +569,10 @@ func _draw_projectile(pr: PackedInt32Array) -> void:
 		_draw_projectile_new(pr, c, age, dir)
 		return
 	var kind := pr[Sim.Proj.KIND] % 3
-	if pr[Sim.Proj.KIND] >= 3:
-		var glow_at := c if kind != 2 else to_screen(float(pr[Sim.Proj.X]) / Sim.SUB, 20)
-		draw_circle(glow_at, float(pr[Sim.Proj.HW]) / Sim.SUB * 1.3, Color(1, 0.8, 0.3, 0.35))
+	if pr[Sim.Proj.KIND] >= 3 and kind != 2:  # усиленная волна — просто крупнее
+		draw_circle(c, float(pr[Sim.Proj.HW]) / Sim.SUB * 1.3, Color(1, 0.8, 0.3, 0.35))
 	if kind == 2:
-		# Волна от удара оземь: бегущие по земле камни и пыль.
-		var hw := float(pr[Sim.Proj.HW]) / Sim.SUB
-		var ground := to_screen(float(pr[Sim.Proj.X]) / Sim.SUB, 0)
-		for i in 5:
-			var ox := (i - 2) * hw * 0.4
-			var hgt := 18.0 + 14.0 * absf(sin(age * 0.6 + i))
-			var rock := PackedVector2Array([ground + Vector2(ox - 10, 0), ground + Vector2(ox, -hgt), ground + Vector2(ox + 10, 0)])
-			draw_colored_polygon(rock, Color(0.5, 0.42, 0.34))
-		draw_circle(ground + Vector2(-dir * hw * 0.7, -8), 12, Color(0.75, 0.68, 0.55, 0.5))
+		_draw_stomp_wave(pr, age, dir)
 	elif kind == 0:
 		# Палица из ролика броска (art/fx/mace.png, центр тяжести — в центре текстуры) кувыркается в полёте.
 		var k := FighterSprites.SCALE / sprites.res("ilya")
