@@ -15,5 +15,8 @@ if [ ! -f "$T/windows_release_x86_64.exe" ]; then
 	unzip -qo t.tpz "templates/windows_*_x86_64.exe" "templates/version.txt"
 	mv templates/* "$T/"
 fi
-pip install -q pillow numpy torch spandrel pe_tools 2>&1 | grep -v "WARNING: Running pip" || true
+pip install -q pillow numpy torch spandrel 2>&1 | grep -v "WARNING: Running pip" || true
+# pe_tools (peresed — иконка .exe) не собирается на Python 3.13: ставим отдельно на 3.11 через uv.
+command -v peresed >/dev/null || pip install -q pe_tools 2>/dev/null \
+	|| { command -v uv >/dev/null || pip install -q uv; uv tool install -q --python 3.11 pe_tools; }
 echo "Среда готова: Godot $GV, шаблоны Windows, Python-пакеты."

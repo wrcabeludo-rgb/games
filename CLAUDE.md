@@ -12,15 +12,16 @@
 
 ## Как выпускать сборку
 1. Поднять версию: `config/version` в `bitva-legend/game/project.godot`.
-2. `timeout 1500 bitva-legend/tools/build.sh` — импорт, 18 наборов автотестов, экспорт, иконка, пакеты бойцов.
+2. `timeout 1500 bitva-legend/tools/build.sh` — импорт, 18 наборов автотестов, экспорт, иконка, пакеты бойцов
+   (проверка перед пушем; релизную сборку делает Actions).
 3. Коммит в `main` с атрибуцией (ниже), `git push`.
-4. Публикация. **Основная — GitHub Releases:** `bitva-legend/tools/publish_release.sh`, один архив со всем.
-   Токен подставляет сетевой посредник среды (секрет `GH_RELEASE_TOKEN` для api/uploads.github.com, путь `/repos/wrcabeludo-rgb/games/`).
+4. Публикация — **GitHub Releases, один архив со всем** (`BitvaLegend-<версия>-windows.zip` из `build.sh`).
+   Делает это GitHub Actions (`.github/workflows/bitva-release.yml`) сам при каждом пуше изменений игры
+   (`bitva-legend/game/**`, `build.sh`, `publish_release.sh`): ставит Godot, запускает `build.sh` и `publish_release.sh`.
+   Следить за прогоном: `curl -sS https://api.github.com/repos/wrcabeludo-rgb/games/actions/runs?per_page=1`.
+   Из облачной сессии `publish_release.sh` руками не запустить: создавать релизы через API этой среды запрещено
+   («not permitted for this session type»), поэтому только через Actions. Ветка `builds` и `publish.sh` больше не используются.
    Ссылка: https://github.com/wrcabeludo-rgb/games/releases/latest/download/BitvaLegend-windows.zip
-   Запасная (до проверки Releases) — `tools/publish.sh`: ветка `builds`, лимит 100 МБ на файл,
-   поэтому бойцы в высоком разрешении лежат отдельными архивами (`BitvaLegend-koschei.zip`).
-   Когда Releases заработает — сделать его основным `publish.sh` и убрать деление на архивы
-   (`EXTRA_PACKS` в `build.sh` и `exclude_filter` в `game/export_presets.cfg` можно оставить: пакеты просто лягут в один архив).
 5. **Всегда давать владельцу ссылку на сборку.**
 
 Атрибуция каждого коммита:
@@ -50,12 +51,16 @@ Claude-Session: <ссылка на текущую сессию>
 - Ключи `sheets.json`: `frames`, `part_frames` (листы `_p1`, `_p2`), `fit` (`inherit:idle`, `h:<кадр>:<px>`, число),
   `pivot_y`, `align_to "<лист>:<кадр>"`, `align_frame`, `align_top`, `align_each` (шаг: каждый кадр по корпусу),
   `align_head` (по переднему краю короны — для приседа и низких поз), `match_scale` (масштаб по голове образца — единый рост),
-  `frame_scale`, `skip`, `order`, `hit`, `hit_end`, `air_frames`.
+  `frame_scale`, `skip`, `order`, `hit`, `hit_end`, `air_frames`,
+  `upscale: true` (апскейлер для одного листа у бойца обычного разрешения — так сделана ходьба Ильи),
+  `bob` (ходьба: игра покачивает тело в такт шагу, доля роста — для листов, где тело застыло; у Ильи выключено).
+- После обработки смотреть `git status`: повторная обработка всего бойца меняет и листы, правленные вручную
+  (у Ильи — fall, hit_high, select, select_win). Обрабатывать только нужные листы, лишнее — `git checkout`.
 - Проверка: `python3 tools/sheet_preview.py art/fighters <боец> <анимации> out.png` (из `game/`) и снимки из игры:
   `xvfb-run -a godot --path game --rendering-driver opengl3 -- --demo=<сценарий> --chars=a,b --arena=<id> --screenshot=x.png --shot-at=<тик>`
   (сценарии в `game/scripts/core/demo_input.gd`; параллельно не больше 4 запусков).
 - Бойцы в высоком разрешении упаковываются в отдельный `<боец>.pck` (`tools/pack_fighter.gd`, `EXTRA_PACKS` в `build.sh`),
-  игра подключает их при запуске (`scripts/core/packs.gd`).
+  игра подключает их при запуске (`scripts/core/packs.gd`); в архив сборки они ложатся вместе с игрой.
 
 ## Арены
 `python3 tools/process_arena_art.py <папка> <id арены>` → `game/art/arenas/<id>/` (у «Перепутья» — `game/art/arena/`).
@@ -63,8 +68,11 @@ Claude-Session: <ссылка на текущую сессию>
 подвешенный предмет (`life.json` + `water_*.png`); координаты — в `LIFE` / `LIFE_ARENAS` в начале скрипта.
 Промпты арен: `docs/ART_ARENA.md`, `docs/arenas/<id>.md`.
 
-## Где мы сейчас (3.17.9)
+## Где мы сейчас (3.17.11)
 - Илья и Дракула: полный набор, Дракула отполирован (стойка, прыжок, удары, шаги, броски).
+- **Илья: живая ходьба** (3.17.11) — новые листы walk_f/walk_b: рука качается, булава подпрыгивает, через апскейлер.
+  Следующее — стойка Ильи в том же духе (сейчас кулак у подбородка, при остановке рука перескакивает),
+  потом так же ходьба Кощея (у него руки тоже застыли).
 - **Кощей:** вся база и все 14 обычных ударов в игре, двойное разрешение. Дальше — промпты и листы спецприёмов
   (Кощеева игла, Бессмертие, Удар кладенцом, Похищение) и суперприёма «Смерть в игле» (`fighter_data.gd`).
 - Карта «Кощеево царство» готова и анимирована (сундук на дубе качается).
