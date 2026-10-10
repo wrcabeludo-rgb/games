@@ -364,7 +364,9 @@ def main() -> int:
                 ref = {"center_offset": mid - rear, "body_dx": mid - cx, "body_dy": bottom - cy}
             px, py = pivot(f, opt.get("pivot_y", "feet"), ref)
             done.append([f, px, py])
-        if "align_to" in opt:
+        if "align_to" in opt and not (out / f"{opt['align_to'].split(':')[0]}.json").exists():
+            print(f"  {name}: образца {opt['align_to']} нет — без выравнивания")
+        elif "align_to" in opt:
             k = int(opt.get("align_frame", 1)) - 1
             f, px, py = done[k]
             base, idx = opt["align_to"].split(":")

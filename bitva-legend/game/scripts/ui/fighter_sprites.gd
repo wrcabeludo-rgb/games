@@ -66,12 +66,13 @@ static func _load_character(id: String) -> Dictionary:
 			out[file.get_basename()] = {"tex": tex, "pivot": pivots, "hit": clampi(hit, 0, n - 1),
 				"hit_end": clampi(hit_end, hit, n - 1), "reverse": bool(meta.get("reverse", false)),
 				"air": int(meta.get("air_frames", 1)), "res": float(meta.get("res", 1.0)),
-				"bob": float(meta.get("bob", 0.0)), "stride": float(meta.get("stride", 0.0))}
+				"bob": float(meta.get("bob", 0.0)), "stride": float(meta.get("stride", 0.0)),
+				"cycle": int(meta.get("cycle", 0))}
 	if IDLE_FROM.has(id) and out.has(IDLE_FROM[id][0]):
 		var src: Dictionary = out[IDLE_FROM[id][0]]
 		var k: int = IDLE_FROM[id][1]
 		out["idle"] = {"tex": [src.tex[k]] as Array[Texture2D], "pivot": [src.pivot[k]] as Array[Vector2],
-			"hit": 0, "hit_end": 0, "reverse": false, "air": 1, "bob": 0.0, "stride": 0.0}
+			"hit": 0, "hit_end": 0, "reverse": false, "air": 1, "bob": 0.0, "stride": 0.0, "cycle": 0}
 	return out
 
 
@@ -263,7 +264,9 @@ func frame_for(f: Fighter, tick: int) -> Array:
 		Fighter.State.STAND, Fighter.State.WALK_F, Fighter.State.WALK_B, Fighter.State.LAND, \
 				Fighter.State.RUN_STOP, Fighter.State.PREJUMP, Fighter.State.RUN, Fighter.State.BACKDASH:
 			if anims.has("idle"):
-				# Стойка — один чистый кадр, дыхание делает игра плавной деформацией.
+				# Стойка из видео (задан cycle) — цикл кадров; иначе один чистый кадр, дыхание делает игра.
+				if anims.idle.cycle > 0:
+					return _pick(anims.idle, _cycle(tick, anims.idle.cycle, anims.idle.tex.size()))
 				return [anims.idle.tex[0], anims.idle.pivot[0], true]
 				var n: int = anims.idle.tex.size()
 				if n <= PING_PONG_MAX:
