@@ -12,6 +12,10 @@ const IDLE_CYCLE := 96      # стойка (дыхание)
 const WALK_CYCLE := 40      # шаг (полный цикл — два шага)
 const RUN_CYCLE := 26       # бег
 const BREATH_TICKS := 110  # один вдох-выдох в стойке (дыхание рисует игра, см. ArenaView._draw_breathing)
+## Покачивание при ходьбе (bob в <анимация>.json — насколько оседает тело, доля роста): самая низкая точка —
+## когда вес ложится на ногу (2-й и 6-й кадры из 8), самая высокая — нога проходит под телом (4-й и 8-й).
+const WALK_LOW := 3.0 / 16.0
+const WALK_SWAY := 0.4     # плечи подаются вперёд-назад — доля от покачивания вверх-вниз
 const GET_UP_TICKS := 18   # вставание — последние столько тиков лежания
 const PING_PONG_MAX := 5    # до стольких кадров стойка идёт туда-обратно (1-2-3-2), больше — нарисован цикл
 
@@ -61,12 +65,13 @@ static func _load_character(id: String) -> Dictionary:
 			var hit_end: int = int(meta.get("hit_end", hit + 1)) - 1
 			out[file.get_basename()] = {"tex": tex, "pivot": pivots, "hit": clampi(hit, 0, n - 1),
 				"hit_end": clampi(hit_end, hit, n - 1), "reverse": bool(meta.get("reverse", false)),
-				"air": int(meta.get("air_frames", 1)), "res": float(meta.get("res", 1.0))}
+				"air": int(meta.get("air_frames", 1)), "res": float(meta.get("res", 1.0)),
+				"bob": float(meta.get("bob", 0.0))}
 	if IDLE_FROM.has(id) and out.has(IDLE_FROM[id][0]):
 		var src: Dictionary = out[IDLE_FROM[id][0]]
 		var k: int = IDLE_FROM[id][1]
 		out["idle"] = {"tex": [src.tex[k]] as Array[Texture2D], "pivot": [src.pivot[k]] as Array[Vector2],
-			"hit": 0, "hit_end": 0, "reverse": false, "air": 1}
+			"hit": 0, "hit_end": 0, "reverse": false, "air": 1, "bob": 0.0}
 	return out
 
 
@@ -89,18 +94,32 @@ func anim(id: String, name: String) -> Dictionary:
 ## phase — 0 (выдох) … 1 (вдох), body_h — рост в пикселях кадра.
 static func draw_breathing(c: CanvasItem, tex: Texture2D, pivot: Vector2, tint: Color, body_h: float,
 		phase: float, lift := 7.0) -> void:
+	draw_flexed(c, tex, pivot, tint, body_h, lift * phase, 0.0)
+
+
+## Кадр на сетке: верх тела (от пояса) поднят на lift и сдвинут вперёд на shift пикселей кадра, ноги на месте.
+static func draw_flexed(c: CanvasItem, tex: Texture2D, pivot: Vector2, tint: Color, body_h: float,
+		lift: float, shift: float) -> void:
 	const ROWS := 12
 	var size := tex.get_size()
 	var colors := PackedColorArray([tint, tint, tint, tint])
 	for j in ROWS:
 		var v0 := float(j) / ROWS
 		var v1 := float(j + 1) / ROWS
-		var y0 := v0 * size.y - pivot.y - _lift(v0 * size.y, pivot.y, body_h) * lift * phase
-		var y1 := v1 * size.y - pivot.y - _lift(v1 * size.y, pivot.y, body_h) * lift * phase
-		var pts := PackedVector2Array([Vector2(-pivot.x, y0), Vector2(size.x - pivot.x, y0),
-			Vector2(size.x - pivot.x, y1), Vector2(-pivot.x, y1)])
+		var k0 := _lift(v0 * size.y, pivot.y, body_h)
+		var k1 := _lift(v1 * size.y, pivot.y, body_h)
+		var y0 := v0 * size.y - pivot.y - k0 * lift
+		var y1 := v1 * size.y - pivot.y - k1 * lift
+		var pts := PackedVector2Array([Vector2(-pivot.x + k0 * shift, y0), Vector2(size.x - pivot.x + k0 * shift, y0),
+			Vector2(size.x - pivot.x + k1 * shift, y1), Vector2(-pivot.x + k1 * shift, y1)])
 		var uvs := PackedVector2Array([Vector2(0, v0), Vector2(1, v0), Vector2(1, v1), Vector2(0, v1)])
 		c.draw_polygon(pts, colors, uvs, tex)
+
+
+## Покачивание в шаге: [насколько поднять верх тела, насколько подать вперёд] в долях роста; phase — 0…1 цикла.
+static func walk_flex(bob: float, phase: float) -> Vector2:
+	var a := TAU * 2.0 * (phase - WALK_LOW)  # два шага за цикл
+	return Vector2(-bob * cos(a), -bob * WALK_SWAY * sin(a))
 
 
 ## Насколько поднимается точка кадра на вдохе: ноги — 0, от пояса растёт, грудь и выше — полностью.
@@ -121,7 +140,8 @@ func frame_for(f: Fighter, tick: int) -> Array:
 				return _pick(anims[name], _attack_index(f, anims[name]))
 		Fighter.State.WALK_F:
 			if anims.has("walk_f"):
-				return _pick(anims.walk_f, _cycle(f.state_frame, WALK_CYCLE, anims.walk_f.tex.size()))
+				return _walk(anims.walk_f, _cycle(f.state_frame, WALK_CYCLE, anims.walk_f.tex.size()),
+					float(f.state_frame % WALK_CYCLE) / WALK_CYCLE)
 		Fighter.State.WALK_B:
 			# Шаг назад — кадры ходьбы в обратном порядке.
 			var key := "walk_b" if anims.has("walk_b") else "walk_f"
@@ -130,7 +150,8 @@ func frame_for(f: Fighter, tick: int) -> Array:
 				# Лист шага вперёд (или помеченный reverse) — задом наперёд.
 				var i := _cycle(f.state_frame, WALK_CYCLE, n)
 				var reverse: bool = key == "walk_f" or anims[key].reverse
-				return _pick(anims[key], n - 1 - i if reverse else i)
+				var phase := float(f.state_frame % WALK_CYCLE) / WALK_CYCLE
+				return _walk(anims[key], n - 1 - i if reverse else i, 1.0 - phase if reverse else phase)
 		Fighter.State.RUN:
 			if anims.has("run"):
 				return _pick(anims.run, _cycle(f.state_frame, RUN_CYCLE, anims.run.tex.size()))
@@ -268,6 +289,13 @@ static func _ping_pong(i: int, n: int) -> int:
 
 static func _pick(anim: Dictionary, i: int) -> Array:
 	return [anim.tex[i], anim.pivot[i]]
+
+
+## Кадр ходьбы; если у анимации задано покачивание — третьим элементом [подъём, сдвиг] в долях роста.
+static func _walk(anim: Dictionary, i: int, phase: float) -> Array:
+	if anim.bob <= 0.0:
+		return _pick(anim, i)
+	return [anim.tex[i], anim.pivot[i], walk_flex(anim.bob, phase)]
 
 
 ## Кадр удара по фазе: замах — кадры до ударных, активная фаза — ударные (hit…hit_end), возврат — остальные.

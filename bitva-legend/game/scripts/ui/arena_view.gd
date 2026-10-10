@@ -167,7 +167,8 @@ func _draw_shadow(f: Fighter) -> void:
 
 
 ## Кадр спрайта: опорная точка (центр бойца на земле) — в позиции бойца; смотрит влево — отражаем.
-func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2, breathe := false) -> void:
+## flex: true — дыхание в стойке, Vector2 — покачивание в шаге (FighterSprites.walk_flex), иначе как есть.
+func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2, flex: Variant = null) -> void:
 	var base := to_screen(float(f.x) / Sim.SUB, float(f.y) / Sim.SUB)
 	var tint := Color(0.75, 0.85, 1.0) if f.alt else Color.WHITE
 	if f.is_stunned() and _sim.hitstop > 0:
@@ -178,9 +179,12 @@ func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2, breathe := false) 
 		tint = Color(0.75, 1.0, 0.85)  # прилип к жвачке
 	var k := FighterSprites.SCALE / sprites.res(f.id)
 	draw_set_transform(base, 0, Vector2(k * f.facing, k))
-	if breathe:
+	var body_h: float = f.data.height * 2.0 * sprites.res(f.id)
+	if flex is Vector2:
+		FighterSprites.draw_flexed(self, tex, pivot, tint, body_h, flex.x * body_h, flex.y * body_h)
+	elif flex is bool and flex:
 		var phase := 0.5 - 0.5 * cos(TAU * float(_sim.tick) / FighterSprites.BREATH_TICKS)
-		FighterSprites.draw_breathing(self, tex, pivot, tint, f.data.height * 2.0 * sprites.res(f.id), phase,
+		FighterSprites.draw_breathing(self, tex, pivot, tint, body_h, phase,
 			7.0 * sprites.res(f.id))
 	else:
 		draw_texture(tex, -pivot, tint)
@@ -197,7 +201,7 @@ func _draw_fighter(f: Fighter) -> void:
 	if use_sprites and not f.is_intangible():
 		var fr := sprites.frame_for(f, _sim.tick)
 		if not fr.is_empty():
-			_draw_sprite(f, fr[0], fr[1], fr.size() > 2 and fr[2])
+			_draw_sprite(f, fr[0], fr[1], fr[2] if fr.size() > 2 else null)
 			return
 	if f.state == Fighter.State.DOWN:
 		_draw_down(f, true)
