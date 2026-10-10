@@ -50,6 +50,12 @@ func _update_camera() -> void:
 		var k := float(_sim.hitstop) / _sim.hitstop_total
 		var sgn := 1.0 if _sim.tick % 2 == 0 else -1.0
 		_shake = Vector2(sgn * amp * k, -sgn * amp * k * 0.5)
+	# Удар палицей оземь в суперприёме Ильи (кратер): земля ходит ходуном.
+	var quake: int = _sim.tick - maxi(_crater_tick[0], _crater_tick[1])
+	if quake >= 0 and quake < QUAKE_TICKS:
+		var q := 18.0 * (1.0 - float(quake) / QUAKE_TICKS)
+		var sq := 1.0 if _sim.tick % 2 == 0 else -1.0
+		_shake += Vector2(sq * q * (0.6 if quake % 4 < 2 else 1.0), -sq * q)
 
 
 func to_screen(world_x_px: float, height_px: float) -> Vector2:
@@ -111,6 +117,7 @@ const STOMP_OFFSET := 70.0        # снаряд волны появляется
 const CRATER_WIDTH := 520.0       # ширина на экране, px (720p)
 const CRATER_GROUND := 101.0      # линия земли в текстуре, px от верха
 const CRATER_HOLD := 180
+const QUAKE_TICKS := 30         # тряска экрана от удара оземь в суперприёме
 const CRATER_FADE := 60
 var _craters: Array = []          # [x в мире, тик появления]
 var _crater_tick := [-1000, -1000]
@@ -532,7 +539,7 @@ func _draw_throw(f: Fighter, shoulder: Vector2, color: Color) -> void:
 ## назад — его зеркало (только картинка) и гаснет; у ноги в начале — всплеск (1-й кадр целиком).
 func _draw_stomp_wave(pr: PackedInt32Array, age: int, dir: float) -> void:
 	var ex := pr[Sim.Proj.KIND] >= 3
-	var s := 1.05 if ex else 0.85
+	var s := 0.88 if ex else 0.7
 	var x := float(pr[Sim.Proj.X]) / Sim.SUB
 	var front := x + dir * float(pr[Sim.Proj.HW]) / Sim.SUB
 	var stomp := x - float(pr[Sim.Proj.VX]) * age / Sim.SUB - dir * STOMP_OFFSET
@@ -574,9 +581,9 @@ func _draw_projectile(pr: PackedInt32Array) -> void:
 	if kind == 2:
 		_draw_stomp_wave(pr, age, dir)
 	elif kind == 0:
-		# Палица из ролика броска (art/fx/mace.png, центр тяжести — в центре текстуры) кувыркается в полёте.
+		# Палица из ролика броска (art/fx/mace.png): летит прямо, не вращаясь, шаром вперёд — в соперника.
 		var k := FighterSprites.SCALE / sprites.res("ilya")
-		draw_set_transform(c, age * 0.35 * dir, Vector2(k * dir, k))
+		draw_set_transform(c, 0, Vector2(k * dir, k))
 		draw_texture(MACE_TEX, -MACE_TEX.get_size() * 0.5)
 		draw_set_transform(Vector2.ZERO)
 	else:

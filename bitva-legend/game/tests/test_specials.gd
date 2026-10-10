@@ -22,7 +22,7 @@ func _init() -> void:
 	ok = _check("мыши бьют и присевшего", _test_duck()) and ok
 	ok = _check("пока снаряд летит, второй не выпустить (выходит обычный удар)", _test_one_projectile()) and ok
 	ok = _check("встречные снаряды гасят друг друга", _test_clash()) and ok
-	ok = _check("палица падает на землю и исчезает", _test_mace_lands()) and ok
+	ok = _check("палица летит прямо через весь экран и бьёт дальнего соперника", _test_mace_lands()) and ok
 	ok = _check("вперёд, назад + удар — обычный удар", _test_wrong_order()) and ok
 	ok = _check("слишком медленный ввод — обычный удар", _test_too_slow()) and ok
 	ok = _check("урон сквозь блок может добить", _test_chip_ko()) and ok
@@ -143,8 +143,8 @@ func _test_mace_lands() -> bool:
 	_run(sim, R | LP, 0)
 	_run(sim, 0, 0, 20)
 	var flying := sim.projectiles.size() == 1
-	_run(sim, 0, 0, 60)
-	return flying and sim.projectiles.is_empty() and sim.fighters[1].hp == 1000
+	_run(sim, 0, 0, 100)
+	return flying and sim.projectiles.is_empty() and sim.fighters[1].hp < 1000
 
 
 func _test_wrong_order() -> bool:

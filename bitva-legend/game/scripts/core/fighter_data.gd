@@ -91,9 +91,9 @@ const CHARACTERS := {
 			"j_lk": {"startup": 6, "active": 8, "damage": 45, "hitstun": 16, "hitstop": 8, "push": 600, "box": [60, 70, 115, 65], "level": "overhead"},
 			"j_hp": {"startup": 9, "active": 5, "damage": 100, "hitstun": 22, "hitstop": 13, "push": 800, "box": [40, 0, 110, 130], "level": "overhead"},
 			"j_hk": {"startup": 8, "active": 6, "damage": 90, "hitstun": 20, "hitstop": 11, "push": 800, "box": [60, 100, 100, 100], "level": "overhead"},
-			# Бросок палицы (только руками): летит по дуге и падает. Медленный, но мощный.
-			"sp_proj_l": {"buttons": "punch", "versions": 2, "startup": 16, "active": 1, "recovery": 20, "proj": {"x": 60, "y": 200, "vx": 650, "vy": 1100, "gravity": 70, "w": 54, "h": 54, "kind": 0, "damage": 90, "hitstun": 22, "hitstop": 12, "push": 900, "chip": 9}, "ex": {"startup": 12, "proj": {"vx": 900, "vy": 1000, "damage": 140, "hitstun": 26, "chip": 16, "kind": 3}}},
-			"sp_proj_h": {"buttons": "punch", "startup": 20, "active": 1, "recovery": 22, "proj": {"x": 60, "y": 200, "vx": 950, "vy": 900, "gravity": 70, "w": 54, "h": 54, "kind": 0, "damage": 110, "hitstun": 24, "hitstop": 13, "push": 1000, "chip": 11}, "ex": {"startup": 14, "proj": {"vx": 1250, "vy": 850, "damage": 150, "hitstun": 26, "chip": 18, "kind": 3}}},
+			# Бросок палицы (только руками): летит прямо на уровне груди, шаром вперёд. Мощный.
+			"sp_proj_l": {"buttons": "punch", "versions": 2, "startup": 16, "active": 1, "recovery": 20, "proj": {"x": 60, "y": 170, "vx": 1100, "vy": 0, "gravity": 0, "w": 70, "h": 54, "kind": 0, "damage": 90, "hitstun": 22, "hitstop": 12, "push": 900, "chip": 9}, "ex": {"startup": 12, "proj": {"vx": 1400, "damage": 140, "hitstun": 26, "chip": 16, "kind": 3}}},
+			"sp_proj_h": {"buttons": "punch", "startup": 20, "active": 1, "recovery": 22, "proj": {"x": 60, "y": 170, "vx": 1300, "vy": 0, "gravity": 0, "w": 70, "h": 54, "kind": 0, "damage": 110, "hitstun": 24, "hitstop": 13, "push": 1000, "chip": 11}, "ex": {"startup": 14, "proj": {"vx": 1600, "damage": 150, "hitstun": 26, "chip": 18, "kind": 3}}},
 			# Удар оземь (вниз, вниз + нога): волна по земле, низкий удар — блокировать сидя или перепрыгнуть.
 			"sp_dd_l": {"buttons": "kick", "startup": 18, "active": 1, "recovery": 24, "proj": {"x": 70, "y": 22, "vx": 900, "vy": 0, "gravity": 0, "w": 70, "h": 44, "kind": 2, "level": "low", "life": 34, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 900, "chip": 8}, "ex": {"startup": 14, "proj": {"life": 70, "vx": 1000, "w": 90, "h": 70, "damage": 120, "hitstun": 26, "chip": 14, "kind": 5}}},
 			# Мельница (вперёд, вперёд + рука): дальний захват, раскручивает и швыряет. Вырваться нельзя.
@@ -106,7 +106,7 @@ const CHARACTERS := {
 			# Бросок: удар лбом и через плечо — соперник улетает за спину (over).
 			"throw": {"startup": 4, "active": 2, "recovery": 18, "grab": {"range": 25, "hold": 40, "damage": 120, "launch": [500, 1000], "tech": 1, "recovery": 14, "over": 1}},
 			# «Удар с небес» (блок + СР + СН): рывок с палицей; попал — подбрасывает, Илья взмывает за облака и обрушивается с палицей.
-			"super": {"name": "УДАР С НЕБЕС", "startup": 8, "active": 8, "recovery": 45, "lunge": 700, "damage": 60, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 45, "box": [25, 40, 140, 240], "cinema": {"hold": 100, "damage": 330, "launch": [700, 1700], "tech": 0, "recovery": 20, "scaled": 1}},
+			"super": {"name": "УДАР С НЕБЕС", "startup": 6, "active": 8, "recovery": 45, "lunge": 700, "damage": 60, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 45, "box": [25, 40, 140, 240], "cinema": {"hold": 80, "damage": 330, "launch": [700, 1700], "tech": 0, "recovery": 16, "scaled": 1}},
 		},
 	},
 	"dracula": {
