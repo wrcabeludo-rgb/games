@@ -2,9 +2,11 @@
 """Лист кадров из видео (Veo, Kling…): цикл или движение бойца на пурпурном фоне → сетка кадров для
 process_fighter_art.py.
 
-Использование: python3 tools/video_sheet.py <видео> <первый кадр> <последний кадр> <выход.png> [шаг] [столбцов]
+Использование: python3 tools/video_sheet.py <видео> <первый кадр> <последний кадр> <выход.png> [шаг] [столбцов] [опорный]
   кадры — с 1, как у ffmpeg; последний не включается (для цикла: первый кадр следующего витка);
-  шаг — брать каждый N-й кадр (по умолчанию 1); столбцов — ширина сетки (по умолчанию 8).
+  шаг — брать каждый N-й кадр (по умолчанию 1); столбцов — ширина сетки (по умолчанию 8);
+  опорный — кадр со стойкой, ставится первым (для выравнивания по стойке, если движение начинается
+  не из неё; в sheets.json тогда "drop_ref": true — после выравнивания он выбрасывается).
 Рядом пишется <выход>.cells.json — раскладка клеток (для "fixed_pivot" в sheets.json).
 Кадры обрезаются по общей рамке бойца (с запасом), фон приводится к чистому #FF00FF, водяной знак
 в правом нижнем углу (Kling) отрезается рамкой. Печатает число кадров и сетку для sheets.json.
@@ -36,7 +38,9 @@ def main() -> int:
     cols = int(sys.argv[6]) if len(sys.argv) > 6 else 8
     tmp = Path(tempfile.mkdtemp())
     subprocess.run(["ffmpeg", "-v", "error", "-i", video, str(tmp / "%04d.png")], check=True)
-    frames = [np.asarray(Image.open(tmp / f"{i:04d}.png").convert("RGB")) for i in range(first, last, step)]
+    ref = int(sys.argv[7]) if len(sys.argv) > 7 else 0
+    idx = ([ref] if ref else []) + list(range(first, last, step))
+    frames = [np.asarray(Image.open(tmp / f"{i:04d}.png").convert("RGB")) for i in idx]
     h, w = frames[0].shape[:2]
     # Общая рамка бойца по всем кадрам (без правого нижнего угла с водяным знаком).
     y0, y1, x0, x1 = h, 0, w, 0

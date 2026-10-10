@@ -18,6 +18,8 @@
   fixed_pivot: true — лист из видео (tools/video_sheet.py, рядом .cells.json): кадры режутся по клеткам,
            опорная точка у всех кадров одна (по 1-му кадру) — сдвиги бойца в ролике сохраняются.
   --draft (в командной строке): листы с upscale берутся без апскейла — черновик движения для утверждения.
+  release: 21 — бросок: кадр (с 1), где соперник брошен; до него кадры идут по ходу удержания, после — в доводке.
+  drop_ref: true — 1-й кадр листа из видео — опорная стойка: выровнять по ней и выбросить.
   upscale: true — увеличить исходник нейросетью (tools/upscale.py) и у бойца обычного разрешения:
            кадры чётче, размер в игре тот же.
   cycle: 60 — стойка из видео: цикл кадров в тиках (60 = 1 с); без него стойка — один кадр с дыханием игры.
@@ -373,7 +375,7 @@ def main() -> int:
         if RES.get(who, 1) != 1:
             meta["res"] = RES[who]
         # Ударные кадры (с 1): hit — первый кадр активной фазы, hit_end — последний.
-        for k in ("hit", "hit_end", "reverse", "air_frames", "bob", "stride", "cycle"):
+        for k in ("hit", "hit_end", "reverse", "air_frames", "bob", "stride", "cycle", "release"):
             if k in opt:
                 meta[k] = opt[k]
         done = []
@@ -427,6 +429,10 @@ def main() -> int:
                 # Стойку выровняли по старому образцу — остальные листы считаем в той же системе.
                 ref["center_offset"] += shift[0]
                 ref["body_dx"] += shift[0]
+        if opt.get("drop_ref"):
+            # Первый кадр — опорная стойка из ролика (video_sheet.py … <опорный>): по нему выровняли, в игру не идёт.
+            done = done[1:]
+            frames = frames[1:]
         for i, (f, px, py) in enumerate(done, 1):
             if fixed:
                 box = f.getchannel("A").point(lambda v: 255 if v > 8 else 0).getbbox()

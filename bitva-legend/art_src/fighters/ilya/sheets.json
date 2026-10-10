@@ -65,8 +65,15 @@
   "fit": "h:2:414"
  },
  "block": {
-  "frames": 2,
-  "fit": "h:1:616"
+  "fit": 1.112,
+  "align_to": "idle:1",
+  "fixed_pivot": true,
+  "frames": 17,
+  "grid": [
+   9,
+   2
+  ],
+  "drop_ref": true
  },
  "block_low": {
   "frames": 2,
@@ -83,8 +90,7 @@
    6,
    3
   ],
-  "fit": 0.556,
-  "upscale": true,
+  "fit": 1.112,
   "align_to": "idle:1",
   "hit": 8,
   "hit_end": 12,
@@ -96,25 +102,23 @@
    6,
    5
   ],
-  "fit": 0.556,
-  "upscale": true,
+  "fit": 1.112,
   "align_to": "idle:1",
   "hit": 13,
   "hit_end": 15,
   "fixed_pivot": true
  },
  "st_hk": {
-  "frames": 33,
-  "grid": [
-   6,
-   6
-  ],
-  "fit": 0.556,
-  "upscale": true,
+  "fit": 1.112,
   "align_to": "idle:1",
-  "hit": 14,
-  "hit_end": 16,
-  "fixed_pivot": true
+  "fixed_pivot": true,
+  "frames": 32,
+  "grid": [
+   8,
+   4
+  ],
+  "hit": 11,
+  "hit_end": 13
  },
  "cr_lp": {
   "frames": 3,
@@ -153,8 +157,15 @@
   "hit_end": 3
  },
  "hit_high": {
-  "frames": 4,
-  "fit": "h:4:605"
+  "fit": 1.112,
+  "align_to": "idle:1",
+  "fixed_pivot": true,
+  "frames": 16,
+  "grid": [
+   8,
+   2
+  ],
+  "drop_ref": true
  },
  "hit_low": {
   "frames": 4,
@@ -182,14 +193,16 @@
   "hit_end": 5
  },
  "st_round": {
-  "frames": 8,
+  "fit": 1.112,
+  "align_to": "idle:1",
+  "fixed_pivot": true,
+  "frames": 41,
   "grid": [
-   4,
-   2
+   7,
+   6
   ],
-  "fit": "h:1:534",
-  "hit": 5,
-  "hit_end": 6
+  "hit": 25,
+  "hit_end": 27
  },
  "j_hk": {
   "frames": 6,
@@ -229,10 +242,17 @@
   "air_frames": 3
  },
  "throw": {
-  "frames": 4,
-  "fit": "inherit:get_up",
-  "hit": 1,
-  "hit_end": 1
+  "fit": 1.112,
+  "align_to": "idle:1",
+  "fixed_pivot": true,
+  "frames": 31,
+  "grid": [
+   8,
+   4
+  ],
+  "hit": 3,
+  "hit_end": 3,
+  "release": 21
  },
  "thrown": {
   "part_frames": [
