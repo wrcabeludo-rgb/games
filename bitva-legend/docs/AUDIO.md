@@ -23,6 +23,7 @@
 | sfx/ui_* | меню | [Interface Sounds](https://kenney.nl/assets/interface-sounds) |
 | voice/* | диктор: «Round 1», «Fight!», «Time», «Winner», «Choose your character» | [Voiceover Pack: Fighter](https://kenney.nl/assets/voiceover-pack-fighter) |
 | sfx/whoosh_light, whoosh_heavy | свист удара | синтезирован из шума (tools/fetch_audio.sh) |
+| sfx/<боец>_<удар> (ilya_st_lp) | свой звук удара бойца вместо свиста | вырезан из видео Veo (ffmpeg, см. CLAUDE.md) |
 
 Громкость — константы в начале `sound_director.gd` (MUSIC_DB, SFX_DB, VOICE_DB).
 Позже: свои фразы героев (Илья, Дракула) — можно записать голосом или подобрать.

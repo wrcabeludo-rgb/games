@@ -1,18 +1,26 @@
 {
  "idle": {
-  "frames": 24,
+  "frames": 44,
   "grid": [
-   6,
-   4
+   8,
+   6
   ],
   "fit": "h:1:620",
   "upscale": true,
   "align_to": "idle_prev:1",
-  "cycle": 60
+  "cycle": 110
  },
  "st_lp": {
-  "frames": 3,
-  "fit": 0.833
+  "frames": 18,
+  "grid": [
+   6,
+   3
+  ],
+  "fit": "h:1:620",
+  "upscale": true,
+  "align_to": "idle:1",
+  "hit": 7,
+  "hit_end": 9
  },
  "walk_f": {
   "frames": 40,
