@@ -44,7 +44,8 @@ func _test_walk_back() -> bool:
 	var x0 := sim.fighters[0].x
 	_run(sim, L, 0, 30)
 	var back := x0 - sim.fighters[0].x
-	return back == 30 * 210 and sim.fighters[0].state == Fighter.State.WALK_B
+	var d: Dictionary = sim.fighters[0].data
+	return back == 30 * d.walk_b and d.walk_b < d.walk_f and sim.fighters[0].state == Fighter.State.WALK_B
 
 
 func _test_jump() -> bool:

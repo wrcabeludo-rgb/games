@@ -161,6 +161,9 @@ func frame_for(f: Fighter, tick: int) -> Array:
 				return _pick(anims.run, _cycle(f.state_frame, cycle, anims.run.tex.size()))
 		Fighter.State.CROUCH:
 			if anims.has("crouch"):
+				if anims.crouch.cycle > 0:
+					# Присед из видео — цикл дыхания (как стойка).
+					return _pick(anims.crouch, _cycle(f.state_frame, anims.crouch.cycle, anims.crouch.tex.size()))
 				return _pick(anims.crouch, 0 if f.state_frame < 3 else anims.crouch.tex.size() - 1)
 		Fighter.State.BLOCK, Fighter.State.BLOCKSTUN:
 			# Блок: 1-й кадр — стойка в блоке, 2-й — принял удар (оглушение в блоке).

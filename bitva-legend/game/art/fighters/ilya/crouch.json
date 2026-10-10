@@ -3,24 +3,619 @@
   {
    "file": "crouch_1.png",
    "pivot": [
-    203,
-    531
+    226,
+    411
    ],
    "size": [
-    413,
-    534
+    432,
+    412
    ]
   },
   {
    "file": "crouch_2.png",
    "pivot": [
     226,
+    411
+   ],
+   "size": [
+    431,
+    412
+   ]
+  },
+  {
+   "file": "crouch_3.png",
+   "pivot": [
+    226,
+    411
+   ],
+   "size": [
+    431,
+    412
+   ]
+  },
+  {
+   "file": "crouch_4.png",
+   "pivot": [
+    226,
+    411
+   ],
+   "size": [
+    431,
+    412
+   ]
+  },
+  {
+   "file": "crouch_5.png",
+   "pivot": [
+    226,
+    409
+   ],
+   "size": [
+    431,
+    410
+   ]
+  },
+  {
+   "file": "crouch_6.png",
+   "pivot": [
+    226,
+    409
+   ],
+   "size": [
+    431,
+    410
+   ]
+  },
+  {
+   "file": "crouch_7.png",
+   "pivot": [
+    226,
+    409
+   ],
+   "size": [
+    431,
+    410
+   ]
+  },
+  {
+   "file": "crouch_8.png",
+   "pivot": [
+    226,
+    409
+   ],
+   "size": [
+    431,
+    410
+   ]
+  },
+  {
+   "file": "crouch_9.png",
+   "pivot": [
+    227,
+    409
+   ],
+   "size": [
+    432,
+    410
+   ]
+  },
+  {
+   "file": "crouch_10.png",
+   "pivot": [
+    227,
+    409
+   ],
+   "size": [
+    432,
+    410
+   ]
+  },
+  {
+   "file": "crouch_11.png",
+   "pivot": [
+    227,
+    409
+   ],
+   "size": [
+    432,
+    410
+   ]
+  },
+  {
+   "file": "crouch_12.png",
+   "pivot": [
+    226,
+    408
+   ],
+   "size": [
+    431,
+    409
+   ]
+  },
+  {
+   "file": "crouch_13.png",
+   "pivot": [
+    226,
+    408
+   ],
+   "size": [
+    431,
+    409
+   ]
+  },
+  {
+   "file": "crouch_14.png",
+   "pivot": [
+    226,
+    408
+   ],
+   "size": [
+    429,
+    409
+   ]
+  },
+  {
+   "file": "crouch_15.png",
+   "pivot": [
+    226,
+    409
+   ],
+   "size": [
+    431,
+    410
+   ]
+  },
+  {
+   "file": "crouch_16.png",
+   "pivot": [
+    226,
+    409
+   ],
+   "size": [
+    429,
+    410
+   ]
+  },
+  {
+   "file": "crouch_17.png",
+   "pivot": [
+    226,
+    409
+   ],
+   "size": [
+    429,
+    410
+   ]
+  },
+  {
+   "file": "crouch_18.png",
+   "pivot": [
+    226,
+    409
+   ],
+   "size": [
+    429,
+    410
+   ]
+  },
+  {
+   "file": "crouch_19.png",
+   "pivot": [
+    226,
+    410
+   ],
+   "size": [
+    428,
+    411
+   ]
+  },
+  {
+   "file": "crouch_20.png",
+   "pivot": [
+    226,
+    410
+   ],
+   "size": [
+    428,
+    411
+   ]
+  },
+  {
+   "file": "crouch_21.png",
+   "pivot": [
+    226,
+    411
+   ],
+   "size": [
+    428,
+    412
+   ]
+  },
+  {
+   "file": "crouch_22.png",
+   "pivot": [
+    226,
+    411
+   ],
+   "size": [
+    428,
+    412
+   ]
+  },
+  {
+   "file": "crouch_23.png",
+   "pivot": [
+    226,
+    411
+   ],
+   "size": [
+    428,
+    412
+   ]
+  },
+  {
+   "file": "crouch_24.png",
+   "pivot": [
+    226,
+    411
+   ],
+   "size": [
+    428,
+    412
+   ]
+  },
+  {
+   "file": "crouch_25.png",
+   "pivot": [
+    226,
+    412
+   ],
+   "size": [
+    428,
+    413
+   ]
+  },
+  {
+   "file": "crouch_26.png",
+   "pivot": [
+    225,
     413
    ],
    "size": [
-    430,
+    427,
     414
    ]
+  },
+  {
+   "file": "crouch_27.png",
+   "pivot": [
+    225,
+    414
+   ],
+   "size": [
+    427,
+    415
+   ]
+  },
+  {
+   "file": "crouch_28.png",
+   "pivot": [
+    223,
+    413
+   ],
+   "size": [
+    425,
+    414
+   ]
+  },
+  {
+   "file": "crouch_29.png",
+   "pivot": [
+    223,
+    414
+   ],
+   "size": [
+    425,
+    415
+   ]
+  },
+  {
+   "file": "crouch_30.png",
+   "pivot": [
+    223,
+    414
+   ],
+   "size": [
+    425,
+    415
+   ]
+  },
+  {
+   "file": "crouch_31.png",
+   "pivot": [
+    223,
+    416
+   ],
+   "size": [
+    425,
+    417
+   ]
+  },
+  {
+   "file": "crouch_32.png",
+   "pivot": [
+    223,
+    416
+   ],
+   "size": [
+    426,
+    417
+   ]
+  },
+  {
+   "file": "crouch_33.png",
+   "pivot": [
+    223,
+    416
+   ],
+   "size": [
+    428,
+    417
+   ]
+  },
+  {
+   "file": "crouch_34.png",
+   "pivot": [
+    223,
+    416
+   ],
+   "size": [
+    426,
+    417
+   ]
+  },
+  {
+   "file": "crouch_35.png",
+   "pivot": [
+    223,
+    416
+   ],
+   "size": [
+    428,
+    417
+   ]
+  },
+  {
+   "file": "crouch_36.png",
+   "pivot": [
+    223,
+    416
+   ],
+   "size": [
+    428,
+    417
+   ]
+  },
+  {
+   "file": "crouch_37.png",
+   "pivot": [
+    223,
+    416
+   ],
+   "size": [
+    428,
+    417
+   ]
+  },
+  {
+   "file": "crouch_38.png",
+   "pivot": [
+    223,
+    416
+   ],
+   "size": [
+    428,
+    417
+   ]
+  },
+  {
+   "file": "crouch_39.png",
+   "pivot": [
+    223,
+    417
+   ],
+   "size": [
+    428,
+    418
+   ]
+  },
+  {
+   "file": "crouch_40.png",
+   "pivot": [
+    223,
+    417
+   ],
+   "size": [
+    428,
+    418
+   ]
+  },
+  {
+   "file": "crouch_41.png",
+   "pivot": [
+    223,
+    416
+   ],
+   "size": [
+    428,
+    417
+   ]
+  },
+  {
+   "file": "crouch_42.png",
+   "pivot": [
+    223,
+    416
+   ],
+   "size": [
+    428,
+    417
+   ]
+  },
+  {
+   "file": "crouch_43.png",
+   "pivot": [
+    223,
+    416
+   ],
+   "size": [
+    429,
+    417
+   ]
+  },
+  {
+   "file": "crouch_44.png",
+   "pivot": [
+    223,
+    416
+   ],
+   "size": [
+    429,
+    417
+   ]
+  },
+  {
+   "file": "crouch_45.png",
+   "pivot": [
+    223,
+    416
+   ],
+   "size": [
+    429,
+    417
+   ]
+  },
+  {
+   "file": "crouch_46.png",
+   "pivot": [
+    223,
+    416
+   ],
+   "size": [
+    429,
+    417
+   ]
+  },
+  {
+   "file": "crouch_47.png",
+   "pivot": [
+    223,
+    416
+   ],
+   "size": [
+    429,
+    417
+   ]
+  },
+  {
+   "file": "crouch_48.png",
+   "pivot": [
+    223,
+    416
+   ],
+   "size": [
+    429,
+    417
+   ]
+  },
+  {
+   "file": "crouch_49.png",
+   "pivot": [
+    225,
+    415
+   ],
+   "size": [
+    431,
+    416
+   ]
+  },
+  {
+   "file": "crouch_50.png",
+   "pivot": [
+    226,
+    414
+   ],
+   "size": [
+    433,
+    415
+   ]
+  },
+  {
+   "file": "crouch_51.png",
+   "pivot": [
+    226,
+    414
+   ],
+   "size": [
+    433,
+    415
+   ]
+  },
+  {
+   "file": "crouch_52.png",
+   "pivot": [
+    226,
+    414
+   ],
+   "size": [
+    432,
+    415
+   ]
+  },
+  {
+   "file": "crouch_53.png",
+   "pivot": [
+    226,
+    413
+   ],
+   "size": [
+    432,
+    414
+   ]
+  },
+  {
+   "file": "crouch_54.png",
+   "pivot": [
+    226,
+    411
+   ],
+   "size": [
+    432,
+    412
+   ]
+  },
+  {
+   "file": "crouch_55.png",
+   "pivot": [
+    226,
+    411
+   ],
+   "size": [
+    433,
+    412
+   ]
+  },
+  {
+   "file": "crouch_56.png",
+   "pivot": [
+    226,
+    411
+   ],
+   "size": [
+    433,
+    412
+   ]
   }
- ]
+ ],
+ "cycle": 140
 }
