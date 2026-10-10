@@ -15,6 +15,8 @@
        "h:<кадр>:<px>"   — кадр № <кадр> высотой <px> (1440p): для приседа, блока, прыжка;
        число           — масштаб вручную.
   grid: [столбцов, рядов] — лист сеткой (8 кадров = [4, 2], 12 = [4, 3]); порядок — слева направо, сверху вниз.
+  upscale: true — увеличить исходник нейросетью (tools/upscale.py) и у бойца обычного разрешения:
+           кадры чётче, размер в игре тот же.
   bob: 0.02 — ходьба: игра покачивает тело в такт шагу (насколько оседает, доля роста).
   reverse: true — проигрывать задом наперёд (шаг назад, нарисованный как шаг вперёд).
   hit / hit_end: номера ударных кадров (с 1) — показываются в активной фазе удара; до них — замах, после — возврат.
@@ -66,9 +68,10 @@ def clear_border(img: Image.Image, px: int = 3) -> Image.Image:
     return Image.fromarray(a, "RGBA")
 
 
-def src_image(p: Path, who: str) -> Image.Image:
-    """Исходник листа; для бойцов с двойным разрешением — увеличенный нейросетью (кэш в <папка>/.x2/)."""
-    if RES.get(who, 1) == 1:
+def src_image(p: Path, who: str, up: bool = False) -> Image.Image:
+    """Исходник листа; для бойцов с двойным разрешением (или листа с upscale) — увеличенный нейросетью
+    (кэш в <папка>/.x2/)."""
+    if RES.get(who, 1) == 1 and not up:
         return Image.open(p)
     cache = p.parent / ".x2" / (p.stem + ".png")
     if not cache.exists() or cache.stat().st_mtime < p.stat().st_mtime:
@@ -290,7 +293,7 @@ def main() -> int:
         name = p.stem
         opt = cfg.get(name, {})
         group = [f for _, f in sorted(parts[name])]
-        raw = src_image(group[0], who)
+        raw = src_image(group[0], who, opt.get("upscale", False))
         heights[name] = raw.height
         if len(group) == 1:
             frames = frames_of(chroma_key(raw), opt.get("frames", 0), opt.get("grid"))
@@ -301,7 +304,7 @@ def main() -> int:
             pf = opt.get("part_frames", 0)
             for i, f in enumerate(group):
                 n = pf[i] if isinstance(pf, list) else pf
-                part = frames_of(chroma_key(src_image(f, who)), n, opt.get("grid"))
+                part = frames_of(chroma_key(src_image(f, who, opt.get("upscale", False))), n, opt.get("grid"))
                 if "parts_fit" in opt:
                     k = _fit_scale(opt["parts_fit"][i], part, who)
                     part = [x.resize((max(1, round(x.width * k)), max(1, round(x.height * k))), Image.LANCZOS)

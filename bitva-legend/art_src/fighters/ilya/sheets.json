@@ -14,7 +14,7 @@
    2
   ],
   "pivot_y": "body_ground",
-  "bob": 0.02
+  "upscale": true
  },
  "walk_b": {
   "frames": 8,
@@ -23,7 +23,7 @@
    2
   ],
   "pivot_y": "body_ground",
-  "bob": 0.02
+  "upscale": true
  },
  "run": {
   "frames": 6,
