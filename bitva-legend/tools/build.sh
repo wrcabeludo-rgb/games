@@ -36,7 +36,7 @@ rm -rf "$OUT" && mkdir -p "$OUT"
 # Иконка игры вместо иконки Godot (rcedit не нужен, см. tools/set_exe_icon.py).
 python3 "$ROOT/tools/set_exe_icon.py" "$OUT/BitvaLegend.exe" "$GAME/icon.ico"
 
-# Бойцы в высоком разрешении — отдельными пакетами и отдельными архивами (у GitHub лимит 100 МБ на файл).
+# Бойцы в высоком разрешении — отдельными пакетами рядом с игрой (подключаются scripts/core/packs.gd).
 # Список должен совпадать с exclude_filter в game/export_presets.cfg.
 EXTRA_PACKS="koschei"
 cp "$ROOT/tools/pack_fighter.gd" "$GAME/tools_pack_fighter.gd"
@@ -45,10 +45,8 @@ for id in $EXTRA_PACKS; do
 done
 rm -f "$GAME/tools_pack_fighter.gd"
 
+# Один архив со всем: запускатель, данные игры и пакеты бойцов (GitHub Releases принимает файлы до 2 ГБ).
 ZIP="$ROOT/build/BitvaLegend-$VERSION-windows.zip"
 rm -f "$ROOT"/build/BitvaLegend-$VERSION-*.zip
-(cd "$ROOT/build" && zip -qr "$ZIP" BitvaLegend -x "*/koschei.pck")
-for id in $EXTRA_PACKS; do
-	(cd "$ROOT/build" && zip -q "$ROOT/build/BitvaLegend-$VERSION-$id.zip" "BitvaLegend/$id.pck")
-done
+(cd "$ROOT/build" && zip -qr "$ZIP" BitvaLegend)
 ls -lh "$OUT"/* "$ROOT"/build/BitvaLegend-$VERSION-*.zip

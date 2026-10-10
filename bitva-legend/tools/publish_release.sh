@@ -6,14 +6,10 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 VERSION="$(sed -n 's/^config\/version="\(.*\)"/\1/p' "$ROOT/game/project.godot")"
-ZIP="$ROOT/build/BitvaLegend-$VERSION-full.zip"
+ZIP="$ROOT/build/BitvaLegend-$VERSION-windows.zip"
 API="https://api.github.com/repos/wrcabeludo-rgb/games"
 UP="https://uploads.github.com/repos/wrcabeludo-rgb/games"
-[ -d "$ROOT/build/BitvaLegend" ] || { echo "Нет сборки — сначала запусти tools/build.sh"; exit 1; }
-
-# Один архив со всем: запускатель, данные игры и пакеты бойцов.
-rm -f "$ZIP"
-(cd "$ROOT/build" && zip -qr "$ZIP" BitvaLegend)
+[ -f "$ZIP" ] || { echo "Нет $ZIP — сначала запусти tools/build.sh"; exit 1; }
 
 TAG="v$VERSION"
 BODY="Битва легенд $VERSION. Скачать BitvaLegend-windows.zip, распаковать и запустить BitvaLegend.exe. Если Windows покажет «Windows защитила ваш компьютер»: «Подробнее» → «Выполнить в любом случае»."
