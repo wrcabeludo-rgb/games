@@ -216,7 +216,8 @@ func parry_success() -> void:
 	parry_timer = TAP_TIMER_MAX
 	move = -1
 	vx = 0
-	_set_state(State.STAND)
+	# Парировал в прыжке — долетает (иначе «стоял» бы в воздухе).
+	_set_state(State.AIR if y > 0 else State.STAND)
 
 
 ## Удар парировали — ошеломлён.
@@ -225,8 +226,15 @@ func take_stagger() -> void:
 	stun = PARRY_STAGGER
 	pushback = 0
 	low_pose = 0
-	staggered = 1
 	vx = 0
+	if y > 0:
+		# Удар в прыжке парировали — беспомощно падает (можно добить в воздухе), а не зависает оглушённым.
+		vy = 0
+		knock_on_land = 0
+		_set_state(State.AIR_HIT)
+		state_frame = 0
+		return
+	staggered = 1
 	_set_state(State.HITSTUN)
 	state_frame = 0
 
@@ -431,8 +439,9 @@ func take_hit(m: Dictionary, attacker_facing: int) -> void:
 		_set_state(State.AIR_HIT)
 		state_frame = 0
 		return
-	if is_airborne():
+	if is_airborne() or y > 0:
 		# В воздухе: отбрасывает; добивание подброшенного (жонглирование) — каждый раз ниже.
+		# y > 0 — и в ударе, поднимающем над землёй (апперкот): иначе оглушение «стоя» повисло бы в воздухе.
 		var launch: Array = m.get("launch", KNOCK_LAUNCH) if m.get("knockdown", 0) else [AIR_HIT_VX, AIR_HIT_VY]
 		juggle = juggle + 1 if juggled else 0
 		vx = launch[0] * attacker_facing
