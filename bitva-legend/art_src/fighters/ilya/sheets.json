@@ -8,22 +8,17 @@
   "fit": 0.833
  },
  "walk_f": {
-  "frames": 8,
+  "frames": 40,
   "grid": [
-   4,
-   2
+   8,
+   5
   ],
   "pivot_y": "body_ground",
-  "upscale": true
- },
- "walk_b": {
-  "frames": 8,
-  "grid": [
-   4,
-   2
-  ],
-  "pivot_y": "body_ground",
-  "upscale": true
+  "upscale": true,
+  "align_to": "idle:1",
+  "align_top": 0.45,
+  "align_each": true,
+  "stride": 270
  },
  "run": {
   "frames": 6,
