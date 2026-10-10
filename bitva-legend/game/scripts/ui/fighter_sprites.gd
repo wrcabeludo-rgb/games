@@ -66,12 +66,12 @@ static func _load_character(id: String) -> Dictionary:
 			out[file.get_basename()] = {"tex": tex, "pivot": pivots, "hit": clampi(hit, 0, n - 1),
 				"hit_end": clampi(hit_end, hit, n - 1), "reverse": bool(meta.get("reverse", false)),
 				"air": int(meta.get("air_frames", 1)), "res": float(meta.get("res", 1.0)),
-				"bob": float(meta.get("bob", 0.0))}
+				"bob": float(meta.get("bob", 0.0)), "stride": float(meta.get("stride", 0.0))}
 	if IDLE_FROM.has(id) and out.has(IDLE_FROM[id][0]):
 		var src: Dictionary = out[IDLE_FROM[id][0]]
 		var k: int = IDLE_FROM[id][1]
 		out["idle"] = {"tex": [src.tex[k]] as Array[Texture2D], "pivot": [src.pivot[k]] as Array[Vector2],
-			"hit": 0, "hit_end": 0, "reverse": false, "air": 1, "bob": 0.0}
+			"hit": 0, "hit_end": 0, "reverse": false, "air": 1, "bob": 0.0, "stride": 0.0}
 	return out
 
 
@@ -140,17 +140,19 @@ func frame_for(f: Fighter, tick: int) -> Array:
 				return _pick(anims[name], _attack_index(f, anims[name]))
 		Fighter.State.WALK_F:
 			if anims.has("walk_f"):
-				return _walk(anims.walk_f, _cycle(f.state_frame, WALK_CYCLE, anims.walk_f.tex.size()),
-					float(f.state_frame % WALK_CYCLE) / WALK_CYCLE)
+				var cycle := _walk_cycle(anims.walk_f, f.data.walk_f)
+				return _walk(anims.walk_f, _cycle(f.state_frame, cycle, anims.walk_f.tex.size()),
+					float(f.state_frame % cycle) / cycle)
 		Fighter.State.WALK_B:
 			# Шаг назад — кадры ходьбы в обратном порядке.
 			var key := "walk_b" if anims.has("walk_b") else "walk_f"
 			if anims.has(key):
 				var n: int = anims[key].tex.size()
 				# Лист шага вперёд (или помеченный reverse) — задом наперёд.
-				var i := _cycle(f.state_frame, WALK_CYCLE, n)
+				var cycle := _walk_cycle(anims[key], f.data.walk_b)
+				var i := _cycle(f.state_frame, cycle, n)
 				var reverse: bool = key == "walk_f" or anims[key].reverse
-				var phase := float(f.state_frame % WALK_CYCLE) / WALK_CYCLE
+				var phase := float(f.state_frame % cycle) / cycle
 				return _walk(anims[key], n - 1 - i if reverse else i, 1.0 - phase if reverse else phase)
 		Fighter.State.RUN:
 			if anims.has("run"):
@@ -271,6 +273,13 @@ func frame_for(f: Fighter, tick: int) -> Array:
 	if anims.has("idle"):
 		return _pick(anims.idle, 0)
 	return []
+
+
+## Цикл шага, тиков: если у листа задано stride (px за цикл) — под скорость бойца, чтобы ступни не скользили.
+static func _walk_cycle(anim: Dictionary, speed: int) -> int:
+	if anim.stride <= 0.0 or speed <= 0:
+		return WALK_CYCLE
+	return maxi(int(round(anim.stride * Fighter.SUB / speed)), 1)
 
 
 ## Кадр цикла длиной cycle тиков из n кадров.
