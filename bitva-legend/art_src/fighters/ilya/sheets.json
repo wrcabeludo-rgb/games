@@ -61,8 +61,16 @@
   "align_to": "idle:1"
  },
  "crouch": {
-  "frames": 2,
-  "fit": "h:2:414"
+  "fit": 1.112,
+  "fixed_pivot": true,
+  "align_to": "crouch_prev:1",
+  "align_head": true,
+  "frames": 56,
+  "grid": [
+   8,
+   7
+  ],
+  "cycle": 140
  },
  "block": {
   "fit": 1.112,
@@ -129,14 +137,17 @@
   "fit": "h:1:440"
  },
  "cr_hp": {
-  "frames": 6,
+  "fit": 1.112,
+  "fixed_pivot": true,
+  "align_to": "crouch_prev:1",
+  "align_head": true,
+  "frames": 33,
   "grid": [
-   3,
-   2
+   8,
+   5
   ],
-  "fit": "h:4:756",
-  "hit": 4,
-  "hit_end": 5
+  "hit": 12,
+  "hit_end": 13
  },
  "cr_hk": {
   "frames": 4,
