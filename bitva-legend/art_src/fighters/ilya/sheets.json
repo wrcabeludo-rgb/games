@@ -78,9 +78,9 @@
   "pivot_y": "body"
  },
  "st_lk": {
-  "frames": 21,
+  "frames": 18,
   "grid": [
-   7,
+   6,
    3
   ],
   "fit": 0.556,
@@ -91,9 +91,9 @@
   "fixed_pivot": true
  },
  "st_hp": {
-  "frames": 25,
+  "frames": 27,
   "grid": [
-   5,
+   6,
    5
   ],
   "fit": 0.556,
@@ -104,10 +104,10 @@
   "fixed_pivot": true
  },
  "st_hk": {
-  "frames": 30,
+  "frames": 33,
   "grid": [
    6,
-   5
+   6
   ],
   "fit": 0.556,
   "upscale": true,
