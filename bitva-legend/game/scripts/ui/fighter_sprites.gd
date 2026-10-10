@@ -28,10 +28,18 @@ const JUMP_LAND_HEIGHT := 110
 
 ## Одинаковые анимации (решение владельца): удары в прыжке рукой — одна на ЛР и СР, ногой — одна на ЛН и СН;
 ## удары ногой сидя — одна на ЛН и СН. Если у бойца нет своей анимации удара — берётся анимация-пара.
-const ANIM_ALIAS := {"j_hp": "j_lp", "j_lp": "j_hp", "j_hk": "j_lk", "j_lk": "j_hk", "cr_hk": "cr_lk", "cr_lk": "cr_hk"}
+## Приёмы: одна анимация на обе версии (лёгкую и сильную).
+const ANIM_ALIAS := {"j_hp": "j_lp", "j_lp": "j_hp", "j_hk": "j_lk", "j_lk": "j_hk", "cr_hk": "cr_lk", "cr_lk": "cr_hk",
+	"sp_proj_h": "sp_proj_l", "sp_dd_h": "sp_dd_l", "sp_ff_h": "sp_ff_l", "sp_bb_h": "sp_bb_l"}
+## Вставание из видео (много кадров) — дольше, чем из 4 нарисованных.
+const GET_UP_TICKS_VIDEO := 28
+## Удар о землю после полёта (кадры падения после воздушных) из видео — столько тиков.
+const LAND_TICKS_VIDEO := 12
 
 ## id бойца → {анимация: {"tex": Array[Texture2D], "pivot": Array[Vector2]}}
 var _bank := {}
+## Боец → анимация последнего захвата (для доводки после броска, когда приём уже закончился).
+var _last_grab := {}
 ## id бойца → во сколько раз его кадры крупнее обычных (у новых бойцов — 2: чётко на мониторах 2K/4K).
 var _res := {}
 
@@ -194,7 +202,19 @@ func frame_for(f: Fighter, tick: int) -> Array:
 				return _pick(anims[key], mini(f.state_frame / 4, n - 2))
 		Fighter.State.THROWING:
 			# Бросает: держит → поднял → швыряет (по ходу удержания).
+			var gkey := _grab_anim(anims, f)
+			if gkey != "" and gkey != "throw":
+				# Захват из видео со своей анимацией (мельница, суперприём): по ходу удержания до release.
+				_last_grab[f] = gkey
+				var ga: Dictionary = anims[gkey]
+				var gm := f.move_data()
+				var gg: Dictionary = gm.grab if gm.has("grab") else gm.get("cinema", {"hold": 30})
+				var gt := clampf(1.0 - float(f.stun) / maxi(int(gg.hold), 1), 0.0, 1.0)
+				var a0: int = ga.hit
+				var rel: int = mini(ga.release - 1, ga.tex.size() - 1)
+				return _pick(ga, a0 + roundi(gt * (rel - a0)))
 			if anims.has("throw") and f.move >= 0:
+				_last_grab[f] = "throw"
 				# Единый сценарий (Sim.throw_progress): держит за ворот → поднимает над головой → бросает.
 				var n: int = anims.throw.tex.size()
 				var m := f.move_data()
@@ -219,19 +239,29 @@ func frame_for(f: Fighter, tick: int) -> Array:
 		Fighter.State.AIR_HIT:
 			# Полёт после удара: кадры полёта по очереди (откинуло → летит → почти лёг).
 			if anims.has("fall"):
+				if anims.fall.tex.size() > 8:
+					return _pick(anims.fall, mini(f.state_frame / 3, anims.fall.air - 1))  # из видео: кадров больше
 				return _pick(anims.fall, mini(f.state_frame / 6, anims.fall.air - 1))
 		Fighter.State.KNOCKDOWN:
 			# Удар о землю → подскок → лежит → встаёт (последние кадры).
 			var up := Fighter.KNOCKDOWN_TICKS - f.state_frame
-			if anims.has("get_up") and up <= GET_UP_TICKS:
+			var gu := GET_UP_TICKS_VIDEO if anims.has("get_up") and anims.get_up.tex.size() > 8 else GET_UP_TICKS
+			if anims.has("get_up") and up <= gu:
 				var n: int = anims.get_up.tex.size()
-				return _pick(anims.get_up, clampi((GET_UP_TICKS - up) * n / GET_UP_TICKS, 0, n - 1))
+				return _pick(anims.get_up, clampi((gu - up) * n / gu, 0, n - 1))
+			if anims.has("fall") and anims.fall.tex.size() > 8:
+				# Из видео: удар о землю и подскок по кадрам, потом лежит (последний кадр).
+				var nf: int = anims.fall.tex.size()
+				var af: int = anims.fall.air
+				return _pick(anims.fall, mini(af + f.state_frame * (nf - af) / LAND_TICKS_VIDEO, nf - 1))
 			if anims.has("fall"):
 				var n: int = anims.fall.tex.size()
 				var air: int = anims.fall.air
 				var i := air if f.state_frame < 5 else (air + 1 if f.state_frame < 10 else n - 2)
 				return _pick(anims.fall, mini(i, n - 1))
 		Fighter.State.DOWN:
+			if anims.has("fall") and anims.fall.tex.size() > 8:
+				return _pick(anims.fall, anims.fall.tex.size() - 1)  # из видео: лежит без сознания
 			if anims.has("fall"):
 				var n: int = anims.fall.tex.size()
 				var air: int = anims.fall.air
@@ -270,14 +300,15 @@ func frame_for(f: Fighter, tick: int) -> Array:
 					# Падение: в листе из 4 кадров последний — приземление, его показываем у самой земли.
 					i = 3 if n > 4 or f.y < JUMP_LAND_HEIGHT * Fighter.SUB else 2
 				return _pick(anims.jump, mini(i, n - 1))
-		Fighter.State.LAND when f.throw_follow and anims.has("throw"):
+		Fighter.State.LAND when f.throw_follow and anims.has(_last_grab.get(f, "throw")):
 			# Только что бросил — доводит движение (у броска из видео — кадры после release, иначе последний).
-			var nt: int = anims.throw.tex.size()
-			if anims.throw.release > 0:
-				var rel: int = mini(anims.throw.release - 1, nt - 1)
+			var ta: Dictionary = anims[_last_grab.get(f, "throw")]
+			var nt: int = ta.tex.size()
+			if ta.release > 0:
+				var rel: int = mini(ta.release - 1, nt - 1)
 				var rest: int = nt - 1 - rel
-				return _pick(anims.throw, rel + clampi(f.state_frame * rest / maxi(f.landing_frames, 1), 0, rest))
-			return _pick(anims.throw, nt - 1)
+				return _pick(ta, rel + clampi(f.state_frame * rest / maxi(f.landing_frames, 1), 0, rest))
+			return _pick(ta, nt - 1)
 		Fighter.State.LAND:
 			if anims.has("jump"):
 				return _pick(anims.jump, anims.jump.tex.size() - 1)
@@ -314,6 +345,18 @@ static func _walk_cycle(anim: Dictionary, speed: int, fallback := WALK_CYCLE) ->
 	if anim.stride <= 0.0 or speed <= 0:
 		return fallback
 	return maxi(int(round(anim.stride * Fighter.SUB / speed)), 1)
+
+
+## Анимация захвата бойца: своя у приёма (мельница), у суперприёма — super_cinema, иначе обычный бросок.
+static func _grab_anim(anims: Dictionary, f: Fighter) -> String:
+	if f.move < 0:
+		return ""
+	var name: String = Fighter.MOVES[f.move]
+	if f.move == Fighter.MOVE_SUPER and anims.has("super_cinema"):
+		return "super_cinema"
+	if anims.has(name) and anims[name].release > 0:
+		return name
+	return "throw" if anims.has("throw") else ""
 
 
 ## Кадр 0…n-1 по ходу оглушения (удар или блок): прошло state_frame из state_frame + stun тиков.

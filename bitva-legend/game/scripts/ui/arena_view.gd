@@ -64,6 +64,7 @@ func _draw() -> void:
 	_scenery.draw_back(self)
 	_draw_walls()
 	_draw_super_backdrop()
+	_draw_craters()
 	for f in _sim.fighters:
 		_draw_shadow(f)
 	for f in _sim.fighters:
@@ -98,6 +99,38 @@ func _draw() -> void:
 	if show_debug:
 		for f in _sim.fighters:
 			_draw_debug(f)
+
+
+## Кратер от «Удара с небес»: появляется, когда палица бьёт в землю (доводка после суперприёма из видео),
+## держится 3 с и тает за 1 с. Только картинка — на бой не влияет.
+const CRATER_TEX := preload("res://art/fx/crater.png")
+const CRATER_WIDTH := 520.0       # ширина на экране, px (720p)
+const CRATER_GROUND := 101.0      # линия земли в текстуре, px от верха
+const CRATER_HOLD := 180
+const CRATER_FADE := 60
+var _craters: Array = []          # [x в мире, тик появления]
+var _crater_tick := [-1000, -1000]
+
+
+func _draw_craters() -> void:
+	for p in Sim.PLAYERS:
+		var f: Fighter = _sim.fighters[p]
+		if f.state == Fighter.State.LAND and f.throw_follow and sprites._last_grab.get(f, "") == "super_cinema" \
+				and _sim.tick - _crater_tick[p] > 30:
+			_crater_tick[p] = _sim.tick
+			_craters.append([float(f.x) / Sim.SUB + f.facing * 70.0, _sim.tick])
+	var keep: Array = []
+	var k := CRATER_WIDTH / CRATER_TEX.get_width()
+	for c in _craters:
+		var age: int = _sim.tick - int(c[1])
+		if age > CRATER_HOLD + CRATER_FADE or age < 0:
+			continue
+		keep.append(c)
+		var alpha := 1.0 if age < CRATER_HOLD else 1.0 - float(age - CRATER_HOLD) / CRATER_FADE
+		var at := to_screen(c[0], 0.0)
+		var sz := Vector2(CRATER_WIDTH, CRATER_TEX.get_height() * k)
+		draw_texture_rect(CRATER_TEX, Rect2(at - Vector2(sz.x / 2.0, CRATER_GROUND * k), sz), false, Color(1, 1, 1, alpha))
+	_craters = keep
 
 
 ## Стены по краям арены.

@@ -36,6 +36,8 @@ var _last_tick := -1
 var _last_phase := -1
 var _last_spark := PackedInt32Array([-999, -999])
 var _last_state := PackedInt32Array([-1, -1])
+## Последний захват бойца (номер приёма) — чем доводить бросок: суперприём, мельница или обычный.
+var _grab_move := [-1, -1]
 var _last_frame := PackedInt32Array([-1, -1])
 
 
@@ -218,7 +220,8 @@ func _on_fighter(f: Fighter, p: int) -> void:
 	if started:
 		var name: String = Fighter.MOVES[f.move]
 		if f.move == Fighter.MOVE_SUPER:
-			play("super")
+			if not _own(f, "super"):
+				play("super")
 		elif _load("sfx/%s_%s" % [f.id, name]) != null:
 			# Свой звук удара бойца (вырезан из видео, см. CLAUDE.md) — вместо общего взмаха.
 			play("%s_%s" % [f.id, name], 1.0, -9.0)
@@ -231,19 +234,34 @@ func _on_fighter(f: Fighter, p: int) -> void:
 	if st != _last_state[p]:
 		match st:
 			Fighter.State.LAND:
-				if not (f.throw_follow and _own(f, "throw")):
+				# Бросил: у суперприёма — удар с небес, у мельницы — свой звук уже звучит, у броска — свой.
+				var thrown := false
+				if f.throw_follow:
+					if _grab_move[p] == Fighter.MOVE_SUPER:
+						thrown = _own(f, "super_smash")
+					elif _grab_move[p] >= 0 and str(Fighter.MOVES[_grab_move[p]]).begins_with("sp_bb"):
+						thrown = true
+					else:
+						thrown = _own(f, "throw")
+				if not thrown:
 					play("land", 0.9 if f.id == "ilya" else 1.2, -6.0)
 			Fighter.State.THROWING:
-				_own(f, "throw_grab")
+				_grab_move[p] = f.move
+				if f.move != Fighter.MOVE_SUPER and not str(Fighter.MOVES[f.move]).begins_with("sp_bb"):
+					_own(f, "throw_grab")
 			Fighter.State.HITSTUN:
 				_own(f, "hurt")
 			Fighter.State.BLOCKSTUN:
 				_own(f, "block")
 			Fighter.State.KNOCKDOWN:
-				play("fall", 0.85 if f.id == "ilya" else 1.0)
+				if not _own(f, "fall"):
+					play("fall", 0.85 if f.id == "ilya" else 1.0)
 			Fighter.State.BACKDASH:
 				_own(f, "backdash")
 				if f.id == "dracula":
 					play("cape", 1.1, -6.0)
+	# Встаёт (вставание из видео — последние тики лежания).
+	if st == Fighter.State.KNOCKDOWN and f.state_frame == Fighter.KNOCKDOWN_TICKS - FighterSprites.GET_UP_TICKS_VIDEO:
+		_own(f, "get_up")
 	_last_state[p] = st
 	_last_frame[p] = f.move_frame if f.move >= 0 else -1
