@@ -105,7 +105,7 @@ const CHARACTERS := {
 			"st_round": {"startup": 14, "active": 4, "recovery": 24, "damage": 120, "hitstun": 22, "hitstop": 14, "push": 1200, "box": [30, 160, 130, 130], "knockdown": 1, "launch": [650, 950], "kick": 1},
 			# Бросок: удар лбом и через плечо — соперник улетает за спину (over).
 			"throw": {"startup": 4, "active": 2, "recovery": 18, "grab": {"range": 25, "hold": 40, "damage": 120, "launch": [500, 1000], "tech": 1, "recovery": 14, "over": 1}},
-			# «Удар с небес» (блок + СР + СН): рывок с палицей; попал — небо разверзается, молнии и удар сверху.
+			# «Удар с небес» (блок + СР + СН): рывок с палицей; попал — подбрасывает, Илья взмывает за облака и обрушивается с палицей.
 			"super": {"name": "УДАР С НЕБЕС", "startup": 8, "active": 8, "recovery": 45, "lunge": 700, "damage": 60, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 45, "box": [25, 40, 140, 240], "cinema": {"hold": 100, "damage": 330, "launch": [700, 1700], "tech": 0, "recovery": 20, "scaled": 1}},
 		},
 	},

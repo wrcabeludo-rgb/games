@@ -104,6 +104,7 @@ func _draw() -> void:
 ## Кратер от «Удара с небес»: появляется, когда палица бьёт в землю (доводка после суперприёма из видео),
 ## держится 3 с и тает за 1 с. Только картинка — на бой не влияет.
 const CRATER_TEX := preload("res://art/fx/crater.png")
+const MACE_TEX := preload("res://art/fx/mace.png")  # брошенная палица Ильи, в масштабе его кадров
 const CRATER_WIDTH := 520.0       # ширина на экране, px (720p)
 const CRATER_GROUND := 101.0      # линия земли в текстуре, px от верха
 const CRATER_HOLD := 180
@@ -140,7 +141,7 @@ func _draw_walls() -> void:
 		draw_rect(Rect2(w.x - 12, 0, 24, GROUND_Y), Color(0.05, 0.05, 0.07))
 
 
-## Суперприём: затемнение; у Ильи — молнии с неба, у Дракулы — кровавая луна.
+## Суперприём: затемнение; у Дракулы — кровавая луна и стая.
 func _draw_super_backdrop() -> void:
 	for p in Sim.PLAYERS:
 		var f := _sim.fighters[p]
@@ -167,16 +168,7 @@ func _draw_super_backdrop() -> void:
 		# Серия ударов: вспышка каждые 10 тиков, в конце — самая большая.
 		var beat := t % 10
 		var k := 1.0 - beat / 10.0
-		if f.id == "ilya" and beat < 4:
-			# Молния бьёт в соперника.
-			var pts := PackedVector2Array([Vector2(foe_top.x + 40, 0)])
-			var seg := 7
-			for i in range(1, seg + 1):
-				var jitter := 28.0 * sin(t * 1.7 + i * 2.3)
-				pts.append(Vector2(foe_top.x + jitter * (1.0 - float(i) / seg), foe_top.y * i / seg))
-			draw_polyline(pts, Color(0.85, 0.9, 1.0), 6)
-			draw_polyline(pts, Color(1, 1, 1), 2)
-		elif f.id == "dracula":
+		if f.id == "dracula":
 			# Стая кружит вокруг соперника.
 			for i in 7:
 				var a := t * 0.25 + TAU * i / 7.0
@@ -184,6 +176,8 @@ func _draw_super_backdrop() -> void:
 				var ink := Color(0.1, 0.02, 0.06)
 				for side in [-1.0, 1.0]:
 					draw_colored_polygon(PackedVector2Array([b, b + Vector2(side * 18, -8), b + Vector2(side * 7, 6)]), ink)
+		if f.id == "ilya":
+			continue  # у Ильи «кино» из ролика: взлёт за облака и удар палицей, без вспышек
 		var r := (40.0 + 30.0 * k) * (1.6 if t > 80 else 1.0)
 		for i in 10:
 			var a := TAU * i / 10.0 + t * 0.2
@@ -554,13 +548,11 @@ func _draw_projectile(pr: PackedInt32Array) -> void:
 			draw_colored_polygon(rock, Color(0.5, 0.42, 0.34))
 		draw_circle(ground + Vector2(-dir * hw * 0.7, -8), 12, Color(0.75, 0.68, 0.55, 0.5))
 	elif kind == 0:
-		var a := age * 0.35 * dir
-		var handle := Vector2.from_angle(a) * 34
-		draw_line(c - handle, c, Color(0.45, 0.32, 0.2), 9)
-		draw_circle(c + handle * 0.25, 24, Color(0.36, 0.3, 0.26))
-		for i in 6:
-			var sa := a + TAU * i / 6.0
-			draw_line(c + handle * 0.25 + Vector2.from_angle(sa) * 20, c + handle * 0.25 + Vector2.from_angle(sa) * 32, Color(0.25, 0.2, 0.18), 5)
+		# Палица из ролика броска (art/fx/mace.png, центр тяжести — в центре текстуры) кувыркается в полёте.
+		var k := FighterSprites.SCALE / sprites.res("ilya")
+		draw_set_transform(c, age * 0.35 * dir, Vector2(k * dir, k))
+		draw_texture(MACE_TEX, -MACE_TEX.get_size() * 0.5)
+		draw_set_transform(Vector2.ZERO)
 	else:
 		var hw := float(pr[Sim.Proj.HW]) / Sim.SUB
 		for i in 3:

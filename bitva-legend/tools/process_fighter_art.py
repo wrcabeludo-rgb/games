@@ -43,6 +43,8 @@
   match_scale: true — подогнать масштаб листа по голове и плечам кадра align_to (единый рост бойца).
   align_head: true — совмещать по голове (корона и лоб), а не по силуэту.
   align_each: true — совместить с образцом каждый кадр по отдельности (по горизонтали; шаг: корпус на месте).
+  lift: {"<кадр>": [<кадр-донор>, <px>]} — кадр, где боец обрезан краем ролика (улетел вверх), заменить целым
+           кадром-донором, поднятым на <px> (1440p): суперприём Ильи — взлёт за верх экрана и падение сверху.
   align_frame: какой кадр листа (с 1) совмещать с образцом — по умолчанию первый (у вставания — последний,
            он совпадает со стойкой).
 """
@@ -442,6 +444,11 @@ def main() -> int:
             f.save(out / f"{name}_{i}.png", optimize=True)
             meta["frames"].append({"file": f"{name}_{i}.png", "pivot": [round(px), round(py)],
                                    "size": [f.width, f.height]})
+        for k, (src, up) in opt.get("lift", {}).items():
+            # Кадр, обрезанный краем ролика (боец улетел за верх кадра), — целый кадр-донор, поднятый на up px.
+            d = dict(meta["frames"][int(src) - 1])
+            d["pivot"] = [d["pivot"][0], d["pivot"][1] + up]
+            meta["frames"][int(k) - 1] = d
         (out / f"{name}.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1))
         print(f"  {name}: {len(frames)} кадр(ов), масштаб {scale:.3f}")
     print(f"Готово. Папка: {out}")
