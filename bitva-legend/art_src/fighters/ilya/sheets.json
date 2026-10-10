@@ -1,7 +1,14 @@
 {
  "idle": {
-  "frames": 4,
-  "fit": "h:1:620"
+  "frames": 24,
+  "grid": [
+   6,
+   4
+  ],
+  "fit": "h:1:620",
+  "upscale": true,
+  "align_to": "idle_prev:1",
+  "cycle": 60
  },
  "st_lp": {
   "frames": 3,
