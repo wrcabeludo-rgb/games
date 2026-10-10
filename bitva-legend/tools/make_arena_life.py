@@ -37,6 +37,22 @@ LIFE = {
 }
 
 
+# Кощеево царство: море у подножия (кусками по 1000 px — так текстура кадров не выходит за предел видеокарты),
+# зелёные огни замка, блеск золота в воротах, сундук на ветке дуба.
+LIFE_ARENAS = {
+    "koschei_realm": {
+        "water": [[(x, 705), (min(x + 1000, 5173), 705), (min(x + 1000, 5173), 812), (x, 812)] for x in range(0, 5173, 1000)],
+        "fall": [],
+        "chimneys": [],
+        "windows_band": (0, 0, 1500, 560),
+        "windows_skip": [],
+        "window_color": "green",
+        "sparkle_band": (290, 480, 460, 620),
+        "hang": {"file": "chest.png", "x": 2822, "y": 318, "h": 170},
+    },
+}
+
+
 def roughness(gray: np.ndarray) -> np.ndarray:
     g = Image.fromarray(gray.astype(np.uint8)).filter(ImageFilter.FIND_EDGES)
     g = Image.fromarray(np.clip(np.asarray(g, float) * 3, 0, 255).astype(np.uint8)).filter(ImageFilter.BoxBlur(3))
@@ -86,14 +102,17 @@ def make_water(src: np.ndarray, mask: np.ndarray, box, flow_x: bool, seed: int) 
     return out
 
 
-def find_windows(src: np.ndarray, band) -> list:
+def find_windows(src: np.ndarray, band, color: str = "warm") -> list:
     """Окна: тёплые яркие пятна, заметно светлее своего окружения (а не освещённые края стен)."""
     x0, y0, x1, y1 = band
     sub = src[y0:y1, x0:x1].astype(float)
     r, g, b = sub[..., 0], sub[..., 1], sub[..., 2]
     lum = sub[..., :3].mean(2)
     around = np.asarray(Image.fromarray(lum.astype(np.uint8)).filter(ImageFilter.BoxBlur(7)), float)
-    hot = (r > 200) & (g > 120) & (b < 120) & (r - b > 110) & (lum - around > 45) & (sub[..., 3] > 200)
+    if color == "green":
+        hot = (g > 150) & (g - r > 50) & (g - b > 60) & (lum - around > 30) & (sub[..., 3] > 200)
+    else:
+        hot = (r > 200) & (g > 120) & (b < 120) & (r - b > 110) & (lum - around > 45) & (sub[..., 3] > 200)
     windows = []
     for y, x in zip(*np.nonzero(hot)):
         p = (int(x + x0), int(y + y0))
@@ -109,8 +128,14 @@ def find_windows(src: np.ndarray, band) -> list:
 
 
 def main() -> int:
+    global LIFE
     root = Path(__file__).resolve().parent.parent
-    folder = Path(sys.argv[1]) if len(sys.argv) > 1 else root / "game/art/arena"
+    arena = sys.argv[1] if len(sys.argv) > 1 else "crossroads"
+    if arena in LIFE_ARENAS:
+        LIFE = LIFE_ARENAS[arena]
+        folder = root / "game/art/arenas" / arena
+    else:
+        folder = Path(arena) if len(sys.argv) > 1 else root / "game/art/arena"
     img = Image.open(folder / "mountains.png").convert("RGBA")
     src = np.asarray(img)
     gray = src[..., :3].mean(2)
@@ -137,7 +162,18 @@ def main() -> int:
         n += 1
         make_water(src, mask, (x0, y0, x1, y1), False, n).save(folder / f"water_{n}.png", optimize=True)
         meta["water"].append({"file": f"water_{n}.png", "rect": [x0, y0, x1 - x0, y1 - y0], "frames": FRAMES, "period": 1.2})
-    meta["windows"] = [w for w in find_windows(src, LIFE["windows_band"])
+    meta["window_color"] = LIFE.get("window_color", "warm")
+    if "hang" in LIFE:
+        meta["hang"] = LIFE["hang"]
+    if "sparkle_band" in LIFE:
+        x0, y0, x1, y1 = LIFE["sparkle_band"]
+        sub = src[y0:y1, x0:x1].astype(float)
+        gold = (sub[..., 0] > 170) & (sub[..., 1] > 130) & (sub[..., 2] < 110)
+        ys, xs = np.nonzero(gold)
+        rng = np.random.default_rng(7)
+        pick = rng.choice(len(xs), size=min(18, len(xs)), replace=False) if len(xs) else []
+        meta["sparkles"] = [[int(xs[i] + x0), int(ys[i] + y0)] for i in pick]
+    meta["windows"] = [w for w in find_windows(src, LIFE["windows_band"], LIFE.get("window_color", "warm"))
                        if not any(a <= w[0] < c and b <= w[1] < d for a, b, c, d in LIFE["windows_skip"])]
     (folder / "life.json").write_text(json.dumps(meta, ensure_ascii=False))
     print(f"вода: {len(meta['water'])} участков, окон: {len(meta['windows'])}, труб: {len(meta['chimneys'])}")

@@ -52,6 +52,7 @@ var _raven_frames: Array[Texture2D] = []
 ## Жизнь дальнего плана (life.json, tools/make_arena_life.py): вода, окна, трубы — в пикселях картинки mountains.
 var _life := {}
 var _water: Array[Texture2D] = []
+var _hang: Texture2D = null   # предмет, подвешенный на дальнем плане (сундук Кощея на дубе)
 ## Ореол луны: свет плавно гаснет от края диска к краю текстуры.
 var _halo := _make_halo()
 
@@ -79,6 +80,8 @@ func _init(arena_id := Arenas.DEFAULT) -> void:
 		_life = JSON.parse_string(FileAccess.get_file_as_string(life_path))
 		for w in _life.water:
 			_water.append(load(_d.dir + String(w.file)))
+		if _life.has("hang"):
+			_hang = _load(String(_life.hang.file).get_basename())
 
 
 static func _make_halo() -> Texture2D:
@@ -238,6 +241,8 @@ func _draw_moon(c: CanvasItem) -> void:
 func _draw_clouds(c: CanvasItem) -> void:
 	if _d.get("indoor", false) or _d.get("glitch", false):
 		return
+	if _clouds.is_empty() and _tex.has("sky"):
+		return  # тучи уже нарисованы на картинке неба — заглушки поверх не нужны
 	var k := K_CLOUDS
 	var w := layer_w(k)
 	for i in 8:
@@ -308,13 +313,35 @@ func _draw_life(c: CanvasItem, origin: Vector2, sc: float) -> void:
 		var dst := Rect2(origin + Vector2(r[0], r[1]) * sc, Vector2(r[2], r[3]) * sc)
 		c.draw_texture_rect_region(_water[i], dst, Rect2(f0 * float(r[2]), 0, r[2], r[3]))
 		c.draw_texture_rect_region(_water[i], dst, Rect2(((f0 + 1) % n) * float(r[2]), 0, r[2], r[3]), Color(1, 1, 1, ft - f0))
-	# Окна: тёплый ореол, у каждого своё неровное мерцание свечи.
+	# Окна: ореол, у каждого своё неровное мерцание (тёплые свечи или колдовской зелёный огонь).
+	var glow_col := Color(0.45, 1.0, 0.4) if _life.get("window_color", "warm") == "green" else Color(1.0, 0.68, 0.3)
 	var wins: Array = _life.windows
 	for i in wins.size():
 		var p := origin + Vector2(wins[i][0], wins[i][1]) * sc
 		var fl := 0.55 + 0.25 * sin(t * (2.1 + (i % 5) * 0.6) + i * 1.7) + 0.2 * sin(t * (5.3 + (i % 3)) + i * 0.9)
 		var rad := (7.0 + minf(wins[i][2], 12.0) * 0.6) * sc * 2.2
-		c.draw_texture_rect(_halo, Rect2(p - Vector2(rad, rad), Vector2(rad, rad) * 2.0), false, Color(1.0, 0.68, 0.3, 0.25 + 0.55 * fl))
+		c.draw_texture_rect(_halo, Rect2(p - Vector2(rad, rad), Vector2(rad, rad) * 2.0), false, Color(glow_col, 0.25 + 0.55 * fl))
+	# Блеск чахнущего золота: короткие искры то тут, то там.
+	var sp: Array = _life.get("sparkles", [])
+	for i in sp.size():
+		var ph := fmod(t * 0.35 + i * 0.618, 1.0)
+		if ph > 0.12:
+			continue
+		var k := sin(ph / 0.12 * PI)
+		var q := origin + Vector2(sp[i][0], sp[i][1]) * sc
+		var len := 9.0 * k
+		c.draw_line(q - Vector2(len, 0), q + Vector2(len, 0), Color(1, 0.92, 0.6, k), 1.5)
+		c.draw_line(q - Vector2(0, len), q + Vector2(0, len), Color(1, 0.92, 0.6, k), 1.5)
+	# Сундук со смертью Кощея качается на цепях под ветром, иногда налетает порыв.
+	if _hang != null:
+		var hg: Dictionary = _life.hang
+		var top := origin + Vector2(hg.x, hg.y) * sc
+		var hh: float = float(hg.h) * sc
+		var hw := hh * _hang.get_width() / _hang.get_height()
+		var ang := 0.05 * sin(t * 0.9) + 0.03 * maxf(sin(t * 0.31), 0.0) * sin(t * 2.7)
+		c.draw_set_transform(top, ang, Vector2.ONE)
+		c.draw_texture_rect(_hang, Rect2(-hw / 2.0, 0, hw, hh), false, Color(0.85, 0.9, 0.85))
+		c.draw_set_transform(Vector2.ZERO)
 	# Дым: клубы поднимаются, растут, относятся ветром вправо и тают.
 	var pipes: Array = _life.chimneys
 	for i in pipes.size():

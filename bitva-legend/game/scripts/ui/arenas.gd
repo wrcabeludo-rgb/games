@@ -89,7 +89,7 @@ const LIST := {
 		"sky": [Color(0.05, 0.08, 0.06), Color(0.2, 0.3, 0.2), Color(0.15, 0.22, 0.15)], "stars": true,
 		"light": ["moon", 0.3], "hills": Color(0.15, 0.2, 0.15), "shape": ["sharp", "sharp"],
 		"marks": [["tower", 0.5, 1.4], ["gold", 0.25, 1.0], ["gold", 0.75, 1.0]], "trees": ["dead", "dead"],
-		"ground": Color(0.18, 0.2, 0.15), "birds": "ravens",
+		"ground": Color(0.18, 0.2, 0.15), "birds": "ravens", "fireflies": true,
 	},
 	"flower_mountain": {
 		"name": "Гора Цветов и Плодов", "dir": "res://art/arenas/flower_mountain/",
