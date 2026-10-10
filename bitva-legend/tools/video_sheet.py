@@ -5,9 +5,11 @@ process_fighter_art.py.
 Использование: python3 tools/video_sheet.py <видео> <первый кадр> <последний кадр> <выход.png> [шаг] [столбцов]
   кадры — с 1, как у ffmpeg; последний не включается (для цикла: первый кадр следующего витка);
   шаг — брать каждый N-й кадр (по умолчанию 1); столбцов — ширина сетки (по умолчанию 8).
+Рядом пишется <выход>.cells.json — раскладка клеток (для "fixed_pivot" в sheets.json).
 Кадры обрезаются по общей рамке бойца (с запасом), фон приводится к чистому #FF00FF, водяной знак
 в правом нижнем углу (Kling) отрезается рамкой. Печатает число кадров и сетку для sheets.json.
 """
+import json
 import subprocess
 import sys
 import tempfile
@@ -56,6 +58,10 @@ def main() -> int:
         sheet[GAP + r * (ch + GAP):GAP + r * (ch + GAP) + ch, GAP + q * (cw + GAP):GAP + q * (cw + GAP) + cw] = c
     out.parent.mkdir(parents=True, exist_ok=True)
     Image.fromarray(sheet).save(out)
+    # Раскладка листа — для process_fighter_art.py ("fixed_pivot": true): кадры режутся по клеткам,
+    # опорная точка у всех одна (камера неподвижна, сдвиг бойца в ролике — его настоящее движение).
+    out.with_suffix(".cells.json").write_text(json.dumps(
+        {"cols": cols, "rows": rows, "cell": [int(cw), int(ch)], "gap": GAP, "width": int(sheet.shape[1]), "frames": len(frames)}))
     print(f"{out}: {len(frames)} кадров, сетка [{cols}, {rows}], кадр {cw}×{ch}")
     return 0
 

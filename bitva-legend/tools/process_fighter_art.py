@@ -15,6 +15,8 @@
        "h:<кадр>:<px>"   — кадр № <кадр> высотой <px> (1440p): для приседа, блока, прыжка;
        число           — масштаб вручную.
   grid: [столбцов, рядов] — лист сеткой (8 кадров = [4, 2], 12 = [4, 3]); порядок — слева направо, сверху вниз.
+  fixed_pivot: true — лист из видео (tools/video_sheet.py, рядом .cells.json): кадры режутся по клеткам,
+           опорная точка у всех кадров одна (по 1-му кадру) — сдвиги бойца в ролике сохраняются.
   upscale: true — увеличить исходник нейросетью (tools/upscale.py) и у бойца обычного разрешения:
            кадры чётче, размер в игре тот же.
   cycle: 60 — стойка из видео: цикл кадров в тиках (60 = 1 с); без него стойка — один кадр с дыханием игры.
@@ -298,7 +300,20 @@ def main() -> int:
         group = [f for _, f in sorted(parts[name])]
         raw = src_image(group[0], who, opt.get("upscale", False))
         heights[name] = raw.height
-        if len(group) == 1:
+        cells = group[0].with_suffix(".cells.json")
+        fixed = opt.get("fixed_pivot") and cells.exists() and len(group) == 1
+        if fixed:
+            # Лист из видео: режем по клеткам целиком (без обрезки по фигуре), опорная точка — общая.
+            lay = json.loads(cells.read_text())
+            kx = raw.width / lay["width"]
+            keyed = chroma_key(raw)
+            cw, ch, gap = lay["cell"][0], lay["cell"][1], lay["gap"]
+            frames = []
+            for i in range(lay["frames"]):
+                r, c = divmod(i, lay["cols"])
+                x0, y0 = round((gap + c * (cw + gap)) * kx), round((gap + r * (ch + gap)) * kx)
+                frames.append(_keep_main(keyed.crop((x0, y0, x0 + round(cw * kx), y0 + round(ch * kx)))))
+        elif len(group) == 1:
             frames = frames_of(chroma_key(raw), opt.get("frames", 0), opt.get("grid"))
         else:
             # Части могут прийти в разном разрешении: у каждой — свой масштаб (parts_fit, как fit),
@@ -362,7 +377,10 @@ def main() -> int:
                 rear, mid, bottom = feet(f)
                 cx, cy = centroid(f)
                 ref = {"center_offset": mid - rear, "body_dx": mid - cx, "body_dy": bottom - cy}
-            px, py = pivot(f, opt.get("pivot_y", "feet"), ref)
+            if fixed and done:
+                px, py = done[0][1], done[0][2]
+            else:
+                px, py = pivot(f, opt.get("pivot_y", "feet"), ref)
             done.append([f, px, py])
         if "align_to" in opt and not (out / f"{opt['align_to'].split(':')[0]}.json").exists():
             print(f"  {name}: образца {opt['align_to']} нет — без выравнивания")
@@ -402,6 +420,11 @@ def main() -> int:
                 ref["center_offset"] += shift[0]
                 ref["body_dx"] += shift[0]
         for i, (f, px, py) in enumerate(done, 1):
+            if fixed:
+                box = f.getchannel("A").point(lambda v: 255 if v > 8 else 0).getbbox()
+                if box:
+                    f, px, py = f.crop(box), px - box[0], py - box[1]
+                    done[i - 1] = [f, px, py]
             f.save(out / f"{name}_{i}.png", optimize=True)
             meta["frames"].append({"file": f"{name}_{i}.png", "pivot": [round(px), round(py)],
                                    "size": [f.width, f.height]})

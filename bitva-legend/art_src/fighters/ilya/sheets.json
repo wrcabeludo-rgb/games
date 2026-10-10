@@ -87,7 +87,8 @@
   "upscale": true,
   "align_to": "idle:1",
   "hit": 8,
-  "hit_end": 12
+  "hit_end": 12,
+  "fixed_pivot": true
  },
  "st_hp": {
   "frames": 25,
@@ -99,7 +100,8 @@
   "upscale": true,
   "align_to": "idle:1",
   "hit": 13,
-  "hit_end": 15
+  "hit_end": 15,
+  "fixed_pivot": true
  },
  "st_hk": {
   "frames": 30,
@@ -111,7 +113,8 @@
   "upscale": true,
   "align_to": "idle:1",
   "hit": 14,
-  "hit_end": 16
+  "hit_end": 16,
+  "fixed_pivot": true
  },
  "cr_lp": {
   "frames": 3,
