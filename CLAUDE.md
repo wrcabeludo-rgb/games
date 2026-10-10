@@ -1,0 +1,73 @@
+# Вводные для Claude: «Битва легенд»
+
+2D-файтинг на Godot 4.4.1 для Windows (управление с геймпада DualSense) в папке `bitva-legend/`.
+Владелец проекта генерирует спрайты и фоны нейросетью по моим промптам и присылает картинки в чат. Всё остальное делаю я:
+код, обработку арта, промпты, сборки. Общаемся по-русски.
+
+## Первым делом в новой сессии
+1. `bash bitva-legend/tools/setup_env.sh` — ставит Godot 4.4.1 (`~/godot/`), шаблоны экспорта Windows, Python-пакеты
+   (pillow, numpy, torch, spandrel для апскейлера, pe_tools для иконки .exe).
+2. `godot --headless --path bitva-legend/game --import` (godot = `~/godot/Godot_v4.4.1-stable_linux.x86_64`).
+3. Прочитать `bitva-legend/docs/PLAN.md`, `GDD.md`, `LORE.md`, а для задач с артом — нужный раздел `docs/ART_FIGHTERS.md`.
+
+## Как выпускать сборку
+1. Поднять версию: `config/version` в `bitva-legend/game/project.godot`.
+2. `timeout 1500 bitva-legend/tools/build.sh` — импорт, 18 наборов автотестов, экспорт, иконка, пакеты бойцов.
+3. Коммит в `main` с атрибуцией (ниже), `git push`.
+4. Публикация. **Основная — GitHub Releases:** `bitva-legend/tools/publish_release.sh`, один архив со всем.
+   Токен подставляет сетевой посредник среды (секрет `GH_RELEASE_TOKEN` для api/uploads.github.com, путь `/repos/wrcabeludo-rgb/games/`).
+   Ссылка: https://github.com/wrcabeludo-rgb/games/releases/latest/download/BitvaLegend-windows.zip
+   Запасная (до проверки Releases) — `tools/publish.sh`: ветка `builds`, лимит 100 МБ на файл,
+   поэтому бойцы в высоком разрешении лежат отдельными архивами (`BitvaLegend-koschei.zip`).
+   Когда Releases заработает — сделать его основным `publish.sh` и убрать деление на архивы
+   (`EXTRA_PACKS` в `build.sh` и `exclude_filter` в `game/export_presets.cfg` можно оставить: пакеты просто лягут в один архив).
+5. **Всегда давать владельцу ссылку на сборку.**
+
+Атрибуция каждого коммита:
+```
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: <ссылка на текущую сессию>
+```
+
+## Правила промптов для нейросети
+- Каждый промпт — ПОЛНЫЙ текст, без «как в прошлом» и шаблонов. Давать прямо в чате **и** файлом (SendUserFile) —
+  `docs/ART_FIGHTERS.md` слишком большой, у владельца не открывается.
+- Не больше 4 кадров на картинке, один ряд, 16:9, фон сплошной пурпурный #FF00FF.
+- Режим редактирования: картинка 1 — модельный лист бойца, картинка 2 — его стойка (или присед / вершина прыжка для ударов сидя / в прыжке).
+- Обязательный блок «EXACTLY TWO arms…», блок «SIZE LOCK», «Frame 1 and the last frame are EXACTLY the pose of image 2» для ударов.
+- Никакого розового, пурпурного, фиолетового на персонаже.
+- Новые бойцы — живые люди, не аниме и не перекачанные: модельные листы v2 делаются с листами Ильи и Дракулы как образцом стиля.
+- **Без команды владельца лор не переписывать.** Сначала обсуждаем и утверждаем.
+
+## Обработка арта бойцов
+`python3 bitva-legend/tools/process_fighter_art.py <боец> [листы…]` — исходники в `art_src/fighters/<боец>/`, настройки в `sheets.json`,
+результат в `game/art/fighters/<боец>/` (кадры PNG + JSON с опорными точками).
+- **Нейросетевой апскейлер:** `tools/upscale.py` (Real-ESRGAN anime 6B, модель в `tools/models/anime6B.pth`).
+  Для бойцов из `RES` в `process_fighter_art.py` (сейчас `koschei: 2`) каждый исходник сначала увеличивается ×2
+  (кэш в `art_src/fighters/<боец>/.x2/`, ~1–1,5 мин на лист), кадры хранятся в двойном разрешении,
+  в JSON пишется `"res": 2`, игра рисует их с масштабом `SCALE / res`. **Новых бойцов делать так же** (добавить в `RES`).
+- `HEIGHT` — рост бойца стоя в px 1440p (Илья 600, Дракула 620, Кощей 586 — подогнан, чтобы не был крупнее Ильи).
+- Ключи `sheets.json`: `frames`, `part_frames` (листы `_p1`, `_p2`), `fit` (`inherit:idle`, `h:<кадр>:<px>`, число),
+  `pivot_y`, `align_to "<лист>:<кадр>"`, `align_frame`, `align_top`, `align_each` (шаг: каждый кадр по корпусу),
+  `align_head` (по переднему краю короны — для приседа и низких поз), `match_scale` (масштаб по голове образца — единый рост),
+  `frame_scale`, `skip`, `order`, `hit`, `hit_end`, `air_frames`.
+- Проверка: `python3 tools/sheet_preview.py art/fighters <боец> <анимации> out.png` (из `game/`) и снимки из игры:
+  `xvfb-run -a godot --path game --rendering-driver opengl3 -- --demo=<сценарий> --chars=a,b --arena=<id> --screenshot=x.png --shot-at=<тик>`
+  (сценарии в `game/scripts/core/demo_input.gd`; параллельно не больше 4 запусков).
+- Бойцы в высоком разрешении упаковываются в отдельный `<боец>.pck` (`tools/pack_fighter.gd`, `EXTRA_PACKS` в `build.sh`),
+  игра подключает их при запуске (`scripts/core/packs.gd`).
+
+## Арены
+`python3 tools/process_arena_art.py <папка> <id арены>` → `game/art/arenas/<id>/` (у «Перепутья» — `game/art/arena/`).
+Оживление дальнего плана: `python3 tools/make_arena_life.py [<id>]` — вода течёт, окна мерцают, дым, блёстки,
+подвешенный предмет (`life.json` + `water_*.png`); координаты — в `LIFE` / `LIFE_ARENAS` в начале скрипта.
+Промпты арен: `docs/ART_ARENA.md`, `docs/arenas/<id>.md`.
+
+## Где мы сейчас (3.17.9)
+- Илья и Дракула: полный набор, Дракула отполирован (стойка, прыжок, удары, шаги, броски).
+- **Кощей:** вся база и все 14 обычных ударов в игре, двойное разрешение. Дальше — промпты и листы спецприёмов
+  (Кощеева игла, Бессмертие, Удар кладенцом, Похищение) и суперприёма «Смерть в игле» (`fighter_data.gd`).
+- Карта «Кощеево царство» готова и анимирована (сундук на дубе качается).
+- Остальные бойцы (Геракл, Афина, Медуза, Сунь Укун, Анубис) — пока заглушки; модельные листы v2 — в `docs/ART_FIGHTERS.md`.
+- Финал: Аватар (цифровой Саша) и Скроллер — механики готовы, ждут арта.
+- Отложено: баланс, картинки истории с Сашей (`docs/ART_STORY.md`), остальные арены.
