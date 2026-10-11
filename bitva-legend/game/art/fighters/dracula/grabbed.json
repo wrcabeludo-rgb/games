@@ -1,0 +1,48 @@
+{
+ "frames": [
+  {
+   "file": "grabbed_1.png",
+   "pivot": [
+    214,
+    737
+   ],
+   "size": [
+    429,
+    738
+   ]
+  },
+  {
+   "file": "grabbed_2.png",
+   "pivot": [
+    161,
+    770
+   ],
+   "size": [
+    322,
+    771
+   ]
+  },
+  {
+   "file": "grabbed_3.png",
+   "pivot": [
+    229,
+    552
+   ],
+   "size": [
+    459,
+    553
+   ]
+  },
+  {
+   "file": "grabbed_4.png",
+   "pivot": [
+    172,
+    584
+   ],
+   "size": [
+    346,
+    585
+   ]
+  }
+ ]
+}

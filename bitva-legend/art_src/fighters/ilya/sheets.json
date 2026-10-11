@@ -422,5 +422,10 @@
     120
    ]
   }
+ },
+ "grabbed": {
+  "frames": 4,
+  "fit": "h:4:570",
+  "pivot_y": "bottom_center"
  }
 }

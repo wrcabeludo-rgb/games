@@ -145,10 +145,14 @@ static func _lift(y: float, feet_y: float, body_h: float) -> float:
 
 
 ## Кадр для текущего состояния бойца: [текстура, опорная точка] или [] (нет анимации — рисовать заглушку).
-func frame_for(f: Fighter, tick: int) -> Array:
+func frame_for(f: Fighter, tick: int, foe: Fighter = null) -> Array:
 	var anims: Dictionary = _bank.get(f.id, {})
 	if anims.is_empty():
 		return []
+	if anims.has("grabbed"):
+		var pose := grab_pose(f, foe)
+		if pose >= 0:
+			return _pick(anims.grabbed, mini(pose, anims.grabbed.tex.size() - 1))
 	match f.state:
 		Fighter.State.ATTACK:
 			var name: String = Fighter.MOVES[f.move]
@@ -345,6 +349,29 @@ static func _walk_cycle(anim: Dictionary, speed: int, fallback := WALK_CYCLE) ->
 	if anim.stride <= 0.0 or speed <= 0:
 		return fallback
 	return maxi(int(round(anim.stride * Fighter.SUB / speed)), 1)
+
+
+## Реакция на захват (лист grabbed: 0 — схвачен за плечи, 1 — вниз головой за лодыжку, 2 — летит после броска,
+## 3 — обмяк после укуса) или -1. Поза — по приёму того, кто держит: укус (захват с лечением) — схвачен, потом
+## обмяк; мельница (захват-приём без лечения) — вниз головой; бросок — схвачен, через плечо — летит; суперприём
+## с укусом — как укус, иначе — схвачен.
+static func grab_pose(f: Fighter, foe: Fighter) -> int:
+	if f.state == Fighter.State.AIR_HIT and f.thrown_air:
+		return 2
+	if f.state != Fighter.State.THROWN or foe == null or foe.state != Fighter.State.THROWING or foe.move < 0:
+		return -1
+	var m := foe.move_data()
+	var g: Dictionary = m.grab if m.has("grab") else m.get("cinema", {})
+	var t := Sim.throw_progress(foe)
+	if g.has("heal"):
+		if foe.move == Fighter.MOVE_SUPER:
+			return 0 if foe.state_frame < 40 else 3
+		return 0 if t < 0.4 else 3
+	if foe.move == Fighter.MOVE_THROW:
+		return 2 if g.get("over", 0) and t > 0.55 else 0
+	if foe.move != Fighter.MOVE_SUPER and m.has("grab"):
+		return 1
+	return 0
 
 
 ## Анимация захвата бойца: своя у приёма (мельница), у суперприёма — super_cinema, иначе обычный бросок.

@@ -3,23 +3,188 @@
   {
    "file": "block_low_1.png",
    "pivot": [
-    208,
-    350
+    128,
+    437
    ],
    "size": [
-    563,
-    352
+    512,
+    438
    ]
   },
   {
    "file": "block_low_2.png",
    "pivot": [
-    204,
-    351
+    114,
+    430
    ],
    "size": [
-    560,
-    352
+    486,
+    431
+   ]
+  },
+  {
+   "file": "block_low_3.png",
+   "pivot": [
+    70,
+    421
+   ],
+   "size": [
+    422,
+    420
+   ]
+  },
+  {
+   "file": "block_low_4.png",
+   "pivot": [
+    104,
+    453
+   ],
+   "size": [
+    490,
+    452
+   ]
+  },
+  {
+   "file": "block_low_5.png",
+   "pivot": [
+    140,
+    509
+   ],
+   "size": [
+    562,
+    508
+   ]
+  },
+  {
+   "file": "block_low_6.png",
+   "pivot": [
+    191,
+    531
+   ],
+   "size": [
+    674,
+    530
+   ]
+  },
+  {
+   "file": "block_low_7.png",
+   "pivot": [
+    254,
+    444
+   ],
+   "size": [
+    743,
+    443
+   ]
+  },
+  {
+   "file": "block_low_8.png",
+   "pivot": [
+    196,
+    419
+   ],
+   "size": [
+    643,
+    418
+   ]
+  },
+  {
+   "file": "block_low_9.png",
+   "pivot": [
+    180,
+    428
+   ],
+   "size": [
+    624,
+    427
+   ]
+  },
+  {
+   "file": "block_low_10.png",
+   "pivot": [
+    153,
+    432
+   ],
+   "size": [
+    564,
+    431
+   ]
+  },
+  {
+   "file": "block_low_11.png",
+   "pivot": [
+    126,
+    437
+   ],
+   "size": [
+    503,
+    438
+   ]
+  },
+  {
+   "file": "block_low_12.png",
+   "pivot": [
+    115,
+    437
+   ],
+   "size": [
+    481,
+    438
+   ]
+  },
+  {
+   "file": "block_low_13.png",
+   "pivot": [
+    115,
+    437
+   ],
+   "size": [
+    483,
+    438
+   ]
+  },
+  {
+   "file": "block_low_14.png",
+   "pivot": [
+    119,
+    437
+   ],
+   "size": [
+    489,
+    438
+   ]
+  },
+  {
+   "file": "block_low_15.png",
+   "pivot": [
+    124,
+    435
+   ],
+   "size": [
+    501,
+    436
+   ]
+  },
+  {
+   "file": "block_low_16.png",
+   "pivot": [
+    126,
+    432
+   ],
+   "size": [
+    510,
+    433
+   ]
+  },
+  {
+   "file": "block_low_17.png",
+   "pivot": [
+    131,
+    430
+   ],
+   "size": [
+    519,
+    433
    ]
   }
  ]

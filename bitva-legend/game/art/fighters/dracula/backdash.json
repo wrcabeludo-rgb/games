@@ -3,34 +3,386 @@
   {
    "file": "backdash_1.png",
    "pivot": [
-    367,
-    499
+    194,
+    631
    ],
    "size": [
-    667,
-    500
+    491,
+    638
    ]
   },
   {
    "file": "backdash_2.png",
    "pivot": [
-    395,
-    492
+    199,
+    631
    ],
    "size": [
-    722,
-    493
+    484,
+    638
    ]
   },
   {
    "file": "backdash_3.png",
    "pivot": [
-    310,
-    474
+    204,
+    625
    ],
    "size": [
-    593,
-    475
+    475,
+    632
+   ]
+  },
+  {
+   "file": "backdash_4.png",
+   "pivot": [
+    210,
+    600
+   ],
+   "size": [
+    484,
+    607
+   ]
+  },
+  {
+   "file": "backdash_5.png",
+   "pivot": [
+    209,
+    588
+   ],
+   "size": [
+    472,
+    595
+   ]
+  },
+  {
+   "file": "backdash_6.png",
+   "pivot": [
+    216,
+    600
+   ],
+   "size": [
+    478,
+    601
+   ]
+  },
+  {
+   "file": "backdash_7.png",
+   "pivot": [
+    219,
+    603
+   ],
+   "size": [
+    484,
+    610
+   ]
+  },
+  {
+   "file": "backdash_8.png",
+   "pivot": [
+    295,
+    615
+   ],
+   "size": [
+    595,
+    616
+   ]
+  },
+  {
+   "file": "backdash_9.png",
+   "pivot": [
+    343,
+    621
+   ],
+   "size": [
+    650,
+    622
+   ]
+  },
+  {
+   "file": "backdash_10.png",
+   "pivot": [
+    408,
+    621
+   ],
+   "size": [
+    730,
+    622
+   ]
+  },
+  {
+   "file": "backdash_11.png",
+   "pivot": [
+    439,
+    621
+   ],
+   "size": [
+    763,
+    622
+   ]
+  },
+  {
+   "file": "backdash_12.png",
+   "pivot": [
+    274,
+    557
+   ],
+   "size": [
+    561,
+    564
+   ]
+  },
+  {
+   "file": "backdash_13.png",
+   "pivot": [
+    280,
+    554
+   ],
+   "size": [
+    558,
+    561
+   ]
+  },
+  {
+   "file": "backdash_14.png",
+   "pivot": [
+    281,
+    539
+   ],
+   "size": [
+    537,
+    546
+   ]
+  },
+  {
+   "file": "backdash_15.png",
+   "pivot": [
+    284,
+    542
+   ],
+   "size": [
+    543,
+    549
+   ]
+  },
+  {
+   "file": "backdash_16.png",
+   "pivot": [
+    322,
+    612
+   ],
+   "size": [
+    583,
+    613
+   ]
+  },
+  {
+   "file": "backdash_17.png",
+   "pivot": [
+    322,
+    609
+   ],
+   "size": [
+    604,
+    610
+   ]
+  },
+  {
+   "file": "backdash_18.png",
+   "pivot": [
+    302,
+    594
+   ],
+   "size": [
+    604,
+    595
+   ]
+  },
+  {
+   "file": "backdash_19.png",
+   "pivot": [
+    298,
+    591
+   ],
+   "size": [
+    604,
+    592
+   ]
+  },
+  {
+   "file": "backdash_20.png",
+   "pivot": [
+    310,
+    603
+   ],
+   "size": [
+    610,
+    604
+   ]
+  },
+  {
+   "file": "backdash_21.png",
+   "pivot": [
+    313,
+    609
+   ],
+   "size": [
+    604,
+    610
+   ]
+  },
+  {
+   "file": "backdash_22.png",
+   "pivot": [
+    316,
+    621
+   ],
+   "size": [
+    610,
+    622
+   ]
+  },
+  {
+   "file": "backdash_23.png",
+   "pivot": [
+    319,
+    628
+   ],
+   "size": [
+    613,
+    629
+   ]
+  },
+  {
+   "file": "backdash_24.png",
+   "pivot": [
+    328,
+    634
+   ],
+   "size": [
+    619,
+    635
+   ]
+  },
+  {
+   "file": "backdash_25.png",
+   "pivot": [
+    323,
+    637
+   ],
+   "size": [
+    613,
+    638
+   ]
+  },
+  {
+   "file": "backdash_26.png",
+   "pivot": [
+    297,
+    637
+   ],
+   "size": [
+    586,
+    638
+   ]
+  },
+  {
+   "file": "backdash_27.png",
+   "pivot": [
+    275,
+    637
+   ],
+   "size": [
+    564,
+    638
+   ]
+  },
+  {
+   "file": "backdash_28.png",
+   "pivot": [
+    243,
+    637
+   ],
+   "size": [
+    529,
+    638
+   ]
+  },
+  {
+   "file": "backdash_29.png",
+   "pivot": [
+    227,
+    637
+   ],
+   "size": [
+    509,
+    638
+   ]
+  },
+  {
+   "file": "backdash_30.png",
+   "pivot": [
+    209,
+    637
+   ],
+   "size": [
+    484,
+    638
+   ]
+  },
+  {
+   "file": "backdash_31.png",
+   "pivot": [
+    197,
+    637
+   ],
+   "size": [
+    469,
+    638
+   ]
+  },
+  {
+   "file": "backdash_32.png",
+   "pivot": [
+    183,
+    637
+   ],
+   "size": [
+    451,
+    638
+   ]
+  },
+  {
+   "file": "backdash_33.png",
+   "pivot": [
+    177,
+    637
+   ],
+   "size": [
+    442,
+    638
+   ]
+  },
+  {
+   "file": "backdash_34.png",
+   "pivot": [
+    168,
+    637
+   ],
+   "size": [
+    429,
+    638
+   ]
+  },
+  {
+   "file": "backdash_35.png",
+   "pivot": [
+    164,
+    637
+   ],
+   "size": [
+    423,
+    638
    ]
   }
  ]

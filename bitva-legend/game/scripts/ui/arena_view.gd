@@ -209,6 +209,15 @@ func _draw_shadow(f: Fighter) -> void:
 ## flex: true — дыхание в стойке, Vector2 — покачивание в шаге (FighterSprites.walk_flex), иначе как есть.
 func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2, flex: Variant = null) -> void:
 	var base := to_screen(float(f.x) / Sim.SUB, float(f.y) / Sim.SUB)
+	var dir := float(f.facing)
+	var foe: Fighter = _sim.fighters[1 - _sim.fighters.find(f)]
+	if FighterSprites.grab_pose(f, foe) == 1:
+		# Мельница: висит вниз головой и два оборота кружит вокруг того, кто держит (видно сбоку: туда-обратно).
+		var a := TAU * 2.0 * Sim.throw_progress(foe)
+		var r := absf(float(f.x - foe.x)) / Sim.SUB
+		base.x = to_screen(float(foe.x) / Sim.SUB + foe.facing * r * cos(a), 0).x
+		dir = -foe.facing * signf(cos(a)) if absf(cos(a)) > 0.05 else dir
+		base.y -= 40.0  # руки висящего не касаются земли
 	var tint := Color(0.75, 0.85, 1.0) if f.alt else Color.WHITE
 	if f.is_stunned() and _sim.hitstop > 0:
 		tint = Color(1.0, 0.75, 0.7)  # получил удар — краснеет на время заморозки
@@ -217,7 +226,7 @@ func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2, flex: Variant = nu
 	elif f.hypnotized == 3:
 		tint = Color(0.75, 1.0, 0.85)  # прилип к жвачке
 	var k := FighterSprites.SCALE / sprites.res(f.id)
-	draw_set_transform(base, 0, Vector2(k * f.facing, k))
+	draw_set_transform(base, 0, Vector2(k * dir, k))
 	var body_h: float = f.data.height * 2.0 * sprites.res(f.id)
 	if flex is Vector2:
 		FighterSprites.draw_flexed(self, tex, pivot, tint, body_h, flex.x * body_h, flex.y * body_h)
@@ -238,7 +247,7 @@ func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2, flex: Variant = nu
 ## Боец-заглушка: тело, голова и «нос», показывающий, куда он смотрит.
 func _draw_fighter(f: Fighter) -> void:
 	if use_sprites and not f.is_intangible():
-		var fr := sprites.frame_for(f, _sim.tick)
+		var fr := sprites.frame_for(f, _sim.tick, _sim.fighters[1 - _sim.fighters.find(f)])
 		if not fr.is_empty():
 			_draw_sprite(f, fr[0], fr[1], fr[2] if fr.size() > 2 else null)
 			return
