@@ -150,7 +150,11 @@ const FX := {
 	"mist": [preload("res://art/fx/mist_1.png"), preload("res://art/fx/mist_2.png"),
 		preload("res://art/fx/mist_3.png"), preload("res://art/fx/mist_4.png")],
 }
-const FX_SCALE := {"hit_light": 0.36, "hit_heavy": 0.5, "hit_block": 0.34, "hit_bite": 0.42}
+const FX_SCALE := {"hit_light": 0.18, "hit_heavy": 0.25, "hit_block": 0.17, "hit_bite": 0.21}
+const FX_EVERY := 3            # спрайт попадания — на каждом третьем ударе (укус — всегда)
+var _fx_seen := [-1, -1]       # тик последней искры игрока
+var _fx_count := [0, 0]
+var _fx_show := [false, false]
 const MIST_SCALE := 0.58
 const MIST_GROUND := 625.0   # низ тумана в клетке, px
 const BATS_TEX: Array[Texture2D] = [preload("res://art/fx/bats_1.png"), preload("res://art/fx/bats_2.png"),
@@ -797,6 +801,12 @@ func _draw_spark(p: int) -> void:
 		for i in 3:
 			var rr := 14.0 + age * 3.0 + i * 9.0
 			draw_arc(c, rr, 0, TAU, 24, Color(0.5, 0.8, 1.0, k * (1.0 - i * 0.25)), 3)
+		return
+	if _fx_seen[p] != _sim.sparks[base]:
+		_fx_seen[p] = _sim.sparks[base]
+		_fx_count[p] += 1
+		_fx_show[p] = kind == 6 or _fx_count[p] % FX_EVERY == 1
+	if (kind <= 2 or kind == 6) and not _fx_show[p]:
 		return
 	if kind <= 2 or kind == 6:
 		# Спрайт эффекта: 4 кадра за время искры; блок — дуга к атакующему; 6 — укус.
