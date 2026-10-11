@@ -327,7 +327,7 @@ func _hold_throws() -> void:
 		a.finish_throw(g.recovery)
 		hitstop = THROW_HITSTOP
 		hitstop_total = THROW_HITSTOP
-		_set_spark(p, d.x, d.data.height * SUB / 2, 1)
+		_set_spark(p, d.x, d.data.height * SUB * 3 / 4, 6 if g.has("heal") else 1)  # 6 — укус
 
 
 ## Страховка: схваченный, которого никто не держит (бросающего сбили), освобождается.

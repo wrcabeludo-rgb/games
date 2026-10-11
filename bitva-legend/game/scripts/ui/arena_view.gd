@@ -145,10 +145,12 @@ const FX := {
 		preload("res://art/fx/hit_heavy_3.png"), preload("res://art/fx/hit_heavy_4.png")],
 	"hit_block": [preload("res://art/fx/hit_block_1.png"), preload("res://art/fx/hit_block_2.png"),
 		preload("res://art/fx/hit_block_3.png"), preload("res://art/fx/hit_block_4.png")],
+	"hit_bite": [preload("res://art/fx/hit_bite_1.png"), preload("res://art/fx/hit_bite_2.png"),
+		preload("res://art/fx/hit_bite_3.png"), preload("res://art/fx/hit_bite_4.png")],
 	"mist": [preload("res://art/fx/mist_1.png"), preload("res://art/fx/mist_2.png"),
 		preload("res://art/fx/mist_3.png"), preload("res://art/fx/mist_4.png")],
 }
-const FX_SCALE := {"hit_light": 0.36, "hit_heavy": 0.5, "hit_block": 0.34}
+const FX_SCALE := {"hit_light": 0.36, "hit_heavy": 0.5, "hit_block": 0.34, "hit_bite": 0.42}
 const MIST_SCALE := 0.58
 const MIST_GROUND := 625.0   # низ тумана в клетке, px
 const BATS_TEX: Array[Texture2D] = [preload("res://art/fx/bats_1.png"), preload("res://art/fx/bats_2.png"),
@@ -796,9 +798,9 @@ func _draw_spark(p: int) -> void:
 			var rr := 14.0 + age * 3.0 + i * 9.0
 			draw_arc(c, rr, 0, TAU, 24, Color(0.5, 0.8, 1.0, k * (1.0 - i * 0.25)), 3)
 		return
-	if kind <= 2:
-		# Спрайт эффекта: 4 кадра за время искры; блок — дуга к атакующему.
-		var fx_name: String = ["hit_light", "hit_heavy", "hit_block"][kind]
+	if kind <= 2 or kind == 6:
+		# Спрайт эффекта: 4 кадра за время искры; блок — дуга к атакующему; 6 — укус.
+		var fx_name: String = "hit_bite" if kind == 6 else ["hit_light", "hit_heavy", "hit_block"][kind]
 		var frames: Array = FX[fx_name]
 		var tex: Texture2D = frames[mini(age * 4 / 15, 3)]
 		var sc: float = FX_SCALE[fx_name]
