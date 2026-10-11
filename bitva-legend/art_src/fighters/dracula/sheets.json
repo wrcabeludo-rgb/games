@@ -145,8 +145,8 @@
    8,
    6
   ],
-  "hit": 6,
-  "hit_end": 10
+  "hit": 8,
+  "hit_end": 12
  },
  "st_hk": {
   "fixed_pivot": true,
@@ -201,7 +201,11 @@
   ],
   "pivot_y": "body",
   "hit": 6,
-  "hit_end": 21
+  "hit_end": 21,
+  "skip": [
+   26,
+   27
+  ]
  },
  "st_sweep": {
   "fixed_pivot": true,
@@ -224,8 +228,8 @@
    8,
    7
   ],
-  "hit": 19,
-  "hit_end": 23
+  "hit": 22,
+  "hit_end": 25
  },
  "select": {
   "frames": 1,

@@ -78,22 +78,22 @@ const CHARACTERS := {
 		"moves": {
 			# Кулаки и ноги Ильи медленнее, зато палица (сильные удары рукой) бьёт далеко.
 			# Хитбоксы ударов стоя — по спрайтам (докуда достают кулак, сапог, палица от центра бойца).
-			"st_lp": {"startup": 5, "active": 3, "recovery": 8, "damage": 40, "hitstun": 15, "hitstop": 8, "push": 700, "box": [80, 190, 150, 50]},
+			"st_lp": {"startup": 5, "active": 3, "recovery": 8, "damage": 40, "hitstun": 15, "hitstop": 8, "push": 700, "box": [60, 190, 123, 60]},
 			"st_lk": {"startup": 7, "active": 3, "recovery": 11, "damage": 50, "hitstun": 16, "hitstop": 8, "push": 800, "box": [60, 130, 115, 60]},
 			"st_hp": {"startup": 12, "active": 4, "recovery": 20, "damage": 110, "hitstun": 22, "hitstop": 13, "push": 1100, "box": [80, 110, 190, 140]},
 			"st_hk": {"startup": 10, "active": 4, "recovery": 18, "damage": 90, "hitstun": 20, "hitstop": 11, "push": 1000, "box": [45, 150, 130, 90]},
 			"cr_lp": {"startup": 5, "active": 3, "recovery": 9, "damage": 35, "hitstun": 14, "hitstop": 7, "push": 650, "box": [70, 125, 125, 45]},
 			"cr_lk": {"startup": 6, "active": 3, "recovery": 10, "damage": 35, "hitstun": 14, "hitstop": 7, "push": 650, "box": [60, 0, 130, 45], "level": "low"},
 			# Апперкот (вниз + СР): удар снизу вверх, распрямляется из приседа, подбрасывает.
-			"cr_hp": {"startup": 8, "active": 5, "recovery": 24, "damage": 100, "hitstun": 22, "hitstop": 13, "push": 900, "box": [20, 50, 150, 260], "knockdown": 1, "launch": [250, 1700], "uppercut": 1},
+			"cr_hp": {"startup": 8, "active": 5, "recovery": 24, "damage": 100, "hitstun": 22, "hitstop": 13, "push": 900, "box": [20, 40, 180, 260], "knockdown": 1, "launch": [250, 1700], "uppercut": 1},
 			"cr_hk": {"startup": 11, "active": 4, "recovery": 24, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 1000, "box": [40, 0, 140, 35], "level": "low"},
 			"j_lp": {"startup": 5, "active": 6, "damage": 40, "hitstun": 15, "hitstop": 8, "push": 600, "box": [60, 140, 120, 55], "level": "overhead"},
 			"j_lk": {"startup": 6, "active": 8, "damage": 45, "hitstun": 16, "hitstop": 8, "push": 600, "box": [60, 70, 115, 65], "level": "overhead"},
 			"j_hp": {"startup": 9, "active": 5, "damage": 100, "hitstun": 22, "hitstop": 13, "push": 800, "box": [40, 0, 110, 130], "level": "overhead"},
 			"j_hk": {"startup": 8, "active": 6, "damage": 90, "hitstun": 20, "hitstop": 11, "push": 800, "box": [60, 100, 100, 100], "level": "overhead"},
 			# Бросок палицы (только руками): летит прямо на уровне груди, шаром вперёд. Мощный.
-			"sp_proj_l": {"buttons": "punch", "versions": 2, "startup": 16, "active": 1, "recovery": 20, "proj": {"x": 60, "y": 170, "vx": 1100, "vy": 0, "gravity": 0, "w": 70, "h": 54, "kind": 0, "damage": 90, "hitstun": 22, "hitstop": 12, "push": 900, "chip": 9}, "ex": {"startup": 12, "proj": {"vx": 1400, "damage": 140, "hitstun": 26, "chip": 16, "kind": 3}}},
-			"sp_proj_h": {"buttons": "punch", "startup": 20, "active": 1, "recovery": 22, "proj": {"x": 60, "y": 170, "vx": 1300, "vy": 0, "gravity": 0, "w": 70, "h": 54, "kind": 0, "damage": 110, "hitstun": 24, "hitstop": 13, "push": 1000, "chip": 11}, "ex": {"startup": 14, "proj": {"vx": 1600, "damage": 150, "hitstun": 26, "chip": 18, "kind": 3}}},
+			"sp_proj_l": {"buttons": "punch", "versions": 2, "startup": 16, "active": 1, "recovery": 20, "proj": {"x": 185, "y": 170, "vx": 1100, "vy": 0, "gravity": 0, "w": 160, "h": 54, "kind": 0, "damage": 90, "hitstun": 22, "hitstop": 12, "push": 900, "chip": 9}, "ex": {"startup": 12, "proj": {"vx": 1400, "damage": 140, "hitstun": 26, "chip": 16, "kind": 3}}},
+			"sp_proj_h": {"buttons": "punch", "startup": 20, "active": 1, "recovery": 22, "proj": {"x": 185, "y": 170, "vx": 1300, "vy": 0, "gravity": 0, "w": 160, "h": 54, "kind": 0, "damage": 110, "hitstun": 24, "hitstop": 13, "push": 1000, "chip": 11}, "ex": {"startup": 14, "proj": {"vx": 1600, "damage": 150, "hitstun": 26, "chip": 18, "kind": 3}}},
 			# Удар оземь (вниз, вниз + нога): волна по земле, низкий удар — блокировать сидя или перепрыгнуть.
 			"sp_dd_l": {"buttons": "kick", "startup": 18, "active": 1, "recovery": 24, "proj": {"x": 70, "y": 22, "vx": 900, "vy": 0, "gravity": 0, "w": 70, "h": 44, "kind": 2, "level": "low", "life": 34, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 900, "chip": 8}, "ex": {"startup": 14, "proj": {"life": 70, "vx": 1000, "w": 90, "h": 70, "damage": 120, "hitstun": 26, "chip": 14, "kind": 5}}},
 			# Мельница (вперёд, вперёд + рука): дальний захват, раскручивает и швыряет. Вырваться нельзя.
@@ -138,17 +138,17 @@ const CHARACTERS := {
 		],
 		"moves": {
 			# Дракула быстрее и бьёт чаще, но слабее; ноги длиннее рук.
-			"st_lp": {"startup": 4, "active": 2, "recovery": 7, "damage": 30, "hitstun": 14, "hitstop": 7, "push": 650, "box": [90, 215, 135, 45]},
-			"st_lk": {"startup": 5, "active": 3, "recovery": 9, "damage": 35, "hitstun": 14, "hitstop": 7, "push": 700, "box": [40, 85, 100, 40]},
-			"st_hp": {"startup": 8, "active": 3, "recovery": 16, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 950, "box": [50, 100, 200, 80]},
-			"st_hk": {"startup": 9, "active": 3, "recovery": 16, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 1000, "box": [40, 140, 105, 110]},
-			"cr_lp": {"startup": 4, "active": 2, "recovery": 7, "damage": 25, "hitstun": 13, "hitstop": 6, "push": 600, "box": [60, 105, 115, 45]},
-			"cr_lk": {"startup": 5, "active": 2, "recovery": 9, "damage": 30, "hitstun": 13, "hitstop": 6, "push": 600, "box": [50, 0, 155, 40], "level": "low"},
+			"st_lp": {"startup": 4, "active": 2, "recovery": 7, "damage": 30, "hitstun": 14, "hitstop": 7, "push": 650, "box": [40, 215, 146, 58]},
+			"st_lk": {"startup": 5, "active": 3, "recovery": 9, "damage": 35, "hitstun": 14, "hitstop": 7, "push": 700, "box": [40, 10, 111, 80]},
+			"st_hp": {"startup": 8, "active": 3, "recovery": 16, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 950, "box": [40, 180, 193, 76]},
+			"st_hk": {"startup": 9, "active": 3, "recovery": 16, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 1000, "box": [40, 146, 154, 72]},
+			"cr_lp": {"startup": 4, "active": 2, "recovery": 7, "damage": 25, "hitstun": 13, "hitstop": 6, "push": 600, "box": [40, 103, 143, 58]},
+			"cr_lk": {"startup": 5, "active": 2, "recovery": 9, "damage": 30, "hitstun": 13, "hitstop": 6, "push": 600, "box": [40, 0, 127, 70], "level": "low"},
 			# Апперкот (вниз + СР): удар снизу вверх, распрямляется из приседа, подбрасывает.
-			"cr_hp": {"startup": 7, "active": 4, "recovery": 20, "damage": 85, "hitstun": 20, "hitstop": 12, "push": 850, "box": [20, 60, 105, 240], "knockdown": 1, "launch": [200, 1600], "uppercut": 1},
-			"cr_hk": {"startup": 9, "active": 3, "recovery": 20, "damage": 70, "hitstun": 19, "hitstop": 10, "push": 1000, "box": [50, 0, 210, 40], "level": "low"},
-			"j_lp": {"startup": 4, "active": 5, "damage": 30, "hitstun": 14, "hitstop": 7, "push": 550, "box": [25, 60, 95, 45], "level": "overhead"},
-			"j_lk": {"startup": 5, "active": 7, "damage": 35, "hitstun": 15, "hitstop": 7, "push": 550, "box": [25, 0, 150, 50], "level": "overhead"},
+			"cr_hp": {"startup": 7, "active": 4, "recovery": 20, "damage": 85, "hitstun": 20, "hitstop": 12, "push": 850, "box": [40, 77, 170, 330], "knockdown": 1, "launch": [200, 1600], "uppercut": 1},
+			"cr_hk": {"startup": 9, "active": 3, "recovery": 20, "damage": 70, "hitstun": 19, "hitstop": 10, "push": 1000, "box": [40, 0, 132, 70], "level": "low"},
+			"j_lp": {"startup": 4, "active": 5, "damage": 30, "hitstun": 14, "hitstop": 7, "push": 550, "box": [40, 39, 150, 140], "level": "overhead"},
+			"j_lk": {"startup": 5, "active": 7, "damage": 35, "hitstun": 15, "hitstop": 7, "push": 550, "box": [40, 31, 199, 96], "level": "overhead"},
 			"j_hp": {"startup": 7, "active": 4, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 750, "box": [25, 0, 105, 80], "level": "overhead"},
 			"j_hk": {"startup": 7, "active": 5, "damage": 75, "hitstun": 19, "hitstop": 10, "push": 750, "box": [25, 0, 150, 50], "level": "overhead"},
 			# Стая летучих мышей (назад, вперёд + рука): летит прямо на уровне груди, бьёт и сидящего.
@@ -161,10 +161,10 @@ const CHARACTERS := {
 			"sp_bb_l": {"buttons": "punch", "startup": 5, "active": 2, "recovery": 28, "grab": {"range": 70, "hold": 40, "damage": 110, "heal": 60, "launch": [300, 600], "tech": 0, "recovery": 10}, "ex": {"grab": {"range": 100, "damage": 150, "heal": 120}}},
 			# Классика.
 			"st_sweep": {"startup": 8, "active": 3, "recovery": 18, "damage": 60, "hitstun": 20, "hitstop": 10, "push": 600, "box": [30, 0, 140, 28], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
-			"st_round": {"startup": 12, "active": 4, "recovery": 20, "damage": 100, "hitstun": 22, "hitstop": 13, "push": 1100, "box": [20, 160, 110, 90], "knockdown": 1, "launch": [600, 900], "kick": 1},
+			"st_round": {"startup": 12, "active": 4, "recovery": 20, "damage": 100, "hitstun": 22, "hitstop": 13, "push": 1100, "box": [40, 95, 162, 222], "knockdown": 1, "launch": [600, 900], "kick": 1},
 			"throw": {"startup": 3, "active": 2, "recovery": 18, "grab": {"range": 25, "hold": 22, "damage": 100, "launch": [450, 900], "tech": 1, "recovery": 10}},
 			# «Кровавая луна» (блок + СР + СН): бросок вперёд; попал — восходит кровавая луна, стая и укус.
-			"super": {"name": "КРОВАВАЯ ЛУНА", "startup": 6, "active": 8, "recovery": 40, "lunge": 950, "damage": 50, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 40, "box": [20, 40, 120, 220], "cinema": {"hold": 100, "damage": 300, "heal": 80, "launch": [600, 1500], "tech": 0, "recovery": 18, "scaled": 1}},
+			"super": {"name": "КРОВАВАЯ ЛУНА", "startup": 6, "active": 8, "recovery": 40, "lunge": 950, "damage": 50, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 40, "box": [40, 40, 198, 220], "cinema": {"hold": 100, "damage": 300, "heal": 80, "launch": [600, 1500], "tech": 0, "recovery": 18, "scaled": 1}},
 		},
 	},
 	"koschei": {

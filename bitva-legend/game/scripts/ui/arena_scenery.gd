@@ -63,7 +63,7 @@ func _init(arena_id := Arenas.DEFAULT) -> void:
 	_sky_top = _d.sky[0]
 	_sky_light = _d.sky[1]
 	_sky_dark = _d.sky[2]
-	for name in ["sky", "moon", "mountains", "forest", "stone", "ground", "foreground"]:
+	for name in ["backdrop", "sky", "moon", "mountains", "forest", "stone", "ground", "foreground"]:
 		var tex := _load(name)
 		if tex != null:
 			_tex[name] = tex
@@ -131,6 +131,9 @@ func darkness(k: float, x_on_layer: float) -> float:
 # --- Задний план (до бойцов) ---------------------------------------------
 
 func draw_back(c: CanvasItem) -> void:
+	if _tex.has("backdrop"):
+		_draw_backdrop(c)
+		return
 	_draw_sky(c)
 	_draw_moon(c)
 	_draw_clouds(c)
@@ -146,6 +149,8 @@ func draw_back(c: CanvasItem) -> void:
 
 ## Передний план (поверх бойцов): трава и кусты у нижнего края.
 func draw_front(c: CanvasItem) -> void:
+	if _tex.has("backdrop"):
+		return
 	var k := K_FRONT
 	var x0 := layer_x(k)
 	var w := layer_w(k)
@@ -180,6 +185,17 @@ func draw_front(c: CanvasItem) -> void:
 
 
 # --- Слои ----------------------------------------------------------------
+
+## Карта-заглушка одной картинкой (backdrop.png, 21:9; пол — нижняя четверть): по высоте экрана, сдвигается
+## с камерой настолько, насколько картинка шире экрана (бойцы стоят на середине пола).
+func _draw_backdrop(c: CanvasItem) -> void:
+	var tex: Texture2D = _tex.backdrop
+	var h := view.y
+	var w := h * tex.get_width() / tex.get_height()
+	var k := clampf((w - view.x) / maxf(arena_w - view.x, 1.0), 0.0, 1.0)
+	var x := (view.x - w) / 2.0 if k <= 0.0 else layer_x(k)
+	c.draw_texture_rect(tex, Rect2(x + shake.x * 0.5, shake.y * 0.5, w, h), false)
+
 
 func _draw_sky(c: CanvasItem) -> void:
 	var k := K_SKY

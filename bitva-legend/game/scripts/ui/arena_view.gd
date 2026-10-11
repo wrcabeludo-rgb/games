@@ -593,6 +593,7 @@ func _draw_projectile(pr: PackedInt32Array) -> void:
 		_draw_stomp_wave(pr, age, dir)
 	elif kind == 0:
 		# Палица из ролика броска (art/fx/mace.png): летит прямо, не вращаясь, шаром вперёд — в соперника.
+		# Снаряд появляется на 185 px впереди Ильи: древко (114 px назад от центра) начинается уже за его телом.
 		var k := FighterSprites.SCALE / sprites.res("ilya")
 		draw_set_transform(c, 0, Vector2(k * dir, k))
 		draw_texture(MACE_TEX, -MACE_TEX.get_size() * 0.5)

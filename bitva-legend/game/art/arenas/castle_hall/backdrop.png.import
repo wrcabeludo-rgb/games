@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cgwv3ar7sqect"
-path="res://.godot/imported/j_lp_26.png-1785f06706a77fece200d5092c213efe.ctex"
+uid="uid://dm4dpifi80b73"
+path="res://.godot/imported/backdrop.png-10351bc86950ef6bd2e07724034bb088.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/fighters/dracula/j_lp_26.png"
-dest_files=["res://.godot/imported/j_lp_26.png-1785f06706a77fece200d5092c213efe.ctex"]
+source_file="res://art/arenas/castle_hall/backdrop.png"
+dest_files=["res://.godot/imported/backdrop.png-10351bc86950ef6bd2e07724034bb088.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c4gpx73s20tsx"
-path="res://.godot/imported/j_lp_27.png-689b692ad6c7ebe0b31524119057d47d.ctex"
+uid="uid://cg4hx3vwck1lx"
+path="res://.godot/imported/backdrop.png-31d2e011c08731b62d4ba9942a3af1ca.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/fighters/dracula/j_lp_27.png"
-dest_files=["res://.godot/imported/j_lp_27.png-689b692ad6c7ebe0b31524119057d47d.ctex"]
+source_file="res://art/arenas/flower_mountain/backdrop.png"
+dest_files=["res://.godot/imported/backdrop.png-31d2e011c08731b62d4ba9942a3af1ca.ctex"]
 
 [params]
 
