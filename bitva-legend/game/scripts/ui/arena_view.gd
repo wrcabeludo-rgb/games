@@ -111,6 +111,8 @@ func _draw() -> void:
 ## держится 3 с и тает за 1 с. Только картинка — на бой не влияет.
 const CRATER_TEX := preload("res://art/fx/crater.png")
 const MACE_TEX := preload("res://art/fx/mace.png")
+const BATS_TEX: Array[Texture2D] = [preload("res://art/fx/bats_1.png"), preload("res://art/fx/bats_2.png"),
+	preload("res://art/fx/bats_3.png"), preload("res://art/fx/bats_4.png")]
 const STOMP_WAVE: Array[Texture2D] = [preload("res://art/fx/stomp_wave_1.png"), preload("res://art/fx/stomp_wave_2.png"),
 	preload("res://art/fx/stomp_wave_3.png"), preload("res://art/fx/stomp_wave_4.png")]
 const STOMP_OFFSET := 70.0        # снаряд волны появляется на 70 px впереди Ильи (fighter_data "proj.x")  # брошенная палица Ильи, в масштабе его кадров
@@ -576,7 +578,7 @@ func _draw_projectile(pr: PackedInt32Array) -> void:
 		_draw_projectile_new(pr, c, age, dir)
 		return
 	var kind := pr[Sim.Proj.KIND] % 3
-	if pr[Sim.Proj.KIND] >= 3 and kind != 2:  # усиленная волна — просто крупнее
+	if pr[Sim.Proj.KIND] >= 3 and kind == 0:  # усиленные волна и стая — просто крупнее
 		draw_circle(c, float(pr[Sim.Proj.HW]) / Sim.SUB * 1.3, Color(1, 0.8, 0.3, 0.35))
 	if kind == 2:
 		_draw_stomp_wave(pr, age, dir)
@@ -587,16 +589,12 @@ func _draw_projectile(pr: PackedInt32Array) -> void:
 		draw_texture(MACE_TEX, -MACE_TEX.get_size() * 0.5)
 		draw_set_transform(Vector2.ZERO)
 	else:
-		var hw := float(pr[Sim.Proj.HW]) / Sim.SUB
-		for i in 3:
-			var off := Vector2(-dir * (i * hw * 0.55 - hw * 0.4), sin(age * 0.5 + i * 2.1) * 10 + (i - 1) * 9)
-			var b := c + off
-			var flap := 8.0 + 7.0 * sin(age * 0.9 + i)
-			var ink := Color(0.12, 0.05, 0.1)
-			for side in [-1.0, 1.0]:
-				draw_colored_polygon(PackedVector2Array([b, b + Vector2(side * 17, -flap), b + Vector2(side * 7, 6)]), ink)
-			draw_circle(b, 5, ink)
-			draw_circle(b + Vector2(dir * 3, -1), 2, Color(1, 0.3, 0.3))
+		# Стая летучих мышей (art/fx/bats_1..4.png — 4 кадра взмаха, стая смотрит вправо): машет крыльями.
+		var tex: Texture2D = BATS_TEX[(age / 4) % BATS_TEX.size()]
+		var k := 0.55 if pr[Sim.Proj.KIND] >= 3 else 0.42
+		draw_set_transform(c + Vector2(0, sin(age * 0.4) * 4.0), 0, Vector2(k * dir, k))
+		draw_texture(tex, -tex.get_size() * 0.5)
+		draw_set_transform(Vector2.ZERO)
 	if show_debug:
 		_debug_box(Sim._proj_box(pr), Color(1, 0.2, 0.2, 0.95))
 

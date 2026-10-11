@@ -274,5 +274,42 @@
   ],
   "hit": 3,
   "hit_end": 36
+ },
+ "super": {
+  "fixed_pivot": true,
+  "align_to": "idle:1",
+  "fit": 1.154,
+  "frames": 87,
+  "grid": [
+   8,
+   11
+  ],
+  "hit": 36,
+  "hit_end": 44
+ },
+ "sp_dd_l": {
+  "fixed_pivot": true,
+  "align_to": "idle:1",
+  "fit": 1.152,
+  "frames": 61,
+  "grid": [
+   8,
+   8
+  ],
+  "hit": 19,
+  "hit_end": 19
+ },
+ "sp_bb_l": {
+  "fixed_pivot": true,
+  "align_to": "idle:1",
+  "fit": 1.152,
+  "frames": 70,
+  "grid": [
+   8,
+   9
+  ],
+  "hit": 15,
+  "hit_end": 15,
+  "release": 45
  }
 }
