@@ -14,6 +14,8 @@ var training := false
 ## подаёт записанный ввод, сохраняет кадр на заданном тике и выходит.
 var _screenshot_path := ""
 var _shot_at := DemoInput.LENGTH
+var _shot_every := 0              # «--shot-every=N --shot-from=T»: серия снимков <путь>_<тик>.png до --shot-at
+var _shot_from := 0
 
 @onready var arena: ArenaView = $ArenaView
 @onready var hud: Hud = $Hud
@@ -74,6 +76,10 @@ func _ready() -> void:
 			ai.level = AiController.Level.OFF   # снимки — по записанному вводу, без сохранённого ИИ
 		elif arg.begins_with("--shot-at="):
 			_shot_at = int(arg.trim_prefix("--shot-at="))
+		elif arg.begins_with("--shot-every="):
+			_shot_every = int(arg.trim_prefix("--shot-every="))
+		elif arg.begins_with("--shot-from="):
+			_shot_from = int(arg.trim_prefix("--shot-from="))
 		elif arg == "--debug":
 			arena.show_debug = true
 		elif arg.begins_with("--demo-hp="):
@@ -169,6 +175,14 @@ func _physics_process(_delta: float) -> void:
 	hud.show_state(sim, reader, ai)
 	if _screenshot_path != "" and sim.tick == _shot_at:
 		_save_screenshot.call_deferred()
+	elif _screenshot_path != "" and _shot_every > 0 and sim.tick >= _shot_from and (sim.tick - _shot_from) % _shot_every == 0:
+		_save_series_shot.call_deferred(sim.tick)
+
+
+## Кадр серии (проверка анимаций): <путь без .png>_<тик>.png, игра идёт дальше.
+func _save_series_shot(tick: int) -> void:
+	await RenderingServer.frame_post_draw
+	get_viewport().get_texture().get_image().save_png(_screenshot_path.trim_suffix(".png") + "_%04d.png" % tick)
 
 
 func _save_screenshot() -> void:
