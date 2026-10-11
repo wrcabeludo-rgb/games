@@ -209,6 +209,8 @@ func frame_for(f: Fighter, tick: int, foe: Fighter = null) -> Array:
 		Fighter.State.THROWING:
 			# Бросает: держит → поднял → швыряет (по ходу удержания).
 			var gkey := _grab_anim(anims, f)
+			if foe != null and f.move == Fighter.MOVE_SUPER and anims.has("pair_" + foe.id):
+				gkey = "pair_" + foe.id  # парная сцена: оба бойца в одном ролике, соперник не рисуется
 			if gkey != "" and gkey != "throw":
 				# Захват из видео со своей анимацией (мельница, суперприём): по ходу удержания до release.
 				_last_grab[f] = gkey
@@ -306,7 +308,8 @@ func frame_for(f: Fighter, tick: int, foe: Fighter = null) -> Array:
 					# Падение: в листе из 4 кадров последний — приземление, его показываем у самой земли.
 					i = 3 if n > 4 or f.y < JUMP_LAND_HEIGHT * Fighter.SUB else 2
 				return _pick(anims.jump, mini(i, n - 1))
-		Fighter.State.LAND when f.throw_follow and anims.has(_last_grab.get(f, "throw")):
+		Fighter.State.LAND when f.throw_follow and anims.has(_last_grab.get(f, "throw")) \
+				and not String(_last_grab.get(f, "throw")).begins_with("pair_"):
 			# Только что бросил — доводит движение (у броска из видео — кадры после release, иначе последний).
 			var ta: Dictionary = anims[_last_grab.get(f, "throw")]
 			var nt: int = ta.tex.size()
@@ -382,6 +385,12 @@ func visual_lift(f: Fighter) -> float:
 	var rel: int = mini(ga.release - 1, ga.tex.size() - 1)
 	var i: int = ga.hit + roundi(gt * (rel - ga.hit))
 	return ga.lift[clampi(i, 0, ga.lift.size() - 1)]
+
+
+## Соперника f сейчас рисует парная сцена суперприёма того, кто его держит (лист pair_<id соперника>).
+func in_pair_scene(f: Fighter, foe: Fighter) -> bool:
+	return foe != null and f.state == Fighter.State.THROWN and foe.state == Fighter.State.THROWING \
+			and foe.move == Fighter.MOVE_SUPER and _bank.get(foe.id, {}).has("pair_" + f.id)
 
 
 ## Реакция на захват (лист grabbed: 0 — схвачен за плечи, 1 — вниз головой за лодыжку, 2 — летит после броска,

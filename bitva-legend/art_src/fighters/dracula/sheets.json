@@ -552,5 +552,19 @@
    1.2037
   ],
   "pivot_y": "bottom_center"
+ },
+ "pair_ilya": {
+  "fixed_pivot": true,
+  "align_to": "idle:1",
+  "drop_ref": true,
+  "fit": 1.422,
+  "frames": 111,
+  "grid": [
+   10,
+   12
+  ],
+  "hit": 1,
+  "hit_end": 1,
+  "release": 105
  }
 }

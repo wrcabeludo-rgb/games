@@ -137,6 +137,20 @@ func _draw() -> void:
 ## держится 3 с и тает за 1 с. Только картинка — на бой не влияет.
 const CRATER_TEX := preload("res://art/fx/crater.png")
 const MACE_TEX := preload("res://art/fx/mace.png")
+## Эффекты (art/fx/<имя>_1..4.png, 4 кадра по ходу; кадр — клетка 500×667, центр эффекта в центре клетки).
+const FX := {
+	"hit_light": [preload("res://art/fx/hit_light_1.png"), preload("res://art/fx/hit_light_2.png"),
+		preload("res://art/fx/hit_light_3.png"), preload("res://art/fx/hit_light_4.png")],
+	"hit_heavy": [preload("res://art/fx/hit_heavy_1.png"), preload("res://art/fx/hit_heavy_2.png"),
+		preload("res://art/fx/hit_heavy_3.png"), preload("res://art/fx/hit_heavy_4.png")],
+	"hit_block": [preload("res://art/fx/hit_block_1.png"), preload("res://art/fx/hit_block_2.png"),
+		preload("res://art/fx/hit_block_3.png"), preload("res://art/fx/hit_block_4.png")],
+	"mist": [preload("res://art/fx/mist_1.png"), preload("res://art/fx/mist_2.png"),
+		preload("res://art/fx/mist_3.png"), preload("res://art/fx/mist_4.png")],
+}
+const FX_SCALE := {"hit_light": 0.36, "hit_heavy": 0.5, "hit_block": 0.34}
+const MIST_SCALE := 0.58
+const MIST_GROUND := 625.0   # низ тумана в клетке, px
 const BATS_TEX: Array[Texture2D] = [preload("res://art/fx/bats_1.png"), preload("res://art/fx/bats_2.png"),
 	preload("res://art/fx/bats_3.png"), preload("res://art/fx/bats_4.png")]
 const STOMP_WAVE: Array[Texture2D] = [preload("res://art/fx/stomp_wave_1.png"), preload("res://art/fx/stomp_wave_2.png"),
@@ -200,8 +214,8 @@ func _draw_super_backdrop() -> void:
 		else:
 			# У остальных — сияние в цвете бойца (свой фон суперприёма появится вместе с артом).
 			draw_circle(Vector2(size.x * 0.5, -60), 260, Color(f.color().lightened(0.4), 0.3))
-		if not cinema:
-			continue
+		if not cinema or sprites.in_pair_scene(foe, f):
+			continue  # парная сцена рисует всё сама
 		var t := f.state_frame
 		# Серия ударов: вспышка каждые 10 тиков, в конце — самая большая.
 		var beat := t % 10
@@ -281,6 +295,13 @@ func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2, flex: Variant = nu
 
 ## Боец-заглушка: тело, голова и «нос», показывающий, куда он смотрит.
 func _draw_fighter(f: Fighter) -> void:
+	if use_sprites and sprites.in_pair_scene(f, _sim.fighters[1 - _sim.fighters.find(f)]):
+		return
+	if use_sprites and f.move >= 0 and f.state == Fighter.State.ATTACK and f.move_data().has("teleport"):
+		var tm := f.move_data()
+		var after: int = f.move_frame - int(tm.startup)
+		if after >= 0 and after < 12:
+			_draw_mist_frame(f, 2 if after < 6 else 3)
 	if use_sprites and not f.is_intangible():
 		var fr := sprites.frame_for(f, _sim.tick, _sim.fighters[1 - _sim.fighters.find(f)])
 		if not fr.is_empty():
@@ -555,12 +576,20 @@ func _draw_guard(f: Fighter, shoulder: Vector2, body_h: float, dir: float, color
 
 ## Туманный рывок: вместо тела — клубы тумана.
 func _draw_mist(f: Fighter) -> void:
-	var base := to_screen(float(f.x) / Sim.SUB, float(f.y) / Sim.SUB)
-	var h: float = f.data.height
-	for i in 7:
-		var a := _sim.tick * 0.2 + i * 0.9
-		var c := base + Vector2(cos(a) * 30, -h * (0.15 + 0.11 * i))
-		draw_circle(c, 26 - i * 1.5, Color(0.55, 0.45, 0.65, 0.35))
+	# Туман (art/fx/mist): пока боец в тумане — плотный столб (кадры 1–2).
+	var m := f.move_data()
+	var t0: int = m.teleport.invul_from
+	var span := maxi(int(m.startup) - t0, 1)
+	_draw_mist_frame(f, clampi((f.move_frame - t0) * 2 / span, 0, 1))
+
+
+## Кадр тумана i (0–3) на месте бойца, низ столба — на земле под ним.
+func _draw_mist_frame(f: Fighter, i: int) -> void:
+	var base := to_screen(float(f.x) / Sim.SUB, 0.0)
+	var tex: Texture2D = FX.mist[i]
+	draw_set_transform(base, 0, Vector2(MIST_SCALE * f.facing, MIST_SCALE))
+	draw_texture(tex, Vector2(-tex.get_size().x * 0.5, -MIST_GROUND))
+	draw_set_transform(Vector2.ZERO)
 
 
 ## Поза броска снаряда: замах назад-вверх, затем рука вперёд.
@@ -766,6 +795,19 @@ func _draw_spark(p: int) -> void:
 		for i in 3:
 			var rr := 14.0 + age * 3.0 + i * 9.0
 			draw_arc(c, rr, 0, TAU, 24, Color(0.5, 0.8, 1.0, k * (1.0 - i * 0.25)), 3)
+		return
+	if kind <= 2:
+		# Спрайт эффекта: 4 кадра за время искры; блок — дуга к атакующему.
+		var fx_name: String = ["hit_light", "hit_heavy", "hit_block"][kind]
+		var frames: Array = FX[fx_name]
+		var tex: Texture2D = frames[mini(age * 4 / 15, 3)]
+		var sc: float = FX_SCALE[fx_name]
+		var flip := 1.0
+		if kind == 2:
+			flip = float(_sim.fighters[p].facing)
+		draw_set_transform(c, 0, Vector2(sc * flip, sc))
+		draw_texture(tex, -tex.get_size() * 0.5)
+		draw_set_transform(Vector2.ZERO)
 		return
 	var r := (46.0 if heavy else 30.0) * (0.6 + 0.4 * k)
 	var col := Color(1.0, 0.95, 0.6, k)
