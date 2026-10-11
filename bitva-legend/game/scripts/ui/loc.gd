@@ -181,6 +181,7 @@ const EN := {
 	"Удар — следующий бой": "Attack — next fight",
 	"Удар — ещё раз   ·   Enter или Options — выйти": "Attack — try again   ·   Enter or Options — quit",
 	"Enter / крест — пропустить": "Enter / Cross — skip",
+	"◄ ► — выбрать арену": "◄ ► — choose the arena",
 	# Пауза и настройки
 	"ПАУЗА": "PAUSE",
 	"Продолжить": "Resume",

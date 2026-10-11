@@ -566,5 +566,19 @@
   "hit": 1,
   "hit_end": 1,
   "release": 105
+ },
+ "pair_throw_ilya": {
+  "fixed_pivot": true,
+  "align_to": "idle:1",
+  "drop_ref": true,
+  "fit": 1.413,
+  "frames": 53,
+  "grid": [
+   10,
+   6
+  ],
+  "hit": 1,
+  "hit_end": 1,
+  "release": 46
  }
 }

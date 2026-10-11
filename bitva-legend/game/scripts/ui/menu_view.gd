@@ -41,6 +41,7 @@ const CONFIRM := InputBits.LP | InputBits.LK | InputBits.START
 const BACK := InputBits.HK
 
 var screen := Screen.TITLE
+var arena_picked := false   # арену выбрали вручную на экране «ПРОТИВ» — ждём подтверждения
 var tick := 0
 ## Курсоры игроков (индекс в ROSTER), выбран ли боец и с какого тика.
 var cursor := PackedInt32Array([0, 1])
@@ -118,7 +119,15 @@ func step(bits: PackedInt32Array) -> void:
 			_step_ending(press[0] | press[1])
 		elif screen == Screen.VERSUS:
 			var total := VS_LINE_START + _dialog.size() * VS_LINE_TICKS + VS_TAIL
-			if tick >= total or (tick > VS_SKIP_AFTER and (press[0] | press[1]) & CONFIRM):
+			var lr := (press[0] | press[1]) & (InputBits.LEFT | InputBits.RIGHT)
+			if lr:
+				# Выбор арены вручную (для проверки карт): влево/вправо — по списку; дальше — только по подтверждению.
+				var ids: Array = Arenas.LIST.keys()
+				var i := ids.find(arena)
+				arena = ids[(i + (1 if lr & InputBits.RIGHT else -1) + ids.size()) % ids.size()]
+				arena_picked = true
+				sound.emit("ui_move")
+			if (tick >= total and not arena_picked) or (tick > VS_SKIP_AFTER and (press[0] | press[1]) & CONFIRM):
 				fight_requested.emit(PackedStringArray([_id(0), _id(1)]))
 		else:
 			_step_select(press)
@@ -132,6 +141,7 @@ func start_versus() -> void:
 	var b := _id(1)
 	_dialog = Quotes.intro(a, b, Time.get_ticks_msec() / 7)
 	arena = Arenas.for_arcade(a, b) if arcade and run != null else Arenas.for_versus(a, b, Time.get_ticks_msec() % 2)
+	arena_picked = false
 	screen = Screen.VERSUS
 	tick = 0
 	visible = true
@@ -465,7 +475,8 @@ func _draw_versus() -> void:
 		_text_c(Vector2(cx, 220), "ФИНАЛ" if finale else "НОВЫЙ ИВЕНТ!", 30, Color(0.3, 0.85, 1.0), _title_font, 2)
 	var pop := 1.0 + 0.6 * (1.0 - smoothstep(10.0, 26.0, float(tick)))
 	_text_c(Vector2(cx, 300), "ПРОТИВ", int(64 * pop), COLOR_GOLD, _title_font, 4)
-	_text_c(Vector2(cx, 350), Loc.t("Арена: %s") % Loc.t(Arenas.data(arena).name), 18, COLOR_DIM)
+	_text_c(Vector2(cx, 350), "◄  " + Loc.t("Арена: %s") % Loc.t(Arenas.data(arena).name) + "  ►", 20,
+		COLOR_GOLD if arena_picked else COLOR_DIM)
 	# Реплики: печатаются по очереди, у края говорящего.
 	for i in _dialog.size():
 		var t0 := VS_LINE_START + i * VS_LINE_TICKS
@@ -482,6 +493,7 @@ func _draw_versus() -> void:
 		draw_rect(box, COLOR_P[p].lightened(0.1), false, 2.0)
 		draw_string(_font, box.position + Vector2(16, 26), Loc.t(FighterData.get_data(who).name), HORIZONTAL_ALIGNMENT_LEFT, -1, 16, COLOR_P[p].lightened(0.3))
 		draw_multiline_string(_font, box.position + Vector2(16, 52), shown, HORIZONTAL_ALIGNMENT_LEFT, box.size.x - 32, 19, 3, COLOR_TEXT)
+	_text_c(Vector2(cx, 376), "◄ ► — выбрать арену", 14, COLOR_DIM)
 	if tick > VS_SKIP_AFTER:
 		_text_c(Vector2(cx, size.y - 20), "Enter / крест — пропустить", 15, COLOR_DIM)
 
