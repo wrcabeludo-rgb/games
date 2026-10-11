@@ -114,16 +114,16 @@
  },
  "cr_hp": {
   "fixed_pivot": true,
-  "align_to": "idle:1",
-  "fit": 1.133,
-  "frames": 37,
+  "align_to": "crouch:1",
+  "align_head": true,
+  "fit": 1.653,
+  "frames": 41,
   "grid": [
    8,
-   5
+   6
   ],
-  "drop_ref": true,
-  "hit": 11,
-  "hit_end": 15
+  "hit": 6,
+  "hit_end": 10
  },
  "st_hk": {
   "fixed_pivot": true,
