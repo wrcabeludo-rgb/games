@@ -99,7 +99,7 @@ const CHARACTERS := {
 			# Мельница (вперёд, вперёд + рука): дальний захват, раскручивает и швыряет. Вырваться нельзя.
 			"sp_ff_l": {"buttons": "punch", "startup": 6, "active": 2, "recovery": 30, "grab": {"range": 90, "hold": 40, "damage": 170, "launch": [900, 1300], "tech": 0, "recovery": 12}, "ex": {"grab": {"range": 130, "damage": 240}}},
 			# Богатырский таран с палицей (назад, назад + рука): рывок вперёд, выдерживает один удар.
-			"sp_bb_l": {"buttons": "punch", "startup": 10, "active": 16, "recovery": 20, "lunge": 900, "armor": 1, "damage": 100, "hitstun": 24, "hitstop": 13, "push": 1400, "chip": 10, "box": [30, 60, 110, 200], "ex": {"armor": 2, "lunge": 1150, "damage": 140, "chip": 16, "knockdown": 1, "launch": [400, 1500]}},
+			"sp_bb_l": {"buttons": "punch", "startup": 10, "active": 24, "recovery": 20, "lunge": 1500, "armor": 1, "damage": 100, "hitstun": 24, "hitstop": 13, "push": 1400, "chip": 10, "box": [30, 60, 110, 200], "ex": {"armor": 2, "lunge": 1900, "damage": 140, "chip": 16, "knockdown": 1, "launch": [400, 1500]}},
 			# Классика.
 			"st_sweep": {"startup": 9, "active": 3, "recovery": 20, "damage": 70, "hitstun": 20, "hitstop": 11, "push": 600, "box": [30, 0, 170, 40], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
 			"st_round": {"startup": 14, "active": 4, "recovery": 24, "damage": 120, "hitstun": 22, "hitstop": 14, "push": 1200, "box": [30, 160, 130, 130], "knockdown": 1, "launch": [650, 950], "kick": 1},
@@ -143,10 +143,10 @@ const CHARACTERS := {
 			"st_hp": {"startup": 8, "active": 3, "recovery": 16, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 950, "box": [40, 180, 193, 76]},
 			"st_hk": {"startup": 9, "active": 3, "recovery": 16, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 1000, "box": [40, 146, 154, 72]},
 			"cr_lp": {"startup": 4, "active": 2, "recovery": 7, "damage": 25, "hitstun": 13, "hitstop": 6, "push": 600, "box": [40, 103, 143, 58]},
-			"cr_lk": {"startup": 5, "active": 2, "recovery": 9, "damage": 30, "hitstun": 13, "hitstop": 6, "push": 600, "box": [40, 0, 127, 70], "level": "low"},
+			"cr_lk": {"startup": 5, "active": 4, "recovery": 7, "damage": 30, "hitstun": 13, "hitstop": 6, "push": 600, "box": [40, 0, 127, 70], "level": "low"},
 			# Апперкот (вниз + СР): удар снизу вверх, распрямляется из приседа, подбрасывает.
 			"cr_hp": {"startup": 7, "active": 4, "recovery": 20, "damage": 85, "hitstun": 20, "hitstop": 12, "push": 850, "box": [40, 77, 170, 330], "knockdown": 1, "launch": [200, 1600], "uppercut": 1},
-			"cr_hk": {"startup": 9, "active": 3, "recovery": 20, "damage": 70, "hitstun": 19, "hitstop": 10, "push": 1000, "box": [40, 0, 132, 70], "level": "low"},
+			"cr_hk": {"startup": 9, "active": 5, "recovery": 18, "damage": 70, "hitstun": 19, "hitstop": 10, "push": 1000, "box": [40, 0, 132, 70], "level": "low"},
 			"j_lp": {"startup": 4, "active": 5, "damage": 30, "hitstun": 14, "hitstop": 7, "push": 550, "box": [40, 39, 150, 140], "level": "overhead"},
 			"j_lk": {"startup": 5, "active": 7, "damage": 35, "hitstun": 15, "hitstop": 7, "push": 550, "box": [40, 31, 199, 96], "level": "overhead"},
 			"j_hp": {"startup": 7, "active": 4, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 750, "box": [25, 0, 105, 80], "level": "overhead"},
