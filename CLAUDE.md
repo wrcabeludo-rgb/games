@@ -71,6 +71,8 @@ Claude-Session: <ссылка на текущую сессию>
 - Проверка: `python3 tools/sheet_preview.py art/fighters <боец> <анимации> out.png` (из `game/`) и снимки из игры:
   `xvfb-run -a godot --path game --rendering-driver opengl3 -- --demo=<сценарий> --chars=a,b --arena=<id> --screenshot=x.png --shot-at=<тик>`
   (сценарии в `game/scripts/core/demo_input.gd`; параллельно не больше 4 запусков).
+  Серия кадров за ОДИН прогон (для GIF): `--screenshot=dir/s.png --shot-from=80 --shot-every=2 --shot-at=860` → `s_<тик>.png`
+  (в 20 раз быстрее отдельных запусков).
 - Бойцы в высоком разрешении упаковываются в отдельный `<боец>.pck` (`tools/pack_fighter.gd`, `EXTRA_PACKS` в `build.sh`),
   игра подключает их при запуске (`scripts/core/packs.gd`); в архив сборки они ложатся вместе с игрой.
 
