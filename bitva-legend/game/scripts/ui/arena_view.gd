@@ -29,6 +29,32 @@ func set_arena(id: String) -> void:
 	if id != _scenery.id:
 		_scenery = ArenaScenery.new(id)
 	arena_id = _scenery.id
+	_attach_sky_video()
+
+
+var _sky_player: VideoStreamPlayer = null
+
+
+## Живое небо арены из ролика (sky.ogv, зациклен): плеер невидим, его кадр рисует ArenaScenery.
+func _attach_sky_video() -> void:
+	var path: String = Arenas.data(arena_id).dir + "sky.ogv"
+	if _sky_player != null:
+		_sky_player.queue_free()
+		_sky_player = null
+	_scenery.sky_video = null
+	if not ResourceLoader.exists(path):
+		return
+	_sky_player = VideoStreamPlayer.new()
+	_sky_player.stream = load(path)
+	_sky_player.loop = true
+	_sky_player.autoplay = true
+	_sky_player.volume_db = -80.0
+	_sky_player.size = Vector2(1, 1)
+	_sky_player.modulate = Color(1, 1, 1, 0)
+	_sky_player.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_sky_player)
+	_sky_player.play()
+	_scenery.sky_video = _sky_player
 
 
 func show_state(sim: Sim) -> void:

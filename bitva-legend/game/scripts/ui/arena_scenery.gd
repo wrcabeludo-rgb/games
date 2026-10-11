@@ -52,6 +52,7 @@ var _raven_frames: Array[Texture2D] = []
 ## Жизнь дальнего плана (life.json, tools/make_arena_life.py): вода, окна, трубы — в пикселях картинки mountains.
 var _life := {}
 var _water: Array[Texture2D] = []
+var sky_video: VideoStreamPlayer = null  # живое небо из ролика (ставит ArenaView)
 var _hang: Texture2D = null   # предмет, подвешенный на дальнем плане (сундук Кощея на дубе)
 ## Ореол луны: свет плавно гаснет от края диска к краю текстуры.
 var _halo := _make_halo()
@@ -63,7 +64,7 @@ func _init(arena_id := Arenas.DEFAULT) -> void:
 	_sky_top = _d.sky[0]
 	_sky_light = _d.sky[1]
 	_sky_dark = _d.sky[2]
-	for name in ["backdrop", "sky", "moon", "mountains", "forest", "stone", "ground", "foreground"]:
+	for name in ["backdrop", "garden", "floor", "sky", "moon", "mountains", "forest", "stone", "ground", "foreground"]:
 		var tex := _load(name)
 		if tex != null:
 			_tex[name] = tex
@@ -131,6 +132,9 @@ func darkness(k: float, x_on_layer: float) -> float:
 # --- Задний план (до бойцов) ---------------------------------------------
 
 func draw_back(c: CanvasItem) -> void:
+	if _tex.has("garden"):
+		_draw_live_layers(c)
+		return
 	if _tex.has("backdrop"):
 		_draw_backdrop(c)
 		return
@@ -149,7 +153,7 @@ func draw_back(c: CanvasItem) -> void:
 
 ## Передний план (поверх бойцов): трава и кусты у нижнего края.
 func draw_front(c: CanvasItem) -> void:
-	if _tex.has("backdrop"):
+	if _tex.has("backdrop") or _tex.has("garden"):
 		return
 	var k := K_FRONT
 	var x0 := layer_x(k)
@@ -185,6 +189,31 @@ func draw_front(c: CanvasItem) -> void:
 
 
 # --- Слои ----------------------------------------------------------------
+
+## Живая карта из слоёв (проба на Саде Гесперид): небо — ролик sky.ogv (или кадр backdrop), сад — garden.png
+## (вырезан из пурпура, качается на ветру), пол — floor.png (линия пола — верх непрозрачной части).
+func _draw_live_layers(c: CanvasItem) -> void:
+	var sky_tex: Texture2D = sky_video.get_video_texture() if sky_video != null else null
+	if sky_tex != null and sky_tex.get_width() > 0:
+		var w := view.x * 1.12
+		var h := w * sky_tex.get_height() / sky_tex.get_width()
+		var k := (w - view.x) / maxf(arena_w - view.x, 1.0)
+		c.draw_texture_rect(sky_tex, Rect2(layer_x(k), ground_y + 70 - h, w, h), false)
+	elif _tex.has("backdrop"):
+		_draw_backdrop(c)
+	var g: Texture2D = _tex.garden
+	var gw := view.x * 0.86
+	var gh := gw * g.get_height() / g.get_width()
+	var gk := 0.35
+	var gx := layer_x(gk) + (layer_w(gk) - gw) / 2.0
+	_draw_swaying(c, g, Rect2(gx, ground_y - 40 - gh * 0.975, gw, gh), Color.WHITE, 3.0, 0.9)
+	var f: Texture2D = _tex.floor
+	var fw := view.x * 1.25
+	var fh := fw * f.get_height() / f.get_width() * 0.8
+	var fk := (fw - view.x) / maxf(arena_w - view.x, 1.0)
+	var top := ground_y - 42 - fh * 0.497  # линия плиток пола в floor.png — на 49.7 % высоты
+	c.draw_texture_rect(f, Rect2(layer_x(fk), top, fw, fh), false)
+
 
 ## Карта-заглушка одной картинкой (backdrop.png, 21:9; пол — нижняя четверть): по высоте экрана, сдвигается
 ## с камерой настолько, насколько картинка шире экрана (бойцы стоят на середине пола).

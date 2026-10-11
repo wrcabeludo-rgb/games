@@ -8,6 +8,7 @@ const L := InputBits.LEFT
 const D := InputBits.DOWN
 const MOVES := {
 	"st_lp": InputBits.LP, "st_lk": InputBits.LK, "st_hp": InputBits.HP, "st_hk": InputBits.HK,
+	"st_sweep": L | InputBits.LK,
 	"cr_lp": D | InputBits.LP, "cr_lk": D | InputBits.LK, "cr_hp": D | InputBits.HP, "cr_hk": D | InputBits.HK,
 }
 const SLACK_IN := 25    # должен попадать, если соперник на столько ближе края рисунка
