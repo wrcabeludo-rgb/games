@@ -218,6 +218,15 @@ func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2, flex: Variant = nu
 		base.x = to_screen(float(foe.x) / Sim.SUB + foe.facing * r * cos(a), 0).x
 		dir = -foe.facing * signf(cos(a)) if absf(cos(a)) > 0.05 else dir
 		base.y -= 40.0  # руки висящего не касаются земли
+	var rot := 0.0
+	var pose := FighterSprites.grab_pose(f, foe)
+	if pose >= 0 and foe.state == Fighter.State.THROWING:
+		if foe.move_data().get("cinema", {}).has("heal"):
+			base.y -= sprites.visual_lift(foe)  # суперприём с укусом: уносит схваченного с собой в небо
+		var tm := Sim.throw_progress(foe)
+		if pose == 2 and tm >= 0.0:
+			# Через плечо: летит по дуге над головой бросающего и переворачивается.
+			rot = -foe.facing * PI * 0.9 * smoothstep(Sim.THROW_GRIP, 1.0, tm)
 	var tint := Color(0.75, 0.85, 1.0) if f.alt else Color.WHITE
 	if f.is_stunned() and _sim.hitstop > 0:
 		tint = Color(1.0, 0.75, 0.7)  # получил удар — краснеет на время заморозки
@@ -226,7 +235,7 @@ func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2, flex: Variant = nu
 	elif f.hypnotized == 3:
 		tint = Color(0.75, 1.0, 0.85)  # прилип к жвачке
 	var k := FighterSprites.SCALE / sprites.res(f.id)
-	draw_set_transform(base, 0, Vector2(k * dir, k))
+	draw_set_transform(base, rot, Vector2(k * dir, k))
 	var body_h: float = f.data.height * 2.0 * sprites.res(f.id)
 	if flex is Vector2:
 		FighterSprites.draw_flexed(self, tex, pivot, tint, body_h, flex.x * body_h, flex.y * body_h)

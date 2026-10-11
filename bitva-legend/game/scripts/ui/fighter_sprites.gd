@@ -79,7 +79,8 @@ static func _load_character(id: String) -> Dictionary:
 				"hit_end": clampi(hit_end, hit, n - 1), "reverse": bool(meta.get("reverse", false)),
 				"air": int(meta.get("air_frames", 1)), "res": float(meta.get("res", 1.0)),
 				"bob": float(meta.get("bob", 0.0)), "stride": float(meta.get("stride", 0.0)),
-				"cycle": int(meta.get("cycle", 0)), "release": int(meta.get("release", 0))}
+				"cycle": int(meta.get("cycle", 0)), "release": int(meta.get("release", 0)),
+				"lift": _lift_list(meta, n)}
 	for a in ANIM_ALIAS:
 		if not out.has(a) and out.has(ANIM_ALIAS[a]):
 			out[a] = out[ANIM_ALIAS[a]]
@@ -87,7 +88,8 @@ static func _load_character(id: String) -> Dictionary:
 		var src: Dictionary = out[IDLE_FROM[id][0]]
 		var k: int = IDLE_FROM[id][1]
 		out["idle"] = {"tex": [src.tex[k]] as Array[Texture2D], "pivot": [src.pivot[k]] as Array[Vector2],
-			"hit": 0, "hit_end": 0, "reverse": false, "air": 1, "bob": 0.0, "stride": 0.0, "cycle": 0, "release": 0}
+			"hit": 0, "hit_end": 0, "reverse": false, "air": 1, "bob": 0.0, "stride": 0.0, "cycle": 0, "release": 0,
+			"lift": PackedFloat32Array()}
 	return out
 
 
@@ -351,6 +353,37 @@ static func _walk_cycle(anim: Dictionary, speed: int, fallback := WALK_CYCLE) ->
 	return maxi(int(round(anim.stride * Fighter.SUB / speed)), 1)
 
 
+## Подъём кадров (sheets.json "lift": боец в ролике улетает вверх), px игры по кадрам; пусто — подъёма нет.
+static func _lift_list(meta: Dictionary, n: int) -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	if not meta.has("lift"):
+		return out
+	out.resize(n)
+	var k := SCALE / float(meta.get("res", 1.0))
+	for key in meta.lift:
+		var i := int(key) - 1
+		if i >= 0 and i < n:
+			out[i] = float(meta.lift[key]) * k
+	return out
+
+
+## На сколько px игры захват из видео (суперприём) поднял бойца на текущем кадре — схваченного держат на той же высоте.
+func visual_lift(f: Fighter) -> float:
+	if f.state != Fighter.State.THROWING:
+		return 0.0
+	var anims: Dictionary = _bank.get(f.id, {})
+	var gkey := _grab_anim(anims, f)
+	if gkey == "" or not anims.has(gkey) or anims[gkey].lift.is_empty():
+		return 0.0
+	var ga: Dictionary = anims[gkey]
+	var gm := f.move_data()
+	var gg: Dictionary = gm.grab if gm.has("grab") else gm.get("cinema", {"hold": 30})
+	var gt := clampf(1.0 - float(f.stun) / maxi(int(gg.hold), 1), 0.0, 1.0)
+	var rel: int = mini(ga.release - 1, ga.tex.size() - 1)
+	var i: int = ga.hit + roundi(gt * (rel - ga.hit))
+	return ga.lift[clampi(i, 0, ga.lift.size() - 1)]
+
+
 ## Реакция на захват (лист grabbed: 0 — схвачен за плечи, 1 — вниз головой за лодыжку, 2 — летит после броска,
 ## 3 — обмяк после укуса) или -1. Поза — по приёму того, кто держит: укус (захват с лечением) — схвачен, потом
 ## обмяк; мельница (захват-приём без лечения) — вниз головой; бросок — схвачен, через плечо — летит; суперприём
@@ -368,7 +401,7 @@ static func grab_pose(f: Fighter, foe: Fighter) -> int:
 			return 0 if foe.state_frame < 40 else 3
 		return 0 if t < 0.4 else 3
 	if foe.move == Fighter.MOVE_THROW:
-		return 2 if g.get("over", 0) and t > 0.55 else 0
+		return 2 if g.get("over", 0) and t > Sim.THROW_GRIP else 0
 	if foe.move != Fighter.MOVE_SUPER and m.has("grab"):
 		return 1
 	return 0

@@ -449,6 +449,7 @@ def main() -> int:
             d = dict(meta["frames"][int(src) - 1])
             d["pivot"] = [d["pivot"][0], d["pivot"][1] + up]
             meta["frames"][int(k) - 1] = d
+            meta.setdefault("lift", {})[str(k)] = up
         (out / f"{name}.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1))
         print(f"  {name}: {len(frames)} кадр(ов), масштаб {scale:.3f}")
     print(f"Готово. Папка: {out}")
