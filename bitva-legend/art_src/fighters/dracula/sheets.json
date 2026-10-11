@@ -557,28 +557,28 @@
   "fixed_pivot": true,
   "align_to": "idle:1",
   "drop_ref": true,
-  "fit": 1.422,
-  "frames": 111,
-  "grid": [
-   10,
-   12
-  ],
   "hit": 1,
   "hit_end": 1,
+  "fit": 1.422,
+  "frames": 131,
+  "grid": [
+   10,
+   14
+  ],
   "release": 105
  },
  "pair_throw_ilya": {
   "fixed_pivot": true,
   "align_to": "idle:1",
   "drop_ref": true,
+  "hit": 1,
+  "hit_end": 1,
   "fit": 1.413,
-  "frames": 53,
+  "frames": 57,
   "grid": [
    10,
    6
   ],
-  "hit": 1,
-  "hit_end": 1,
-  "release": 46
+  "release": 31
  }
 }

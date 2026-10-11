@@ -104,9 +104,9 @@ const CHARACTERS := {
 			"st_sweep": {"startup": 9, "active": 3, "recovery": 20, "damage": 70, "hitstun": 20, "hitstop": 11, "push": 600, "box": [30, 0, 170, 40], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
 			"st_round": {"startup": 14, "active": 4, "recovery": 24, "damage": 120, "hitstun": 22, "hitstop": 14, "push": 1200, "box": [30, 160, 130, 130], "knockdown": 1, "launch": [650, 950], "kick": 1},
 			# Бросок: удар лбом и через плечо — соперник улетает за спину (over).
-			"throw": {"startup": 4, "active": 2, "recovery": 18, "grab": {"range": 25, "hold": 40, "damage": 120, "launch": [500, 1000], "tech": 1, "recovery": 14, "over": 1}},
+			"throw": {"startup": 4, "active": 2, "recovery": 18, "grab": {"pair": {"dracula": {"hold": 70, "recovery": 24, "launch": [0, 300], "land": -180}}, "range": 25, "hold": 40, "damage": 120, "launch": [500, 1000], "tech": 1, "recovery": 14, "over": 1}},
 			# «Удар с небес» (блок + СР + СН): рывок с палицей; попал — подбрасывает, Илья взмывает за облака и обрушивается с палицей.
-			"super": {"name": "УДАР С НЕБЕС", "startup": 6, "active": 8, "recovery": 45, "lunge": 700, "damage": 60, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 45, "box": [25, 40, 140, 240], "cinema": {"hold": 80, "damage": 330, "launch": [700, 1700], "tech": 0, "recovery": 16, "scaled": 1}},
+			"super": {"name": "УДАР С НЕБЕС", "startup": 6, "active": 8, "recovery": 45, "lunge": 700, "damage": 60, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 45, "box": [25, 40, 140, 240], "cinema": {"pair": {"dracula": {"recovery": 34, "launch": [0, 300], "land": 370}}, "hold": 80, "damage": 330, "launch": [700, 1700], "tech": 0, "recovery": 16, "scaled": 1}},
 		},
 	},
 	"dracula": {
@@ -162,9 +162,9 @@ const CHARACTERS := {
 			# Классика.
 			"st_sweep": {"startup": 8, "active": 3, "recovery": 18, "damage": 60, "hitstun": 20, "hitstop": 10, "push": 600, "box": [40, 0, 161, 40], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
 			"st_round": {"startup": 12, "active": 4, "recovery": 20, "damage": 100, "hitstun": 22, "hitstop": 13, "push": 1100, "box": [40, 95, 162, 222], "knockdown": 1, "launch": [600, 900], "kick": 1},
-			"throw": {"startup": 3, "active": 2, "recovery": 18, "grab": {"range": 25, "hold": 22, "damage": 100, "launch": [450, 900], "tech": 1, "recovery": 10}},
+			"throw": {"startup": 3, "active": 2, "recovery": 18, "grab": {"pair": {"ilya": {"hold": 45, "recovery": 24, "launch": [0, 300], "land": 297}}, "range": 25, "hold": 22, "damage": 100, "launch": [450, 900], "tech": 1, "recovery": 10}},
 			# «Кровавая луна» (блок + СР + СН): бросок вперёд; попал — восходит кровавая луна, стая и укус.
-			"super": {"name": "КРОВАВАЯ ЛУНА", "startup": 6, "active": 8, "recovery": 40, "lunge": 950, "damage": 50, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 40, "box": [40, 40, 198, 220], "cinema": {"hold": 100, "damage": 300, "heal": 80, "launch": [600, 1500], "tech": 0, "recovery": 18, "scaled": 1}},
+			"super": {"name": "КРОВАВАЯ ЛУНА", "startup": 6, "active": 8, "recovery": 40, "lunge": 950, "damage": 50, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 40, "box": [40, 40, 198, 220], "cinema": {"pair": {"ilya": {"recovery": 30, "launch": [0, 300], "land": 398}}, "hold": 100, "damage": 300, "heal": 80, "launch": [600, 1500], "tech": 0, "recovery": 18, "scaled": 1}},
 		},
 	},
 	"koschei": {

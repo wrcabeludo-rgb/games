@@ -98,7 +98,8 @@ func _draw() -> void:
 	_draw_super_backdrop()
 	_draw_craters()
 	for f in _sim.fighters:
-		_draw_shadow(f)
+		if not sprites.in_pair_scene(f, _sim.fighters[1 - _sim.fighters.find(f)]):
+			_draw_shadow(f)
 	for f in _sim.fighters:
 		_draw_fighter(f)
 	for pr in _sim.projectiles:
@@ -162,7 +163,7 @@ const BATS_TEX: Array[Texture2D] = [preload("res://art/fx/bats_1.png"), preload(
 const STOMP_WAVE: Array[Texture2D] = [preload("res://art/fx/stomp_wave_1.png"), preload("res://art/fx/stomp_wave_2.png"),
 	preload("res://art/fx/stomp_wave_3.png"), preload("res://art/fx/stomp_wave_4.png")]
 const STOMP_OFFSET := 70.0        # снаряд волны появляется на 70 px впереди Ильи (fighter_data "proj.x")  # брошенная палица Ильи, в масштабе его кадров
-const CRATER_WIDTH := 520.0       # ширина на экране, px (720p)
+const CRATER_WIDTH := 364.0     # (было 520: на 30 % меньше)       # ширина на экране, px (720p)
 const CRATER_GROUND := 101.0      # линия земли в текстуре, px от верха
 const CRATER_HOLD := 180
 const QUAKE_TICKS := 30         # тряска экрана от удара оземь в суперприёме
@@ -174,7 +175,9 @@ var _crater_tick := [-1000, -1000]
 func _draw_craters() -> void:
 	for p in Sim.PLAYERS:
 		var f: Fighter = _sim.fighters[p]
-		if f.state == Fighter.State.LAND and f.throw_follow and sprites._last_grab.get(f, "") == "super_cinema" \
+		var lg := String(sprites._last_grab.get(f, ""))
+		if f.state == Fighter.State.LAND and f.throw_follow and (lg == "super_cinema" or (lg.begins_with("pair_") \
+				and not lg.begins_with("pair_throw_"))) and f.id == "ilya" \
 				and _sim.tick - _crater_tick[p] > 30:
 			_crater_tick[p] = _sim.tick
 			_craters.append([float(f.x) / Sim.SUB + f.facing * 70.0, _sim.tick])
@@ -185,7 +188,7 @@ func _draw_craters() -> void:
 		if age > CRATER_HOLD + CRATER_FADE or age < 0:
 			continue
 		keep.append(c)
-		var alpha := 1.0 if age < CRATER_HOLD else 1.0 - float(age - CRATER_HOLD) / CRATER_FADE
+		var alpha := (1.0 if age < CRATER_HOLD else 1.0 - float(age - CRATER_HOLD) / CRATER_FADE) * 0.5
 		var at := to_screen(c[0], 0.0)
 		var sz := Vector2(CRATER_WIDTH, CRATER_TEX.get_height() * k)
 		draw_texture_rect(CRATER_TEX, Rect2(at - Vector2(sz.x / 2.0, CRATER_GROUND * k), sz), false, Color(1, 1, 1, alpha))

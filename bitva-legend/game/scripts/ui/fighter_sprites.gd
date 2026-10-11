@@ -216,9 +216,8 @@ func frame_for(f: Fighter, tick: int, foe: Fighter = null) -> Array:
 				# Захват из видео со своей анимацией (мельница, суперприём): по ходу удержания до release.
 				_last_grab[f] = gkey
 				var ga: Dictionary = anims[gkey]
-				var gm := f.move_data()
-				var gg: Dictionary = gm.grab if gm.has("grab") else gm.get("cinema", {"hold": 30})
-				var gt := clampf(1.0 - float(f.stun) / maxi(int(gg.hold), 1), 0.0, 1.0)
+				var gg: Dictionary = Sim.grab_of(f, foe.id if foe != null else "")
+				var gt := clampf(1.0 - float(f.stun) / maxi(int(gg.get("hold", 30)), 1), 0.0, 1.0)
 				var a0: int = ga.hit
 				var rel: int = mini(ga.release - 1, ga.tex.size() - 1)
 				return _pick(ga, a0 + roundi(gt * (rel - a0)))
@@ -309,8 +308,7 @@ func frame_for(f: Fighter, tick: int, foe: Fighter = null) -> Array:
 					# Падение: в листе из 4 кадров последний — приземление, его показываем у самой земли.
 					i = 3 if n > 4 or f.y < JUMP_LAND_HEIGHT * Fighter.SUB else 2
 				return _pick(anims.jump, mini(i, n - 1))
-		Fighter.State.LAND when f.throw_follow and anims.has(_last_grab.get(f, "throw")) \
-				and not String(_last_grab.get(f, "throw")).begins_with("pair_"):
+		Fighter.State.LAND when f.throw_follow and anims.has(_last_grab.get(f, "throw")):
 			# Только что бросил — доводит движение (у броска из видео — кадры после release, иначе последний).
 			var ta: Dictionary = anims[_last_grab.get(f, "throw")]
 			var nt: int = ta.tex.size()
@@ -399,10 +397,15 @@ static func pair_key(f: Fighter, foe: Fighter) -> String:
 	return ""
 
 
-## Соперника f сейчас рисует парная сцена суперприёма того, кто его держит (лист pair_<id соперника>).
+## Соперника f сейчас рисует парная сцена того, кто его держит (лист pair_<id> / pair_throw_<id>): во время
+## захвата и пока бросивший доигрывает ролик после броска (соперник в ролике летит и падает).
 func in_pair_scene(f: Fighter, foe: Fighter) -> bool:
-	return foe != null and f.state == Fighter.State.THROWN and foe.state == Fighter.State.THROWING \
-			and _bank.get(foe.id, {}).has(pair_key(foe, f))
+	if foe == null:
+		return false
+	if f.state == Fighter.State.THROWN and foe.state == Fighter.State.THROWING:
+		return _bank.get(foe.id, {}).has(pair_key(foe, f))
+	return foe.state == Fighter.State.LAND and foe.throw_follow \
+			and String(_last_grab.get(foe, "")).begins_with("pair_")
 
 
 ## Реакция на захват (лист grabbed: 0 — схвачен за плечи, 1 — вниз головой за лодыжку, 2 — летит после броска,

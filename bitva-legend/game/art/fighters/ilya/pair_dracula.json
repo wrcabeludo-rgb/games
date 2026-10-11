@@ -1,0 +1,887 @@
+{
+ "frames": [
+  {
+   "file": "pair_dracula_1.png",
+   "pivot": [
+    439,
+    670
+   ],
+   "size": [
+    1211,
+    672
+   ]
+  },
+  {
+   "file": "pair_dracula_2.png",
+   "pivot": [
+    439,
+    670
+   ],
+   "size": [
+    1211,
+    672
+   ]
+  },
+  {
+   "file": "pair_dracula_3.png",
+   "pivot": [
+    421,
+    682
+   ],
+   "size": [
+    1196,
+    684
+   ]
+  },
+  {
+   "file": "pair_dracula_4.png",
+   "pivot": [
+    397,
+    730
+   ],
+   "size": [
+    1172,
+    732
+   ]
+  },
+  {
+   "file": "pair_dracula_5.png",
+   "pivot": [
+    331,
+    832
+   ],
+   "size": [
+    1109,
+    834
+   ]
+  },
+  {
+   "file": "pair_dracula_6.png",
+   "pivot": [
+    216,
+    832
+   ],
+   "size": [
+    994,
+    834
+   ]
+  },
+  {
+   "file": "pair_dracula_7.png",
+   "pivot": [
+    216,
+    793
+   ],
+   "size": [
+    997,
+    795
+   ]
+  },
+  {
+   "file": "pair_dracula_8.png",
+   "pivot": [
+    222,
+    697
+   ],
+   "size": [
+    985,
+    699
+   ]
+  },
+  {
+   "file": "pair_dracula_9.png",
+   "pivot": [
+    216,
+    694
+   ],
+   "size": [
+    985,
+    696
+   ]
+  },
+  {
+   "file": "pair_dracula_10.png",
+   "pivot": [
+    216,
+    706
+   ],
+   "size": [
+    997,
+    708
+   ]
+  },
+  {
+   "file": "pair_dracula_11.png",
+   "pivot": [
+    216,
+    715
+   ],
+   "size": [
+    1006,
+    717
+   ]
+  },
+  {
+   "file": "pair_dracula_12.png",
+   "pivot": [
+    216,
+    775
+   ],
+   "size": [
+    985,
+    778
+   ]
+  },
+  {
+   "file": "pair_dracula_13.png",
+   "pivot": [
+    213,
+    826
+   ],
+   "size": [
+    958,
+    834
+   ]
+  },
+  {
+   "file": "pair_dracula_14.png",
+   "pivot": [
+    213,
+    869
+   ],
+   "size": [
+    928,
+    886
+   ]
+  },
+  {
+   "file": "pair_dracula_15.png",
+   "pivot": [
+    210,
+    902
+   ],
+   "size": [
+    898,
+    925
+   ]
+  },
+  {
+   "file": "pair_dracula_16.png",
+   "pivot": [
+    210,
+    926
+   ],
+   "size": [
+    883,
+    957
+   ]
+  },
+  {
+   "file": "pair_dracula_17.png",
+   "pivot": [
+    207,
+    938
+   ],
+   "size": [
+    877,
+    969
+   ]
+  },
+  {
+   "file": "pair_dracula_18.png",
+   "pivot": [
+    207,
+    947
+   ],
+   "size": [
+    889,
+    978
+   ]
+  },
+  {
+   "file": "pair_dracula_19.png",
+   "pivot": [
+    204,
+    947
+   ],
+   "size": [
+    910,
+    978
+   ]
+  },
+  {
+   "file": "pair_dracula_20.png",
+   "pivot": [
+    192,
+    929
+   ],
+   "size": [
+    928,
+    960
+   ]
+  },
+  {
+   "file": "pair_dracula_21.png",
+   "pivot": [
+    180,
+    899
+   ],
+   "size": [
+    955,
+    930
+   ]
+  },
+  {
+   "file": "pair_dracula_22.png",
+   "pivot": [
+    339,
+    1019
+   ],
+   "size": [
+    1277,
+    1008
+   ]
+  },
+  {
+   "file": "pair_dracula_23.png",
+   "pivot": [
+    355,
+    1019
+   ],
+   "size": [
+    1293,
+    1008
+   ]
+  },
+  {
+   "file": "pair_dracula_24.png",
+   "pivot": [
+    373,
+    1026
+   ],
+   "size": [
+    1311,
+    1015
+   ]
+  },
+  {
+   "file": "pair_dracula_25.png",
+   "pivot": [
+    379,
+    1019
+   ],
+   "size": [
+    1317,
+    1005
+   ]
+  },
+  {
+   "file": "pair_dracula_26.png",
+   "pivot": [
+    391,
+    1019
+   ],
+   "size": [
+    1329,
+    993
+   ]
+  },
+  {
+   "file": "pair_dracula_27.png",
+   "pivot": [
+    403,
+    1013
+   ],
+   "size": [
+    1338,
+    954
+   ]
+  },
+  {
+   "file": "pair_dracula_28.png",
+   "pivot": [
+    409,
+    1007
+   ],
+   "size": [
+    1344,
+    915
+   ]
+  },
+  {
+   "file": "pair_dracula_29.png",
+   "pivot": [
+    415,
+    995
+   ],
+   "size": [
+    1347,
+    867
+   ]
+  },
+  {
+   "file": "pair_dracula_30.png",
+   "pivot": [
+    415,
+    983
+   ],
+   "size": [
+    1347,
+    822
+   ]
+  },
+  {
+   "file": "pair_dracula_31.png",
+   "pivot": [
+    415,
+    965
+   ],
+   "size": [
+    1347,
+    776
+   ]
+  },
+  {
+   "file": "pair_dracula_32.png",
+   "pivot": [
+    415,
+    971
+   ],
+   "size": [
+    1347,
+    755
+   ]
+  },
+  {
+   "file": "pair_dracula_33.png",
+   "pivot": [
+    409,
+    989
+   ],
+   "size": [
+    1347,
+    748
+   ]
+  },
+  {
+   "file": "pair_dracula_34.png",
+   "pivot": [
+    409,
+    1001
+   ],
+   "size": [
+    1353,
+    737
+   ]
+  },
+  {
+   "file": "pair_dracula_35.png",
+   "pivot": [
+    403,
+    1013
+   ],
+   "size": [
+    1350,
+    743
+   ]
+  },
+  {
+   "file": "pair_dracula_36.png",
+   "pivot": [
+    391,
+    1019
+   ],
+   "size": [
+    1341,
+    779
+   ]
+  },
+  {
+   "file": "pair_dracula_37.png",
+   "pivot": [
+    397,
+    1026
+   ],
+   "size": [
+    1350,
+    810
+   ]
+  },
+  {
+   "file": "pair_dracula_38.png",
+   "pivot": [
+    397,
+    1026
+   ],
+   "size": [
+    1347,
+    831
+   ]
+  },
+  {
+   "file": "pair_dracula_39.png",
+   "pivot": [
+    403,
+    1026
+   ],
+   "size": [
+    1353,
+    856
+   ]
+  },
+  {
+   "file": "pair_dracula_40.png",
+   "pivot": [
+    403,
+    1019
+   ],
+   "size": [
+    1347,
+    873
+   ]
+  },
+  {
+   "file": "pair_dracula_41.png",
+   "pivot": [
+    409,
+    1019
+   ],
+   "size": [
+    1347,
+    894
+   ]
+  },
+  {
+   "file": "pair_dracula_42.png",
+   "pivot": [
+    409,
+    1013
+   ],
+   "size": [
+    1341,
+    909
+   ]
+  },
+  {
+   "file": "pair_dracula_43.png",
+   "pivot": [
+    409,
+    1032
+   ],
+   "size": [
+    1335,
+    946
+   ]
+  },
+  {
+   "file": "pair_dracula_44.png",
+   "pivot": [
+    415,
+    1050
+   ],
+   "size": [
+    1344,
+    979
+   ]
+  },
+  {
+   "file": "pair_dracula_45.png",
+   "pivot": [
+    415,
+    1055
+   ],
+   "size": [
+    1341,
+    996
+   ]
+  },
+  {
+   "file": "pair_dracula_46.png",
+   "pivot": [
+    415,
+    1055
+   ],
+   "size": [
+    1344,
+    1002
+   ]
+  },
+  {
+   "file": "pair_dracula_47.png",
+   "pivot": [
+    415,
+    1055
+   ],
+   "size": [
+    1347,
+    1005
+   ]
+  },
+  {
+   "file": "pair_dracula_48.png",
+   "pivot": [
+    421,
+    1055
+   ],
+   "size": [
+    1353,
+    1002
+   ]
+  },
+  {
+   "file": "pair_dracula_49.png",
+   "pivot": [
+    421,
+    1055
+   ],
+   "size": [
+    1356,
+    1005
+   ]
+  },
+  {
+   "file": "pair_dracula_50.png",
+   "pivot": [
+    421,
+    1055
+   ],
+   "size": [
+    1359,
+    1005
+   ]
+  },
+  {
+   "file": "pair_dracula_51.png",
+   "pivot": [
+    421,
+    1055
+   ],
+   "size": [
+    1361,
+    1007
+   ]
+  },
+  {
+   "file": "pair_dracula_52.png",
+   "pivot": [
+    421,
+    1055
+   ],
+   "size": [
+    1362,
+    1007
+   ]
+  },
+  {
+   "file": "pair_dracula_53.png",
+   "pivot": [
+    415,
+    1055
+   ],
+   "size": [
+    1359,
+    1007
+   ]
+  },
+  {
+   "file": "pair_dracula_54.png",
+   "pivot": [
+    415,
+    1026
+   ],
+   "size": [
+    1362,
+    978
+   ]
+  },
+  {
+   "file": "pair_dracula_55.png",
+   "pivot": [
+    415,
+    1001
+   ],
+   "size": [
+    1362,
+    953
+   ]
+  },
+  {
+   "file": "pair_dracula_56.png",
+   "pivot": [
+    409,
+    911
+   ],
+   "size": [
+    1359,
+    861
+   ]
+  },
+  {
+   "file": "pair_dracula_57.png",
+   "pivot": [
+    409,
+    814
+   ],
+   "size": [
+    1362,
+    766
+   ]
+  },
+  {
+   "file": "pair_dracula_58.png",
+   "pivot": [
+    415,
+    742
+   ],
+   "size": [
+    1347,
+    695
+   ]
+  },
+  {
+   "file": "pair_dracula_59.png",
+   "pivot": [
+    421,
+    748
+   ],
+   "size": [
+    1347,
+    694
+   ]
+  },
+  {
+   "file": "pair_dracula_60.png",
+   "pivot": [
+    427,
+    754
+   ],
+   "size": [
+    1344,
+    692
+   ]
+  },
+  {
+   "file": "pair_dracula_61.png",
+   "pivot": [
+    439,
+    760
+   ],
+   "size": [
+    1353,
+    695
+   ]
+  },
+  {
+   "file": "pair_dracula_62.png",
+   "pivot": [
+    451,
+    772
+   ],
+   "size": [
+    1371,
+    701
+   ]
+  },
+  {
+   "file": "pair_dracula_63.png",
+   "pivot": [
+    469,
+    784
+   ],
+   "size": [
+    1407,
+    710
+   ]
+  },
+  {
+   "file": "pair_dracula_64.png",
+   "pivot": [
+    484,
+    793
+   ],
+   "size": [
+    1440,
+    710
+   ]
+  },
+  {
+   "file": "pair_dracula_65.png",
+   "pivot": [
+    496,
+    796
+   ],
+   "size": [
+    1467,
+    698
+   ]
+  },
+  {
+   "file": "pair_dracula_66.png",
+   "pivot": [
+    496,
+    790
+   ],
+   "size": [
+    1494,
+    707
+   ]
+  },
+  {
+   "file": "pair_dracula_67.png",
+   "pivot": [
+    490,
+    772
+   ],
+   "size": [
+    1558,
+    713
+   ]
+  },
+  {
+   "file": "pair_dracula_68.png",
+   "pivot": [
+    499,
+    736
+   ],
+   "size": [
+    1633,
+    688
+   ]
+  },
+  {
+   "file": "pair_dracula_69.png",
+   "pivot": [
+    499,
+    703
+   ],
+   "size": [
+    1672,
+    659
+   ]
+  },
+  {
+   "file": "pair_dracula_70.png",
+   "pivot": [
+    496,
+    676
+   ],
+   "size": [
+    1684,
+    638
+   ]
+  },
+  {
+   "file": "pair_dracula_71.png",
+   "pivot": [
+    496,
+    657
+   ],
+   "size": [
+    1687,
+    643
+   ]
+  },
+  {
+   "file": "pair_dracula_72.png",
+   "pivot": [
+    493,
+    648
+   ],
+   "size": [
+    1681,
+    640
+   ]
+  },
+  {
+   "file": "pair_dracula_73.png",
+   "pivot": [
+    493,
+    645
+   ],
+   "size": [
+    1675,
+    640
+   ]
+  },
+  {
+   "file": "pair_dracula_74.png",
+   "pivot": [
+    493,
+    645
+   ],
+   "size": [
+    1675,
+    640
+   ]
+  },
+  {
+   "file": "pair_dracula_75.png",
+   "pivot": [
+    493,
+    651
+   ],
+   "size": [
+    1672,
+    646
+   ]
+  },
+  {
+   "file": "pair_dracula_76.png",
+   "pivot": [
+    496,
+    660
+   ],
+   "size": [
+    1675,
+    655
+   ]
+  },
+  {
+   "file": "pair_dracula_77.png",
+   "pivot": [
+    496,
+    667
+   ],
+   "size": [
+    1681,
+    662
+   ]
+  },
+  {
+   "file": "pair_dracula_78.png",
+   "pivot": [
+    496,
+    673
+   ],
+   "size": [
+    1681,
+    668
+   ]
+  },
+  {
+   "file": "pair_dracula_79.png",
+   "pivot": [
+    496,
+    677
+   ],
+   "size": [
+    1681,
+    672
+   ]
+  },
+  {
+   "file": "pair_dracula_80.png",
+   "pivot": [
+    496,
+    676
+   ],
+   "size": [
+    1681,
+    671
+   ]
+  }
+ ],
+ "hit": 1,
+ "hit_end": 1,
+ "release": 63
+}

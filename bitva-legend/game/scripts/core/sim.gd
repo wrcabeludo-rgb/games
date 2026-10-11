@@ -244,7 +244,7 @@ func _process_grabs() -> void:
 		var d := fighters[1 - p]
 		if a.state != Fighter.State.ATTACK or not d.is_throwable():
 			continue
-		var g: Dictionary = a.move_data().grab
+		var g: Dictionary = grab_of(a, d.id)
 		if _throw_gap(a, d) > g.range * SUB:
 			continue
 		a.stun = g.hold
@@ -268,19 +268,31 @@ const THROW_OVER_ARC := 0.85         # …и докуда дуга доходи�
 const THROW_UP := 0.8               # к этой доле удержания соперник поднят полностью
 
 
+## Захват приёма a (grab или cinema) с поправками под соперника foe_id ("pair": {<id>: {...}}) — парные сцены
+## из видео: своя длительность удержания, где соперник оказывается (land) и как отлетает (launch).
+static func grab_of(a: Fighter, foe_id: String) -> Dictionary:
+	var m := a.move_data()
+	var g: Dictionary = m.grab if m.has("grab") else m.get("cinema", {})
+	if not g.has("pair") or not g.pair.has(foe_id):
+		return g
+	var out := g.duplicate()
+	out.merge(g.pair[foe_id], true)
+	return out
+
+
 ## Доля удержания в броске 0…1 (по оставшимся тикам бросающего) или -1, если это не обычный захват.
-static func throw_progress(a: Fighter) -> float:
+static func throw_progress(a: Fighter, foe_id := "") -> float:
 	if a.state != Fighter.State.THROWING or a.move < 0:
 		return -1.0
 	var m := a.move_data()
 	if not m.has("grab"):
 		return -1.0
-	return clampf(1.0 - float(a.stun) / maxi(int(m.grab.hold), 1), 0.0, 1.0)
+	return clampf(1.0 - float(a.stun) / maxi(int(grab_of(a, foe_id).hold), 1), 0.0, 1.0)
 
 
 func _hold_position(a: Fighter, d: Fighter) -> void:
 	d.x = a.x + a.facing * (a.push_half() + d.push_half())
-	var t := throw_progress(a)
+	var t := throw_progress(a, d.id)
 	var m := a.move_data()
 	if t >= 0.0 and a.y == 0 and m.has("grab") and m.grab.get("over", 0):
 		# Через плечо: держит за ворот, потом соперник по дуге над головой уходит за спину.
@@ -301,8 +313,7 @@ func _hold_throws() -> void:
 		if a.state != Fighter.State.THROWING:
 			continue
 		var d := fighters[1 - p]
-		var m := a.move_data()
-		var g: Dictionary = m.grab if m.has("grab") else m.cinema
+		var g: Dictionary = grab_of(a, d.id)
 		_hold_position(a, d)
 		if g.tech and d.tech_press and d.state_frame <= TECH_WINDOW:
 			a.throw_break(-a.facing)
@@ -314,6 +325,10 @@ func _hold_throws() -> void:
 		a.stun -= 1
 		if a.stun > 0:
 			continue
+		if g.has("land"):
+			# Парная сцена: соперник там, где он упал в ролике (px от бросающего, + — вперёд).
+			d.x = clampi(a.x + a.facing * int(g.land) * SUB, d.push_half(), ARENA_WIDTH * SUB - d.push_half())
+			d.y = 0
 		d.take_throw(g, -a.facing if g.get("over", 0) else a.facing)
 		if not g.has("scaled"):
 			a.add_meter(g.damage * METER_HIT)
@@ -694,7 +709,7 @@ func _apply_hit(p: int, m: Dictionary, direction: int, spark_x: int, spark_y: in
 		# Суперприём попал: ролик — соперник схвачен, серия ударов, в конце урон (_hold_throws).
 		if not d.is_stunned():
 			d.combo = 0
-		a.stun = m.cinema.hold
+		a.stun = grab_of(a, d.id).hold
 		a.vx = 0
 		a.state = Fighter.State.THROWING
 		a.state_frame = 0

@@ -432,14 +432,28 @@
   "fixed_pivot": true,
   "align_to": "idle:1",
   "drop_ref": true,
-  "fit": 1.435,
-  "frames": 102,
-  "grid": [
-   10,
-   11
-  ],
   "hit": 1,
   "hit_end": 1,
-  "release": 96
+  "fit": 1.435,
+  "frames": 57,
+  "grid": [
+   10,
+   6
+  ],
+  "release": 42
+ },
+ "pair_dracula": {
+  "fixed_pivot": true,
+  "align_to": "idle:1",
+  "drop_ref": true,
+  "hit": 1,
+  "hit_end": 1,
+  "fit": 1.509,
+  "frames": 81,
+  "grid": [
+   10,
+   9
+  ],
+  "release": 63
  }
 }
