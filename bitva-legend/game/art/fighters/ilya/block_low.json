@@ -3,24 +3,366 @@
   {
    "file": "block_low_1.png",
    "pivot": [
-    201,
-    439
+    233,
+    407
    ],
    "size": [
-    482,
-    440
+    476,
+    408
    ]
   },
   {
    "file": "block_low_2.png",
    "pivot": [
-    201,
+    235,
+    408
+   ],
+   "size": [
+    478,
+    409
+   ]
+  },
+  {
+   "file": "block_low_3.png",
+   "pivot": [
+    235,
+    408
+   ],
+   "size": [
+    478,
+    409
+   ]
+  },
+  {
+   "file": "block_low_4.png",
+   "pivot": [
+    235,
+    410
+   ],
+   "size": [
+    478,
+    411
+   ]
+  },
+  {
+   "file": "block_low_5.png",
+   "pivot": [
+    235,
+    411
+   ],
+   "size": [
+    478,
+    412
+   ]
+  },
+  {
+   "file": "block_low_6.png",
+   "pivot": [
+    238,
+    412
+   ],
+   "size": [
+    481,
+    413
+   ]
+  },
+  {
+   "file": "block_low_7.png",
+   "pivot": [
+    238,
+    413
+   ],
+   "size": [
+    481,
+    414
+   ]
+  },
+  {
+   "file": "block_low_8.png",
+   "pivot": [
+    238,
+    416
+   ],
+   "size": [
+    481,
+    417
+   ]
+  },
+  {
+   "file": "block_low_9.png",
+   "pivot": [
+    238,
+    417
+   ],
+   "size": [
+    481,
+    418
+   ]
+  },
+  {
+   "file": "block_low_10.png",
+   "pivot": [
+    238,
+    418
+   ],
+   "size": [
+    481,
+    419
+   ]
+  },
+  {
+   "file": "block_low_11.png",
+   "pivot": [
+    238,
+    419
+   ],
+   "size": [
+    481,
+    420
+   ]
+  },
+  {
+   "file": "block_low_12.png",
+   "pivot": [
+    238,
     421
    ],
    "size": [
-    534,
+    481,
     422
    ]
+  },
+  {
+   "file": "block_low_13.png",
+   "pivot": [
+    238,
+    421
+   ],
+   "size": [
+    481,
+    422
+   ]
+  },
+  {
+   "file": "block_low_14.png",
+   "pivot": [
+    238,
+    424
+   ],
+   "size": [
+    481,
+    425
+   ]
+  },
+  {
+   "file": "block_low_15.png",
+   "pivot": [
+    237,
+    424
+   ],
+   "size": [
+    480,
+    425
+   ]
+  },
+  {
+   "file": "block_low_16.png",
+   "pivot": [
+    238,
+    426
+   ],
+   "size": [
+    481,
+    427
+   ]
+  },
+  {
+   "file": "block_low_17.png",
+   "pivot": [
+    238,
+    425
+   ],
+   "size": [
+    481,
+    426
+   ]
+  },
+  {
+   "file": "block_low_18.png",
+   "pivot": [
+    238,
+    424
+   ],
+   "size": [
+    481,
+    425
+   ]
+  },
+  {
+   "file": "block_low_19.png",
+   "pivot": [
+    238,
+    422
+   ],
+   "size": [
+    481,
+    423
+   ]
+  },
+  {
+   "file": "block_low_20.png",
+   "pivot": [
+    238,
+    421
+   ],
+   "size": [
+    481,
+    422
+   ]
+  },
+  {
+   "file": "block_low_21.png",
+   "pivot": [
+    238,
+    420
+   ],
+   "size": [
+    481,
+    421
+   ]
+  },
+  {
+   "file": "block_low_22.png",
+   "pivot": [
+    239,
+    419
+   ],
+   "size": [
+    482,
+    420
+   ]
+  },
+  {
+   "file": "block_low_23.png",
+   "pivot": [
+    239,
+    419
+   ],
+   "size": [
+    482,
+    420
+   ]
+  },
+  {
+   "file": "block_low_24.png",
+   "pivot": [
+    239,
+    418
+   ],
+   "size": [
+    482,
+    419
+   ]
+  },
+  {
+   "file": "block_low_25.png",
+   "pivot": [
+    238,
+    417
+   ],
+   "size": [
+    481,
+    418
+   ]
+  },
+  {
+   "file": "block_low_26.png",
+   "pivot": [
+    238,
+    417
+   ],
+   "size": [
+    481,
+    418
+   ]
+  },
+  {
+   "file": "block_low_27.png",
+   "pivot": [
+    238,
+    416
+   ],
+   "size": [
+    481,
+    417
+   ]
+  },
+  {
+   "file": "block_low_28.png",
+   "pivot": [
+    238,
+    415
+   ],
+   "size": [
+    481,
+    416
+   ]
+  },
+  {
+   "file": "block_low_29.png",
+   "pivot": [
+    238,
+    414
+   ],
+   "size": [
+    480,
+    415
+   ]
+  },
+  {
+   "file": "block_low_30.png",
+   "pivot": [
+    237,
+    412
+   ],
+   "size": [
+    479,
+    413
+   ]
+  },
+  {
+   "file": "block_low_31.png",
+   "pivot": [
+    235,
+    412
+   ],
+   "size": [
+    477,
+    413
+   ]
+  },
+  {
+   "file": "block_low_32.png",
+   "pivot": [
+    235,
+    412
+   ],
+   "size": [
+    477,
+    413
+   ]
+  },
+  {
+   "file": "block_low_33.png",
+   "pivot": [
+    235,
+    413
+   ],
+   "size": [
+    477,
+    414
+   ]
   }
- ]
+ ],
+ "cycle": 83
 }

@@ -33,6 +33,8 @@ const ANIM_ALIAS := {"j_hp": "j_lp", "j_lp": "j_hp", "j_hk": "j_lk", "j_lk": "j_
 	"sp_proj_h": "sp_proj_l", "sp_dd_h": "sp_dd_l", "sp_ff_h": "sp_ff_l", "sp_bb_h": "sp_bb_l"}
 ## Вставание из видео (много кадров) — дольше, чем из 4 нарисованных.
 const GET_UP_TICKS_VIDEO := 28
+## Прыжок из видео: столько последних кадров листа — приземление.
+const JUMP_LAND_FRAMES := 4
 ## Удар о землю после полёта (кадры падения после воздушных) из видео — столько тиков.
 const LAND_TICKS_VIDEO := 12
 
@@ -191,6 +193,9 @@ func frame_for(f: Fighter, tick: int, foe: Fighter = null) -> Array:
 			var key := "block_low" if f.low_pose else "block"
 			if anims.has(key):
 				var n: int = anims[key].tex.size()
+				if anims[key].cycle > 0:
+					# Блок из видео — цикл дыхания (держит блок и пропускает удары в нём же).
+					return _pick(anims[key], _cycle(tick, anims[key].cycle, n))
 				if n > 2 and f.state == Fighter.State.BLOCKSTUN:
 					# Блок из видео: 1-й кадр — защита, остальные — принял удар и выровнялся (по ходу оглушения).
 					return _pick(anims[key], 1 + _progress(f, n - 1))
@@ -281,12 +286,19 @@ func frame_for(f: Fighter, tick: int, foe: Fighter = null) -> Array:
 			if anims.has("jump"):
 				# Прыжок из 8 кадров: присед, потом толчок.
 				var n0: int = anims.jump.tex.size()
-				return _pick(anims.jump, 1 if n0 >= 8 and f.state_frame * 2 >= f.data.prejump else 0)
+				return _pick(anims.jump, 1 if n0 == 8 and f.state_frame * 2 >= f.data.prejump else 0)
 		Fighter.State.AIR:
 			# Удар в прыжке — свои кадры, если нарисованы.
 			if f.move >= 0 and anims.has(Fighter.MOVES[f.move]):
 				var air: Dictionary = anims[Fighter.MOVES[f.move]]
 				return _pick(air, _attack_index(f, air))
+			# Прыжок из видео (больше 8 кадров): 1-й — присед, последние JUMP_LAND_FRAMES — приземление,
+			# между ними — полёт по ходу прыжка (от толчка до земли).
+			if anims.has("jump") and f.move < 0 and anims.jump.tex.size() > 8:
+				var nj: int = anims.jump.tex.size()
+				var air_n: int = nj - 1 - JUMP_LAND_FRAMES
+				var p := clampf((1.0 - float(f.vy) / f.data.jump_vy) * 0.5, 0.0, 1.0)
+				return _pick(anims.jump, 1 + mini(int(p * air_n), air_n - 1))
 			# Прыжок: взлёт → верх (сгруппировался) → падение.
 			if anims.has("jump") and f.move < 0 and anims.jump.tex.size() >= 8:
 				# 8 кадров: 2 взлёт, 3 группировка, 4 верх, 5 раскрылся, 6 падает, (7 приземление — в LAND).
@@ -321,7 +333,12 @@ func frame_for(f: Fighter, tick: int, foe: Fighter = null) -> Array:
 			return _pick(ta, nt - 1)
 		Fighter.State.LAND:
 			if anims.has("jump"):
-				return _pick(anims.jump, anims.jump.tex.size() - 1)
+				var nl: int = anims.jump.tex.size()
+				if nl > 8:
+					# Приземление из видео: последние кадры листа по ходу приземления.
+					var k := clampi(f.state_frame * JUMP_LAND_FRAMES / maxi(f.landing_frames, 1), 0, JUMP_LAND_FRAMES - 1)
+					return _pick(anims.jump, nl - JUMP_LAND_FRAMES + k)
+				return _pick(anims.jump, nl - 1)
 		Fighter.State.BACKDASH:
 			if anims.has("backdash"):
 				var n: int = anims.backdash.tex.size()
@@ -388,7 +405,8 @@ func visual_lift(f: Fighter) -> float:
 	return ga.lift[clampi(i, 0, ga.lift.size() - 1)]
 
 
-## Лист парной сцены захвата: суперприём — pair_<соперник>, бросок — pair_throw_<соперник>; "" — нет.
+## Лист парной сцены захвата: суперприём — pair_<соперник>, бросок — pair_throw_<соперник>,
+## приём-захват — pair_<приём>_<соперник>; "" — нет.
 static func pair_key(f: Fighter, foe: Fighter) -> String:
 	if foe == null or f.move < 0:
 		return ""
@@ -396,6 +414,9 @@ static func pair_key(f: Fighter, foe: Fighter) -> String:
 		return "pair_" + foe.id
 	if f.move == Fighter.MOVE_THROW:
 		return "pair_throw_" + foe.id
+	if f.move_data().has("grab"):
+		# Приём-захват (мельница): pair_sp_ff_l_<id>, у сильной версии — тот же лист.
+		return "pair_%s_%s" % [String(Fighter.MOVES[f.move]).replace("_h", "_l"), foe.id]
 	return ""
 
 

@@ -82,7 +82,7 @@ const CHARACTERS := {
 			"st_lk": {"startup": 7, "active": 3, "recovery": 11, "damage": 50, "hitstun": 16, "hitstop": 8, "push": 800, "box": [60, 130, 115, 60]},
 			"st_hp": {"startup": 12, "active": 4, "recovery": 20, "damage": 110, "hitstun": 22, "hitstop": 13, "push": 1100, "box": [80, 110, 190, 140]},
 			"st_hk": {"startup": 10, "active": 4, "recovery": 18, "damage": 90, "hitstun": 20, "hitstop": 11, "push": 1000, "box": [45, 150, 130, 90]},
-			"cr_lp": {"startup": 5, "active": 3, "recovery": 9, "damage": 35, "hitstun": 14, "hitstop": 7, "push": 650, "box": [70, 125, 125, 45]},
+			"cr_lp": {"startup": 5, "active": 3, "recovery": 9, "damage": 35, "hitstun": 14, "hitstop": 7, "push": 650, "box": [142, 88, 131, 84]},
 			"cr_lk": {"startup": 6, "active": 3, "recovery": 10, "damage": 35, "hitstun": 14, "hitstop": 7, "push": 650, "box": [60, 0, 130, 45], "level": "low"},
 			# Апперкот (вниз + СР): удар снизу вверх, распрямляется из приседа, подбрасывает.
 			"cr_hp": {"startup": 8, "active": 5, "recovery": 24, "damage": 100, "hitstun": 22, "hitstop": 13, "push": 900, "box": [20, 40, 180, 260], "knockdown": 1, "launch": [250, 1700], "uppercut": 1},
@@ -97,11 +97,11 @@ const CHARACTERS := {
 			# Удар оземь (вниз, вниз + нога): волна по земле, низкий удар — блокировать сидя или перепрыгнуть.
 			"sp_dd_l": {"buttons": "kick", "startup": 18, "active": 1, "recovery": 24, "proj": {"x": 70, "y": 22, "vx": 900, "vy": 0, "gravity": 0, "w": 70, "h": 44, "kind": 2, "level": "low", "life": 34, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 900, "chip": 8}, "ex": {"startup": 14, "proj": {"life": 70, "vx": 1000, "w": 90, "h": 70, "damage": 120, "hitstun": 26, "chip": 14, "kind": 5}}},
 			# Мельница (вперёд, вперёд + рука): дальний захват, раскручивает и швыряет. Вырваться нельзя.
-			"sp_ff_l": {"buttons": "punch", "startup": 6, "active": 2, "recovery": 30, "grab": {"range": 90, "hold": 40, "damage": 170, "launch": [900, 1300], "tech": 0, "recovery": 12}, "ex": {"grab": {"range": 130, "damage": 240}}},
+			"sp_ff_l": {"buttons": "punch", "startup": 6, "active": 2, "recovery": 30, "grab": {"pair": {"dracula": {"hold": 60, "recovery": 30, "launch": [0, 300], "land": 410}}, "range": 90, "hold": 40, "damage": 170, "launch": [900, 1300], "tech": 0, "recovery": 12}, "ex": {"grab": {"range": 130, "damage": 240}}},
 			# Богатырский таран с палицей (назад, назад + рука): рывок вперёд, выдерживает один удар.
 			"sp_bb_l": {"buttons": "punch", "startup": 10, "active": 24, "recovery": 20, "lunge": 1500, "armor": 1, "damage": 100, "hitstun": 24, "hitstop": 13, "push": 1400, "chip": 10, "box": [30, 60, 110, 200], "ex": {"armor": 2, "lunge": 1900, "damage": 140, "chip": 16, "knockdown": 1, "launch": [400, 1500]}},
 			# Классика.
-			"st_sweep": {"startup": 9, "active": 3, "recovery": 20, "damage": 70, "hitstun": 20, "hitstop": 11, "push": 600, "box": [30, 0, 170, 40], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
+			"st_sweep": {"startup": 9, "active": 3, "recovery": 20, "damage": 70, "hitstun": 20, "hitstop": 11, "push": 600, "box": [79, 0, 177, 40], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
 			"st_round": {"startup": 14, "active": 4, "recovery": 24, "damage": 120, "hitstun": 22, "hitstop": 14, "push": 1200, "box": [30, 160, 130, 130], "knockdown": 1, "launch": [650, 950], "kick": 1},
 			# Бросок: удар лбом и через плечо — соперник улетает за спину (over).
 			"throw": {"startup": 4, "active": 2, "recovery": 18, "grab": {"pair": {"dracula": {"hold": 70, "recovery": 24, "launch": [0, 300], "land": -180}}, "range": 25, "hold": 40, "damage": 120, "launch": [500, 1000], "tech": 1, "recovery": 14, "over": 1}},
@@ -139,7 +139,7 @@ const CHARACTERS := {
 		"moves": {
 			# Дракула быстрее и бьёт чаще, но слабее; ноги длиннее рук.
 			"st_lp": {"startup": 4, "active": 2, "recovery": 7, "damage": 30, "hitstun": 14, "hitstop": 7, "push": 650, "box": [40, 215, 146, 58]},
-			"st_lk": {"startup": 5, "active": 3, "recovery": 9, "damage": 35, "hitstun": 14, "hitstop": 7, "push": 700, "box": [40, 10, 111, 80]},
+			"st_lk": {"startup": 5, "active": 3, "recovery": 9, "damage": 35, "hitstun": 14, "hitstop": 7, "push": 700, "box": [89, 10, 101, 80]},
 			"st_hp": {"startup": 8, "active": 3, "recovery": 16, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 950, "box": [40, 180, 193, 76]},
 			"st_hk": {"startup": 9, "active": 3, "recovery": 16, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 1000, "box": [40, 146, 154, 72]},
 			"cr_lp": {"startup": 4, "active": 2, "recovery": 7, "damage": 25, "hitstun": 13, "hitstop": 6, "push": 600, "box": [40, 103, 143, 58]},

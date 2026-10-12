@@ -50,12 +50,12 @@
   "cycle": 105
  },
  "jump": {
-  "fit": 1.158,
-  "frames": 8,
+  "frames": 37,
   "grid": [
    8,
-   1
+   5
   ],
+  "fit": 1.103,
   "pivot_y": "body"
  },
  "block": {
@@ -89,16 +89,16 @@
   "hit_end": 8
  },
  "st_lk": {
-  "fixed_pivot": true,
-  "align_to": "idle:1",
-  "fit": 1.158,
-  "frames": 19,
+  "frames": 25,
   "grid": [
-   7,
-   3
+   8,
+   4
   ],
-  "hit": 8,
-  "hit_end": 10
+  "fit": 1.103,
+  "align_to": "idle:1",
+  "fixed_pivot": true,
+  "hit": 9,
+  "hit_end": 12
  },
  "backdash": {
   "fit": 1.533,
@@ -354,16 +354,16 @@
   "hit_end": 17
  },
  "sp_bb_l": {
-  "fixed_pivot": true,
-  "align_to": "idle:1",
-  "fit": 1.164,
-  "frames": 46,
+  "frames": 49,
   "grid": [
    8,
-   6
+   7
   ],
-  "hit": 3,
-  "hit_end": 36
+  "fit": 1.103,
+  "align_to": "idle:1",
+  "fixed_pivot": true,
+  "hit": 16,
+  "hit_end": 39
  },
  "super": {
   "fixed_pivot": true,

@@ -23,17 +23,17 @@
   "hit_end": 10
  },
  "walk_f": {
-  "frames": 40,
+  "frames": 29,
   "grid": [
    8,
-   5
+   4
   ],
+  "fit": 1.117,
   "pivot_y": "body_ground",
-  "upscale": true,
   "align_to": "idle:1",
   "align_top": 0.45,
   "align_each": true,
-  "stride": 270
+  "stride": 180
  },
  "run": {
   "frames": 23,
@@ -74,23 +74,35 @@
   "upscale": true
  },
  "block": {
-  "fit": 1.112,
+  "frames": 35,
+  "grid": [
+   8,
+   5
+  ],
+  "fit": 1.117,
   "align_to": "idle:1",
   "fixed_pivot": true,
-  "frames": 17,
-  "grid": [
-   9,
-   2
-  ],
-  "drop_ref": true
+  "cycle": 88
  },
  "block_low": {
-  "frames": 2,
-  "fit": "h:1:440"
+  "frames": 33,
+  "grid": [
+   8,
+   5
+  ],
+  "fit": 1.115,
+  "align_to": "crouch:1",
+  "align_head": true,
+  "fixed_pivot": true,
+  "cycle": 83
  },
  "jump": {
-  "frames": 5,
-  "fit": "h:1:461",
+  "frames": 25,
+  "grid": [
+   8,
+   4
+  ],
+  "fit": 1.172,
   "pivot_y": "body"
  },
  "st_lk": {
@@ -130,8 +142,17 @@
   "hit_end": 13
  },
  "cr_lp": {
-  "frames": 3,
-  "fit": "h:1:440"
+  "frames": 33,
+  "grid": [
+   8,
+   5
+  ],
+  "fit": 1.115,
+  "align_to": "crouch:1",
+  "align_head": true,
+  "fixed_pivot": true,
+  "hit": 10,
+  "hit_end": 20
  },
  "cr_lk": {
   "frames": 3,
@@ -194,14 +215,16 @@
   "fit": "h:4:440"
  },
  "st_sweep": {
-  "frames": 8,
+  "frames": 38,
   "grid": [
-   4,
-   2
+   8,
+   5
   ],
-  "fit": "h:1:627",
-  "hit": 5,
-  "hit_end": 6
+  "fit": 1.172,
+  "align_to": "idle:1",
+  "fixed_pivot": true,
+  "hit": 15,
+  "hit_end": 22
  },
  "j_hp": {
   "frames": 6,
@@ -455,5 +478,18 @@
    9
   ],
   "release": 63
+ },
+ "pair_sp_ff_l_dracula": {
+  "frames": 91,
+  "grid": [
+   10,
+   10
+  ],
+  "fit": 1.316,
+  "align_to": "idle:1",
+  "fixed_pivot": true,
+  "hit": 1,
+  "hit_end": 1,
+  "release": 49
  }
 }
