@@ -1,0 +1,565 @@
+{
+ "frames": [
+  {
+   "file": "select_win_b_1.png",
+   "pivot": [
+    354,
+    903
+   ],
+   "size": [
+    803,
+    904
+   ]
+  },
+  {
+   "file": "select_win_b_2.png",
+   "pivot": [
+    348,
+    903
+   ],
+   "size": [
+    780,
+    904
+   ]
+  },
+  {
+   "file": "select_win_b_3.png",
+   "pivot": [
+    340,
+    906
+   ],
+   "size": [
+    761,
+    907
+   ]
+  },
+  {
+   "file": "select_win_b_4.png",
+   "pivot": [
+    334,
+    906
+   ],
+   "size": [
+    750,
+    907
+   ]
+  },
+  {
+   "file": "select_win_b_5.png",
+   "pivot": [
+    326,
+    906
+   ],
+   "size": [
+    739,
+    907
+   ]
+  },
+  {
+   "file": "select_win_b_6.png",
+   "pivot": [
+    318,
+    909
+   ],
+   "size": [
+    734,
+    910
+   ]
+  },
+  {
+   "file": "select_win_b_7.png",
+   "pivot": [
+    309,
+    909
+   ],
+   "size": [
+    725,
+    910
+   ]
+  },
+  {
+   "file": "select_win_b_8.png",
+   "pivot": [
+    304,
+    909
+   ],
+   "size": [
+    722,
+    910
+   ]
+  },
+  {
+   "file": "select_win_b_9.png",
+   "pivot": [
+    298,
+    909
+   ],
+   "size": [
+    722,
+    910
+   ]
+  },
+  {
+   "file": "select_win_b_10.png",
+   "pivot": [
+    295,
+    909
+   ],
+   "size": [
+    725,
+    910
+   ]
+  },
+  {
+   "file": "select_win_b_11.png",
+   "pivot": [
+    292,
+    909
+   ],
+   "size": [
+    727,
+    910
+   ]
+  },
+  {
+   "file": "select_win_b_12.png",
+   "pivot": [
+    292,
+    909
+   ],
+   "size": [
+    733,
+    910
+   ]
+  },
+  {
+   "file": "select_win_b_13.png",
+   "pivot": [
+    292,
+    909
+   ],
+   "size": [
+    738,
+    910
+   ]
+  },
+  {
+   "file": "select_win_b_14.png",
+   "pivot": [
+    292,
+    911
+   ],
+   "size": [
+    744,
+    912
+   ]
+  },
+  {
+   "file": "select_win_b_15.png",
+   "pivot": [
+    295,
+    911
+   ],
+   "size": [
+    747,
+    912
+   ]
+  },
+  {
+   "file": "select_win_b_16.png",
+   "pivot": [
+    298,
+    911
+   ],
+   "size": [
+    753,
+    912
+   ]
+  },
+  {
+   "file": "select_win_b_17.png",
+   "pivot": [
+    304,
+    911
+   ],
+   "size": [
+    759,
+    912
+   ]
+  },
+  {
+   "file": "select_win_b_18.png",
+   "pivot": [
+    306,
+    911
+   ],
+   "size": [
+    761,
+    912
+   ]
+  },
+  {
+   "file": "select_win_b_19.png",
+   "pivot": [
+    309,
+    911
+   ],
+   "size": [
+    764,
+    912
+   ]
+  },
+  {
+   "file": "select_win_b_20.png",
+   "pivot": [
+    315,
+    911
+   ],
+   "size": [
+    767,
+    912
+   ]
+  },
+  {
+   "file": "select_win_b_21.png",
+   "pivot": [
+    318,
+    911
+   ],
+   "size": [
+    770,
+    912
+   ]
+  },
+  {
+   "file": "select_win_b_22.png",
+   "pivot": [
+    320,
+    914
+   ],
+   "size": [
+    772,
+    915
+   ]
+  },
+  {
+   "file": "select_win_b_23.png",
+   "pivot": [
+    320,
+    911
+   ],
+   "size": [
+    772,
+    912
+   ]
+  },
+  {
+   "file": "select_win_b_24.png",
+   "pivot": [
+    323,
+    914
+   ],
+   "size": [
+    775,
+    915
+   ]
+  },
+  {
+   "file": "select_win_b_25.png",
+   "pivot": [
+    323,
+    914
+   ],
+   "size": [
+    775,
+    915
+   ]
+  },
+  {
+   "file": "select_win_b_26.png",
+   "pivot": [
+    323,
+    917
+   ],
+   "size": [
+    778,
+    918
+   ]
+  },
+  {
+   "file": "select_win_b_27.png",
+   "pivot": [
+    323,
+    917
+   ],
+   "size": [
+    781,
+    918
+   ]
+  },
+  {
+   "file": "select_win_b_28.png",
+   "pivot": [
+    323,
+    917
+   ],
+   "size": [
+    781,
+    918
+   ]
+  },
+  {
+   "file": "select_win_b_29.png",
+   "pivot": [
+    323,
+    917
+   ],
+   "size": [
+    783,
+    918
+   ]
+  },
+  {
+   "file": "select_win_b_30.png",
+   "pivot": [
+    323,
+    917
+   ],
+   "size": [
+    786,
+    918
+   ]
+  },
+  {
+   "file": "select_win_b_31.png",
+   "pivot": [
+    320,
+    917
+   ],
+   "size": [
+    783,
+    918
+   ]
+  },
+  {
+   "file": "select_win_b_32.png",
+   "pivot": [
+    320,
+    917
+   ],
+   "size": [
+    786,
+    918
+   ]
+  },
+  {
+   "file": "select_win_b_33.png",
+   "pivot": [
+    320,
+    911
+   ],
+   "size": [
+    786,
+    912
+   ]
+  },
+  {
+   "file": "select_win_b_34.png",
+   "pivot": [
+    315,
+    917
+   ],
+   "size": [
+    778,
+    918
+   ]
+  },
+  {
+   "file": "select_win_b_35.png",
+   "pivot": [
+    315,
+    911
+   ],
+   "size": [
+    775,
+    912
+   ]
+  },
+  {
+   "file": "select_win_b_36.png",
+   "pivot": [
+    312,
+    917
+   ],
+   "size": [
+    770,
+    918
+   ]
+  },
+  {
+   "file": "select_win_b_37.png",
+   "pivot": [
+    309,
+    914
+   ],
+   "size": [
+    764,
+    915
+   ]
+  },
+  {
+   "file": "select_win_b_38.png",
+   "pivot": [
+    306,
+    914
+   ],
+   "size": [
+    758,
+    915
+   ]
+  },
+  {
+   "file": "select_win_b_39.png",
+   "pivot": [
+    304,
+    911
+   ],
+   "size": [
+    753,
+    912
+   ]
+  },
+  {
+   "file": "select_win_b_40.png",
+   "pivot": [
+    301,
+    911
+   ],
+   "size": [
+    747,
+    912
+   ]
+  },
+  {
+   "file": "select_win_b_41.png",
+   "pivot": [
+    298,
+    911
+   ],
+   "size": [
+    742,
+    912
+   ]
+  },
+  {
+   "file": "select_win_b_42.png",
+   "pivot": [
+    295,
+    911
+   ],
+   "size": [
+    736,
+    912
+   ]
+  },
+  {
+   "file": "select_win_b_43.png",
+   "pivot": [
+    292,
+    911
+   ],
+   "size": [
+    730,
+    912
+   ]
+  },
+  {
+   "file": "select_win_b_44.png",
+   "pivot": [
+    289,
+    909
+   ],
+   "size": [
+    724,
+    910
+   ]
+  },
+  {
+   "file": "select_win_b_45.png",
+   "pivot": [
+    287,
+    909
+   ],
+   "size": [
+    722,
+    910
+   ]
+  },
+  {
+   "file": "select_win_b_46.png",
+   "pivot": [
+    281,
+    906
+   ],
+   "size": [
+    713,
+    907
+   ]
+  },
+  {
+   "file": "select_win_b_47.png",
+   "pivot": [
+    284,
+    906
+   ],
+   "size": [
+    716,
+    907
+   ]
+  },
+  {
+   "file": "select_win_b_48.png",
+   "pivot": [
+    281,
+    906
+   ],
+   "size": [
+    713,
+    907
+   ]
+  },
+  {
+   "file": "select_win_b_49.png",
+   "pivot": [
+    281,
+    906
+   ],
+   "size": [
+    713,
+    907
+   ]
+  },
+  {
+   "file": "select_win_b_50.png",
+   "pivot": [
+    281,
+    906
+   ],
+   "size": [
+    713,
+    907
+   ]
+  },
+  {
+   "file": "select_win_b_51.png",
+   "pivot": [
+    281,
+    900
+   ],
+   "size": [
+    713,
+    901
+   ]
+  }
+ ]
+}

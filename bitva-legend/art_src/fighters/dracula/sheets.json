@@ -300,12 +300,14 @@
   "pivot_y": "bottom_center"
  },
  "select_win": {
-  "part_frames": 4,
-  "parts_fit": [
-   "h:1:900",
-   1.473
+  "frames": 69,
+  "grid": [
+   10,
+   7
   ],
-  "pivot_y": "bottom_center"
+  "fit": 1.402,
+  "fixed_pivot": true,
+  "align_to": "select:1"
  },
  "fall": {
   "part_frames": 4,
@@ -637,13 +639,23 @@
   "release": 31
  },
  "finisher_ilya": {
-  "frames": 87,
+  "frames": 104,
   "grid": [
    10,
-   9
+   11
   ],
   "fit": 1.422,
   "align_to": "idle:1",
   "fixed_pivot": true
+ },
+ "select_win_b": {
+  "frames": 51,
+  "grid": [
+   10,
+   6
+  ],
+  "fit": 1.402,
+  "fixed_pivot": true,
+  "align_to": "select:1"
  }
 }

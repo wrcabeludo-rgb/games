@@ -322,12 +322,14 @@
   "pivot_y": "bottom_center"
  },
  "select_win": {
-  "part_frames": 4,
-  "parts_fit": [
-   "h:1:900",
-   "h:1:900"
+  "frames": 60,
+  "grid": [
+   10,
+   6
   ],
-  "pivot_y": "bottom_center"
+  "fit": 1.536,
+  "fixed_pivot": true,
+  "align_to": "select:1"
  },
  "sp_dd_l": {
   "fit": 1.171,
@@ -500,5 +502,15 @@
   "fit": 1.23,
   "align_to": "idle:1",
   "fixed_pivot": true
+ },
+ "select_win_b": {
+  "frames": 60,
+  "grid": [
+   10,
+   6
+  ],
+  "fit": 1.536,
+  "fixed_pivot": true,
+  "align_to": "select:1"
  }
 }

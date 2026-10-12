@@ -25,13 +25,14 @@ const COLS := 4
 const CELL := Vector2(104, 104)
 const CELL_GAP := 12.0
 const GRID_Y := 396.0
-const READY_TICKS := 100        # после выбора обоих — столько тиков радуются, потом экран «ПРОТИВ»
+const READY_TICKS := 150        # после выбора обоих — столько тиков радуются, потом экран «ПРОТИВ»
 const VS_LINE_START := 30       # экран «ПРОТИВ»: первая реплика — с этого тика
 const VS_LINE_TICKS := 170      # на каждую реплику
 const VS_TAIL := 40             # после последней реплики — до боя
 const VS_SKIP_AFTER := 15       # пропустить кнопкой можно не сразу (кнопка выбора ещё зажата)
 const TYPE_SPEED := 1.6         # букв за тик
 const WIN_TICKS := 48           # анимация «радуется» проигрывается за столько тиков и замирает
+const WIN_FRAME_TICKS := 3      # радость из видео (больше 8 кадров): тиков на кадр, потом замирает
 const PORTRAIT_SCALE := 0.38    # портреты по пояс (кадр 900 px) — около 360 px на экране
 const COLOR_GOLD := Color(1, 0.85, 0.3)
 const COLOR_TEXT := Color(0.95, 0.95, 0.97)
@@ -47,6 +48,8 @@ var tick := 0
 var cursor := PackedInt32Array([0, 1])
 var picked := [false, false]
 var picked_at := PackedInt32Array([0, 0])
+## Какой вариант радости играет (0 — select_win, 1 — select_win_b): случайно, у одинаковых бойцов — разные.
+var win_variant := PackedInt32Array([0, 0])
 ## Против ИИ первый игрок выбирает обоих бойцов по очереди.
 var vs_ai := false
 var ai_label := ""
@@ -217,6 +220,9 @@ func _step_select(press: PackedInt32Array) -> void:
 		if press[p] & CONFIRM and ROSTER[c] != "":
 			picked[who] = true
 			picked_at[who] = tick
+			win_variant[who] = (tick / 7) % 2
+			if picked[1 - who] and _id(0) == _id(1):
+				win_variant[who] = 1 - win_variant[1 - who]
 			sound.emit("ui_confirm")
 	if picked[0] and (picked[1] or arcade):
 		_ready_tick = tick
@@ -417,10 +423,14 @@ func _draw_preview(p: int) -> void:
 	var face := 1.0 if p == 0 else -1.0
 	var waist := Vector2(x, size.y - 64)       # портрет по пояс — низ кадра у нижнего края экрана
 	var since := tick - picked_at[p]
-	var win := _sprites.anim(id, "select_win")
+	var win := _sprites.anim(id, "select_win_b" if win_variant[p] == 1 else "select_win")
+	if win.is_empty():
+		win = _sprites.anim(id, "select_win")
 	if picked[p] and not win.is_empty():
 		var n: int = win.tex.size()
 		var i := mini(since * n / WIN_TICKS, n - 1)
+		if n > 8:
+			i = mini(since / WIN_FRAME_TICKS, n - 1)  # из видео — в своём темпе
 		draw_set_transform(waist, 0, Vector2(PORTRAIT_SCALE * face, PORTRAIT_SCALE))
 		draw_texture(win.tex[i], -win.pivot[i])
 		draw_set_transform(Vector2.ZERO)
