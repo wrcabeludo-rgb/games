@@ -97,11 +97,12 @@ func _draw() -> void:
 	_draw_walls()
 	_draw_super_backdrop()
 	_draw_craters()
-	for f in _sim.fighters:
-		if not sprites.in_pair_scene(f, _sim.fighters[1 - _sim.fighters.find(f)]):
-			_draw_shadow(f)
-	for f in _sim.fighters:
-		_draw_fighter(f)
+	if not _draw_finisher_scene():
+		for f in _sim.fighters:
+			if not sprites.in_pair_scene(f, _sim.fighters[1 - _sim.fighters.find(f)]):
+				_draw_shadow(f)
+		for f in _sim.fighters:
+			_draw_fighter(f)
 	for pr in _sim.projectiles:
 		_draw_projectile(pr)
 	for f in _sim.fighters:
@@ -328,6 +329,33 @@ func _draw_throw_bats(f: Fighter) -> void:
 		draw_set_transform(pos, 0, Vector2(k * dir, k))
 		draw_texture(tex, -tex.get_size() * 0.5, Color(1, 1, 1, alpha))
 	draw_set_transform(Vector2.ZERO)
+
+
+## Добивание из видео (лист finisher_<соперник> у победителя): ролик рисует обоих бойцов, привязан к проигравшему —
+## в данных победителя finishers[<соперник>] = на сколько px перед опорной точкой листа стоит соперник.
+## После ролика (конец матча) остаётся последний кадр. true — нарисовано, бойцов не рисовать.
+func _draw_finisher_scene() -> bool:
+	if not use_sprites or not _sim.finished or not (_sim.phase == Sim.Phase.FINISHER or _sim.phase == Sim.Phase.MATCH_END):
+		return false
+	var w := _sim.round_winner
+	if not _sim.finisher_scene(w):
+		return false
+	var a: Fighter = _sim.fighters[w]
+	var d: Fighter = _sim.fighters[1 - w]
+	var anim := sprites.anim(a.id, "finisher_" + d.id)
+	if anim.is_empty():
+		return false
+	var n: int = anim.tex.size()
+	var i := n - 1
+	if _sim.phase == Sim.Phase.FINISHER:
+		i = clampi(_sim.phase_frame * n / maxi(_sim.finisher_ticks(), 1), 0, n - 1)
+	var anchor := float(a.data.finishers[d.id])
+	var base := to_screen(float(d.x) / Sim.SUB - a.facing * anchor, 0.0)
+	var k := FighterSprites.SCALE / sprites.res(a.id)
+	draw_set_transform(base, 0, Vector2(k * a.facing, k))
+	draw_texture(anim.tex[i], -anim.pivot[i])
+	draw_set_transform(Vector2.ZERO)
+	return true
 
 
 ## Боец-заглушка: тело, голова и «нос», показывающий, куда он смотрит.

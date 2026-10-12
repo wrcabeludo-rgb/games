@@ -635,5 +635,15 @@
    6
   ],
   "release": 31
+ },
+ "finisher_ilya": {
+  "frames": 87,
+  "grid": [
+   10,
+   9
+  ],
+  "fit": 1.422,
+  "align_to": "idle:1",
+  "fixed_pivot": true
  }
 }

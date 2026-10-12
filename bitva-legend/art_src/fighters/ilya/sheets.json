@@ -452,18 +452,17 @@
   "pivot_y": "bottom_center"
  },
  "pair_throw_dracula": {
-  "fixed_pivot": true,
-  "align_to": "idle:1",
-  "drop_ref": true,
-  "hit": 1,
-  "hit_end": 1,
-  "fit": 1.435,
-  "frames": 57,
+  "frames": 81,
   "grid": [
    10,
-   6
+   9
   ],
-  "release": 42
+  "fit": 1.253,
+  "align_to": "idle:1",
+  "fixed_pivot": true,
+  "hit": 1,
+  "hit_end": 1,
+  "release": 38
  },
  "pair_dracula": {
   "fixed_pivot": true,
@@ -491,5 +490,15 @@
   "hit": 1,
   "hit_end": 1,
   "release": 49
+ },
+ "finisher_dracula": {
+  "frames": 104,
+  "grid": [
+   10,
+   11
+  ],
+  "fit": 1.23,
+  "align_to": "idle:1",
+  "fixed_pivot": true
  }
 }

@@ -31,6 +31,7 @@ const FINISH_TICKS := 180           # время на команду
 const FINISH_STEP := 30             # между нажатиями команды — не дольше
 const FINISH_RANGE := 420           # дистанция удара: не дальше, px между бойцами
 const FINISHER_TICKS := 160         # ролик добивания
+const FINISHER_SCENE_TICKS := 330   # добивание из видео (оба бойца в одном ролике: finishers в данных бойца)
 const ATTACK_MASK := InputBits.LP | InputBits.LK | InputBits.HP | InputBits.HK
 
 ## Поля снаряда (PackedInt32Array): владелец, позиция, скорость, гравитация, размер,
@@ -170,7 +171,7 @@ func step(frame_inputs: PackedInt32Array) -> void:
 				_set_phase(Phase.MATCH_END)
 		Phase.FINISHER:
 			_combat_step(PackedInt32Array([0, 0]), false)
-			if phase_frame >= FINISHER_TICKS:
+			if phase_frame >= finisher_ticks():
 				_set_phase(Phase.MATCH_END)
 		Phase.MATCH_END:
 			_combat_step(idle, false)
@@ -567,7 +568,7 @@ func _start_finish() -> void:
 	finish_wait = 0
 	var w := fighters[round_winner]
 	w.hp = maxi(w.hp, 1)
-	fighters[1 - round_winner].daze(FINISH_TICKS + FINISHER_TICKS)
+	fighters[1 - round_winner].daze(FINISH_TICKS + FINISHER_SCENE_TICKS)
 	_set_phase(Phase.FINISH)
 
 
@@ -597,11 +598,27 @@ func _finish_input(w: int) -> bool:
 
 func _start_finisher(w: int) -> void:
 	finished = true
+	if finisher_scene(w):
+		# Добивание из видео: ролик рисует обоих, проигравший стоит оглушённым до конца.
+		hitstop = 0
+		hitstop_total = 0
+		_set_phase(Phase.FINISHER)
+		return
 	fighters[1 - w].finisher_launch(fighters[w].facing)
 	hitstop = SUPER_FLASH
 	hitstop_total = 0
 	_set_spark(w, fighters[1 - w].x, fighters[1 - w].data.height * SUB / 2, 1)
 	_set_phase(Phase.FINISHER)
+
+
+## У победителя w есть добивание-ролик против этого соперника (finishers в данных бойца).
+func finisher_scene(w: int) -> bool:
+	return w >= 0 and w <= 1 and fighters[w].data.get("finishers", {}).has(fighters[1 - w].id)
+
+
+## Длительность добивания: ролик из видео или заглушка.
+func finisher_ticks() -> int:
+	return FINISHER_SCENE_TICKS if finisher_scene(round_winner) else FINISHER_TICKS
 
 
 func _set_phase(p: Phase) -> void:

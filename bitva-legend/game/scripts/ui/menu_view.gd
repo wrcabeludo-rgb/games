@@ -574,14 +574,14 @@ func _draw_ladder() -> void:
 func _draw_ending() -> void:
 	var id: String = ROSTER[cursor[0]]
 	draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, 0.5))
-	var a := _sprites.anim(id, "select_win")
-	if a.is_empty():
-		a = _sprites.anim(id, "select")
+	var a := _sprites.anim(id, "select")
 	var waist := Vector2(size.x * 0.22, size.y)
 	if not a.is_empty():
-		var n: int = a.tex.size()
+		# Тот же портрет, что на экране «ПРОТИВ» (дышит).
+		var tex: Texture2D = a.tex[0]
+		var phase := 0.5 - 0.5 * cos(TAU * float(tick) / FighterSprites.BREATH_TICKS)
 		draw_set_transform(waist, 0, Vector2(0.5, 0.5))
-		draw_texture(a.tex[n - 1], -a.pivot[n - 1])
+		FighterSprites.draw_breathing(self, tex, a.pivot[0], Color.WHITE, tex.get_height() * 0.9, phase, 8.0)
 		draw_set_transform(Vector2.ZERO)
 	else:
 		_draw_silhouette(id, waist, 1.1)

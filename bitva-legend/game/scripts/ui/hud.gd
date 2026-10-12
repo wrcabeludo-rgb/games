@@ -442,19 +442,18 @@ func _draw_win_quote() -> void:
 		HORIZONTAL_ALIGNMENT_LEFT, lb.size.x - 110, 17, 2, Color(COLOR_TEXT, 0.8 * k))
 
 
-## Портрет бойца по пояс (последний кадр радости, иначе портрет выбора); справа — зеркально, к центру.
+## Портрет бойца по пояс — тот же, что на экране «ПРОТИВ» (дышит); справа — зеркально, к центру.
 func _draw_portrait(id: String, waist: Vector2, mirror: bool) -> void:
 	if _sprites == null:
 		return
-	var a := _sprites.anim(id, "select_win")
-	if a.is_empty():
-		a = _sprites.anim(id, "select")
+	var a := _sprites.anim(id, "select")
 	if a.is_empty():
 		return
-	var n: int = a.tex.size()
-	var k := 0.42
+	var tex: Texture2D = a.tex[0]
+	var k := 0.5
+	var phase := 0.5 - 0.5 * cos(TAU * float(_sim.tick) / FighterSprites.BREATH_TICKS)
 	draw_set_transform(waist, 0, Vector2(-k if mirror else k, k))
-	draw_texture(a.tex[n - 1], -a.pivot[n - 1])
+	FighterSprites.draw_breathing(self, tex, a.pivot[0], Color.WHITE, tex.get_height() * 0.9, phase, 8.0)
 	draw_set_transform(Vector2.ZERO)
 
 

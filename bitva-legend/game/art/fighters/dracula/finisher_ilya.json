@@ -1,0 +1,961 @@
+{
+ "frames": [
+  {
+   "file": "finisher_ilya_1.png",
+   "pivot": [
+    987,
+    673
+   ],
+   "size": [
+    1263,
+    675
+   ]
+  },
+  {
+   "file": "finisher_ilya_2.png",
+   "pivot": [
+    987,
+    678
+   ],
+   "size": [
+    1255,
+    680
+   ]
+  },
+  {
+   "file": "finisher_ilya_3.png",
+   "pivot": [
+    1007,
+    678
+   ],
+   "size": [
+    1266,
+    680
+   ]
+  },
+  {
+   "file": "finisher_ilya_4.png",
+   "pivot": [
+    1016,
+    678
+   ],
+   "size": [
+    1278,
+    680
+   ]
+  },
+  {
+   "file": "finisher_ilya_5.png",
+   "pivot": [
+    993,
+    678
+   ],
+   "size": [
+    1255,
+    679
+   ]
+  },
+  {
+   "file": "finisher_ilya_6.png",
+   "pivot": [
+    959,
+    667
+   ],
+   "size": [
+    1221,
+    668
+   ]
+  },
+  {
+   "file": "finisher_ilya_7.png",
+   "pivot": [
+    916,
+    667
+   ],
+   "size": [
+    1175,
+    668
+   ]
+  },
+  {
+   "file": "finisher_ilya_8.png",
+   "pivot": [
+    845,
+    627
+   ],
+   "size": [
+    1104,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_9.png",
+   "pivot": [
+    777,
+    627
+   ],
+   "size": [
+    1036,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_10.png",
+   "pivot": [
+    720,
+    627
+   ],
+   "size": [
+    979,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_11.png",
+   "pivot": [
+    677,
+    627
+   ],
+   "size": [
+    936,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_12.png",
+   "pivot": [
+    643,
+    627
+   ],
+   "size": [
+    902,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_13.png",
+   "pivot": [
+    598,
+    627
+   ],
+   "size": [
+    857,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_14.png",
+   "pivot": [
+    552,
+    627
+   ],
+   "size": [
+    811,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_15.png",
+   "pivot": [
+    530,
+    627
+   ],
+   "size": [
+    789,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_16.png",
+   "pivot": [
+    525,
+    627
+   ],
+   "size": [
+    782,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_17.png",
+   "pivot": [
+    521,
+    627
+   ],
+   "size": [
+    775,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_18.png",
+   "pivot": [
+    515,
+    627
+   ],
+   "size": [
+    769,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_19.png",
+   "pivot": [
+    501,
+    627
+   ],
+   "size": [
+    749,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_20.png",
+   "pivot": [
+    484,
+    627
+   ],
+   "size": [
+    732,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_21.png",
+   "pivot": [
+    470,
+    627
+   ],
+   "size": [
+    715,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_22.png",
+   "pivot": [
+    458,
+    630
+   ],
+   "size": [
+    700,
+    631
+   ]
+  },
+  {
+   "file": "finisher_ilya_23.png",
+   "pivot": [
+    456,
+    627
+   ],
+   "size": [
+    698,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_24.png",
+   "pivot": [
+    458,
+    630
+   ],
+   "size": [
+    700,
+    631
+   ]
+  },
+  {
+   "file": "finisher_ilya_25.png",
+   "pivot": [
+    461,
+    630
+   ],
+   "size": [
+    703,
+    631
+   ]
+  },
+  {
+   "file": "finisher_ilya_26.png",
+   "pivot": [
+    461,
+    630
+   ],
+   "size": [
+    706,
+    631
+   ]
+  },
+  {
+   "file": "finisher_ilya_27.png",
+   "pivot": [
+    495,
+    630
+   ],
+   "size": [
+    746,
+    631
+   ]
+  },
+  {
+   "file": "finisher_ilya_28.png",
+   "pivot": [
+    595,
+    633
+   ],
+   "size": [
+    849,
+    635
+   ]
+  },
+  {
+   "file": "finisher_ilya_29.png",
+   "pivot": [
+    714,
+    627
+   ],
+   "size": [
+    968,
+    629
+   ]
+  },
+  {
+   "file": "finisher_ilya_30.png",
+   "pivot": [
+    800,
+    627
+   ],
+   "size": [
+    1054,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_31.png",
+   "pivot": [
+    845,
+    627
+   ],
+   "size": [
+    1099,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_32.png",
+   "pivot": [
+    879,
+    633
+   ],
+   "size": [
+    1133,
+    634
+   ]
+  },
+  {
+   "file": "finisher_ilya_33.png",
+   "pivot": [
+    885,
+    627
+   ],
+   "size": [
+    1139,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_34.png",
+   "pivot": [
+    931,
+    627
+   ],
+   "size": [
+    1185,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_35.png",
+   "pivot": [
+    965,
+    627
+   ],
+   "size": [
+    1219,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_36.png",
+   "pivot": [
+    976,
+    627
+   ],
+   "size": [
+    1230,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_37.png",
+   "pivot": [
+    965,
+    627
+   ],
+   "size": [
+    1219,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_38.png",
+   "pivot": [
+    948,
+    633
+   ],
+   "size": [
+    1202,
+    634
+   ]
+  },
+  {
+   "file": "finisher_ilya_39.png",
+   "pivot": [
+    925,
+    633
+   ],
+   "size": [
+    1179,
+    634
+   ]
+  },
+  {
+   "file": "finisher_ilya_40.png",
+   "pivot": [
+    925,
+    769
+   ],
+   "size": [
+    1176,
+    771
+   ]
+  },
+  {
+   "file": "finisher_ilya_41.png",
+   "pivot": [
+    919,
+    633
+   ],
+   "size": [
+    1170,
+    634
+   ]
+  },
+  {
+   "file": "finisher_ilya_42.png",
+   "pivot": [
+    913,
+    627
+   ],
+   "size": [
+    1161,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_43.png",
+   "pivot": [
+    913,
+    627
+   ],
+   "size": [
+    1161,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_44.png",
+   "pivot": [
+    913,
+    627
+   ],
+   "size": [
+    1155,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_45.png",
+   "pivot": [
+    913,
+    627
+   ],
+   "size": [
+    1153,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_46.png",
+   "pivot": [
+    913,
+    627
+   ],
+   "size": [
+    1150,
+    629
+   ]
+  },
+  {
+   "file": "finisher_ilya_47.png",
+   "pivot": [
+    919,
+    627
+   ],
+   "size": [
+    1184,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_48.png",
+   "pivot": [
+    1022,
+    877
+   ],
+   "size": [
+    1304,
+    879
+   ]
+  },
+  {
+   "file": "finisher_ilya_49.png",
+   "pivot": [
+    919,
+    627
+   ],
+   "size": [
+    1204,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_50.png",
+   "pivot": [
+    919,
+    627
+   ],
+   "size": [
+    1204,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_51.png",
+   "pivot": [
+    919,
+    627
+   ],
+   "size": [
+    1204,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_52.png",
+   "pivot": [
+    919,
+    627
+   ],
+   "size": [
+    1204,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_53.png",
+   "pivot": [
+    919,
+    627
+   ],
+   "size": [
+    1204,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_54.png",
+   "pivot": [
+    919,
+    627
+   ],
+   "size": [
+    1204,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_55.png",
+   "pivot": [
+    919,
+    627
+   ],
+   "size": [
+    1204,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_56.png",
+   "pivot": [
+    919,
+    627
+   ],
+   "size": [
+    1207,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_57.png",
+   "pivot": [
+    919,
+    627
+   ],
+   "size": [
+    1207,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_58.png",
+   "pivot": [
+    919,
+    627
+   ],
+   "size": [
+    1207,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_59.png",
+   "pivot": [
+    919,
+    627
+   ],
+   "size": [
+    1207,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_60.png",
+   "pivot": [
+    913,
+    627
+   ],
+   "size": [
+    1201,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_61.png",
+   "pivot": [
+    908,
+    627
+   ],
+   "size": [
+    1196,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_62.png",
+   "pivot": [
+    902,
+    633
+   ],
+   "size": [
+    1190,
+    634
+   ]
+  },
+  {
+   "file": "finisher_ilya_63.png",
+   "pivot": [
+    896,
+    633
+   ],
+   "size": [
+    1184,
+    634
+   ]
+  },
+  {
+   "file": "finisher_ilya_64.png",
+   "pivot": [
+    891,
+    633
+   ],
+   "size": [
+    1179,
+    634
+   ]
+  },
+  {
+   "file": "finisher_ilya_65.png",
+   "pivot": [
+    885,
+    633
+   ],
+   "size": [
+    1173,
+    634
+   ]
+  },
+  {
+   "file": "finisher_ilya_66.png",
+   "pivot": [
+    885,
+    633
+   ],
+   "size": [
+    1173,
+    634
+   ]
+  },
+  {
+   "file": "finisher_ilya_67.png",
+   "pivot": [
+    891,
+    633
+   ],
+   "size": [
+    1179,
+    634
+   ]
+  },
+  {
+   "file": "finisher_ilya_68.png",
+   "pivot": [
+    891,
+    633
+   ],
+   "size": [
+    1179,
+    634
+   ]
+  },
+  {
+   "file": "finisher_ilya_69.png",
+   "pivot": [
+    896,
+    633
+   ],
+   "size": [
+    1184,
+    634
+   ]
+  },
+  {
+   "file": "finisher_ilya_70.png",
+   "pivot": [
+    902,
+    633
+   ],
+   "size": [
+    1190,
+    634
+   ]
+  },
+  {
+   "file": "finisher_ilya_71.png",
+   "pivot": [
+    902,
+    627
+   ],
+   "size": [
+    1190,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_72.png",
+   "pivot": [
+    908,
+    627
+   ],
+   "size": [
+    1196,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_73.png",
+   "pivot": [
+    908,
+    627
+   ],
+   "size": [
+    1196,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_74.png",
+   "pivot": [
+    908,
+    627
+   ],
+   "size": [
+    1196,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_75.png",
+   "pivot": [
+    902,
+    627
+   ],
+   "size": [
+    1190,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_76.png",
+   "pivot": [
+    902,
+    627
+   ],
+   "size": [
+    1190,
+    628
+   ]
+  },
+  {
+   "file": "finisher_ilya_77.png",
+   "pivot": [
+    896,
+    633
+   ],
+   "size": [
+    1184,
+    634
+   ]
+  },
+  {
+   "file": "finisher_ilya_78.png",
+   "pivot": [
+    896,
+    633
+   ],
+   "size": [
+    1184,
+    634
+   ]
+  },
+  {
+   "file": "finisher_ilya_79.png",
+   "pivot": [
+    891,
+    633
+   ],
+   "size": [
+    1179,
+    634
+   ]
+  },
+  {
+   "file": "finisher_ilya_80.png",
+   "pivot": [
+    891,
+    633
+   ],
+   "size": [
+    1179,
+    634
+   ]
+  },
+  {
+   "file": "finisher_ilya_81.png",
+   "pivot": [
+    891,
+    633
+   ],
+   "size": [
+    1179,
+    634
+   ]
+  },
+  {
+   "file": "finisher_ilya_82.png",
+   "pivot": [
+    896,
+    633
+   ],
+   "size": [
+    1184,
+    634
+   ]
+  },
+  {
+   "file": "finisher_ilya_83.png",
+   "pivot": [
+    896,
+    633
+   ],
+   "size": [
+    1184,
+    634
+   ]
+  },
+  {
+   "file": "finisher_ilya_84.png",
+   "pivot": [
+    896,
+    633
+   ],
+   "size": [
+    1184,
+    634
+   ]
+  },
+  {
+   "file": "finisher_ilya_85.png",
+   "pivot": [
+    896,
+    633
+   ],
+   "size": [
+    1184,
+    634
+   ]
+  },
+  {
+   "file": "finisher_ilya_86.png",
+   "pivot": [
+    896,
+    633
+   ],
+   "size": [
+    1184,
+    634
+   ]
+  },
+  {
+   "file": "finisher_ilya_87.png",
+   "pivot": [
+    896,
+    633
+   ],
+   "size": [
+    1184,
+    634
+   ]
+  }
+ ]
+}

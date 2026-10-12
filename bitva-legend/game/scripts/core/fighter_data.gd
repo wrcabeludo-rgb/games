@@ -70,6 +70,8 @@ const CHARACTERS := {
 		"backdash_v0": 1000,    # отскок: начальная скорость
 		"backdash_decel": 55,   # отскок: замедление за тик (~96 px за 19 тиков)
 		"backdash_recovery": 8, # после отскока нельзя действовать, тиков
+		# Добивание из видео (лист finisher_<соперник>): на сколько px перед опорной точкой листа стоит соперник.
+		"finishers": {"dracula": 402},
 		"strings": [
 			{"name": "Кулачный бой", "moves": ["st_lp", "st_lp", "st_hp"]},
 			{"name": "Богатырский пинок", "moves": ["st_lk", "st_hk"]},
@@ -104,7 +106,7 @@ const CHARACTERS := {
 			"st_sweep": {"startup": 9, "active": 3, "recovery": 20, "damage": 70, "hitstun": 20, "hitstop": 11, "push": 600, "box": [79, 0, 177, 40], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
 			"st_round": {"startup": 14, "active": 4, "recovery": 24, "damage": 120, "hitstun": 22, "hitstop": 14, "push": 1200, "box": [30, 160, 130, 130], "knockdown": 1, "launch": [650, 950], "kick": 1},
 			# Бросок: удар лбом и через плечо — соперник улетает за спину (over).
-			"throw": {"startup": 4, "active": 2, "recovery": 18, "grab": {"pair": {"dracula": {"hold": 70, "recovery": 24, "launch": [0, 300], "land": -180}}, "range": 25, "hold": 40, "damage": 120, "launch": [500, 1000], "tech": 1, "recovery": 14, "over": 1}},
+			"throw": {"startup": 4, "active": 2, "recovery": 18, "grab": {"pair": {"dracula": {"hold": 60, "recovery": 40, "launch": [0, 300], "land": -180}}, "range": 25, "hold": 40, "damage": 120, "launch": [500, 1000], "tech": 1, "recovery": 14, "over": 1}},
 			# «Удар с небес» (блок + СР + СН): рывок с палицей; попал — подбрасывает, Илья взмывает за облака и обрушивается с палицей.
 			"super": {"name": "УДАР С НЕБЕС", "startup": 6, "active": 8, "recovery": 45, "lunge": 700, "damage": 60, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 45, "box": [25, 40, 140, 240], "cinema": {"pair": {"dracula": {"recovery": 34, "launch": [0, 300], "land": 370}}, "hold": 80, "damage": 330, "launch": [700, 1700], "tech": 0, "recovery": 16, "scaled": 1}},
 		},
@@ -131,6 +133,8 @@ const CHARACTERS := {
 		"backdash_v0": 1700,
 		"backdash_decel": 120,
 		"backdash_recovery": 3,
+		# Добивание из видео (лист finisher_<соперник>): на сколько px перед опорной точкой листа стоит соперник.
+		"finishers": {"ilya": 25},
 		"strings": [
 			{"name": "Когти ночи", "moves": ["st_lp", "st_lp", "st_hk"]},
 			{"name": "Взмах плаща", "moves": ["st_lk", "st_lk", "st_hp"]},

@@ -1,0 +1,1148 @@
+{
+ "frames": [
+  {
+   "file": "finisher_dracula_1.png",
+   "pivot": [
+    161,
+    567
+   ],
+   "size": [
+    1091,
+    568
+   ]
+  },
+  {
+   "file": "finisher_dracula_2.png",
+   "pivot": [
+    127,
+    567
+   ],
+   "size": [
+    1060,
+    568
+   ]
+  },
+  {
+   "file": "finisher_dracula_3.png",
+   "pivot": [
+    68,
+    572
+   ],
+   "size": [
+    1006,
+    573
+   ]
+  },
+  {
+   "file": "finisher_dracula_4.png",
+   "pivot": [
+    13,
+    572
+   ],
+   "size": [
+    955,
+    573
+   ]
+  },
+  {
+   "file": "finisher_dracula_5.png",
+   "pivot": [
+    -21,
+    572
+   ],
+   "size": [
+    924,
+    573
+   ]
+  },
+  {
+   "file": "finisher_dracula_6.png",
+   "pivot": [
+    -36,
+    567
+   ],
+   "size": [
+    911,
+    568
+   ]
+  },
+  {
+   "file": "finisher_dracula_7.png",
+   "pivot": [
+    -36,
+    572
+   ],
+   "size": [
+    911,
+    573
+   ]
+  },
+  {
+   "file": "finisher_dracula_8.png",
+   "pivot": [
+    -31,
+    626
+   ],
+   "size": [
+    916,
+    627
+   ]
+  },
+  {
+   "file": "finisher_dracula_9.png",
+   "pivot": [
+    -31,
+    704
+   ],
+   "size": [
+    914,
+    705
+   ]
+  },
+  {
+   "file": "finisher_dracula_10.png",
+   "pivot": [
+    -9,
+    685
+   ],
+   "size": [
+    931,
+    686
+   ]
+  },
+  {
+   "file": "finisher_dracula_11.png",
+   "pivot": [
+    55,
+    621
+   ],
+   "size": [
+    993,
+    622
+   ]
+  },
+  {
+   "file": "finisher_dracula_12.png",
+   "pivot": [
+    77,
+    596
+   ],
+   "size": [
+    1012,
+    597
+   ]
+  },
+  {
+   "file": "finisher_dracula_13.png",
+   "pivot": [
+    82,
+    601
+   ],
+   "size": [
+    1015,
+    602
+   ]
+  },
+  {
+   "file": "finisher_dracula_14.png",
+   "pivot": [
+    68,
+    596
+   ],
+   "size": [
+    1001,
+    597
+   ]
+  },
+  {
+   "file": "finisher_dracula_15.png",
+   "pivot": [
+    8,
+    645
+   ],
+   "size": [
+    941,
+    646
+   ]
+  },
+  {
+   "file": "finisher_dracula_16.png",
+   "pivot": [
+    -31,
+    719
+   ],
+   "size": [
+    904,
+    720
+   ]
+  },
+  {
+   "file": "finisher_dracula_17.png",
+   "pivot": [
+    -31,
+    670
+   ],
+   "size": [
+    907,
+    671
+   ]
+  },
+  {
+   "file": "finisher_dracula_18.png",
+   "pivot": [
+    -31,
+    582
+   ],
+   "size": [
+    912,
+    583
+   ]
+  },
+  {
+   "file": "finisher_dracula_19.png",
+   "pivot": [
+    -31,
+    527
+   ],
+   "size": [
+    909,
+    528
+   ]
+  },
+  {
+   "file": "finisher_dracula_20.png",
+   "pivot": [
+    -31,
+    508
+   ],
+   "size": [
+    929,
+    509
+   ]
+  },
+  {
+   "file": "finisher_dracula_21.png",
+   "pivot": [
+    -31,
+    527
+   ],
+   "size": [
+    953,
+    528
+   ]
+  },
+  {
+   "file": "finisher_dracula_22.png",
+   "pivot": [
+    -31,
+    503
+   ],
+   "size": [
+    973,
+    504
+   ]
+  },
+  {
+   "file": "finisher_dracula_23.png",
+   "pivot": [
+    -31,
+    508
+   ],
+   "size": [
+    956,
+    509
+   ]
+  },
+  {
+   "file": "finisher_dracula_24.png",
+   "pivot": [
+    -31,
+    513
+   ],
+   "size": [
+    924,
+    514
+   ]
+  },
+  {
+   "file": "finisher_dracula_25.png",
+   "pivot": [
+    -31,
+    527
+   ],
+   "size": [
+    907,
+    528
+   ]
+  },
+  {
+   "file": "finisher_dracula_26.png",
+   "pivot": [
+    -31,
+    532
+   ],
+   "size": [
+    897,
+    533
+   ]
+  },
+  {
+   "file": "finisher_dracula_27.png",
+   "pivot": [
+    -31,
+    596
+   ],
+   "size": [
+    899,
+    597
+   ]
+  },
+  {
+   "file": "finisher_dracula_28.png",
+   "pivot": [
+    -31,
+    685
+   ],
+   "size": [
+    904,
+    686
+   ]
+  },
+  {
+   "file": "finisher_dracula_29.png",
+   "pivot": [
+    -31,
+    729
+   ],
+   "size": [
+    904,
+    730
+   ]
+  },
+  {
+   "file": "finisher_dracula_30.png",
+   "pivot": [
+    -31,
+    719
+   ],
+   "size": [
+    907,
+    720
+   ]
+  },
+  {
+   "file": "finisher_dracula_31.png",
+   "pivot": [
+    -1,
+    680
+   ],
+   "size": [
+    939,
+    681
+   ]
+  },
+  {
+   "file": "finisher_dracula_32.png",
+   "pivot": [
+    55,
+    621
+   ],
+   "size": [
+    995,
+    622
+   ]
+  },
+  {
+   "file": "finisher_dracula_33.png",
+   "pivot": [
+    72,
+    591
+   ],
+   "size": [
+    1012,
+    592
+   ]
+  },
+  {
+   "file": "finisher_dracula_34.png",
+   "pivot": [
+    82,
+    596
+   ],
+   "size": [
+    1020,
+    597
+   ]
+  },
+  {
+   "file": "finisher_dracula_35.png",
+   "pivot": [
+    82,
+    601
+   ],
+   "size": [
+    1020,
+    602
+   ]
+  },
+  {
+   "file": "finisher_dracula_36.png",
+   "pivot": [
+    82,
+    601
+   ],
+   "size": [
+    1020,
+    602
+   ]
+  },
+  {
+   "file": "finisher_dracula_37.png",
+   "pivot": [
+    63,
+    591
+   ],
+   "size": [
+    1001,
+    592
+   ]
+  },
+  {
+   "file": "finisher_dracula_38.png",
+   "pivot": [
+    13,
+    611
+   ],
+   "size": [
+    951,
+    612
+   ]
+  },
+  {
+   "file": "finisher_dracula_39.png",
+   "pivot": [
+    -31,
+    685
+   ],
+   "size": [
+    907,
+    686
+   ]
+  },
+  {
+   "file": "finisher_dracula_40.png",
+   "pivot": [
+    -31,
+    690
+   ],
+   "size": [
+    909,
+    691
+   ]
+  },
+  {
+   "file": "finisher_dracula_41.png",
+   "pivot": [
+    -31,
+    596
+   ],
+   "size": [
+    909,
+    597
+   ]
+  },
+  {
+   "file": "finisher_dracula_42.png",
+   "pivot": [
+    -31,
+    493
+   ],
+   "size": [
+    867,
+    494
+   ]
+  },
+  {
+   "file": "finisher_dracula_43.png",
+   "pivot": [
+    -31,
+    488
+   ],
+   "size": [
+    862,
+    489
+   ]
+  },
+  {
+   "file": "finisher_dracula_44.png",
+   "pivot": [
+    -31,
+    493
+   ],
+   "size": [
+    870,
+    494
+   ]
+  },
+  {
+   "file": "finisher_dracula_45.png",
+   "pivot": [
+    -31,
+    498
+   ],
+   "size": [
+    872,
+    499
+   ]
+  },
+  {
+   "file": "finisher_dracula_46.png",
+   "pivot": [
+    -31,
+    503
+   ],
+   "size": [
+    867,
+    504
+   ]
+  },
+  {
+   "file": "finisher_dracula_47.png",
+   "pivot": [
+    -31,
+    508
+   ],
+   "size": [
+    860,
+    509
+   ]
+  },
+  {
+   "file": "finisher_dracula_48.png",
+   "pivot": [
+    -31,
+    518
+   ],
+   "size": [
+    857,
+    519
+   ]
+  },
+  {
+   "file": "finisher_dracula_49.png",
+   "pivot": [
+    -31,
+    523
+   ],
+   "size": [
+    855,
+    524
+   ]
+  },
+  {
+   "file": "finisher_dracula_50.png",
+   "pivot": [
+    -31,
+    572
+   ],
+   "size": [
+    852,
+    573
+   ]
+  },
+  {
+   "file": "finisher_dracula_51.png",
+   "pivot": [
+    -31,
+    665
+   ],
+   "size": [
+    852,
+    666
+   ]
+  },
+  {
+   "file": "finisher_dracula_52.png",
+   "pivot": [
+    -31,
+    734
+   ],
+   "size": [
+    852,
+    735
+   ]
+  },
+  {
+   "file": "finisher_dracula_53.png",
+   "pivot": [
+    -31,
+    734
+   ],
+   "size": [
+    855,
+    735
+   ]
+  },
+  {
+   "file": "finisher_dracula_54.png",
+   "pivot": [
+    -31,
+    704
+   ],
+   "size": [
+    855,
+    705
+   ]
+  },
+  {
+   "file": "finisher_dracula_55.png",
+   "pivot": [
+    33,
+    645
+   ],
+   "size": [
+    921,
+    646
+   ]
+  },
+  {
+   "file": "finisher_dracula_56.png",
+   "pivot": [
+    63,
+    596
+   ],
+   "size": [
+    951,
+    597
+   ]
+  },
+  {
+   "file": "finisher_dracula_57.png",
+   "pivot": [
+    77,
+    591
+   ],
+   "size": [
+    968,
+    592
+   ]
+  },
+  {
+   "file": "finisher_dracula_58.png",
+   "pivot": [
+    77,
+    596
+   ],
+   "size": [
+    970,
+    597
+   ]
+  },
+  {
+   "file": "finisher_dracula_59.png",
+   "pivot": [
+    72,
+    591
+   ],
+   "size": [
+    965,
+    592
+   ]
+  },
+  {
+   "file": "finisher_dracula_60.png",
+   "pivot": [
+    55,
+    596
+   ],
+   "size": [
+    948,
+    597
+   ]
+  },
+  {
+   "file": "finisher_dracula_61.png",
+   "pivot": [
+    -21,
+    665
+   ],
+   "size": [
+    870,
+    666
+   ]
+  },
+  {
+   "file": "finisher_dracula_62.png",
+   "pivot": [
+    -31,
+    714
+   ],
+   "size": [
+    860,
+    715
+   ]
+  },
+  {
+   "file": "finisher_dracula_63.png",
+   "pivot": [
+    -31,
+    670
+   ],
+   "size": [
+    860,
+    671
+   ]
+  },
+  {
+   "file": "finisher_dracula_64.png",
+   "pivot": [
+    -31,
+    523
+   ],
+   "size": [
+    857,
+    524
+   ]
+  },
+  {
+   "file": "finisher_dracula_65.png",
+   "pivot": [
+    -31,
+    498
+   ],
+   "size": [
+    860,
+    499
+   ]
+  },
+  {
+   "file": "finisher_dracula_66.png",
+   "pivot": [
+    -31,
+    498
+   ],
+   "size": [
+    867,
+    499
+   ]
+  },
+  {
+   "file": "finisher_dracula_67.png",
+   "pivot": [
+    -31,
+    498
+   ],
+   "size": [
+    875,
+    499
+   ]
+  },
+  {
+   "file": "finisher_dracula_68.png",
+   "pivot": [
+    -31,
+    503
+   ],
+   "size": [
+    877,
+    504
+   ]
+  },
+  {
+   "file": "finisher_dracula_69.png",
+   "pivot": [
+    -31,
+    508
+   ],
+   "size": [
+    877,
+    509
+   ]
+  },
+  {
+   "file": "finisher_dracula_70.png",
+   "pivot": [
+    -31,
+    518
+   ],
+   "size": [
+    877,
+    519
+   ]
+  },
+  {
+   "file": "finisher_dracula_71.png",
+   "pivot": [
+    -31,
+    527
+   ],
+   "size": [
+    877,
+    528
+   ]
+  },
+  {
+   "file": "finisher_dracula_72.png",
+   "pivot": [
+    -31,
+    552
+   ],
+   "size": [
+    877,
+    553
+   ]
+  },
+  {
+   "file": "finisher_dracula_73.png",
+   "pivot": [
+    -31,
+    616
+   ],
+   "size": [
+    877,
+    617
+   ]
+  },
+  {
+   "file": "finisher_dracula_74.png",
+   "pivot": [
+    -31,
+    655
+   ],
+   "size": [
+    887,
+    656
+   ]
+  },
+  {
+   "file": "finisher_dracula_75.png",
+   "pivot": [
+    -31,
+    660
+   ],
+   "size": [
+    899,
+    661
+   ]
+  },
+  {
+   "file": "finisher_dracula_76.png",
+   "pivot": [
+    -16,
+    650
+   ],
+   "size": [
+    892,
+    651
+   ]
+  },
+  {
+   "file": "finisher_dracula_77.png",
+   "pivot": [
+    18,
+    636
+   ],
+   "size": [
+    926,
+    637
+   ]
+  },
+  {
+   "file": "finisher_dracula_78.png",
+   "pivot": [
+    53,
+    621
+   ],
+   "size": [
+    961,
+    622
+   ]
+  },
+  {
+   "file": "finisher_dracula_79.png",
+   "pivot": [
+    68,
+    616
+   ],
+   "size": [
+    976,
+    617
+   ]
+  },
+  {
+   "file": "finisher_dracula_80.png",
+   "pivot": [
+    63,
+    621
+   ],
+   "size": [
+    971,
+    622
+   ]
+  },
+  {
+   "file": "finisher_dracula_81.png",
+   "pivot": [
+    58,
+    621
+   ],
+   "size": [
+    966,
+    622
+   ]
+  },
+  {
+   "file": "finisher_dracula_82.png",
+   "pivot": [
+    55,
+    616
+   ],
+   "size": [
+    963,
+    617
+   ]
+  },
+  {
+   "file": "finisher_dracula_83.png",
+   "pivot": [
+    48,
+    616
+   ],
+   "size": [
+    956,
+    617
+   ]
+  },
+  {
+   "file": "finisher_dracula_84.png",
+   "pivot": [
+    48,
+    616
+   ],
+   "size": [
+    956,
+    617
+   ]
+  },
+  {
+   "file": "finisher_dracula_85.png",
+   "pivot": [
+    53,
+    616
+   ],
+   "size": [
+    961,
+    617
+   ]
+  },
+  {
+   "file": "finisher_dracula_86.png",
+   "pivot": [
+    53,
+    616
+   ],
+   "size": [
+    961,
+    617
+   ]
+  },
+  {
+   "file": "finisher_dracula_87.png",
+   "pivot": [
+    58,
+    616
+   ],
+   "size": [
+    966,
+    617
+   ]
+  },
+  {
+   "file": "finisher_dracula_88.png",
+   "pivot": [
+    58,
+    616
+   ],
+   "size": [
+    966,
+    617
+   ]
+  },
+  {
+   "file": "finisher_dracula_89.png",
+   "pivot": [
+    55,
+    616
+   ],
+   "size": [
+    963,
+    617
+   ]
+  },
+  {
+   "file": "finisher_dracula_90.png",
+   "pivot": [
+    48,
+    611
+   ],
+   "size": [
+    956,
+    612
+   ]
+  },
+  {
+   "file": "finisher_dracula_91.png",
+   "pivot": [
+    53,
+    606
+   ],
+   "size": [
+    961,
+    607
+   ]
+  },
+  {
+   "file": "finisher_dracula_92.png",
+   "pivot": [
+    72,
+    611
+   ],
+   "size": [
+    980,
+    612
+   ]
+  },
+  {
+   "file": "finisher_dracula_93.png",
+   "pivot": [
+    92,
+    611
+   ],
+   "size": [
+    1000,
+    612
+   ]
+  },
+  {
+   "file": "finisher_dracula_94.png",
+   "pivot": [
+    102,
+    606
+   ],
+   "size": [
+    1010,
+    607
+   ]
+  },
+  {
+   "file": "finisher_dracula_95.png",
+   "pivot": [
+    102,
+    601
+   ],
+   "size": [
+    1010,
+    602
+   ]
+  },
+  {
+   "file": "finisher_dracula_96.png",
+   "pivot": [
+    102,
+    601
+   ],
+   "size": [
+    1010,
+    602
+   ]
+  },
+  {
+   "file": "finisher_dracula_97.png",
+   "pivot": [
+    102,
+    606
+   ],
+   "size": [
+    1010,
+    607
+   ]
+  },
+  {
+   "file": "finisher_dracula_98.png",
+   "pivot": [
+    102,
+    601
+   ],
+   "size": [
+    1010,
+    602
+   ]
+  },
+  {
+   "file": "finisher_dracula_99.png",
+   "pivot": [
+    102,
+    601
+   ],
+   "size": [
+    1010,
+    602
+   ]
+  },
+  {
+   "file": "finisher_dracula_100.png",
+   "pivot": [
+    102,
+    606
+   ],
+   "size": [
+    1010,
+    607
+   ]
+  },
+  {
+   "file": "finisher_dracula_101.png",
+   "pivot": [
+    102,
+    601
+   ],
+   "size": [
+    1010,
+    602
+   ]
+  },
+  {
+   "file": "finisher_dracula_102.png",
+   "pivot": [
+    102,
+    601
+   ],
+   "size": [
+    1010,
+    602
+   ]
+  },
+  {
+   "file": "finisher_dracula_103.png",
+   "pivot": [
+    102,
+    606
+   ],
+   "size": [
+    1010,
+    607
+   ]
+  },
+  {
+   "file": "finisher_dracula_104.png",
+   "pivot": [
+    102,
+    601
+   ],
+   "size": [
+    1010,
+    602
+   ]
+  }
+ ]
+}
