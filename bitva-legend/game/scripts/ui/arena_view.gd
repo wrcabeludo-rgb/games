@@ -302,6 +302,34 @@ func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2, flex: Variant = nu
 			draw_circle(head + Vector2(cos(a) * 40, sin(a) * 8), 6, Color(1, 0.9, 0.3))
 
 
+## Вторая фаза броска Дракулы: из-под плаща вылетает стая и сбивает брошенного на землю, потом разлетается вверх.
+func _draw_throw_bats(f: Fighter) -> void:
+	var foe: Fighter = _sim.fighters[1 - _sim.fighters.find(f)]
+	var t := clampf(float(f.state_frame) / maxi(f.landing_frames, 1), 0.0, 1.0)
+	var x0 := float(f.x) / Sim.SUB + f.facing * 60.0
+	var x1 := float(foe.x) / Sim.SUB
+	var dir := float(f.facing)
+	for i in 3:
+		# Три стайки с отставанием: летят по дуге к упавшему, долетев — взмывают и тают.
+		var ti := clampf(t * 1.3 - i * 0.12, 0.0, 1.0)
+		if ti <= 0.0 or ti >= 1.0:
+			continue
+		var pos: Vector2
+		var alpha := 1.0
+		if ti < 0.7:
+			var u := ti / 0.7
+			pos = to_screen(lerpf(x0, x1, u), lerpf(190.0, 70.0, u) + sin(u * PI) * 60.0 + i * 25.0)
+		else:
+			var u := (ti - 0.7) / 0.3
+			pos = to_screen(x1 + dir * u * 120.0, 70.0 + i * 25.0 + u * 260.0)
+			alpha = 1.0 - u
+		var tex: Texture2D = BATS_TEX[(_sim.tick / 4 + i) % BATS_TEX.size()]
+		var k := 0.36 - i * 0.04
+		draw_set_transform(pos, 0, Vector2(k * dir, k))
+		draw_texture(tex, -tex.get_size() * 0.5, Color(1, 1, 1, alpha))
+	draw_set_transform(Vector2.ZERO)
+
+
 ## Боец-заглушка: тело, голова и «нос», показывающий, куда он смотрит.
 func _draw_fighter(f: Fighter) -> void:
 	if use_sprites and sprites.in_pair_scene(f, _sim.fighters[1 - _sim.fighters.find(f)]):
@@ -315,6 +343,8 @@ func _draw_fighter(f: Fighter) -> void:
 		var fr := sprites.frame_for(f, _sim.tick, _sim.fighters[1 - _sim.fighters.find(f)])
 		if not fr.is_empty():
 			_draw_sprite(f, fr[0], fr[1], fr[2] if fr.size() > 2 else null)
+			if f.id == "dracula" and sprites.follow_anim(f).begins_with("pair_throw_"):
+				_draw_throw_bats(f)
 			return
 	if f.state == Fighter.State.DOWN:
 		_draw_down(f, true)

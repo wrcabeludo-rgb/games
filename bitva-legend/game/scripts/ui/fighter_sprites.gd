@@ -410,6 +410,13 @@ func in_pair_scene(f: Fighter, foe: Fighter) -> bool:
 			and String(_last_grab.get(foe, "")).begins_with("pair_")
 
 
+## Анимация, которую боец доигрывает после броска (кадры после release), или "" — не доигрывает.
+func follow_anim(f: Fighter) -> String:
+	if f.state != Fighter.State.LAND or not f.throw_follow:
+		return ""
+	return String(_last_grab.get(f, ""))
+
+
 ## Реакция на захват (лист grabbed: 0 — схвачен за плечи, 1 — вниз головой за лодыжку, 2 — летит после броска,
 ## 3 — обмяк после укуса) или -1. Поза — по приёму того, кто держит: укус (захват с лечением) — схвачен, потом
 ## обмяк; мельница (захват-приём без лечения) — вниз головой; бросок — схвачен, через плечо — летит; суперприём
