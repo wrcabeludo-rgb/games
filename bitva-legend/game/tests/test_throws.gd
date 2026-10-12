@@ -154,12 +154,13 @@ func _test_windmill() -> bool:
 func _test_bite() -> bool:
 	var sim := _sim_at(900, 1040)
 	sim.fighters[1].hp = 500
-	_run(sim, 0, R, 2)
+	# Укус — «вперёд, вперёд + рука» (с 3.17.40); Дракула справа, вперёд — влево.
+	_run(sim, 0, L, 2)
 	_run(sim, 0, 0, 2)
-	_run(sim, 0, R | LP)
+	_run(sim, 0, L | LP)
 	var name := _move_name(sim.fighters[1])
 	_run(sim, 0, 0, 60)
-	return name == "sp_bb_l" and sim.fighters[0].hp == 1000 - 110 and sim.fighters[1].hp == 560
+	return name == "sp_ff_l" and sim.fighters[0].hp == 1000 - 110 and sim.fighters[1].hp == 560
 
 
 func _test_mirror() -> bool:
@@ -176,7 +177,7 @@ func _test_swapped() -> bool:
 	sim.fighters[1].x = 1040 * SUB
 	_run(sim, R, 0, 2)
 	_run(sim, 0, 0, 2)
-	_run(sim, R | LP, 0)  # у Дракулы «вперёд, вперёд + рука» — гипнотический взгляд
+	_run(sim, R | LP, 0)  # у Дракулы «вперёд, вперёд + рука» — укус
 	return sim.fighters[0].id == "dracula" and _move_name(sim.fighters[0]) == "sp_ff_l"
 
 

@@ -15,7 +15,7 @@ SCALE = 0.5
 
 def boxes_from_data(who):
     src = (ROOT / "game/scripts/core/fighter_data.gd").read_text()
-    block = src[src.index(f'"{who}": {{'):]
+    block = src[src.index(f'\n\t"{who}": {{') + 1:]
     m = re.search(r'\n\t"[a-z_]+": \{', block[10:])
     block = block[:m.start() + 10] if m else block
     out = {}

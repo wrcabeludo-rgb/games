@@ -218,7 +218,7 @@
  "st_sweep": {
   "fixed_pivot": true,
   "align_to": "idle:1",
-  "fit": 1.2,
+  "fit": 1.14,
   "frames": 30,
   "grid": [
    8,
@@ -298,7 +298,7 @@
   "hit": 13,
   "hit_end": 17
  },
- "sp_ff_l": {
+ "sp_bb_l": {
   "fixed_pivot": true,
   "align_to": "idle:1",
   "fit": 1.164,
@@ -334,7 +334,7 @@
   "hit": 19,
   "hit_end": 19
  },
- "sp_bb_l": {
+ "sp_ff_l": {
   "fixed_pivot": true,
   "align_to": "idle:1",
   "fit": 1.152,

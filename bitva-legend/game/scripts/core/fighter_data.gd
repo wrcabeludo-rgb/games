@@ -146,7 +146,8 @@ const CHARACTERS := {
 			"cr_lk": {"startup": 5, "active": 4, "recovery": 7, "damage": 30, "hitstun": 13, "hitstop": 6, "push": 600, "box": [40, 0, 127, 70], "level": "low"},
 			# Апперкот (вниз + СР): удар снизу вверх, распрямляется из приседа, подбрасывает.
 			"cr_hp": {"startup": 7, "active": 4, "recovery": 20, "damage": 85, "hitstun": 20, "hitstop": 12, "push": 850, "box": [40, 77, 170, 330], "knockdown": 1, "launch": [200, 1600], "uppercut": 1},
-			"cr_hk": {"startup": 9, "active": 5, "recovery": 18, "damage": 70, "hitstun": 19, "hitstop": 10, "push": 1000, "box": [40, 0, 132, 70], "level": "low"},
+			# Сильный удар ногой сидя — та же анимация и скорость, что у лёгкого (решение владельца), чуть сильнее.
+			"cr_hk": {"startup": 5, "active": 4, "recovery": 7, "damage": 40, "hitstun": 14, "hitstop": 7, "push": 700, "box": [40, 0, 127, 70], "level": "low"},
 			"j_lp": {"startup": 4, "active": 5, "damage": 30, "hitstun": 14, "hitstop": 7, "push": 550, "box": [40, 39, 150, 140], "level": "overhead"},
 			"j_lk": {"startup": 5, "active": 7, "damage": 35, "hitstun": 15, "hitstop": 7, "push": 550, "box": [40, 31, 199, 96], "level": "overhead"},
 			"j_hp": {"startup": 7, "active": 4, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 750, "box": [25, 0, 105, 80], "level": "overhead"},
@@ -155,12 +156,12 @@ const CHARACTERS := {
 			"sp_proj_l": {"buttons": "punch", "startup": 12, "active": 1, "recovery": 22, "proj": {"x": 50, "y": 150, "vx": 1000, "vy": 0, "gravity": 0, "w": 68, "h": 44, "kind": 1, "damage": 60, "hitstun": 18, "hitstop": 9, "push": 700, "chip": 6}, "ex": {"startup": 9, "proj": {"vx": 1400, "damage": 90, "hitstun": 26, "chip": 10, "h": 70, "kind": 4}}},
 			# Туманный рывок (вниз, вниз + нога): растворяется в тумане и появляется за спиной соперника.
 			"sp_dd_l": {"buttons": "kick", "startup": 16, "active": 1, "recovery": 14, "teleport": {"invul_from": 4, "offset": 110}, "ex": {"startup": 10, "recovery": 6, "teleport": {"invul_from": 2}}},
-			# Гипнотический взгляд (вперёд, вперёд + рука): если соперник ударит в окно — застынет.
-			"sp_ff_l": {"buttons": "punch", "startup": 4, "active": 16, "recovery": 18, "counter": {"stun": 55}, "ex": {"active": 28, "counter": {"stun": 90}}},
-			# Укус (назад, назад + рука): захват, кусает и лечится. Вырваться нельзя.
-			"sp_bb_l": {"buttons": "punch", "startup": 5, "active": 2, "recovery": 28, "grab": {"range": 70, "hold": 40, "damage": 110, "heal": 60, "launch": [300, 600], "tech": 0, "recovery": 10}, "ex": {"grab": {"range": 100, "damage": 150, "heal": 120}}},
+			# Укус (вперёд, вперёд + рука): захват, кусает и лечится. Вырваться нельзя.
+			"sp_ff_l": {"buttons": "punch", "startup": 5, "active": 2, "recovery": 28, "grab": {"range": 70, "hold": 40, "damage": 110, "heal": 60, "launch": [300, 600], "tech": 0, "recovery": 10}, "ex": {"grab": {"range": 100, "damage": 150, "heal": 120}}},
+			# Гипнотический взгляд (назад, назад + рука): если соперник ударит в окно — застынет.
+			"sp_bb_l": {"buttons": "punch", "startup": 4, "active": 16, "recovery": 18, "counter": {"stun": 55}, "ex": {"active": 28, "counter": {"stun": 90}}},
 			# Классика.
-			"st_sweep": {"startup": 8, "active": 3, "recovery": 18, "damage": 60, "hitstun": 20, "hitstop": 10, "push": 600, "box": [40, 0, 161, 40], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
+			"st_sweep": {"startup": 8, "active": 3, "recovery": 18, "damage": 60, "hitstun": 20, "hitstop": 10, "push": 600, "box": [40, 0, 200, 40], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
 			"st_round": {"startup": 12, "active": 4, "recovery": 20, "damage": 100, "hitstun": 22, "hitstop": 13, "push": 1100, "box": [40, 95, 162, 222], "knockdown": 1, "launch": [600, 900], "kick": 1},
 			"throw": {"startup": 3, "active": 2, "recovery": 18, "grab": {"pair": {"ilya": {"hold": 45, "recovery": 24, "launch": [0, 300], "land": 297}}, "range": 25, "hold": 22, "damage": 100, "launch": [450, 900], "tech": 1, "recovery": 10}},
 			# «Кровавая луна» (блок + СР + СН): бросок вперёд; попал — восходит кровавая луна, стая и укус.

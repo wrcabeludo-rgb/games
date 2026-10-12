@@ -194,7 +194,9 @@ func frame_for(f: Fighter, tick: int, foe: Fighter = null) -> Array:
 				if n > 2 and f.state == Fighter.State.BLOCKSTUN:
 					# Блок из видео: 1-й кадр — защита, остальные — принял удар и выровнялся (по ходу оглушения).
 					return _pick(anims[key], 1 + _progress(f, n - 1))
-				return _pick(anims[key], mini(1 if f.state == Fighter.State.BLOCKSTUN else 0, n - 1))
+				if f.state == Fighter.State.BLOCK:
+					return [anims[key].tex[0], anims[key].pivot[0], true]  # держит блок и дышит
+				return _pick(anims[key], mini(1, n - 1))
 		Fighter.State.HITSTUN:
 			# Получил удар: удар → откинулся → сильнее всего откинулся; в конце оглушения — приходит в себя.
 			var key := "hit_low" if f.low_pose else "hit_high"

@@ -147,10 +147,11 @@ func _test_mist_intangible() -> bool:
 
 
 ## Дракула смотрит влево: «вперёд» — влево.
+## Гипнотический взгляд Дракулы — «назад, назад + рука» (с 3.17.40); Дракула справа, назад — вправо.
 func _drac_ff(sim: Sim) -> void:
-	_run(sim, 0, L, 2)
+	_run(sim, 0, R, 2)
 	_run(sim, 0, 0, 2)
-	_run(sim, 0, L | LP)
+	_run(sim, 0, R | LP)
 
 
 func _test_counter() -> bool:
@@ -169,4 +170,4 @@ func _test_counter_whiff() -> bool:
 	var sim := _sim_at(700, 1100)
 	_drac_ff(sim)
 	_run(sim, 0, 0, 30)
-	return sim.fighters[1].state == S.ATTACK and _move_name(sim.fighters[1]) == "sp_ff_l"
+	return sim.fighters[1].state == S.ATTACK and _move_name(sim.fighters[1]) == "sp_bb_l"

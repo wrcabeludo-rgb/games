@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dnhujc6jm1043"
-path="res://.godot/imported/sp_bb_l_65.png-5701c7a01fee0f3cecfed4540a1368a6.ctex"
+uid="uid://dymap17duej0q"
+path="res://.godot/imported/sp_ff_l_64.png-a8905a4707c97943ef75f6e23c810e93.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/fighters/dracula/sp_bb_l_65.png"
-dest_files=["res://.godot/imported/sp_bb_l_65.png-5701c7a01fee0f3cecfed4540a1368a6.ctex"]
+source_file="res://art/fighters/dracula/sp_ff_l_64.png"
+dest_files=["res://.godot/imported/sp_ff_l_64.png-a8905a4707c97943ef75f6e23c810e93.ctex"]
 
 [params]
 
