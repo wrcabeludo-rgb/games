@@ -160,6 +160,8 @@ func frame_for(f: Fighter, tick: int, foe: Fighter = null) -> Array:
 	match f.state:
 		Fighter.State.ATTACK:
 			var name: String = Fighter.MOVES[f.move]
+			if f.alt_hand() and anims.has(name + "_b"):
+				name += "_b"  # тот же удар подряд — другой рукой
 			if anims.has(name):
 				return _pick(anims[name], _attack_index(f, anims[name]))
 		Fighter.State.WALK_F:
@@ -298,6 +300,8 @@ func frame_for(f: Fighter, tick: int, foe: Fighter = null) -> Array:
 				var nj: int = anims.jump.tex.size()
 				var air_n: int = nj - 1 - JUMP_LAND_FRAMES
 				var p := clampf((1.0 - float(f.vy) / f.data.jump_vy) * 0.5, 0.0, 1.0)
+				if flip_angle(f) != 0.0:
+					p = 0.5  # кувырок: весь оборот — кадр «сгруппировался» (верх прыжка)
 				return _pick(anims.jump, 1 + mini(int(p * air_n), air_n - 1))
 			# Прыжок: взлёт → верх (сгруппировался) → падение.
 			if anims.has("jump") and f.move < 0 and anims.jump.tex.size() >= 8:
@@ -312,6 +316,8 @@ func frame_for(f: Fighter, tick: int, foe: Fighter = null) -> Array:
 					i8 = 5
 				if up < -0.5 or (f.vy < 0 and f.y < JUMP_LAND_HEIGHT * Fighter.SUB):
 					i8 = 6
+				if flip_angle(f) != 0.0:
+					i8 = 3  # кувырок — сгруппировался
 				return _pick(anims.jump, i8)
 			if anims.has("jump") and f.move < 0:
 				var n: int = anims.jump.tex.size()
@@ -403,6 +409,21 @@ func visual_lift(f: Fighter) -> float:
 	var rel: int = mini(ga.release - 1, ga.tex.size() - 1)
 	var i: int = ga.hit + roundi(gt * (rel - ga.hit))
 	return ga.lift[clampi(i, 0, ga.lift.size() - 1)]
+
+
+## Кувырок в прыжке вперёд/назад (рисует игра: кадр «сгруппировался» крутится на полный оборот вокруг
+## середины тела): угол поворота по ходу полёта, по часовой — вперёд; 0 — не кувыркается.
+const FLIP_FROM := 0.12   # доля полёта, где начинается оборот…
+const FLIP_TO := 0.82     # …и где заканчивается (дальше — раскрылся к приземлению)
+static func flip_angle(f: Fighter) -> float:
+	if f.state != Fighter.State.AIR or f.move >= 0 or f.vx == 0 or f.data.jump_vy <= 0:
+		return 0.0
+	var p := clampf((1.0 - float(f.vy) / f.data.jump_vy) * 0.5, 0.0, 1.0)
+	if p <= FLIP_FROM or p >= FLIP_TO:
+		return 0.0
+	var t := smoothstep(FLIP_FROM, FLIP_TO, p)
+	var forward := signi(f.vx) == f.facing
+	return TAU * t * (1.0 if forward else -1.0)
 
 
 ## Лист парной сцены захвата: суперприём — pair_<соперник>, бросок — pair_throw_<соперник>,

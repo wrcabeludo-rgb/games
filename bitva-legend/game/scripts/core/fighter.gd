@@ -69,8 +69,8 @@ const CHAIN_LATE := 10      # строку можно продолжить ещ�
 const CANCEL_LATE := 12     # попавший удар можно отменить в спецприём ещё столько тиков после активной фазы
 const COMBO_SCALE := 10     # каждый следующий удар в комбо слабее на 10%…
 const COMBO_MIN := 30       # …но не слабее 30% от полного урона
-const JUGGLE_MAX := 3       # сколько ударов можно добавить подброшенному сопернику
-const JUGGLE_DECAY := 250   # каждый удар в воздухе подбрасывает слабее
+const JUGGLE_MAX := 5       # сколько ударов можно добавить подброшенному сопернику
+const JUGGLE_DECAY := 180   # каждый удар в воздухе подбрасывает слабее
 const JUGGLE_MIN_VY := 500
 const BUTTON_OF := {"lp": 0, "lk": 1, "hp": 2, "hk": 3}
 ## Шкала силы (2.5): 3 секции.
@@ -983,18 +983,43 @@ func _try_cancel() -> bool:
 		return true
 	if (has_hit or after >= 0) and after <= CHAIN_LATE:
 		var b := _buffered_button()
-		if b < 0:
-			return false
 		var n := chain.find(-1)
-		var next := _next_in_string(b, n)
-		if next < 0:
+		var next := _next_in_string(b, n) if b >= 0 else -1
+		if next >= 0:
+			_consume_button(b)
+			chain[n] = next
+			move = next
+			_begin_move()
+			return true
+	# Цепочка по силе (как в Marvel vs Capcom): попавший удар отменяется в удар сильнее —
+	# ЛР → ЛН → СР → СН, в той же позе (стоя или сидя); ЛР можно дважды (вторая рука).
+	if has_hit and after <= CHAIN_LATE and move <= 7:
+		var b := _buffered_button()
+		var n := chain.find(-1)
+		if b < 0 or n <= 0:
 			return false
+		var cur := move % 4
+		var rank := [0, 1, 2, 3]  # ЛР, ЛН, СР, СН — по порядку кнопок
+		var twice_lp := b == 0 and cur == 0 and (n < 2 or chain[n - 2] != move)
+		if rank[b] <= rank[cur] and not twice_lp:
+			return false
+		var next: int = (move / 4) * 4 + b
 		_consume_button(b)
 		chain[n] = next
 		move = next
 		_begin_move()
 		return true
 	return false
+
+
+## Удар той же кнопкой подряд (ЛР, ЛР): второй — другой рукой (лист <удар>_b, если нарисован).
+func alt_hand() -> bool:
+	if move < 0 or move > 7:
+		return false
+	var n := chain.find(-1)
+	if n < 0:
+		n = chain.size()
+	return n >= 2 and chain[n - 1] == move and chain[n - 2] == move
 
 
 ## Следующий удар строки для кнопки button, если строка сейчас на шаге n; иначе -1.

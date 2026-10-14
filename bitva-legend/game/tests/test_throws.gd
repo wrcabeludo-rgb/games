@@ -77,7 +77,7 @@ func _test_sweep() -> bool:
 func _test_knockdown_invul() -> bool:
 	var sim := _sim_at(900, 1040)
 	_run(sim, L | LK, 0)
-	for i in 30:
+	for i in 36:
 		_run(sim, 0, 0)
 	var down := sim.fighters[1].state == S.KNOCKDOWN
 	var hp := sim.fighters[1].hp

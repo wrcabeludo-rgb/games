@@ -22,6 +22,8 @@ const ROUND_TICKS := 60 * 60        # таймер раунда: 60 секунд
 const ROUND_END_TICKS := 200        # пауза после конца раунда
 const REMATCH_DELAY := 60           # после конца матча кнопки работают не сразу
 const KO_FREEZE := 40               # драматичная заморозка на нокауте
+const HEAVY_HITSTOP := 11           # удар с заморозкой от стольких тиков — сильный…
+const HEAVY_HITSTOP_BONUS := 3      # …и замирает ещё на столько
 const WINS_NEEDED := 2
 const ONE_ROUND_TICKS := 99 * 60     # один длинный раунд финального босса
 ## Добивание: после решающего нокаута проигравший встаёт оглушённым, у победителя есть время
@@ -715,6 +717,8 @@ func _apply_hit(p: int, m: Dictionary, direction: int, spark_x: int, spark_y: in
 		return
 	var blocked := d.try_block(m)
 	var stop: int = m.hitstop
+	if stop >= HEAVY_HITSTOP:
+		stop += HEAVY_HITSTOP_BONUS  # сильный удар «весит» больше (как в Marvel vs Capcom)
 	var a := fighters[p]
 	if blocked:
 		d.take_block(m, direction)

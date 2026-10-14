@@ -22,7 +22,9 @@ func _init() -> void:
 	ok = _check("строка Дракулы ЛР, ЛР, СН — три удара подряд", _test_drac_string2()) and ok
 	ok = _check("строка в блоке: все удары выходят, урона нет", _test_string_blocked()) and ok
 	ok = _check("строка выходит и при промахе (как в МК)", _test_string_whiff()) and ok
-	ok = _check("кнопка не из строки — строка обрывается", _test_string_wrong_button()) and ok
+	ok = _check("цепочка по силе: попавший ЛР отменяется в СН", _test_string_wrong_button()) and ok
+	ok = _check("цепочка по силе: в удар слабее не отменяется", _test_chain_weaker()) and ok
+	ok = _check("ЛР, ЛР — вторая рука, третий ЛР не выходит", _test_chain_two_lp()) and ok
 	ok = _check("попавший удар отменяется в спецприём", _test_cancel_on_hit()) and ok
 	ok = _check("удар в блок тоже отменяется в спецприём", _test_cancel_on_block()) and ok
 	ok = _check("промах в спецприём не отменить", _test_no_cancel_on_whiff()) and ok
@@ -116,7 +118,30 @@ func _test_string_whiff() -> bool:
 func _test_string_wrong_button() -> bool:
 	var sim := _sim_at(900, 1040)
 	var moves := _play(sim, {0: LP, 7: HK})
-	return moves == ["st_lp"]
+	return moves == ["st_lp", "st_hk"]
+
+
+func _test_chain_weaker() -> bool:
+	var sim := _sim_at(900, 1040)
+	var moves := _play(sim, {0: HP, 14: LP})
+	return moves == ["st_hp"]
+
+
+func _test_chain_two_lp() -> bool:
+	var sim := _sim_at(900, 1040)
+	var f := sim.fighters[0]
+	var seen_alt := false
+	var moves := []
+	var was_start := false
+	var script := {0: LP, 7: LP, 15: LP}
+	for t in 70:
+		sim.step(PackedInt32Array([script.get(t, 0), 0]))
+		var at_start := f.state == S.ATTACK and f.move >= 0 and f.move_frame == 1
+		if at_start and not was_start:
+			moves.append(Fighter.MOVES[f.move])
+		was_start = at_start
+		seen_alt = seen_alt or (f.state == S.ATTACK and f.alt_hand())
+	return moves == ["st_lp", "st_lp"] and seen_alt
 
 
 ## Илья бьёт ЛР и сразу «назад, вперёд + ЛР» — палица вылетает раньше, чем закончился бы удар.

@@ -73,6 +73,8 @@ func _update_camera() -> void:
 	_shake = Vector2.ZERO
 	if _sim.hitstop > 0 and _sim.hitstop_total > 0:
 		var amp := minf(2.0 + _sim.hitstop_total * 0.6, 12.0)
+		if _sim.hitstop_total >= Sim.HEAVY_HITSTOP:
+			amp = minf(4.0 + _sim.hitstop_total * 0.9, 20.0)  # сильный удар — экран трясёт заметно
 		var k := float(_sim.hitstop) / _sim.hitstop_total
 		var sgn := 1.0 if _sim.tick % 2 == 0 else -1.0
 		_shake = Vector2(sgn * amp * k, -sgn * amp * k * 0.5)
@@ -167,6 +169,7 @@ const STOMP_OFFSET := 70.0        # снаряд волны появляется
 const CRATER_WIDTH := 364.0     # (было 520: на 30 % меньше)       # ширина на экране, px (720p)
 const CRATER_GROUND := 101.0      # линия земли в текстуре, px от верха
 const CRATER_HOLD := 180
+const FLASH_TICKS := 3          # белая вспышка получившего удар в начале заморозки
 const QUAKE_TICKS := 30         # тряска экрана от удара оземь в суперприёме
 const CRATER_FADE := 60
 var _craters: Array = []          # [x в мире, тик появления]
@@ -277,9 +280,17 @@ func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2, flex: Variant = nu
 		if pose == 2 and tm >= 0.0:
 			# Через плечо: летит по дуге над головой бросающего и переворачивается.
 			rot = -foe.facing * PI * 0.9 * smoothstep(Sim.THROW_GRIP, 1.0, tm)
+	var flip := FighterSprites.flip_angle(f)
+	if flip != 0.0:
+		# Кувырок: крутится вокруг середины тела, а не вокруг ступней.
+		var mid := Vector2(0, -float(f.data.height) * 0.55)
+		base += mid - mid.rotated(flip * f.facing)
+		rot = flip * f.facing
 	var tint := Color(0.75, 0.85, 1.0) if f.alt else Color.WHITE
 	if f.is_stunned() and _sim.hitstop > 0:
 		tint = Color(1.0, 0.75, 0.7)  # получил удар — краснеет на время заморозки
+		if _sim.hitstop_total - _sim.hitstop < FLASH_TICKS:
+			tint = Color(2.2, 2.2, 2.2)  # первые тики — белая вспышка
 	if f.hypnotized == 2:
 		tint = Color(0.6, 0.6, 0.58)  # окаменел
 	elif f.hypnotized == 3:
