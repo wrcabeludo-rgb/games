@@ -206,7 +206,9 @@ func frame_for(f: Fighter, tick: int, foe: Fighter = null) -> Array:
 				return _pick(anims[key], mini(1, n - 1))
 		Fighter.State.HITSTUN:
 			# Получил удар: удар → откинулся → сильнее всего откинулся; в конце оглушения — приходит в себя.
-			var key := "hit_low" if f.low_pose else "hit_high"
+			var key: String = "hit_low" if f.low_pose else HIT_KEYS[clampi(f.hit_kind, 0, 3)]
+			if not anims.has(key):
+				key = "hit_low" if f.low_pose else "hit_high"  # своей реакции ещё нет — общая
 			if anims.has(key):
 				var n: int = anims[key].tex.size()
 				if n > 4:
@@ -253,6 +255,8 @@ func frame_for(f: Fighter, tick: int, foe: Fighter = null) -> Array:
 		Fighter.State.AIR_HIT when f.thrown_air and anims.has("thrown") and anims.thrown.tex.size() >= 4:
 			# Летит после броска: кувырок → вниз головой у земли.
 			return _pick(anims.thrown, 2 if f.vy > 0 or f.y > 140 * Fighter.SUB else 3)
+		Fighter.State.AIR_HIT when tumble_angle(f) != 0.0 and anims.has("grabbed") and anims.grabbed.tex.size() > 2:
+			return _pick(anims.grabbed, 2)  # подброшен высоко — кувыркается (поза «летит», крутит игра)
 		Fighter.State.AIR_HIT:
 			# Полёт после удара: кадры полёта по очереди (откинуло → летит → почти лёг).
 			if anims.has("fall"):
@@ -424,6 +428,23 @@ static func flip_angle(f: Fighter) -> float:
 	var t := smoothstep(FLIP_FROM, FLIP_TO, p)
 	var forward := signi(f.vx) == f.facing
 	return TAU * t * (1.0 if forward else -1.0)
+
+
+## Реакции на удар стоя по hit_kind: голова, голова сильно, корпус, ноги (нет листа — общая hit_high).
+const HIT_KEYS := ["hit_high", "hit_heavy", "hit_body", "hit_legs"]
+## Подброшен высоко (апперкот, жонглирование): кувыркается назад через голову на полный оборот за полёт.
+const TUMBLE_VY := 1300
+static func tumble_angle(f: Fighter) -> float:
+	if f.state != Fighter.State.AIR_HIT or f.thrown_air or f.hp <= 0:
+		return 0.0
+	var g: int = f.data.gravity
+	var v0: int = f.vy + g * f.state_frame  # скорость подброса
+	if v0 < TUMBLE_VY or g <= 0:
+		return 0.0
+	var t := float(f.state_frame) / (2.0 * v0 / g * 0.8)
+	if t >= 1.0:
+		return 0.0
+	return -TAU * smoothstep(0.0, 1.0, t)
 
 
 ## Лист парной сцены захвата: суперприём — pair_<соперник>, бросок — pair_throw_<соперник>,

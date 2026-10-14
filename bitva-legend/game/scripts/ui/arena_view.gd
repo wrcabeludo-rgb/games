@@ -280,7 +280,7 @@ func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2, flex: Variant = nu
 		if pose == 2 and tm >= 0.0:
 			# Через плечо: летит по дуге над головой бросающего и переворачивается.
 			rot = -foe.facing * PI * 0.9 * smoothstep(Sim.THROW_GRIP, 1.0, tm)
-	var flip := FighterSprites.flip_angle(f)
+	var flip := FighterSprites.flip_angle(f) + FighterSprites.tumble_angle(f)
 	if flip != 0.0:
 		# Кувырок: крутится вокруг середины тела, а не вокруг ступней.
 		var mid := Vector2(0, -float(f.data.height) * 0.55)

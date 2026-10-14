@@ -124,6 +124,7 @@ var armor := 0              # сколько ударов ещё выдержи�
 var hypnotized := 0         # 1 — оглушён гипнозом, 2 — окаменел, 3 — прилип к жвачке (для отрисовки)
 var inverted := 0           # тиков до конца «перехвата»: лево и право поменялись местами
 var thrown_air := 0         # 1 — летит после броска (для отрисовки: кадры «его бросают», а не падения)
+var hit_kind := 0           # куда пришёлся последний удар (для реакции): 0 голова, 1 голова сильно, 2 корпус, 3 ноги
 var throw_follow := 0       # 1 — только что бросил (для отрисовки: последний кадр броска вместо приземления)
 var knock_on_land := 0      # приземлится — будет лежать (сбит с ног)
 var parry_timer := TAP_TIMER_MAX  # тиков с последней засчитанной попытки парирования
@@ -176,7 +177,7 @@ func save() -> PackedInt32Array:
 	s.append_array(PackedInt32Array([special_buf, special_strength, special_timer, armor, hypnotized, knock_on_land]))
 	s.append_array(chain)
 	s.append_array(PackedInt32Array([juggle, combo_damage, meter, ex, special_ex, super_timer,
-		parry_timer, parry_cool, staggered, inverted, thrown_air, throw_follow]))
+		parry_timer, parry_cool, staggered, inverted, thrown_air, throw_follow, hit_kind]))
 	return s
 
 
@@ -195,7 +196,7 @@ func load(s: PackedInt32Array) -> void:
 	juggle = s[43]; combo_damage = s[44]
 	meter = s[45]; ex = s[46]; special_ex = s[47]; super_timer = s[48]
 	parry_timer = s[49]; parry_cool = s[50]; staggered = s[51]; inverted = s[52]
-	thrown_air = s[53]; throw_follow = s[54]
+	thrown_air = s[53]; throw_follow = s[54]; hit_kind = s[55]
 
 
 # --- Вопросы о состоянии --------------------------------------------------
@@ -429,6 +430,7 @@ func take_hit(m: Dictionary, attacker_facing: int) -> void:
 	hp = maxi(hp - dmg, min_hp)
 	var was_crouching := is_crouching()
 	var juggled := state == State.AIR_HIT
+	hit_kind = _hit_kind(m)
 	move = -1
 	chain = PackedInt32Array([-1, -1, -1, -1])
 	if hp == 0:
@@ -502,6 +504,21 @@ func daze(ticks: int) -> void:
 func finisher_launch(direction: int) -> void:
 	staggered = 0
 	_launch_knockdown([700, 3400], direction)
+
+
+## Реакция на удар по месту попадания: по ногам (низкий или хитбокс у земли), в корпус (середина хитбокса ниже
+## плеч), иначе в голову — лёгкий или сильный (по заморозке).
+func _hit_kind(m: Dictionary) -> int:
+	if m.get("level", "high") == "low":
+		return 3
+	var box: Array = m.get("box", [])
+	if box.size() == 4:
+		var mid: float = float(box[1]) + float(box[3]) / 2.0
+		if float(box[1]) + float(box[3]) < data.height * 0.3:
+			return 3
+		if mid < data.height * 0.62:
+			return 2
+	return 1 if int(m.get("hitstop", 0)) >= 11 else 0
 
 
 ## Отпустили из захвата без броска: в воздухе — падает, на земле — сразу свободен.
