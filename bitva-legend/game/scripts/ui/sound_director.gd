@@ -192,8 +192,14 @@ func _on_phase(sim: Sim, vs_ai: bool) -> void:
 			elif sim.end_reason == Sim.EndReason.KO:
 				play("hit_heavy", 0.7, 3.0)
 		Sim.Phase.FINISHER:
-			play("super")
-			play("hit_heavy", 0.6, 4.0)
+			var w := sim.round_winner
+			if sim.finisher_scene(w):
+				# Добивание из видео: звук всего ролика (удары, «Фу, чеснок!»), идёт вровень с кадрами.
+				var f := sim.fighters[w]
+				play("%s_finisher_%s" % [f.id, sim.fighters[1 - w].id], 1.0, -3.0)
+			else:
+				play("super")
+				play("hit_heavy", 0.6, 4.0)
 		Sim.Phase.MATCH_END:
 			var w := sim.match_winner()
 			if w == 2:

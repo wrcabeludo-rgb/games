@@ -116,8 +116,9 @@ func _draw() -> void:
 	_draw_ground_fog()
 	if not _draw_finisher_scene():
 		for f in _sim.fighters:
-			if not sprites.in_pair_scene(f, _sim.fighters[1 - _sim.fighters.find(f)]):
-				_draw_shadow(f)
+			var other: Fighter = _sim.fighters[1 - _sim.fighters.find(f)]
+			if not sprites.in_pair_scene(f, other) and not sprites.in_pair_scene(other, f):
+				_draw_shadow(f)  # в парной сцене тени рисует сам кадр (_draw_scene_shadows)
 		for f in _sim.fighters:
 			_draw_fighter(f)
 	for pr in _sim.projectiles:
@@ -145,7 +146,11 @@ func _draw() -> void:
 			draw_line(Vector2(top.x, -10), top, Color(0.85, 0.85, 0.9, 0.8), 2)
 			_text_centered(top + Vector2(0, 8), "⇄", 34, Color(0.3, 0.85, 1.0))
 	_scenery.draw_front(self)
+	_update_particles()
+	_draw_particles()
+	_draw_grade()
 	_draw_vignette()
+	_draw_cinema_bars()
 	for p in Sim.PLAYERS:
 		_draw_spark(p)
 	if show_debug:
@@ -274,6 +279,123 @@ func _draw_shadow(f: Fighter) -> void:
 	draw_set_transform(Vector2.ZERO)
 
 
+## --- Кинематографичность (2D-приёмы вместо 3D-света МК11) ---
+const RIM_PX := 4.0                    # толщина контровой кромки, px экрана
+## Цвет света арены — цвет горизонта её неба (закат, луна, огонь), ярче.
+func _light_color() -> Color:
+	var sky: Array = Arenas.data(arena_id).get("sky", [])
+	return (sky[1] as Color).lightened(0.25) if sky.size() > 1 else Color(1.0, 0.85, 0.6)
+
+
+func _rim_color() -> Color:
+	return Color(_light_color(), 0.8)
+
+
+## С какой стороны свет: луна/солнце в правой части неба — справа (+1), иначе слева.
+func _rim_side() -> float:
+	var light: Array = Arenas.data(arena_id).get("light", [])
+	return 1.0 if light.size() > 1 and float(light[1]) >= 0.5 else -1.0
+
+
+## Цветокоррекция: лёгкая заливка экрана цветом света арены сверху (тёплая/холодная гамма) и затемнение низа.
+func _draw_grade() -> void:
+	var c := _light_color()
+	draw_rect(Rect2(Vector2.ZERO, size), Color(c, 0.06))
+	var clear := Color(c, 0.0)
+	draw_polygon(PackedVector2Array([Vector2(0, 0), Vector2(size.x, 0), Vector2(size.x, size.y * 0.45), Vector2(0, size.y * 0.45)]),
+		PackedColorArray([Color(c, 0.1), Color(c, 0.1), clear, clear]))
+
+
+## Свечение: мягкий ореол (несколько полупрозрачных кругов) — искры, глаза, эффекты.
+func _glow(at: Vector2, r: float, c: Color, strength := 1.0) -> void:
+	for i in 4:
+		var k := 1.0 - i / 4.0
+		draw_circle(at, r * (0.4 + i * 0.35), Color(c, 0.12 * k * strength))
+
+
+## Частицы (только картинка, в бой не вмешиваются): пыль от приземлений и падений, искры от сильных ударов.
+var _parts: Array = []                 # [x, y, vx, vy, жизнь, всего, цвет, размер, гравитация]
+var _prev_state := {}
+
+func _spawn(x: float, y: float, n: int, c: Color, spread: float, up: float, life: int, sz: float, grav: float) -> void:
+	for i in n:
+		var a := randf_range(-PI, 0.0)
+		_parts.append([x, y, cos(a) * spread * randf_range(0.3, 1.0), sin(a) * up * randf_range(0.3, 1.0),
+			life, life, c, sz * randf_range(0.6, 1.3), grav])
+
+
+func _update_particles() -> void:
+	for f in _sim.fighters:
+		var st: int = f.state
+		var was: int = _prev_state.get(f, st)
+		_prev_state[f] = st
+		if st == was:
+			continue
+		var gx := float(f.x) / Sim.SUB
+		var dust := Color(0.75, 0.66, 0.52)
+		if st == Fighter.State.KNOCKDOWN or st == Fighter.State.DOWN:
+			_spawn(gx, 0, 18, dust, 5.0, 4.0, 34, 13.0, -0.05)  # грохнулся
+		elif st == Fighter.State.LAND and was == Fighter.State.AIR:
+			_spawn(gx, 0, 8, dust, 3.0, 2.0, 22, 9.0, -0.03)  # приземлился
+	# Искры от сильного удара (в начале заморозки).
+	if _sim.hitstop > 0 and _sim.hitstop == _sim.hitstop_total and _sim.hitstop_total >= Sim.HEAVY_HITSTOP:
+		for p in Sim.PLAYERS:
+			if _sim.tick - _sim.sparks[p * 4] == 0:
+				_spawn(float(_sim.sparks[p * 4 + 1]) / Sim.SUB, float(_sim.sparks[p * 4 + 2]) / Sim.SUB, 14,
+					Color(1.0, 0.85, 0.45), 9.0, 9.0, 18, 4.0, 0.45)
+	for q in _parts:
+		q[0] += q[2]
+		q[1] -= q[3]
+		q[3] -= q[8]
+		q[2] *= 0.94
+		q[4] -= 1
+	_parts = _parts.filter(func(q): return q[4] > 0)
+
+
+func _draw_particles() -> void:
+	for q in _parts:
+		var k: float = float(q[4]) / float(q[5])
+		var at := to_screen(q[0], maxf(q[1], 0.0))
+		draw_circle(at, q[7] * (1.6 - k * 0.6), Color(q[6], 0.5 * k))
+
+
+## Кино-камера: чёрные полосы сверху и снизу на «кино» суперприёма, добивании и решающем нокауте.
+var _bars := 0.0
+
+func _draw_cinema_bars() -> void:
+	var want := 0.0
+	for f in _sim.fighters:
+		if f.is_super() and f.state == Fighter.State.THROWING:
+			want = 1.0
+	if _sim.phase == Sim.Phase.FINISHER or _sim.phase == Sim.Phase.FINISH:
+		want = 1.0
+	if _sim.phase == Sim.Phase.ROUND_END and _sim.phase_frame < 60 and _sim.end_reason == Sim.EndReason.KO:
+		want = 1.0
+	_bars = move_toward(_bars, want, 0.08)
+	if _bars <= 0.0:
+		return
+	var h := size.y * 0.09 * _bars
+	draw_rect(Rect2(0, 0, size.x, h), Color.BLACK)
+	draw_rect(Rect2(0, size.y - h, size.x, h), Color.BLACK)
+
+
+## Тени фигур в кадре парной сцены или добивания (их нет в симуляции): пятно под каждой фигурой, чей низ
+## у земли; чем выше фигура над землёй, тем тень меньше и бледнее. base — опорная точка кадра на экране.
+func _draw_scene_shadows(tex: Texture2D, pivot: Vector2, base: Vector2, kx: float, ky: float) -> void:
+	for ft in FighterSprites.feet_of(tex):
+		var lift: float = -float(ft[2]) * ky  # px экрана над опорной точкой (+ вверх)
+		var h := maxf(-lift, 0.0)
+		var up := maxf(lift, 0.0)
+		if up > 220.0:
+			continue
+		var k := clampf(1.0 - up / 260.0, 0.35, 1.0)
+		var cx := base.x + (float(ft[0]) + float(ft[1])) * 0.5 * kx
+		var r := absf(float(ft[1]) - float(ft[0])) * 0.5 * absf(kx) * 0.95 * k
+		draw_set_transform(Vector2(cx, base.y + h), 0, Vector2(1, 0.2))
+		draw_circle(Vector2.ZERO, maxf(r, 20.0), Color(0, 0, 0, 0.35 * k))
+	draw_set_transform(Vector2.ZERO)
+
+
 ## Кадр спрайта: опорная точка (центр бойца на земле) — в позиции бойца; смотрит влево — отражаем.
 ## flex: true — дыхание в стойке, Vector2 — покачивание в шаге (FighterSprites.walk_flex), иначе как есть.
 func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2, flex: Variant = null) -> void:
@@ -313,6 +435,12 @@ func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2, flex: Variant = nu
 		tint = Color(0.75, 1.0, 0.85)  # прилип к жвачке
 	var k := FighterSprites.SCALE / sprites.res(f.id)
 	_draw_ghosts(f, [tex, pivot, base, rot, Vector2(k * dir, k)])
+	_draw_scene_shadows(tex, pivot, base, k * dir, k)
+	# Контровой свет: силуэт в цвете неба арены, сдвинутый к свету, — светлая кромка по краю фигуры.
+	var rim := _rim_color()
+	for off in [Vector2(RIM_PX, -RIM_PX * 0.5), Vector2(RIM_PX * 0.5, -RIM_PX)]:
+		draw_set_transform(base + off * Vector2(_rim_side(), 1), rot, Vector2(k * dir, k))
+		draw_texture(tex, -pivot, rim)
 	draw_set_transform(base, rot, Vector2(k * dir, k))
 	var body_h: float = f.data.height * 2.0 * sprites.res(f.id)
 	if flex is Vector2:
@@ -380,6 +508,7 @@ func _draw_finisher_scene() -> bool:
 	var anchor := float(a.data.finishers[d.id])
 	var base := to_screen(float(d.x) / Sim.SUB - a.facing * anchor, 0.0)
 	var k := FighterSprites.SCALE / sprites.res(a.id)
+	_draw_scene_shadows(anim.tex[i], anim.pivot[i], base, k * a.facing, k)
 	draw_set_transform(base, 0, Vector2(k * a.facing, k))
 	draw_texture(anim.tex[i], -anim.pivot[i])
 	draw_set_transform(Vector2.ZERO)
@@ -420,10 +549,6 @@ func _ghost_on(f: Fighter) -> bool:
 	match f.state:
 		Fighter.State.RUN, Fighter.State.BACKDASH:
 			return true
-		Fighter.State.AIR:
-			return FighterSprites.flip_angle(f) != 0.0
-		Fighter.State.AIR_HIT:
-			return FighterSprites.tumble_angle(f) != 0.0
 		Fighter.State.ATTACK:
 			var m := f.move_data()
 			var heavy: bool = int(m.get("hitstop", 0)) >= Sim.HEAVY_HITSTOP or m.has("lunge") or f.move >= 12
@@ -975,6 +1100,7 @@ func _draw_spark(p: int) -> void:
 		var flip := 1.0
 		if kind == 2:
 			flip = float(_sim.fighters[p].facing)
+		_glow(c, 70.0 * sc / 0.2, Color(1.0, 0.8, 0.45) if kind != 2 else Color(0.6, 0.85, 1.0), k)
 		draw_set_transform(c, 0, Vector2(sc * flip, sc))
 		draw_texture(tex, -tex.get_size() * 0.5)
 		draw_set_transform(Vector2.ZERO)

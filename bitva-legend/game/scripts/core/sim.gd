@@ -33,7 +33,7 @@ const FINISH_TICKS := 180           # время на команду
 const FINISH_STEP := 30             # между нажатиями команды — не дольше
 const FINISH_RANGE := 420           # дистанция удара: не дальше, px между бойцами
 const FINISHER_TICKS := 160         # ролик добивания
-const FINISHER_SCENE_TICKS := 330   # добивание из видео (оба бойца в одном ролике: finishers в данных бойца)
+const FINISHER_SCENE_TICKS := 520   # добивание из видео: 104 кадра через один = 8,7 с, как в ролике (звук из ролика совпадает)
 const ATTACK_MASK := InputBits.LP | InputBits.LK | InputBits.HP | InputBits.HK
 
 ## Поля снаряда (PackedInt32Array): владелец, позиция, скорость, гравитация, размер,
@@ -345,7 +345,12 @@ func _hold_throws() -> void:
 		a.finish_throw(g.recovery)
 		hitstop = THROW_HITSTOP
 		hitstop_total = THROW_HITSTOP
-		_set_spark(p, d.x, d.data.height * SUB * 3 / 4, 6 if g.has("heal") else 1)  # 6 — укус
+		if g.has("land"):
+			# Парная сцена: удар о землю уже в ролике — искра на земле, где лежит соперник, без заморозки.
+			hitstop = 0
+			hitstop_total = 0
+		else:
+			_set_spark(p, d.x, d.data.height * SUB * 3 / 4, 6 if g.has("heal") else 1)  # 6 — укус
 
 
 ## Страховка: схваченный, которого никто не держит (бросающего сбили), освобождается.

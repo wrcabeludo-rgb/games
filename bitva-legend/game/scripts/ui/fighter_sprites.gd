@@ -46,14 +46,31 @@ var _last_grab := {}
 var _res := {}
 
 
+## Кадр парной сцены → пятна теней фигур в нём: [[x0, x1, низ], …] (px листа от опорной точки, tools/add_feet.py).
+static var _feet := {}
+
+
+## Тени фигур кадра (парная сцена, добивание) или [] — у обычного кадра тень рисует бой.
+static func feet_of(tex: Texture2D) -> Array:
+	return _feet.get(tex, [])
+
+
+## id бойца → {анимация: данные json} — всё, что нарисовано (текстуры грузятся по требованию: все кадры всех
+## бойцов — несколько гигабайт).
+var _meta := {}
+## id бойца → загружены ли все обычные анимации (парные сцены, добивания, радость после выбора — отдельно).
+var _full := {}
+
+
 func _init() -> void:
 	for id in FighterData.CHARACTERS:
-		_bank[id] = _load_character(id)
-		var idle: Dictionary = _bank[id].get("idle", {})
-		_res[id] = idle.get("res", 1.0)
+		_meta[id] = _scan_character(id)
+		_bank[id] = {}
+		var idle: Dictionary = _meta[id].get("idle", {})
+		_res[id] = float(idle.get("res", 1.0))
 
 
-static func _load_character(id: String) -> Dictionary:
+static func _scan_character(id: String) -> Dictionary:
 	var out := {}
 	var dir := DirAccess.open(ART_DIR + id)
 	if dir == null:
@@ -62,27 +79,68 @@ static func _load_character(id: String) -> Dictionary:
 		if not file.ends_with(".json"):
 			continue
 		var meta = JSON.parse_string(FileAccess.get_file_as_string(ART_DIR + id + "/" + file))
-		if not meta is Dictionary:
+		if meta is Dictionary:
+			out[file.get_basename()] = meta
+	return out
+
+
+## Тяжёлые листы, которые нужны редко: парные сцены и добивания (только против своего соперника),
+## радость после выбора (только в меню) — грузятся при первом обращении.
+static func _deferred(name: String) -> bool:
+	return name.begins_with("pair_") or name.begins_with("finisher_") or name.begins_with("select_win")
+
+
+static func _load_anim(id: String, meta: Dictionary) -> Dictionary:
+	var tex: Array[Texture2D] = []
+	var pivots: Array[Vector2] = []
+	for fr in meta.frames:
+		var path: String = ART_DIR + id + "/" + fr.file
+		if not ResourceLoader.exists(path):
 			continue
-		var tex: Array[Texture2D] = []
-		var pivots: Array[Vector2] = []
-		for fr in meta.frames:
-			var path: String = ART_DIR + id + "/" + fr.file
-			if not ResourceLoader.exists(path):
-				continue
-			tex.append(load(path))
-			pivots.append(Vector2(fr.pivot[0], fr.pivot[1]))
-		if not tex.is_empty():
-			# Ударные кадры (с 0); по умолчанию — 2-й из 3, предпоследний из 4+.
-			var n := tex.size()
-			var hit: int = int(meta.get("hit", 2 if n <= 3 else n - 1)) - 1
-			var hit_end: int = int(meta.get("hit_end", hit + 1)) - 1
-			out[file.get_basename()] = {"tex": tex, "pivot": pivots, "hit": clampi(hit, 0, n - 1),
-				"hit_end": clampi(hit_end, hit, n - 1), "reverse": bool(meta.get("reverse", false)),
-				"air": int(meta.get("air_frames", 1)), "res": float(meta.get("res", 1.0)),
-				"bob": float(meta.get("bob", 0.0)), "stride": float(meta.get("stride", 0.0)),
-				"cycle": int(meta.get("cycle", 0)), "release": int(meta.get("release", 0)),
-				"lift": _lift_list(meta, n)}
+		tex.append(load(path))
+		pivots.append(Vector2(fr.pivot[0], fr.pivot[1]))
+		var fi: int = tex.size() - 1
+		if meta.has("feet") and fi < meta.feet.size():
+			_feet[tex[fi]] = meta.feet[fi]
+	if tex.is_empty():
+		return {}
+	# Ударные кадры (с 0); по умолчанию — 2-й из 3, предпоследний из 4+.
+	var n := tex.size()
+	var hit: int = int(meta.get("hit", 2 if n <= 3 else n - 1)) - 1
+	var hit_end: int = int(meta.get("hit_end", hit + 1)) - 1
+	return {"tex": tex, "pivot": pivots, "hit": clampi(hit, 0, n - 1),
+		"hit_end": clampi(hit_end, hit, n - 1), "reverse": bool(meta.get("reverse", false)),
+		"air": int(meta.get("air_frames", 1)), "res": float(meta.get("res", 1.0)),
+		"bob": float(meta.get("bob", 0.0)), "stride": float(meta.get("stride", 0.0)),
+		"cycle": int(meta.get("cycle", 0)), "release": int(meta.get("release", 0)),
+		"lift": _lift_list(meta, n)}
+
+
+## Одна анимация бойца (грузит, если ещё нет); {} — не нарисована.
+func _one(id: String, name: String) -> Dictionary:
+	var bank: Dictionary = _bank.get(id, {})
+	if bank.has(name):
+		return bank[name]
+	var metas: Dictionary = _meta.get(id, {})
+	if not metas.has(name):
+		return {}
+	var a := _load_anim(id, metas[name])
+	if not a.is_empty():
+		bank[name] = a
+	return a
+
+
+## Все обычные анимации бойца (загружаются при первом появлении бойца в бою).
+func _char(id: String) -> Dictionary:
+	if not _bank.has(id):
+		return {}
+	var out: Dictionary = _bank[id]
+	if _full.get(id, false):
+		return out
+	_full[id] = true
+	for name in _meta[id]:
+		if not _deferred(name):
+			_one(id, name)
 	for a in ANIM_ALIAS:
 		if not out.has(a) and out.has(ANIM_ALIAS[a]):
 			out[a] = out[ANIM_ALIAS[a]]
@@ -95,18 +153,27 @@ static func _load_character(id: String) -> Dictionary:
 	return out
 
 
+## Парные сцены и добивание бойца id против этого соперника (грузятся, когда они впервые встретились).
+func _ensure_pairs(id: String, foe_id: String) -> void:
+	for name in _meta.get(id, {}):
+		if (name.begins_with("pair_") or name.begins_with("finisher_")) and String(name).ends_with("_" + foe_id):
+			_one(id, name)
+
+
 ## Разрешение кадров бойца: 1 — обычное, 2 — двойное (рисовать с масштабом SCALE / res).
 func res(id: String) -> float:
 	return _res.get(id, 1.0)
 
 
 func has_any(id: String) -> bool:
-	return not _bank.get(id, {}).is_empty()
+	return not _meta.get(id, {}).is_empty()
 
 
 ## Анимация бойца по имени: {"tex", "pivot", …} или пусто, если её ещё не нарисовали.
 func anim(id: String, name: String) -> Dictionary:
-	return _bank.get(id, {}).get(name, {})
+	if name == "idle" or not _meta.get(id, {}).has(name):
+		return _char(id).get(name, {})  # стойка может собираться из другого листа, псевдонимы — тоже
+	return _one(id, name)
 
 
 ## Дыхание: один кадр, натянутый на сетку; грудь, плечи и голова плавно поднимаются,
@@ -150,7 +217,9 @@ static func _lift(y: float, feet_y: float, body_h: float) -> float:
 
 ## Кадр для текущего состояния бойца: [текстура, опорная точка] или [] (нет анимации — рисовать заглушку).
 func frame_for(f: Fighter, tick: int, foe: Fighter = null) -> Array:
-	var anims: Dictionary = _bank.get(f.id, {})
+	var anims: Dictionary = _char(f.id)
+	if foe != null:
+		_ensure_pairs(f.id, foe.id)
 	if anims.is_empty():
 		return []
 	if anims.has("grabbed"):
@@ -304,8 +373,18 @@ func frame_for(f: Fighter, tick: int, foe: Fighter = null) -> Array:
 				var nj: int = anims.jump.tex.size()
 				var air_n: int = nj - 1 - JUMP_LAND_FRAMES
 				var p := clampf((1.0 - float(f.vy) / f.data.jump_vy) * 0.5, 0.0, 1.0)
-				if flip_angle(f) != 0.0:
-					p = 0.5  # кувырок: весь оборот — кадр «сгруппировался» (верх прыжка)
+				if f.vx != 0:
+					# Кувырок: до оборота — взлёт кадрами до «сгруппировался», весь оборот — сгруппированные
+					# кадры (крутит игра), после — раскрывается к земле.
+					var tk: Vector2i = _tuck(anims.jump)
+					var j: float
+					if p < FLIP_FROM:
+						j = lerpf(1.0, tk.x, p / FLIP_FROM)
+					elif p < FLIP_TO:
+						j = lerpf(tk.x, tk.y, (p - FLIP_FROM) / (FLIP_TO - FLIP_FROM))
+					else:
+						j = lerpf(tk.y, air_n, (p - FLIP_TO) / (1.0 - FLIP_TO))
+					return _pick(anims.jump, clampi(roundi(j), 1, air_n))
 				return _pick(anims.jump, 1 + mini(int(p * air_n), air_n - 1))
 			# Прыжок: взлёт → верх (сгруппировался) → падение.
 			if anims.has("jump") and f.move < 0 and anims.jump.tex.size() >= 8:
@@ -402,7 +481,7 @@ static func _lift_list(meta: Dictionary, n: int) -> PackedFloat32Array:
 func visual_lift(f: Fighter) -> float:
 	if f.state != Fighter.State.THROWING:
 		return 0.0
-	var anims: Dictionary = _bank.get(f.id, {})
+	var anims: Dictionary = _char(f.id)
 	var gkey := _grab_anim(anims, f)
 	if gkey == "" or not anims.has(gkey) or anims[gkey].lift.is_empty():
 		return 0.0
@@ -417,8 +496,8 @@ func visual_lift(f: Fighter) -> float:
 
 ## Кувырок в прыжке вперёд/назад (рисует игра: кадр «сгруппировался» крутится на полный оборот вокруг
 ## середины тела): угол поворота по ходу полёта, по часовой — вперёд; 0 — не кувыркается.
-const FLIP_FROM := 0.12   # доля полёта, где начинается оборот…
-const FLIP_TO := 0.82     # …и где заканчивается (дальше — раскрылся к приземлению)
+const FLIP_FROM := 0.2    # доля полёта, где начинается оборот…
+const FLIP_TO := 0.8      # …и где заканчивается (дальше — раскрылся к приземлению)
 static func flip_angle(f: Fighter) -> float:
 	if f.state != Fighter.State.AIR or f.move >= 0 or f.vx == 0 or f.data.jump_vy <= 0:
 		return 0.0
@@ -428,6 +507,26 @@ static func flip_angle(f: Fighter) -> float:
 	var t := smoothstep(FLIP_FROM, FLIP_TO, p)
 	var forward := signi(f.vx) == f.facing
 	return TAU * t * (1.0 if forward else -1.0)
+
+
+## Сгруппированные кадры прыжка из видео (самые низкие по высоте рисунка в середине полёта): [первый, последний].
+func _tuck(a: Dictionary) -> Vector2i:
+	if a.has("tuck"):
+		return a.tuck
+	var n: int = a.tex.size() - JUMP_LAND_FRAMES
+	var lo := 1
+	for i in range(1, n):
+		if a.tex[i].get_height() < a.tex[lo].get_height():
+			lo = i
+	var limit: float = a.tex[lo].get_height() * 1.08
+	var first := lo
+	var last := lo
+	while first > 1 and a.tex[first - 1].get_height() <= limit:
+		first -= 1
+	while last < n - 1 and a.tex[last + 1].get_height() <= limit:
+		last += 1
+	a["tuck"] = Vector2i(first, last)
+	return a.tuck
 
 
 ## Реакции на удар стоя по hit_kind: голова, голова сильно, корпус, ноги (нет листа — общая hit_high).
@@ -468,7 +567,8 @@ func in_pair_scene(f: Fighter, foe: Fighter) -> bool:
 	if foe == null:
 		return false
 	if f.state == Fighter.State.THROWN and foe.state == Fighter.State.THROWING:
-		return _bank.get(foe.id, {}).has(pair_key(foe, f))
+		_ensure_pairs(foe.id, f.id)
+		return _char(foe.id).has(pair_key(foe, f))
 	return foe.state == Fighter.State.LAND and foe.throw_follow \
 			and String(_last_grab.get(foe, "")).begins_with("pair_")
 
