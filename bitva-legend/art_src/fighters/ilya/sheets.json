@@ -155,8 +155,17 @@
   "hit_end": 20
  },
  "cr_lk": {
-  "frames": 3,
-  "fit": "h:1:440"
+  "frames": 21,
+  "grid": [
+   8,
+   3
+  ],
+  "fit": 1.115,
+  "align_to": "crouch:1",
+  "align_head": true,
+  "fixed_pivot": true,
+  "hit": 8,
+  "hit_end": 11
  },
  "cr_hp": {
   "fit": 1.112,
@@ -180,10 +189,6 @@
    25,
    26
   ]
- },
- "cr_hk": {
-  "frames": 4,
-  "fit": "h:1:407"
  },
  "j_lp": {
   "frames": 4,
@@ -210,8 +215,15 @@
   "fixed_pivot": true
  },
  "hit_low": {
-  "frames": 4,
-  "fit": "h:4:440"
+  "frames": 21,
+  "grid": [
+   8,
+   3
+  ],
+  "fit": 1.115,
+  "align_to": "crouch:1",
+  "align_head": true,
+  "fixed_pivot": true
  },
  "st_sweep": {
   "frames": 38,
@@ -472,12 +484,12 @@
   "hit": 1,
   "hit_end": 1,
   "fit": 1.509,
-  "frames": 81,
+  "frames": 78,
   "grid": [
    10,
-   9
+   8
   ],
-  "release": 63
+  "release": 48
  },
  "pair_sp_ff_l_dracula": {
   "frames": 91,

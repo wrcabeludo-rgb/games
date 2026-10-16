@@ -339,10 +339,17 @@
   "drop_ref": true
  },
  "throw": {
-  "frames": 4,
-  "fit": "inherit:idle",
-  "hit": 1,
-  "hit_end": 1
+  "frames": 63,
+  "grid": [
+   8,
+   8
+  ],
+  "fit": 1.245,
+  "align_to": "idle:1",
+  "fixed_pivot": true,
+  "hit": 4,
+  "hit_end": 4,
+  "release": 47
  },
  "thrown": {
   "frames": 4,
