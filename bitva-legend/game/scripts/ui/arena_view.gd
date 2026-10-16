@@ -57,8 +57,22 @@ func _attach_sky_video() -> void:
 	_scenery.sky_video = _sky_player
 
 
+## Рывок камеры (приближение) на сильном ударе и нокауте: 0…1, гаснет за несколько тиков.
+const PUNCH_ZOOM := 0.07
+var _punch := 0.0
+var _last_stop := 0
+
 func show_state(sim: Sim) -> void:
 	_sim = sim
+	var fresh := sim.hitstop > 0 and sim.hitstop == sim.hitstop_total and sim.hitstop != _last_stop
+	if fresh and sim.hitstop_total >= Sim.HEAVY_HITSTOP:
+		_punch = 1.0
+	_last_stop = sim.hitstop if sim.hitstop == sim.hitstop_total else _last_stop
+	if sim.hitstop == 0:
+		_last_stop = 0
+		_punch *= 0.8
+	pivot_offset = Vector2(size.x / 2.0, GROUND_Y - 220.0)
+	scale = Vector2.ONE * (1.0 + PUNCH_ZOOM * _punch)
 	queue_redraw()
 
 
@@ -99,6 +113,7 @@ func _draw() -> void:
 	_draw_walls()
 	_draw_super_backdrop()
 	_draw_craters()
+	_draw_ground_fog()
 	if not _draw_finisher_scene():
 		for f in _sim.fighters:
 			if not sprites.in_pair_scene(f, _sim.fighters[1 - _sim.fighters.find(f)]):
@@ -130,6 +145,7 @@ func _draw() -> void:
 			draw_line(Vector2(top.x, -10), top, Color(0.85, 0.85, 0.9, 0.8), 2)
 			_text_centered(top + Vector2(0, 8), "⇄", 34, Color(0.3, 0.85, 1.0))
 	_scenery.draw_front(self)
+	_draw_vignette()
 	for p in Sim.PLAYERS:
 		_draw_spark(p)
 	if show_debug:
@@ -296,6 +312,7 @@ func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2, flex: Variant = nu
 	elif f.hypnotized == 3:
 		tint = Color(0.75, 1.0, 0.85)  # прилип к жвачке
 	var k := FighterSprites.SCALE / sprites.res(f.id)
+	_draw_ghosts(f, [tex, pivot, base, rot, Vector2(k * dir, k)])
 	draw_set_transform(base, rot, Vector2(k * dir, k))
 	var body_h: float = f.data.height * 2.0 * sprites.res(f.id)
 	if flex is Vector2:
@@ -367,6 +384,75 @@ func _draw_finisher_scene() -> bool:
 	draw_texture(anim.tex[i], -anim.pivot[i])
 	draw_set_transform(Vector2.ZERO)
 	return true
+
+
+## Шлейф (смаз) за быстрым движением, как в Marvel vs Capcom: несколько прошлых кадров бойца, полупрозрачные,
+## в цвете бойца — на сильных ударах и приёмах в активной фазе, в рывках, беге, отскоке и кувырках.
+const GHOSTS := 3            # сколько прошлых кадров
+const GHOST_STEP := 2        # через сколько тиков
+var _ghost_hist := {}        # боец → [[tex, pivot, base, rot, scale], …] (последний — свежий)
+var _ghost_tick := {}
+
+func _draw_ghosts(f: Fighter, now: Array) -> void:
+	var hist: Array = _ghost_hist.get(f, [])
+	if _ghost_tick.get(f, -1) != _sim.tick:
+		_ghost_tick[f] = _sim.tick
+		hist.append(now)
+		if hist.size() > GHOSTS * GHOST_STEP + 1:
+			hist.pop_front()
+		_ghost_hist[f] = hist
+	if not _ghost_on(f):
+		return
+	var c := f.color().lightened(0.35)
+	for g in GHOSTS:
+		var i := hist.size() - 1 - (g + 1) * GHOST_STEP
+		if i < 0:
+			break
+		var h: Array = hist[i]
+		if (h[2] as Vector2).distance_to(now[2]) < 6.0 and h[0] == now[0]:
+			continue  # стоит на месте тем же кадром — шлейф не нужен
+		draw_set_transform(h[2], h[3], h[4])
+		draw_texture(h[0], -h[1], Color(c, 0.32 - g * 0.09))
+	draw_set_transform(Vector2.ZERO)
+
+
+func _ghost_on(f: Fighter) -> bool:
+	match f.state:
+		Fighter.State.RUN, Fighter.State.BACKDASH:
+			return true
+		Fighter.State.AIR:
+			return FighterSprites.flip_angle(f) != 0.0
+		Fighter.State.AIR_HIT:
+			return FighterSprites.tumble_angle(f) != 0.0
+		Fighter.State.ATTACK:
+			var m := f.move_data()
+			var heavy: bool = int(m.get("hitstop", 0)) >= Sim.HEAVY_HITSTOP or m.has("lunge") or f.move >= 12
+			return heavy and f.move_phase() == 1
+	return false
+
+
+## Атмосфера (как в МК11, но в 2D): туман стелется по земле за бойцами.
+func _draw_ground_fog() -> void:
+	for i in 7:
+		var x := fmod(i * 260.0 + _sim.tick * (0.35 + 0.12 * (i % 3)), size.x + 520.0) - 260.0
+		var y := GROUND_Y - 18.0 - (i % 3) * 14.0
+		draw_set_transform(Vector2(x, y), 0, Vector2(3.2, 0.55))
+		draw_circle(Vector2.ZERO, 70.0, Color(0.85, 0.85, 0.95, 0.045))
+	draw_set_transform(Vector2.ZERO)
+
+
+## Виньетка: края экрана темнее — взгляд в центр, картинка «дороже».
+func _draw_vignette() -> void:
+	var dark := Color(0, 0, 0, 0.42)
+	var clear := Color(0, 0, 0, 0)
+	var w := size.x * 0.16
+	var h := size.y * 0.18
+	draw_polygon(PackedVector2Array([Vector2(0, 0), Vector2(w, 0), Vector2(w, size.y), Vector2(0, size.y)]),
+		PackedColorArray([dark, clear, clear, dark]))
+	draw_polygon(PackedVector2Array([Vector2(size.x - w, 0), Vector2(size.x, 0), Vector2(size.x, size.y), Vector2(size.x - w, size.y)]),
+		PackedColorArray([clear, dark, dark, clear]))
+	draw_polygon(PackedVector2Array([Vector2(0, 0), Vector2(size.x, 0), Vector2(size.x, h), Vector2(0, h)]),
+		PackedColorArray([dark, dark, clear, clear]))
 
 
 ## Боец-заглушка: тело, голова и «нос», показывающий, куда он смотрит.

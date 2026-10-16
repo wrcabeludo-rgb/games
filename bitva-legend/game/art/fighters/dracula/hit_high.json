@@ -3,45 +3,199 @@
   {
    "file": "hit_high_1.png",
    "pivot": [
-    200,
-    529
+    194,
+    631
    ],
    "size": [
-    438,
-    530
+    492,
+    632
    ]
   },
   {
    "file": "hit_high_2.png",
    "pivot": [
-    264,
-    488
+    197,
+    631
    ],
    "size": [
-    474,
-    489
+    495,
+    632
    ]
   },
   {
    "file": "hit_high_3.png",
    "pivot": [
-    323,
-    463
+    197,
+    631
    ],
    "size": [
-    521,
-    464
+    494,
+    632
    ]
   },
   {
    "file": "hit_high_4.png",
    "pivot": [
-    194,
-    511
+    184,
+    643
    ],
    "size": [
-    362,
-    512
+    1066,
+    644
+   ]
+  },
+  {
+   "file": "hit_high_5.png",
+   "pivot": [
+    161,
+    623
+   ],
+   "size": [
+    459,
+    624
+   ]
+  },
+  {
+   "file": "hit_high_6.png",
+   "pivot": [
+    187,
+    623
+   ],
+   "size": [
+    485,
+    624
+   ]
+  },
+  {
+   "file": "hit_high_7.png",
+   "pivot": [
+    220,
+    620
+   ],
+   "size": [
+    518,
+    621
+   ]
+  },
+  {
+   "file": "hit_high_8.png",
+   "pivot": [
+    235,
+    623
+   ],
+   "size": [
+    533,
+    624
+   ]
+  },
+  {
+   "file": "hit_high_9.png",
+   "pivot": [
+    260,
+    623
+   ],
+   "size": [
+    558,
+    624
+   ]
+  },
+  {
+   "file": "hit_high_10.png",
+   "pivot": [
+    268,
+    623
+   ],
+   "size": [
+    566,
+    624
+   ]
+  },
+  {
+   "file": "hit_high_11.png",
+   "pivot": [
+    270,
+    628
+   ],
+   "size": [
+    568,
+    629
+   ]
+  },
+  {
+   "file": "hit_high_12.png",
+   "pivot": [
+    258,
+    628
+   ],
+   "size": [
+    556,
+    629
+   ]
+  },
+  {
+   "file": "hit_high_13.png",
+   "pivot": [
+    247,
+    631
+   ],
+   "size": [
+    545,
+    632
+   ]
+  },
+  {
+   "file": "hit_high_14.png",
+   "pivot": [
+    227,
+    631
+   ],
+   "size": [
+    525,
+    632
+   ]
+  },
+  {
+   "file": "hit_high_15.png",
+   "pivot": [
+    217,
+    631
+   ],
+   "size": [
+    515,
+    632
+   ]
+  },
+  {
+   "file": "hit_high_16.png",
+   "pivot": [
+    199,
+    631
+   ],
+   "size": [
+    497,
+    632
+   ]
+  },
+  {
+   "file": "hit_high_17.png",
+   "pivot": [
+    187,
+    631
+   ],
+   "size": [
+    485,
+    632
+   ]
+  },
+  {
+   "file": "hit_high_18.png",
+   "pivot": [
+    182,
+    631
+   ],
+   "size": [
+    480,
+    632
    ]
   }
  ]
