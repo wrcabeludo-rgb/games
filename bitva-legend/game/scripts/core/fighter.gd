@@ -48,6 +48,7 @@ const SUB := 100            # субпикселей в пикселе
 const AIR_PUSH_RATIO := 60  # в воздухе «тело» ниже, чтобы можно было перепрыгнуть соперника, %
 const HURT_WIDTH_RATIO := 115  # уязвимое «тело» чуть шире, чем для столкновений, %
 const DASH_WINDOW := 12     # за сколько тиков нужно нажать направление второй раз для бега/отскока
+const SUPER_WINDOW := 8     # суперприём: блок, СР и СН — в любом порядке за столько тиков
 const BUFFER := 4           # нажатие кнопки удара «запоминается» на столько тиков
 const TAP_TIMER_MAX := 99
 const PUSHBACK_DECAY := 80  # отбрасывание затухает на 20% за тик
@@ -140,6 +141,8 @@ var meter := 0              # шкала силы, 0…METER_MAX
 var ex := 0                 # 1 — текущий спецприём усиленный
 var special_ex := 0         # спецприём введён с зажатым блоком
 var super_timer := TAP_TIMER_MAX  # тиков с ввода суперприёма
+var hp_press := TAP_TIMER_MAX     # тиков с нажатия СР / СН (для суперприёма, не расходуются ударами)
+var hk_press := TAP_TIMER_MAX
 ## Удар дошёл до первого кадра суперприёма — симуляция включит затемнение и паузу.
 var flash_request := 0
 ## Усиленные версии спецприёмов (данные приёма + поле "ex"); не состояние — считаются из данных.
@@ -177,7 +180,7 @@ func save() -> PackedInt32Array:
 	s.append_array(PackedInt32Array([special_buf, special_strength, special_timer, armor, hypnotized, knock_on_land]))
 	s.append_array(chain)
 	s.append_array(PackedInt32Array([juggle, combo_damage, meter, ex, special_ex, super_timer,
-		parry_timer, parry_cool, staggered, inverted, thrown_air, throw_follow, hit_kind]))
+		parry_timer, parry_cool, staggered, inverted, thrown_air, throw_follow, hit_kind, hp_press, hk_press]))
 	return s
 
 
@@ -196,7 +199,7 @@ func load(s: PackedInt32Array) -> void:
 	juggle = s[43]; combo_damage = s[44]
 	meter = s[45]; ex = s[46]; special_ex = s[47]; super_timer = s[48]
 	parry_timer = s[49]; parry_cool = s[50]; staggered = s[51]; inverted = s[52]
-	thrown_air = s[53]; throw_follow = s[54]; hit_kind = s[55]
+	thrown_air = s[53]; throw_follow = s[54]; hit_kind = s[55]; hp_press = s[56]; hk_press = s[57]
 
 
 # --- Вопросы о состоянии --------------------------------------------------
@@ -638,6 +641,8 @@ func read_input(bits: int, aging: bool) -> Dictionary:
 		back_tap_timer = mini(back_tap_timer + 1, TAP_TIMER_MAX)
 		special_timer = mini(special_timer + 1, TAP_TIMER_MAX)
 		super_timer = mini(super_timer + 1, TAP_TIMER_MAX)
+		hp_press = mini(hp_press + 1, TAP_TIMER_MAX)
+		hk_press = mini(hk_press + 1, TAP_TIMER_MAX)
 		for i in 4:
 			btn_timers[i] = mini(btn_timers[i] + 1, TAP_TIMER_MAX)
 		for i in 3:
@@ -665,8 +670,15 @@ func read_input(bits: int, aging: bool) -> Dictionary:
 			special_ex = 1 if bits & InputBits.BLOCK else 0
 			_check_special(i)
 	# Суперприём: блок + СР + СН (вторая из сильных нажата, пока первая держится).
+	# Порядок не важен: блок держится, СР и СН нажаты за последние SUPER_WINDOW тиков, и одна из трёх кнопок —
+	# только что (на геймпаде три кнопки разом нажать трудно).
 	var heavy := InputBits.HP | InputBits.HK
-	if (bits & InputBits.BLOCK) and (bits & heavy) == heavy and (prev_bits & heavy) != heavy:
+	var fresh := (bits & ~prev_bits) & (heavy | InputBits.BLOCK)
+	if bits & InputBits.HP and not prev_bits & InputBits.HP:
+		hp_press = 0
+	if bits & InputBits.HK and not prev_bits & InputBits.HK:
+		hk_press = 0
+	if (bits & InputBits.BLOCK) and fresh != 0 and hp_press <= SUPER_WINDOW and hk_press <= SUPER_WINDOW:
 		super_timer = 0
 	prev_bits = bits
 	return {

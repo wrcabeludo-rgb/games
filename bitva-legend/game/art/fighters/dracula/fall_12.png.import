@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c55ifvxpms5e4"
-path="res://.godot/imported/fall_12.png-fdae0a8a44706d017575c2d5382677e6.ctex"
+path.s3tc="res://.godot/imported/fall_12.png-fdae0a8a44706d017575c2d5382677e6.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://art/fighters/dracula/fall_12.png"
-dest_files=["res://.godot/imported/fall_12.png-fdae0a8a44706d017575c2d5382677e6.ctex"]
+dest_files=["res://.godot/imported/fall_12.png-fdae0a8a44706d017575c2d5382677e6.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1

@@ -606,7 +606,12 @@ func _finish_input(w: int) -> bool:
 func _start_finisher(w: int) -> void:
 	finished = true
 	if finisher_scene(w):
-		# Добивание из видео: ролик рисует обоих, проигравший стоит оглушённым до конца.
+		# Добивание из видео: ролик рисует обоих с того места, где стоит победитель; проигравшего ставим
+		# туда, где он стоит в ролике (тени и камера — по нему), он оглушён до конца.
+		var a := fighters[w]
+		var d := fighters[1 - w]
+		var dist: int = int(a.data.finishers[d.id].dist)
+		d.x = clampi(a.x + a.facing * dist * SUB, d.push_half(), ARENA_WIDTH * SUB - d.push_half())
 		hitstop = 0
 		hitstop_total = 0
 		_set_phase(Phase.FINISHER)

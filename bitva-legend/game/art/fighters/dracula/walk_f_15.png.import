@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bc7wd03t57sah"
-path="res://.godot/imported/walk_f_15.png-d360fe598b581c21d7b7e4acf4069660.ctex"
+path.s3tc="res://.godot/imported/walk_f_15.png-d360fe598b581c21d7b7e4acf4069660.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://art/fighters/dracula/walk_f_15.png"
-dest_files=["res://.godot/imported/walk_f_15.png-d360fe598b581c21d7b7e4acf4069660.ctex"]
+dest_files=["res://.godot/imported/walk_f_15.png-d360fe598b581c21d7b7e4acf4069660.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1

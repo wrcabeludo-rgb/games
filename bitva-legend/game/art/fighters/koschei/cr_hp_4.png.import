@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bu6tmdcd8bk4j"
-path="res://.godot/imported/cr_hp_4.png-88ee4d47205aa3e40203247866f15583.ctex"
+path.s3tc="res://.godot/imported/cr_hp_4.png-88ee4d47205aa3e40203247866f15583.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://art/fighters/koschei/cr_hp_4.png"
-dest_files=["res://.godot/imported/cr_hp_4.png-88ee4d47205aa3e40203247866f15583.ctex"]
+dest_files=["res://.godot/imported/cr_hp_4.png-88ee4d47205aa3e40203247866f15583.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1

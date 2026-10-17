@@ -184,8 +184,15 @@
   "fixed_pivot": true
  },
  "hit_low": {
-  "frames": 4,
-  "fit": 0.92
+  "frames": 42,
+  "grid": [
+   8,
+   6
+  ],
+  "fit": 1.176,
+  "align_to": "crouch:1",
+  "align_head": true,
+  "fixed_pivot": true
  },
  "j_lk": {
   "fit": 1.579,

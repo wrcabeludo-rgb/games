@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://mrei4i1h6055"
-path="res://.godot/imported/j_hk_2.png-1b9d0cb897b3a69aca678c0e15f0d254.ctex"
+path.s3tc="res://.godot/imported/j_hk_2.png-1b9d0cb897b3a69aca678c0e15f0d254.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://art/fighters/koschei/j_hk_2.png"
-dest_files=["res://.godot/imported/j_hk_2.png-1b9d0cb897b3a69aca678c0e15f0d254.ctex"]
+dest_files=["res://.godot/imported/j_hk_2.png-1b9d0cb897b3a69aca678c0e15f0d254.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1

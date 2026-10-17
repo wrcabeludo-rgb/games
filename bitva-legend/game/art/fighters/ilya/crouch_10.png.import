@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://djkgc7pjv4h05"
-path="res://.godot/imported/crouch_10.png-7d53e9e27cc486a863e67105b2ab3cb6.ctex"
+path.s3tc="res://.godot/imported/crouch_10.png-7d53e9e27cc486a863e67105b2ab3cb6.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://art/fighters/ilya/crouch_10.png"
-dest_files=["res://.godot/imported/crouch_10.png-7d53e9e27cc486a863e67105b2ab3cb6.ctex"]
+dest_files=["res://.godot/imported/crouch_10.png-7d53e9e27cc486a863e67105b2ab3cb6.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1

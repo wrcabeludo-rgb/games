@@ -190,20 +190,6 @@
    26
   ]
  },
- "j_lp": {
-  "frames": 4,
-  "fit": "h:1:543",
-  "pivot_y": "body",
-  "hit": 2,
-  "hit_end": 3
- },
- "j_lk": {
-  "frames": 4,
-  "fit": "h:1:468",
-  "pivot_y": "body",
-  "hit": 2,
-  "hit_end": 3
- },
  "hit_high": {
   "frames": 19,
   "grid": [
@@ -238,15 +224,15 @@
   "hit_end": 22
  },
  "j_hp": {
-  "frames": 6,
+  "frames": 18,
   "grid": [
-   3,
-   2
+   8,
+   3
   ],
-  "fit": "h:1:508",
+  "fit": 1.172,
   "pivot_y": "body",
-  "hit": 4,
-  "hit_end": 5
+  "hit": 14,
+  "hit_end": 17
  },
  "st_round": {
   "fit": 1.112,
@@ -261,15 +247,15 @@
   "hit_end": 27
  },
  "j_hk": {
-  "frames": 6,
+  "frames": 18,
   "grid": [
-   3,
-   2
+   8,
+   3
   ],
-  "fit": "h:1:517",
+  "fit": 1.172,
   "pivot_y": "body",
   "hit": 4,
-  "hit_end": 5
+  "hit_end": 14
  },
  "get_up": {
   "frames": 47,
@@ -475,7 +461,27 @@
   "fixed_pivot": true,
   "hit": 1,
   "hit_end": 1,
-  "release": 38
+  "release": 38,
+  "skip": [
+   64,
+   65,
+   66,
+   67,
+   68,
+   69,
+   70,
+   71,
+   72,
+   73,
+   74,
+   75,
+   76,
+   77,
+   78,
+   79,
+   80,
+   81
+  ]
  },
  "pair_dracula": {
   "fixed_pivot": true,
@@ -502,7 +508,8 @@
   "fixed_pivot": true,
   "hit": 1,
   "hit_end": 1,
-  "release": 49
+  "release": 49,
+  "mirror": true
  },
  "finisher_dracula": {
   "frames": 104,

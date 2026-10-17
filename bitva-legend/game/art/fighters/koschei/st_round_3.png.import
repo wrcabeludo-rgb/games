@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dd6rf3fe43tns"
-path="res://.godot/imported/st_round_3.png-0886ba0fabccef30e3cb69163a86cbc2.ctex"
+path.s3tc="res://.godot/imported/st_round_3.png-0886ba0fabccef30e3cb69163a86cbc2.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://art/fighters/koschei/st_round_3.png"
-dest_files=["res://.godot/imported/st_round_3.png-0886ba0fabccef30e3cb69163a86cbc2.ctex"]
+dest_files=["res://.godot/imported/st_round_3.png-0886ba0fabccef30e3cb69163a86cbc2.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1

@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://i8six43l3qmu"
-path="res://.godot/imported/jump_18.png-c190fae1e5ccc02136d31a99d195531d.ctex"
+path.s3tc="res://.godot/imported/jump_18.png-c190fae1e5ccc02136d31a99d195531d.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://art/fighters/ilya/jump_18.png"
-dest_files=["res://.godot/imported/jump_18.png-c190fae1e5ccc02136d31a99d195531d.ctex"]
+dest_files=["res://.godot/imported/jump_18.png-c190fae1e5ccc02136d31a99d195531d.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1

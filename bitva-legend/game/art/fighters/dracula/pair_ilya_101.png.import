@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dng1f74e6k8kk"
-path="res://.godot/imported/pair_ilya_101.png-86428778c3ed6163537daca21fbc9b33.ctex"
+path.s3tc="res://.godot/imported/pair_ilya_101.png-86428778c3ed6163537daca21fbc9b33.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://art/fighters/dracula/pair_ilya_101.png"
-dest_files=["res://.godot/imported/pair_ilya_101.png-86428778c3ed6163537daca21fbc9b33.ctex"]
+dest_files=["res://.godot/imported/pair_ilya_101.png-86428778c3ed6163537daca21fbc9b33.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1

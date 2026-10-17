@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://51kn2dfi3s6t"
-path="res://.godot/imported/walk_f_10.png-a6dd5995de836116e4760225c4fa878d.ctex"
+path.s3tc="res://.godot/imported/walk_f_10.png-a6dd5995de836116e4760225c4fa878d.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://art/fighters/ilya/walk_f_10.png"
-dest_files=["res://.godot/imported/walk_f_10.png-a6dd5995de836116e4760225c4fa878d.ctex"]
+dest_files=["res://.godot/imported/walk_f_10.png-a6dd5995de836116e4760225c4fa878d.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1

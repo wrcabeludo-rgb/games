@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cnx1xocdykupj"
-path="res://.godot/imported/backdash_3.png-6c826271b7b3d1885a113d0d5f343f5c.ctex"
+path.s3tc="res://.godot/imported/backdash_3.png-6c826271b7b3d1885a113d0d5f343f5c.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://art/fighters/dracula/backdash_3.png"
-dest_files=["res://.godot/imported/backdash_3.png-6c826271b7b3d1885a113d0d5f343f5c.ctex"]
+dest_files=["res://.godot/imported/backdash_3.png-6c826271b7b3d1885a113d0d5f343f5c.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1

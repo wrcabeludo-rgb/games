@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://hp7t7ighvv8c"
-path="res://.godot/imported/throw_62.png-38a49a63413cf10732e6c337a36b1ffa.ctex"
+path.s3tc="res://.godot/imported/throw_62.png-38a49a63413cf10732e6c337a36b1ffa.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://art/fighters/dracula/throw_62.png"
-dest_files=["res://.godot/imported/throw_62.png-38a49a63413cf10732e6c337a36b1ffa.ctex"]
+dest_files=["res://.godot/imported/throw_62.png-38a49a63413cf10732e6c337a36b1ffa.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1

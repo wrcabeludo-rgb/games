@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://p2v5ghkftkcs"
-path="res://.godot/imported/super_cinema_3.png-96c6205317e96268047b76212df090da.ctex"
+path.s3tc="res://.godot/imported/super_cinema_3.png-96c6205317e96268047b76212df090da.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://art/fighters/ilya/super_cinema_3.png"
-dest_files=["res://.godot/imported/super_cinema_3.png-96c6205317e96268047b76212df090da.ctex"]
+dest_files=["res://.godot/imported/super_cinema_3.png-96c6205317e96268047b76212df090da.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1

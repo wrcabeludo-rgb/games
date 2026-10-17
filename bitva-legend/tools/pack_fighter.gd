@@ -19,8 +19,11 @@ func _init() -> void:
 			pck.add_file(dir + file, dir + file)
 			var cfg := ConfigFile.new()
 			cfg.load(dir + file)
-			var imported: String = cfg.get_value("remap", "path")
-			pck.add_file(imported, imported)
+			# Сжатие VRAM: у текстуры несколько файлов (path.s3tc, path.etc2 …), без сжатия — один (path).
+			for key in cfg.get_section_keys("remap"):
+				if String(key).begins_with("path"):
+					var imported: String = cfg.get_value("remap", key)
+					pck.add_file(imported, imported)
 			n += 1
 	pck.flush()
 	print("Пакет %s: %d кадров → %s" % [id, n, out])

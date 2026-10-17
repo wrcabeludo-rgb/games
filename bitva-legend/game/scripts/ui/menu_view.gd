@@ -143,6 +143,7 @@ func start_versus() -> void:
 	var a := _id(0)
 	var b := _id(1)
 	_dialog = Quotes.intro(a, b, Time.get_ticks_msec() / 7)
+	_sprites.prefetch(PackedStringArray([a, b]))  # кадры бойцов грузятся в фоне, пока идёт этот экран
 	arena = Arenas.for_arcade(a, b) if arcade and run != null else Arenas.for_versus(a, b, Time.get_ticks_msec() % 2)
 	arena_picked = false
 	screen = Screen.VERSUS
@@ -220,6 +221,7 @@ func _step_select(press: PackedInt32Array) -> void:
 		if press[p] & CONFIRM and ROSTER[c] != "":
 			picked[who] = true
 			picked_at[who] = tick
+			_sprites.prefetch(PackedStringArray([ROSTER[c]]))
 			win_variant[who] = (tick / 7) % 2
 			if picked[1 - who] and _id(0) == _id(1):
 				win_variant[who] = 1 - win_variant[1 - who]

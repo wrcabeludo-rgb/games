@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cjwiyino7xey0"
-path="res://.godot/imported/fall_3.png-d3a704b24f905c3ac4405c22a2dd0667.ctex"
+path.s3tc="res://.godot/imported/fall_3.png-d3a704b24f905c3ac4405c22a2dd0667.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://art/fighters/ilya/fall_3.png"
-dest_files=["res://.godot/imported/fall_3.png-d3a704b24f905c3ac4405c22a2dd0667.ctex"]
+dest_files=["res://.godot/imported/fall_3.png-d3a704b24f905c3ac4405c22a2dd0667.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1

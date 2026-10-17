@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://blo4esi1lagog"
-path="res://.godot/imported/hit_high_16.png-88a7ed182f9cc91046cfd7a213a8fedd.ctex"
+path.s3tc="res://.godot/imported/hit_high_16.png-88a7ed182f9cc91046cfd7a213a8fedd.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://art/fighters/ilya/hit_high_16.png"
-dest_files=["res://.godot/imported/hit_high_16.png-88a7ed182f9cc91046cfd7a213a8fedd.ctex"]
+dest_files=["res://.godot/imported/hit_high_16.png-88a7ed182f9cc91046cfd7a213a8fedd.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1

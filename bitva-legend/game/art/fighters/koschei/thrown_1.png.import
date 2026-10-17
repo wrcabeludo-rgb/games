@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://do2l0rv4jqeg"
-path="res://.godot/imported/thrown_1.png-90b1f172ee38bb8a249448503479ce6a.ctex"
+path.s3tc="res://.godot/imported/thrown_1.png-90b1f172ee38bb8a249448503479ce6a.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://art/fighters/koschei/thrown_1.png"
-dest_files=["res://.godot/imported/thrown_1.png-90b1f172ee38bb8a249448503479ce6a.ctex"]
+dest_files=["res://.godot/imported/thrown_1.png-90b1f172ee38bb8a249448503479ce6a.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1

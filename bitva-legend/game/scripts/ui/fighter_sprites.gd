@@ -97,7 +97,10 @@ static func _load_anim(id: String, meta: Dictionary) -> Dictionary:
 		var path: String = ART_DIR + id + "/" + fr.file
 		if not ResourceLoader.exists(path):
 			continue
-		tex.append(load(path))
+		if ResourceLoader.load_threaded_get_status(path) != ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+			tex.append(ResourceLoader.load_threaded_get(path))  # уже грузится в фоне (prefetch)
+		else:
+			tex.append(load(path))
 		pivots.append(Vector2(fr.pivot[0], fr.pivot[1]))
 		var fi: int = tex.size() - 1
 		if meta.has("feet") and fi < meta.feet.size():
@@ -113,7 +116,7 @@ static func _load_anim(id: String, meta: Dictionary) -> Dictionary:
 		"air": int(meta.get("air_frames", 1)), "res": float(meta.get("res", 1.0)),
 		"bob": float(meta.get("bob", 0.0)), "stride": float(meta.get("stride", 0.0)),
 		"cycle": int(meta.get("cycle", 0)), "release": int(meta.get("release", 0)),
-		"lift": _lift_list(meta, n)}
+		"mirror": bool(meta.get("mirror", false)), "lift": _lift_list(meta, n)}
 
 
 ## Одна анимация бойца (грузит, если ещё нет); {} — не нарисована.
@@ -151,6 +154,30 @@ func _char(id: String) -> Dictionary:
 			"hit": 0, "hit_end": 0, "reverse": false, "air": 1, "bob": 0.0, "stride": 0.0, "cycle": 0, "release": 0,
 			"lift": PackedFloat32Array()}
 	return out
+
+
+## Заранее, в фоне (несколько потоков), начать грузить кадры бойцов боя — пока идут экраны выбора и «ПРОТИВ».
+## Без этого первый кадр боя ждал загрузки тысяч кадров (зависание до минуты).
+var _prefetched := {}
+func prefetch(ids: PackedStringArray) -> void:
+	for id in ids:
+		for foe in ids:
+			var key := id + ">" + foe
+			if _prefetched.has(key):
+				continue
+			_prefetched[key] = true
+			for name in _meta.get(id, {}):
+				var pair: bool = (name.begins_with("pair_") or name.begins_with("finisher_")) \
+					and String(name).ends_with("_" + foe)
+				if _deferred(name) and not pair:
+					continue
+				if _bank.get(id, {}).has(name):
+					continue
+				for fr in _meta[id][name].frames:
+					var path: String = ART_DIR + id + "/" + fr.file
+					if ResourceLoader.exists(path) and \
+							ResourceLoader.load_threaded_get_status(path) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+						ResourceLoader.load_threaded_request(path, "", false)
 
 
 ## Парные сцены и добивание бойца id против этого соперника (грузятся, когда они впервые встретились).
@@ -295,6 +322,7 @@ func frame_for(f: Fighter, tick: int, foe: Fighter = null) -> Array:
 			if gkey != "" and gkey != "throw":
 				# Захват из видео со своей анимацией (мельница, суперприём): по ходу удержания до release.
 				_last_grab[f] = gkey
+				_grab_facing[f] = f.facing
 				var ga: Dictionary = anims[gkey]
 				var gg: Dictionary = Sim.grab_of(f, foe.id if foe != null else "")
 				var gt := clampf(1.0 - float(f.stun) / maxi(int(gg.get("hold", 30)), 1), 0.0, 1.0)
@@ -544,6 +572,20 @@ static func tumble_angle(f: Fighter) -> float:
 	if t >= 1.0:
 		return 0.0
 	return -TAU * smoothstep(0.0, 1.0, t)
+
+
+## Куда смотрел бросающий, когда схватил (парная сцена доигрывается после броска в той же ориентации, даже если
+## соперник уже оказался за спиной и бой развернул бойца).
+var _grab_facing := {}
+
+## В какую сторону рисовать бойца: после броска в парной сцене — как при захвате; у листа с "mirror" кадры
+## после броска отражены (в ролике бросок вперёд, а в игре — через себя: соперник за спиной, боец к нему лицом).
+func draw_facing(f: Fighter) -> int:
+	var key := String(_last_grab.get(f, ""))
+	if f.state == Fighter.State.LAND and f.throw_follow and key.begins_with("pair_") and _grab_facing.has(f):
+		var a: Dictionary = _char(f.id).get(key, {})
+		return -int(_grab_facing[f]) if a.get("mirror", false) else int(_grab_facing[f])
+	return f.facing
 
 
 ## Лист парной сцены захвата: суперприём — pair_<соперник>, бросок — pair_throw_<соперник>,

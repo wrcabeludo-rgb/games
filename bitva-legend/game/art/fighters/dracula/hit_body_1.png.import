@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cpt84ht7dg2jw"
-path="res://.godot/imported/hit_body_1.png-c5e905b22389243c960c9aea5777def4.ctex"
+path.s3tc="res://.godot/imported/hit_body_1.png-c5e905b22389243c960c9aea5777def4.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://art/fighters/dracula/hit_body_1.png"
-dest_files=["res://.godot/imported/hit_body_1.png-c5e905b22389243c960c9aea5777def4.ctex"]
+dest_files=["res://.godot/imported/hit_body_1.png-c5e905b22389243c960c9aea5777def4.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1

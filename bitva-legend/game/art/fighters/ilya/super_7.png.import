@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://do2ogy4fxgue2"
-path="res://.godot/imported/super_7.png-cefc3f26b862f101fb849d014e3805ee.ctex"
+path.s3tc="res://.godot/imported/super_7.png-cefc3f26b862f101fb849d014e3805ee.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://art/fighters/ilya/super_7.png"
-dest_files=["res://.godot/imported/super_7.png-cefc3f26b862f101fb849d014e3805ee.ctex"]
+dest_files=["res://.godot/imported/super_7.png-cefc3f26b862f101fb849d014e3805ee.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1

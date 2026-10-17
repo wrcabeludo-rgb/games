@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ha8bdvxdaad1"
-path="res://.godot/imported/backdash_3.png-12a0ed56a962be04c4ef2431561d9b5f.ctex"
+path.s3tc="res://.godot/imported/backdash_3.png-12a0ed56a962be04c4ef2431561d9b5f.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://art/fighters/koschei/backdash_3.png"
-dest_files=["res://.godot/imported/backdash_3.png-12a0ed56a962be04c4ef2431561d9b5f.ctex"]
+dest_files=["res://.godot/imported/backdash_3.png-12a0ed56a962be04c4ef2431561d9b5f.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1

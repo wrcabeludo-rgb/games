@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://drniuv1vtqnqt"
-path="res://.godot/imported/finisher_ilya_23.png-26ff951f1dc1cfe67afc9caec274f543.ctex"
+path.s3tc="res://.godot/imported/finisher_ilya_23.png-26ff951f1dc1cfe67afc9caec274f543.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://art/fighters/dracula/finisher_ilya_23.png"
-dest_files=["res://.godot/imported/finisher_ilya_23.png-26ff951f1dc1cfe67afc9caec274f543.ctex"]
+dest_files=["res://.godot/imported/finisher_ilya_23.png-26ff951f1dc1cfe67afc9caec274f543.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1

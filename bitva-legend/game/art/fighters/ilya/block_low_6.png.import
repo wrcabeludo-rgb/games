@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dqvu47tumvj42"
-path="res://.godot/imported/block_low_6.png-b61e8a30d83b39a8ffacd53413db77bb.ctex"
+path.s3tc="res://.godot/imported/block_low_6.png-b61e8a30d83b39a8ffacd53413db77bb.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://art/fighters/ilya/block_low_6.png"
-dest_files=["res://.godot/imported/block_low_6.png-b61e8a30d83b39a8ffacd53413db77bb.ctex"]
+dest_files=["res://.godot/imported/block_low_6.png-b61e8a30d83b39a8ffacd53413db77bb.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1

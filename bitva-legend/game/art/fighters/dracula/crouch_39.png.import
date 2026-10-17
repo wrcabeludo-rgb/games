@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cx5vvbwxjkui7"
-path="res://.godot/imported/crouch_39.png-d32b1df09a1cf2e1033a079d4bd165ed.ctex"
+path.s3tc="res://.godot/imported/crouch_39.png-d32b1df09a1cf2e1033a079d4bd165ed.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://art/fighters/dracula/crouch_39.png"
-dest_files=["res://.godot/imported/crouch_39.png-d32b1df09a1cf2e1033a079d4bd165ed.ctex"]
+dest_files=["res://.godot/imported/crouch_39.png-d32b1df09a1cf2e1033a079d4bd165ed.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1

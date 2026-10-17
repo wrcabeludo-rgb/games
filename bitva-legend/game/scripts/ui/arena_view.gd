@@ -146,11 +146,13 @@ func _draw() -> void:
 			draw_line(Vector2(top.x, -10), top, Color(0.85, 0.85, 0.9, 0.8), 2)
 			_text_centered(top + Vector2(0, 8), "⇄", 34, Color(0.3, 0.85, 1.0))
 	_scenery.draw_front(self)
-	_update_particles()
-	_draw_particles()
-	_draw_grade()
+	if CINEMA_FX:
+		_update_particles()
+		_draw_particles()
+		_draw_grade()
 	_draw_vignette()
-	_draw_cinema_bars()
+	if CINEMA_FX:
+		_draw_cinema_bars()
 	for p in Sim.PLAYERS:
 		_draw_spark(p)
 	if show_debug:
@@ -280,6 +282,9 @@ func _draw_shadow(f: Fighter) -> void:
 
 
 ## --- Кинематографичность (2D-приёмы вместо 3D-света МК11) ---
+## Эффекты 3.17.48 (контровой свет, цветокоррекция, свечение, частицы, кино-полосы) — выключены по просьбе
+## владельца, пока ищем причину зависания.
+const CINEMA_FX := false
 const RIM_PX := 4.0                    # толщина контровой кромки, px экрана
 ## Цвет света арены — цвет горизонта её неба (закат, луна, огонь), ярче.
 func _light_color() -> Color:
@@ -308,6 +313,8 @@ func _draw_grade() -> void:
 
 ## Свечение: мягкий ореол (несколько полупрозрачных кругов) — искры, глаза, эффекты.
 func _glow(at: Vector2, r: float, c: Color, strength := 1.0) -> void:
+	if not CINEMA_FX:
+		return
 	for i in 4:
 		var k := 1.0 - i / 4.0
 		draw_circle(at, r * (0.4 + i * 0.35), Color(c, 0.12 * k * strength))
@@ -400,7 +407,7 @@ func _draw_scene_shadows(tex: Texture2D, pivot: Vector2, base: Vector2, kx: floa
 ## flex: true — дыхание в стойке, Vector2 — покачивание в шаге (FighterSprites.walk_flex), иначе как есть.
 func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2, flex: Variant = null) -> void:
 	var base := to_screen(float(f.x) / Sim.SUB, float(f.y) / Sim.SUB)
-	var dir := float(f.facing)
+	var dir := float(sprites.draw_facing(f))
 	var foe: Fighter = _sim.fighters[1 - _sim.fighters.find(f)]
 	if FighterSprites.grab_pose(f, foe) == 1:
 		# Мельница: висит вниз головой и два оборота кружит вокруг того, кто держит (видно сбоку: туда-обратно).
@@ -438,7 +445,7 @@ func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2, flex: Variant = nu
 	_draw_scene_shadows(tex, pivot, base, k * dir, k)
 	# Контровой свет: силуэт в цвете неба арены, сдвинутый к свету, — светлая кромка по краю фигуры.
 	var rim := _rim_color()
-	for off in [Vector2(RIM_PX, -RIM_PX * 0.5), Vector2(RIM_PX * 0.5, -RIM_PX)]:
+	for off in ([Vector2(RIM_PX, -RIM_PX * 0.5), Vector2(RIM_PX * 0.5, -RIM_PX)] if CINEMA_FX else []):
 		draw_set_transform(base + off * Vector2(_rim_side(), 1), rot, Vector2(k * dir, k))
 		draw_texture(tex, -pivot, rim)
 	draw_set_transform(base, rot, Vector2(k * dir, k))
@@ -505,9 +512,10 @@ func _draw_finisher_scene() -> bool:
 	var i := n - 1
 	if _sim.phase == Sim.Phase.FINISHER:
 		i = clampi(_sim.phase_frame * n / maxi(_sim.finisher_ticks(), 1), 0, n - 1)
-	var anchor := float(a.data.finishers[d.id])
-	var base := to_screen(float(d.x) / Sim.SUB - a.facing * anchor, 0.0)
 	var k := FighterSprites.SCALE / sprites.res(a.id)
+	# Победитель в ролике — там, где он стоит в бою (центр его фигуры на 1-м кадре — finishers.from).
+	var from := float(a.data.finishers[d.id].from) * k
+	var base := to_screen(float(a.x) / Sim.SUB - a.facing * from, 0.0)
 	_draw_scene_shadows(anim.tex[i], anim.pivot[i], base, k * a.facing, k)
 	draw_set_transform(base, 0, Vector2(k * a.facing, k))
 	draw_texture(anim.tex[i], -anim.pivot[i])

@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://rsih04un6bbs"
-path="res://.godot/imported/walk_f_6.png-42daa26329fd1d3190996a06963317cd.ctex"
+path.s3tc="res://.godot/imported/walk_f_6.png-42daa26329fd1d3190996a06963317cd.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://art/fighters/koschei/walk_f_6.png"
-dest_files=["res://.godot/imported/walk_f_6.png-42daa26329fd1d3190996a06963317cd.ctex"]
+dest_files=["res://.godot/imported/walk_f_6.png-42daa26329fd1d3190996a06963317cd.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1

@@ -70,8 +70,9 @@ const CHARACTERS := {
 		"backdash_v0": 1000,    # отскок: начальная скорость
 		"backdash_decel": 55,   # отскок: замедление за тик (~96 px за 19 тиков)
 		"backdash_recovery": 8, # после отскока нельзя действовать, тиков
-		# Добивание из видео (лист finisher_<соперник>): на сколько px перед опорной точкой листа стоит соперник.
-		"finishers": {"dracula": 402},
+		# Добивание из видео (лист finisher_<соперник>): from — центр победителя на 1-м кадре (px листа от опорной
+		# точки), dist — на сколько px игры перед ним стоит соперник (его ставят туда в начале ролика).
+		"finishers": {"dracula": {"from": 0, "dist": 402}},
 		"strings": [
 			{"name": "Кулачный бой", "moves": ["st_lp", "st_lp", "st_hp"]},
 			{"name": "Богатырский пинок", "moves": ["st_lk", "st_hk"]},
@@ -99,14 +100,14 @@ const CHARACTERS := {
 			# Удар оземь (вниз, вниз + нога): волна по земле, низкий удар — блокировать сидя или перепрыгнуть.
 			"sp_dd_l": {"buttons": "kick", "startup": 18, "active": 1, "recovery": 24, "proj": {"x": 70, "y": 22, "vx": 900, "vy": 0, "gravity": 0, "w": 70, "h": 44, "kind": 2, "level": "low", "life": 34, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 900, "chip": 8}, "ex": {"startup": 14, "proj": {"life": 70, "vx": 1000, "w": 90, "h": 70, "damage": 120, "hitstun": 26, "chip": 14, "kind": 5}}},
 			# Мельница (вперёд, вперёд + рука): дальний захват, раскручивает и швыряет. Вырваться нельзя.
-			"sp_ff_l": {"buttons": "punch", "startup": 6, "active": 2, "recovery": 30, "grab": {"pair": {"dracula": {"hold": 60, "recovery": 30, "launch": [0, 300], "land": 410}}, "range": 90, "hold": 40, "damage": 170, "launch": [900, 1300], "tech": 0, "recovery": 12}, "ex": {"grab": {"range": 130, "damage": 240}}},
+			"sp_ff_l": {"buttons": "punch", "startup": 6, "active": 2, "recovery": 30, "grab": {"pair": {"dracula": {"hold": 60, "recovery": 30, "launch": [0, 300], "land": -395}}, "range": 90, "hold": 40, "damage": 170, "launch": [900, 1300], "tech": 0, "recovery": 12}, "ex": {"grab": {"range": 130, "damage": 240}}},
 			# Богатырский таран с палицей (назад, назад + рука): рывок вперёд, выдерживает один удар.
 			"sp_bb_l": {"buttons": "punch", "startup": 10, "active": 24, "recovery": 20, "lunge": 1500, "armor": 1, "damage": 100, "hitstun": 24, "hitstop": 13, "push": 1400, "chip": 10, "box": [30, 60, 110, 200], "ex": {"armor": 2, "lunge": 1900, "damage": 140, "chip": 16, "knockdown": 1, "launch": [400, 1500]}},
 			# Классика.
 			"st_sweep": {"startup": 9, "active": 3, "recovery": 20, "damage": 70, "hitstun": 20, "hitstop": 11, "push": 600, "box": [79, 0, 177, 40], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
 			"st_round": {"startup": 14, "active": 4, "recovery": 24, "damage": 120, "hitstun": 22, "hitstop": 14, "push": 1200, "box": [30, 160, 130, 130], "knockdown": 1, "launch": [650, 950], "kick": 1},
 			# Бросок: удар лбом и через плечо — соперник улетает за спину (over).
-			"throw": {"startup": 4, "active": 2, "recovery": 18, "grab": {"pair": {"dracula": {"hold": 60, "recovery": 40, "launch": [0, 300], "land": -180}}, "range": 25, "hold": 40, "damage": 120, "launch": [500, 1000], "tech": 1, "recovery": 14, "over": 1}},
+			"throw": {"startup": 4, "active": 2, "recovery": 18, "grab": {"pair": {"dracula": {"hold": 60, "recovery": 22, "launch": [0, 300], "land": -180}}, "range": 25, "hold": 40, "damage": 120, "launch": [500, 1000], "tech": 1, "recovery": 14, "over": 1}},
 			# «Удар с небес» (блок + СР + СН): рывок с палицей; попал — подбрасывает, Илья взмывает за облака и обрушивается с палицей.
 			"super": {"name": "УДАР С НЕБЕС", "startup": 6, "active": 8, "recovery": 45, "lunge": 700, "damage": 60, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 45, "box": [25, 40, 140, 240], "cinema": {"pair": {"dracula": {"recovery": 34, "launch": [0, 300], "land": 395}}, "hold": 80, "damage": 330, "launch": [700, 1700], "tech": 0, "recovery": 16, "scaled": 1}},
 		},
@@ -133,8 +134,9 @@ const CHARACTERS := {
 		"backdash_v0": 1700,
 		"backdash_decel": 120,
 		"backdash_recovery": 3,
-		# Добивание из видео (лист finisher_<соперник>): на сколько px перед опорной точкой листа стоит соперник.
-		"finishers": {"ilya": 25},
+		# Добивание из видео (лист finisher_<соперник>): from — центр победителя на 1-м кадре (px листа от опорной
+		# точки), dist — на сколько px игры перед ним стоит соперник (его ставят туда в начале ролика).
+		"finishers": {"ilya": {"from": -844, "dist": 457}},
 		"strings": [
 			{"name": "Когти ночи", "moves": ["st_lp", "st_lp", "st_hk"]},
 			{"name": "Взмах плаща", "moves": ["st_lk", "st_lk", "st_hp"]},
