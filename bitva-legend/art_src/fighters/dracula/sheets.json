@@ -56,7 +56,14 @@
    5
   ],
   "fit": 1.103,
-  "pivot_y": "body"
+  "pivot_y": "body",
+  "ground_frames": [
+   1,
+   34,
+   35,
+   36,
+   37
+  ]
  },
  "block": {
   "fit": 1.126,

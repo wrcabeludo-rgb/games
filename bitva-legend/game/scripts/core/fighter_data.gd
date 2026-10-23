@@ -72,7 +72,7 @@ const CHARACTERS := {
 		"backdash_recovery": 8, # после отскока нельзя действовать, тиков
 		# Добивание из видео (лист finisher_<соперник>): from — центр победителя на 1-м кадре (px листа от опорной
 		# точки), dist — на сколько px игры перед ним стоит соперник (его ставят туда в начале ролика).
-		"finishers": {"dracula": {"from": 0, "dist": 402}},
+		"finishers": {"dracula": {"from": 0, "dist": 434}},
 		"strings": [
 			{"name": "Кулачный бой", "moves": ["st_lp", "st_lp", "st_hp"]},
 			{"name": "Богатырский пинок", "moves": ["st_lk", "st_hk"]},

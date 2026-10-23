@@ -505,7 +505,7 @@
    8
   ],
   "release": 48,
-  "ground_from": 44,
+  "ground_from": 13,
   "ground_wide": true,
   "zoom_fix": [
    [
@@ -540,7 +540,13 @@
   ],
   "fit": 1.23,
   "align_to": "idle:1",
-  "fixed_pivot": true
+  "fixed_pivot": true,
+  "zoom_fix": [
+   [
+    1,
+    1.08
+   ]
+  ]
  },
  "select_win_b": {
   "frames": 60,
