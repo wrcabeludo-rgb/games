@@ -109,7 +109,7 @@ const CHARACTERS := {
 			# Бросок: удар лбом и через плечо — соперник улетает за спину (over).
 			"throw": {"startup": 4, "active": 2, "recovery": 18, "grab": {"pair": {"dracula": {"hold": 60, "recovery": 22, "launch": [0, 300], "land": -180}}, "range": 25, "hold": 40, "damage": 120, "launch": [500, 1000], "tech": 1, "recovery": 14, "over": 1}},
 			# «Удар с небес» (блок + СР + СН): рывок с палицей; попал — подбрасывает, Илья взмывает за облака и обрушивается с палицей.
-			"super": {"name": "УДАР С НЕБЕС", "startup": 6, "active": 8, "recovery": 45, "lunge": 700, "damage": 60, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 45, "box": [25, 40, 140, 240], "cinema": {"pair": {"dracula": {"recovery": 34, "launch": [0, 300], "land": 395}}, "hold": 80, "damage": 330, "launch": [700, 1700], "tech": 0, "recovery": 16, "scaled": 1}},
+			"super": {"name": "УДАР С НЕБЕС", "startup": 6, "active": 8, "recovery": 45, "lunge": 700, "damage": 60, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 45, "box": [25, 40, 140, 240], "cinema": {"pair": {"dracula": {"recovery": 34, "launch": [0, 300], "land": 275}}, "hold": 80, "damage": 330, "launch": [700, 1700], "tech": 0, "recovery": 16, "scaled": 1}},
 		},
 	},
 	"dracula": {

@@ -29,6 +29,10 @@
   reverse: true — проигрывать задом наперёд (шаг назад, нарисованный как шаг вперёд).
   hit / hit_end: номера ударных кадров (с 1) — показываются в активной фазе удара; до них — замах, после — возврат.
   skip: [номера кадров с 1] — выбросить бракованные кадры.
+  ground_from N — с кадра N боец на земле: опорная точка не выше низа фигуры (лёжа не вкапывается);
+  ground_frames [N, …] — то же для отдельных кадров (присед перед прыжком и приземление);
+  zoom_fix [[кадр, масштаб], …] — вернуть масштаб, если Veo увеличивал персонажей (вокруг опорной точки).
+  ground_wide — низ по всей ширине кадра, сдвиг не убывает (парные сцены: на полу лежит соперник).
   pivot_y "bottom_center" — центр по ширине, низ кадра (лёжа, в полёте).
   part_frames: сколько кадров в каждой части (лист прислан частями <имя>_p1, <имя>_p2, …).
   pivot_y: "feet" (по умолчанию — задняя ступня стоит на месте), "body" (по центру фигуры — ходьба, бег)
@@ -435,12 +439,34 @@ def main() -> int:
             # Первый кадр — опорная стойка из ролика (video_sheet.py … <опорный>): по нему выровняли, в игру не идёт.
             done = done[1:]
             frames = frames[1:]
+        if fixed and "zoom_fix" in opt:
+            # Veo «растил» персонажей без движения камеры (пол на месте): кадр масштабируется вокруг опорной точки,
+            # множитель — линейно между опорными кадрами [[кадр, масштаб], …] (номера после drop_ref).
+            keys = sorted((int(a), float(b)) for a, b in opt["zoom_fix"])
+            for i, d in enumerate(done, 1):
+                k = float(np.interp(i, [a for a, _ in keys], [b for _, b in keys]))
+                if abs(k - 1.0) > 1e-3:
+                    d[0] = d[0].resize((max(1, round(d[0].width * k)), max(1, round(d[0].height * k))), Image.LANCZOS)
+                    d[1] *= k
+                    d[2] *= k
+        ground_lift = 0.0
         for i, (f, px, py) in enumerate(done, 1):
             if fixed:
                 box = f.getchannel("A").point(lambda v: 255 if v > 8 else 0).getbbox()
                 if box:
                     f, px, py = f.crop(box), px - box[0], py - box[1]
                     done[i - 1] = [f, px, py]
+            if i >= int(opt.get("ground_from", 10 ** 6)) or i in opt.get("ground_frames", []):
+                # Лежит/сидит на земле: ниже опорной точки ничего нет (в ролике плащ и палица ложатся ниже ступней).
+                # Только у корпуса (±300 px от опорной точки): палица, отлетевшая в сторону, лежит «ближе к зрителю».
+                a = np.asarray(f.getchannel("A"))[:, 0 if opt.get("ground_wide") else max(0, int(px) - 300):
+                                                 None if opt.get("ground_wide") else int(px) + 300] > 40
+                if a.any():
+                    lift = max(0.0, float(np.where(a.any(1))[0].max() + 1) - py)
+                    if opt.get("ground_wide"):
+                        # Кто-то уже лежит на полу — пол дальше не поднимается (прыжок над лежащим).
+                        lift = ground_lift = max(lift, ground_lift)
+                    py += lift
             f.save(out / f"{name}_{i}.png", optimize=True)
             meta["frames"].append({"file": f"{name}_{i}.png", "pivot": [round(px), round(py)],
                                    "size": [f.width, f.height]})

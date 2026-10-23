@@ -205,6 +205,7 @@ func _combat_step(inp: PackedInt32Array, hits: bool) -> void:
 	_process_grabs()
 	_hold_throws()
 	_release_orphans()
+	_pair_lying()
 	_move_projectiles()
 	_spawn_projectiles()
 	if hits:
@@ -268,6 +269,7 @@ const THROW_LIFT := 110             # высота подъёма в броск�
 const THROW_GRIP := 0.35            # доля удержания, пока держит за ворот (дальше — поднимает)
 const THROW_OVER_LIFT := 260        # бросок через плечо: высота дуги над головой бросающего, px
 const THROW_OVER_ARC := 0.85         # …и докуда дуга доходит к броску (доля полуокружности: за спиной)
+const PAIR_DOWN_HOLD := 11         # до какого тика лежания соперник ждёт конца парной сцены (встаёт с 17-го)
 const THROW_UP := 0.8               # к этой доле удержания соперник поднят полностью
 
 
@@ -342,7 +344,7 @@ func _hold_throws() -> void:
 			var stolen := mini(d.meter, g.drain)
 			d.meter -= stolen
 			a.meter = mini(a.meter + stolen, Fighter.METER_MAX)
-		a.finish_throw(g.recovery)
+		a.finish_throw(g.recovery, g.has("land"))
 		hitstop = THROW_HITSTOP
 		hitstop_total = THROW_HITSTOP
 		if g.has("land"):
@@ -351,6 +353,16 @@ func _hold_throws() -> void:
 			hitstop_total = 0
 		else:
 			_set_spark(p, d.x, d.data.height * SUB * 3 / 4, 6 if g.has("heal") else 1)  # 6 — укус
+
+
+## Парная сцена: пока бросивший доигрывает ролик, соперника не видно — он лежит и не начинает вставать,
+## иначе появится уже наполовину вставшим.
+func _pair_lying() -> void:
+	for p in PLAYERS:
+		var a := fighters[p]
+		var d := fighters[1 - p]
+		if a.state == Fighter.State.LAND and a.throw_follow == 2 and d.state == Fighter.State.KNOCKDOWN:
+			d.state_frame = mini(d.state_frame, PAIR_DOWN_HOLD)
 
 
 ## Страховка: схваченный, которого никто не держит (бросающего сбили), освобождается.

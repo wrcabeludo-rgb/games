@@ -332,7 +332,8 @@
   "align_to": "idle:1",
   "fixed_pivot": true,
   "drop_ref": true,
-  "air_frames": 11
+  "air_frames": 11,
+  "ground_from": 12
  },
  "get_up": {
   "frames": 21,
@@ -343,7 +344,8 @@
   "fit": 1.265,
   "align_to": "idle:1",
   "fixed_pivot": true,
-  "drop_ref": true
+  "drop_ref": true,
+  "ground_from": 1
  },
  "throw": {
   "frames": 63,
