@@ -511,7 +511,9 @@ func _draw_finisher_scene() -> bool:
 	var n: int = anim.tex.size()
 	var i := n - 1
 	if _sim.phase == Sim.Phase.FINISHER:
-		i = clampi(_sim.phase_frame * n / maxi(_sim.finisher_ticks(), 1), 0, n - 1)
+		if _sim.phase_frame < Sim.FINISHER_APPROACH:
+			return false  # проигравший ещё отшатывается — обычные кадры
+		i = clampi((_sim.phase_frame - Sim.FINISHER_APPROACH) * n / Sim.FINISHER_SCENE_TICKS, 0, n - 1)
 	var k := FighterSprites.SCALE / sprites.res(a.id)
 	# Победитель в ролике — там, где он стоит в бою (центр его фигуры на 1-м кадре — finishers.from).
 	var from := float(a.data.finishers[d.id].from) * k

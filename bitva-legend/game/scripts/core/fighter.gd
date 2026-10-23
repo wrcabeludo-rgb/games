@@ -488,6 +488,15 @@ func become_thrown() -> void:
 	state_frame = 0
 
 
+## Начало добивания из видео: победитель бросает начатый удар (СР из команды) и стоит в стойке — дальше играет ролик.
+func to_stance() -> void:
+	move = -1
+	vx = 0
+	pushback = 0
+	low_pose = 0
+	_set_state(State.STAND)
+
+
 ## Добивание: проигравший стоит оглушённым (звёзды над головой), пока победитель вводит команду.
 func daze(ticks: int) -> void:
 	move = -1

@@ -34,6 +34,7 @@ const FINISH_STEP := 30             # между нажатиями команд
 const FINISH_RANGE := 420           # дистанция удара: не дальше, px между бойцами
 const FINISHER_TICKS := 160         # ролик добивания
 const FINISHER_SCENE_TICKS := 520   # добивание из видео: 104 кадра через один = 8,7 с, как в ролике (звук из ролика совпадает)
+const FINISHER_APPROACH := 14       # перед роликом добивания проигравший отшатывается туда, где он стоит в ролике
 const ATTACK_MASK := InputBits.LP | InputBits.LK | InputBits.HP | InputBits.HK
 
 ## Поля снаряда (PackedInt32Array): владелец, позиция, скорость, гравитация, размер,
@@ -172,6 +173,8 @@ func step(frame_inputs: PackedInt32Array) -> void:
 				fighters[1 - w].vy = 0
 				_set_phase(Phase.MATCH_END)
 		Phase.FINISHER:
+			if finisher_scene(round_winner) and phase_frame < FINISHER_APPROACH:
+				_finisher_approach()
 			_combat_step(PackedInt32Array([0, 0]), false)
 			if phase_frame >= finisher_ticks():
 				_set_phase(Phase.MATCH_END)
@@ -587,7 +590,7 @@ func _start_finish() -> void:
 	finish_wait = 0
 	var w := fighters[round_winner]
 	w.hp = maxi(w.hp, 1)
-	fighters[1 - round_winner].daze(FINISH_TICKS + FINISHER_SCENE_TICKS)
+	fighters[1 - round_winner].daze(FINISH_TICKS + FINISHER_APPROACH + FINISHER_SCENE_TICKS)
 	_set_phase(Phase.FINISH)
 
 
@@ -618,12 +621,9 @@ func _finish_input(w: int) -> bool:
 func _start_finisher(w: int) -> void:
 	finished = true
 	if finisher_scene(w):
-		# Добивание из видео: ролик рисует обоих с того места, где стоит победитель; проигравшего ставим
-		# туда, где он стоит в ролике (тени и камера — по нему), он оглушён до конца.
-		var a := fighters[w]
-		var d := fighters[1 - w]
-		var dist: int = int(a.data.finishers[d.id].dist)
-		d.x = clampi(a.x + a.facing * dist * SUB, d.push_half(), ARENA_WIDTH * SUB - d.push_half())
+		# Добивание из видео: ролик рисует обоих с того места, где стоит победитель; проигравший сначала
+		# отшатывается туда, где он стоит в ролике (_finisher_approach), он оглушён до конца.
+		fighters[w].to_stance()
 		hitstop = 0
 		hitstop_total = 0
 		_set_phase(Phase.FINISHER)
@@ -635,6 +635,16 @@ func _start_finisher(w: int) -> void:
 	_set_phase(Phase.FINISHER)
 
 
+## Первые FINISHER_APPROACH тиков добивания: проигравший плавно доходит до места, где он стоит в ролике
+## (раньше перескакивал туда в первом кадре ролика).
+func _finisher_approach() -> void:
+	var a := fighters[round_winner]
+	var d := fighters[1 - round_winner]
+	var dist: int = int(a.data.finishers[d.id].dist)
+	var target := clampi(a.x + a.facing * dist * SUB, d.push_half(), ARENA_WIDTH * SUB - d.push_half())
+	d.x += (target - d.x) / (FINISHER_APPROACH - phase_frame)
+
+
 ## У победителя w есть добивание-ролик против этого соперника (finishers в данных бойца).
 func finisher_scene(w: int) -> bool:
 	return w >= 0 and w <= 1 and fighters[w].data.get("finishers", {}).has(fighters[1 - w].id)
@@ -642,7 +652,7 @@ func finisher_scene(w: int) -> bool:
 
 ## Длительность добивания: ролик из видео или заглушка.
 func finisher_ticks() -> int:
-	return FINISHER_SCENE_TICKS if finisher_scene(round_winner) else FINISHER_TICKS
+	return FINISHER_APPROACH + FINISHER_SCENE_TICKS if finisher_scene(round_winner) else FINISHER_TICKS
 
 
 func _set_phase(p: Phase) -> void:

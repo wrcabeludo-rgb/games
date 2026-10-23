@@ -167,6 +167,11 @@ func update(sim: Sim, vs_ai: bool) -> void:
 	if sim.phase != _last_phase:
 		_on_phase(sim, vs_ai)
 		_last_phase = sim.phase
+	if sim.phase == Sim.Phase.FINISHER and sim.phase_frame == Sim.FINISHER_APPROACH \
+			and sim.finisher_scene(sim.round_winner):
+		# Добивание из видео: звук всего ролика (удары, «Фу, чеснок!»), идёт вровень с кадрами.
+		var w := sim.round_winner
+		play("%s_finisher_%s" % [sim.fighters[w].id, sim.fighters[1 - w].id], 1.0, -3.0)
 	for p in 2:
 		var t := sim.sparks[p * 4]
 		if t != _last_spark[p]:
@@ -193,11 +198,7 @@ func _on_phase(sim: Sim, vs_ai: bool) -> void:
 				play("hit_heavy", 0.7, 3.0)
 		Sim.Phase.FINISHER:
 			var w := sim.round_winner
-			if sim.finisher_scene(w):
-				# Добивание из видео: звук всего ролика (удары, «Фу, чеснок!»), идёт вровень с кадрами.
-				var f := sim.fighters[w]
-				play("%s_finisher_%s" % [f.id, sim.fighters[1 - w].id], 1.0, -3.0)
-			else:
+			if not sim.finisher_scene(w):  # у ролика добивания свой звук — с первым кадром ролика (update)
 				play("super")
 				play("hit_heavy", 0.6, 4.0)
 		Sim.Phase.MATCH_END:
