@@ -1869,5 +1869,12 @@
    ]
   ]
  ],
- "mirror": true
+ "mirror": true,
+ "foe": {
+  "file": "pair_sp_ff_l_dracula_foe.png",
+  "pivot": [
+   -498,
+   175
+  ]
+ }
 }

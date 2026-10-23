@@ -1566,5 +1566,12 @@
     -1
    ]
   ]
- ]
+ ],
+ "foe": {
+  "file": "pair_dracula_foe.png",
+  "pivot": [
+   -224,
+   102
+  ]
+ }
 }

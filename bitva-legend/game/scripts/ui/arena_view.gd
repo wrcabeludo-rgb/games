@@ -441,6 +441,9 @@ func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2, flex: Variant = nu
 	elif f.hypnotized == 3:
 		tint = Color(0.75, 1.0, 0.85)  # прилип к жвачке
 	var k := FighterSprites.SCALE / sprites.res(f.id)
+	var follow := sprites.follow_anim(f)
+	if follow.begins_with("pair_"):
+		_pair_end[f] = [_sim.tick, base, Vector2(k * dir, k), sprites.anim(f.id, follow)]
 	_draw_ghosts(f, [tex, pivot, base, rot, Vector2(k * dir, k)])
 	_draw_scene_shadows(tex, pivot, base, k * dir, k)
 	# Контровой свет: силуэт в цвете неба арены, сдвинутый к свету, — светлая кромка по краю фигуры.
@@ -591,8 +594,30 @@ func _draw_vignette() -> void:
 
 
 ## Боец-заглушка: тело, голова и «нос», показывающий, куда он смотрит.
+## Конец парной сцены: лежащий соперник в ролике и его спрайт — разные позы (у спрайта раскинуты руки и плащ).
+## Пока соперник лежит, рисуется он же из последнего кадра ролика (tools/pair_foe.py); спрайт — когда начинает
+## вставать: смена позы совпадает с началом движения, без подмены лежащего.
+var _pair_end := {}          # бросивший → [тик, base, scale, анимация] последнего кадра ролика
+
+
+func _draw_pair_foe(f: Fighter, thrower: Fighter) -> bool:
+	var end: Array = _pair_end.get(thrower, [])
+	if end.is_empty() or f.state != Fighter.State.KNOCKDOWN or end[3].get("foe_tex") == null:
+		return false
+	var t: int = _sim.tick - int(end[0])
+	var getting_up := f.state_frame >= Fighter.KNOCKDOWN_TICKS - FighterSprites.GET_UP_TICKS_VIDEO
+	if t <= 0 or t > Fighter.KNOCKDOWN_TICKS or getting_up:
+		return false
+	draw_set_transform(end[1], 0.0, end[2])
+	draw_texture(end[3].foe_tex, -end[3].foe_pivot)
+	draw_set_transform(Vector2.ZERO)
+	return true
+
+
 func _draw_fighter(f: Fighter) -> void:
 	if use_sprites and sprites.in_pair_scene(f, _sim.fighters[1 - _sim.fighters.find(f)]):
+		return
+	if use_sprites and _draw_pair_foe(f, _sim.fighters[1 - _sim.fighters.find(f)]):
 		return
 	if use_sprites and f.move >= 0 and f.state == Fighter.State.ATTACK and f.move_data().has("teleport"):
 		var tm := f.move_data()

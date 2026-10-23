@@ -107,6 +107,12 @@ static func _load_anim(id: String, meta: Dictionary) -> Dictionary:
 			_feet[tex[fi]] = meta.feet[fi]
 	if tex.is_empty():
 		return {}
+	# Парная сцена: лежащий соперник из последнего кадра (tools/pair_foe.py) — для перехода к его спрайту.
+	var foe_tex: Texture2D = null
+	var foe_pivot := Vector2.ZERO
+	if meta.has("foe") and ResourceLoader.exists(ART_DIR + id + "/" + meta.foe.file):
+		foe_tex = load(ART_DIR + id + "/" + meta.foe.file)
+		foe_pivot = Vector2(meta.foe.pivot[0], meta.foe.pivot[1])
 	# Ударные кадры (с 0); по умолчанию — 2-й из 3, предпоследний из 4+.
 	var n := tex.size()
 	var hit: int = int(meta.get("hit", 2 if n <= 3 else n - 1)) - 1
@@ -116,7 +122,8 @@ static func _load_anim(id: String, meta: Dictionary) -> Dictionary:
 		"air": int(meta.get("air_frames", 1)), "res": float(meta.get("res", 1.0)),
 		"bob": float(meta.get("bob", 0.0)), "stride": float(meta.get("stride", 0.0)),
 		"cycle": int(meta.get("cycle", 0)), "release": int(meta.get("release", 0)),
-		"mirror": bool(meta.get("mirror", false)), "lift": _lift_list(meta, n)}
+		"mirror": bool(meta.get("mirror", false)), "lift": _lift_list(meta, n),
+		"foe_tex": foe_tex, "foe_pivot": foe_pivot}
 
 
 ## Одна анимация бойца (грузит, если ещё нет); {} — не нарисована.

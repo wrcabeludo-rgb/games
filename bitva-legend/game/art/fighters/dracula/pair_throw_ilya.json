@@ -1013,5 +1013,12 @@
     5
    ]
   ]
- ]
+ ],
+ "foe": {
+  "file": "pair_throw_ilya_foe.png",
+  "pivot": [
+   -216,
+   237
+  ]
+ }
 }
