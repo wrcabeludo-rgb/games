@@ -72,10 +72,9 @@ const SCENARIOS := {
 	# Илья издалека: назад, назад + ЛР (таран).
 	"ram": [[0, 0, 80], [L, 0, 2], [0, 0, 2], [L | InputBits.LP, 0, 1], [0, 0, 600]],
 	"bite": [[0, 0, 80], [R, 0, 90], [L, 0, 2], [0, 0, 2], [L | InputBits.LP, 0, 1], [0, 0, 600]],
-	# Добивание (с --demo-hp=10 --demo-wins=1): подходит, нокаут ЛР, потом «вперёд, назад + СР» (несколько попыток).
-	"finisher": [[0, 0, 80], [R, 0, 110], [InputBits.LP, 0, 1], [0, 0, 150], [R, 0, 1], [0, 0, 2], [L, 0, 1], [0, 0, 2],
-		[InputBits.HP, 0, 1], [0, 0, 40], [R, 0, 1], [0, 0, 2], [L, 0, 1], [0, 0, 2], [InputBits.HP, 0, 1], [0, 0, 40],
-		[R, 0, 1], [0, 0, 2], [L, 0, 1], [0, 0, 2], [InputBits.HP, 0, 1], [0, 0, 900]],
+	# Добивание (с --demo-hp=10 --demo-wins=1): подходит, нокаут ЛР, потом сам встаёт на расстояние ролика
+	# добивания и вводит «вперёд, назад + СР» (AUTO_FINISH).
+	"finisher": [[0, 0, 80], [R, 0, 110], [InputBits.LP, 0, 1], [AUTO_FINISH, 0, 1200]],
 	# Кувырки: прыжок вперёд, потом назад.
 	"flips": [[0, 0, 100], [InputBits.UP | R, 0, 8], [0, 0, 70], [InputBits.UP | L, 0, 8], [0, 0, 600]],
 	# Подходит вплотную и бьёт апперкот (вниз + СР): соперник кувыркается в воздухе.
@@ -84,10 +83,12 @@ const SCENARIOS := {
 	"hits": [[0, 0, 80], [R, 0, 100], [InputBits.LP, 0, 1], [0, 0, 7], [InputBits.LP, 0, 1], [0, 0, 50],
 		[InputBits.HP, 0, 1], [0, 0, 60], [InputBits.HK, 0, 1], [0, 0, 60], [D, 0, 2], [D | InputBits.LK, 0, 1],
 		[0, 0, 60], [L | InputBits.LK, 0, 1], [0, 0, 600]],
-	# Добивание с подходом: после нокаута подходит вплотную (для медленных/далёких бойцов).
-	"finisher_walk": [[0, 0, 80], [R, 0, 110], [InputBits.LP, 0, 1], [0, 0, 150], [R, 0, 60], [0, 0, 2], [R, 0, 1],
-		[0, 0, 2], [L, 0, 1], [0, 0, 2], [InputBits.HP, 0, 1], [0, 0, 900]],
+	# То же для медленных бойцов (нокаут позже): подходит дольше.
+	"finisher_walk": [[0, 0, 80], [R, 0, 140], [InputBits.LP, 0, 1], [AUTO_FINISH, 0, 1200]],
 	"jump": [[0, 0, 80], [InputBits.UP, 0, 1], [0, 0, 600]],
+	# Перепрыгивание: подходит вплотную, прыгает через соперника вперёд, потом обратно.
+	"crossup": [[0, 0, 80], [R, 0, 170], [InputBits.UP | R, 0, 1], [R, 0, 50], [0, 0, 30], [InputBits.UP | L, 0, 1],
+		[L, 0, 50], [0, 0, 600]],
 	"jumpkick": [[0, 0, 80], [InputBits.UP | R, 0, 1], [R, 0, 14], [InputBits.LK, 0, 1], [0, 0, 600]],
 	# Второй боец подходит и делает «вперёд, вперёд + ЛР» (у Аватара — «Листает ленту»).
 	"forward_special": [[0, 0, 80], [0, L, 30], [0, 0, 4], [0, L, 2], [0, 0, 2], [0, L | InputBits.LP, 1], [0, 0, 600]],
@@ -101,10 +102,26 @@ const LENGTH := 112
 static var scenario := "projectiles"
 
 
-static func frame(tick: int) -> PackedInt32Array:
+static func frame(tick: int, sim: Sim = null) -> PackedInt32Array:
 	var t := 0
 	for s in SCENARIOS[scenario]:
 		t += s[2]
 		if tick < t:
+			if s[0] == AUTO_FINISH:
+				return PackedInt32Array([_auto_finish(sim, tick), s[1]])
 			return PackedInt32Array([s[0], s[1]])
 	return PackedInt32Array([0, 0])
+
+
+## Первый боец добивает: встаёт на расстояние, на котором снят ролик добивания, и вводит «вперёд, назад + СР».
+const AUTO_FINISH := -1
+static func _auto_finish(sim: Sim, tick: int) -> int:
+	if sim == null or sim.phase != Sim.Phase.FINISH:
+		return 0
+	var a := sim.fighters[0]
+	var fwd := R if a.facing > 0 else L
+	var back := L if a.facing > 0 else R
+	var gap := sim.finish_gap()
+	if gap != 0:
+		return fwd if gap > 0 else back
+	return [fwd, 0, 0, back, 0, 0, InputBits.HP, 0, 0, 0][tick % 10]

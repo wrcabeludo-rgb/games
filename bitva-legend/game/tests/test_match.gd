@@ -19,7 +19,7 @@ func _init() -> void:
 	ok = _check("время вышло при равном здоровье — ничья, победа обоим", _test_draw()) and ok
 	ok = _check("двойной нокаут — ничья", _test_double_ko()) and ok
 	ok = _check("реванш по кнопке удара после конца матча", _test_rematch()) and ok
-	ok = _check("решающий нокаут: «ДОБИВАЙ!», команда вплотную — добивание, потом победа", _test_finisher()) and ok
+	ok = _check("решающий нокаут: «ДОБИВАЙ!», команда с расстояния ролика — добивание, потом победа", _test_finisher()) and ok
 	ok = _check("не добил за отведённое время — обычная победа, никто не застрял", _test_finish_timeout()) and ok
 	ok = _check("ничья при счёте 1:1 — «Последний бой», а не ничья в матче", _test_last_bout()) and ok
 	ok = _check("здоровье: Илья 1100, Дракула 950", _test_max_hp()) and ok
@@ -169,20 +169,34 @@ func _test_finisher() -> bool:
 	var sim := _to_finish()
 	if sim.phase != P.FINISH or sim.fighters[1].state != Fighter.State.HITSTUN or sim.fighters[1].staggered != 1:
 		return false
-	# Подойти вплотную.
+	# Вплотную добивание из видео не срабатывает: нужно расстояние, на котором снят ролик.
 	for i in 120:
-		if absi(sim.fighters[1].x - sim.fighters[0].x) <= 220 * SUB:
+		if absi(sim.fighters[1].x - sim.fighters[0].x) <= 160 * SUB:
 			break
 		_run(sim, R, 0)
+	_finish_command(sim)
+	var too_close := sim.phase == P.FINISH and sim.finish_gap() < 0
+	# Отойти на расстояние ролика.
+	for i in 120:
+		var gap := sim.finish_gap()
+		if gap == 0:
+			break
+		_run(sim, R if gap > 0 else InputBits.LEFT, 0)
+		_run(sim, 0, 0, 2)
+	_finish_command(sim)
+	var started := sim.phase == P.FINISHER and sim.finished
+	_to_match_end(sim)
+	return too_close and started and sim.match_winner() == 0
+
+
+## «Вперёд, назад + СР».
+func _finish_command(sim: Sim) -> void:
 	_run(sim, 0, 0, 2)
 	_run(sim, R, 0)
 	_run(sim, 0, 0, 2)
 	_run(sim, InputBits.LEFT, 0)
 	_run(sim, 0, 0, 2)
 	_run(sim, InputBits.HP, 0)
-	var started := sim.phase == P.FINISHER and sim.finished
-	_to_match_end(sim)
-	return started and sim.match_winner() == 0
 
 
 func _test_finish_timeout() -> bool:

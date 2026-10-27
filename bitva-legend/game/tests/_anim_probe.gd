@@ -15,7 +15,7 @@ func _init() -> void:
 		sim.wins[0] = int(args[5])
 	var spr := FighterSprites.new()
 	for t in ticks:
-		sim.step(DemoInput.frame(sim.tick))
+		sim.step(DemoInput.frame(sim.tick, sim))
 		for p in 2:
 			var f := sim.fighters[p]
 			var foe := sim.fighters[1 - p]

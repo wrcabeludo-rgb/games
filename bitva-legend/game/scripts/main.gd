@@ -114,7 +114,7 @@ func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--pause="):
 			for i in 40:
-				sim.step(DemoInput.frame(sim.tick))
+				sim.step(DemoInput.frame(sim.tick, sim))
 			arena.show_state(sim)
 			hud.show_state(sim, reader, ai)
 			_open_pause(false)
@@ -163,7 +163,7 @@ func _physics_process(_delta: float) -> void:
 		return
 	var frame := raw
 	if _screenshot_path != "":
-		frame = DemoInput.frame(sim.tick)
+		frame = DemoInput.frame(sim.tick, sim)
 	if ai.level != AiController.Level.OFF:
 		frame[1] = ai.get_input(sim, 1)
 	sim.step(frame)

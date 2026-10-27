@@ -188,7 +188,13 @@
   ],
   "fit": 1.265,
   "align_to": "idle:1",
-  "fixed_pivot": true
+  "fixed_pivot": true,
+  "lift": {
+   "4": [
+    3,
+    0
+   ]
+  }
  },
  "hit_low": {
   "frames": 42,
