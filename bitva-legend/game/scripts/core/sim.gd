@@ -572,11 +572,26 @@ func _start_round() -> void:
 	_set_phase(Phase.INTRO)
 
 
-## Победитель стоит достаточно близко для добивания.
+## Победитель стоит на расстоянии добивания.
 func finish_in_range() -> bool:
+	return finish_gap() == 0
+
+
+## Куда сдвинуться для добивания: 1 — подойти ближе, -1 — отойти, 0 — в самый раз. Добивание из видео — только с
+## того расстояния, на котором снят ролик (± FINISH_TOL): иначе проигравшего приходится переставлять, а ролик
+## уезжает за край экрана.
+const FINISH_TOL := 50
+func finish_gap() -> int:
 	if round_winner < 0 or round_winner > 1:
-		return false
-	return absi(fighters[0].x - fighters[1].x) <= FINISH_RANGE * SUB
+		return 1
+	var dx := absi(fighters[0].x - fighters[1].x)
+	if finisher_scene(round_winner):
+		var a := fighters[round_winner]
+		var dist: int = int(a.data.finishers[fighters[1 - round_winner].id].dist)
+		if dx > (dist + FINISH_TOL) * SUB:
+			return 1
+		return -1 if dx < (dist - FINISH_TOL) * SUB else 0
+	return 1 if dx > FINISH_RANGE * SUB else 0
 
 
 ## Добивание возможно: нокаут решил матч.
@@ -808,13 +823,18 @@ func _record_history(p: int, bits: int) -> void:
 		h[0][1] = mini(h[0][1] + 1, MAX_HOLD_FRAMES)
 
 
-## Бойцы не проходят друг сквозь друга. На взлёте столкновения нет, а в воздухе
-## «тело» ниже — так можно перепрыгнуть соперника (кросс-ап).
+## Бойцы не проходят друг сквозь друга. На взлёте и в прыжке выше CROSS_Y столкновения нет — так можно
+## перепрыгнуть соперника (кросс-ап): у земли расталкивает в ту сторону, куда прыгнувший успел перелететь.
+## (Прыжок поднимает ступни на ~180 px, а «тело» стоящего — 300 px: раньше прыгнувшего отталкивало весь спуск.)
+const CROSS_Y := 60
 func _resolve_push() -> void:
 	var a := fighters[0]
 	var b := fighters[1]
 	if a.is_rising() or b.is_rising() or a.is_intangible() or b.is_intangible():
 		return
+	for f in fighters:
+		if f.state == Fighter.State.AIR and f.y > CROSS_Y * SUB:
+			return
 	for f in fighters:
 		if f.state == Fighter.State.THROWING or f.state == Fighter.State.THROWN:
 			return

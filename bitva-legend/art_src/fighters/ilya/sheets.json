@@ -529,8 +529,7 @@
   "fixed_pivot": true,
   "hit": 1,
   "hit_end": 1,
-  "release": 49,
-  "mirror": true
+  "release": 49
  },
  "finisher_dracula": {
   "frames": 104,
@@ -587,17 +586,5 @@
   "fit": 1.115,
   "align_to": "idle:1",
   "fixed_pivot": true
- },
- "st_lp_b": {
-  "frames": 44,
-  "grid": [
-   8,
-   6
-  ],
-  "fit": 1.115,
-  "align_to": "idle:1",
-  "fixed_pivot": true,
-  "hit": 12,
-  "hit_end": 15
  }
 }

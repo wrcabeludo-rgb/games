@@ -387,8 +387,9 @@ func _draw_finish_command() -> void:
 		draw_rect(box, Color(0.04, 0.02, 0.05, 0.85))
 		draw_rect(box, COLOR_GOLD if done else Color(0.6, 0.6, 0.65), false, 2.0)
 		_text(box.get_center() + Vector2(0, 12), steps[i], 30, COLOR_GOLD if done else COLOR_TEXT, false, true, 2)
-	if not _sim.finish_in_range():
-		_text(Vector2(cx, y + 50), "Подойди ближе!", 22, Color(1, 0.45, 0.35), false, true, 2)
+	var gap := _sim.finish_gap()
+	if gap != 0:
+		_text(Vector2(cx, y + 50), "Подойди ближе!" if gap > 0 else "Отойди дальше!", 22, Color(1, 0.45, 0.35), false, true, 2)
 
 
 ## Конец матча: портрет победителя (поза победы с экрана выбора) выезжает со своей стороны,

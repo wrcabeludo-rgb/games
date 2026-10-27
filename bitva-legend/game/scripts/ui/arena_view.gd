@@ -602,11 +602,13 @@ var _pair_end := {}          # бросивший → [тик, base, scale, ан
 
 func _draw_pair_foe(f: Fighter, thrower: Fighter) -> bool:
 	var end: Array = _pair_end.get(thrower, [])
-	if end.is_empty() or f.state != Fighter.State.KNOCKDOWN or end[3].get("foe_tex") == null:
+	var down := f.state == Fighter.State.DOWN  # нокаут парной сценой — лежит до конца раунда
+	if end.is_empty() or not (down or f.state == Fighter.State.KNOCKDOWN) or end[3].get("foe_tex") == null:
 		return false
 	var t: int = _sim.tick - int(end[0])
-	var getting_up := f.state_frame >= Fighter.KNOCKDOWN_TICKS - FighterSprites.GET_UP_TICKS_VIDEO
-	if t <= 0 or t > Fighter.KNOCKDOWN_TICKS or getting_up:
+	var getting_up := not down and f.state_frame >= Fighter.KNOCKDOWN_TICKS - FighterSprites.GET_UP_TICKS_VIDEO
+	# Лежит с тех пор, как ролик кончился (а не упал позже от другого удара).
+	if t <= 0 or f.state_frame < t or getting_up:
 		return false
 	draw_set_transform(end[1], 0.0, end[2])
 	draw_texture(end[3].foe_tex, -end[3].foe_pivot)

@@ -408,7 +408,7 @@ func frame_for(f: Fighter, tick: int, foe: Fighter = null) -> Array:
 				var nj: int = anims.jump.tex.size()
 				var air_n: int = nj - 1 - JUMP_LAND_FRAMES
 				var p := clampf((1.0 - float(f.vy) / f.data.jump_vy) * 0.5, 0.0, 1.0)
-				if f.vx != 0:
+				if f.vx != 0 and FLIPS:
 					# Кувырок: до оборота — взлёт кадрами до «сгруппировался», весь оборот — сгруппированные
 					# кадры (крутит игра), после — раскрывается к земле.
 					var tk: Vector2i = _tuck(anims.jump)
@@ -531,10 +531,13 @@ func visual_lift(f: Fighter) -> float:
 
 ## Кувырок в прыжке вперёд/назад (рисует игра: кадр «сгруппировался» крутится на полный оборот вокруг
 ## середины тела): угол поворота по ходу полёта, по часовой — вперёд; 0 — не кувыркается.
+## Кувырки, которые рисует игра (вращение кадра), выключены (решение владельца, 3.17.56): в роликах нет
+## сгруппированной позы — крутится вытянутая фигура, «вихрь». Включать, только если есть ролик кувырка.
+const FLIPS := false
 const FLIP_FROM := 0.2    # доля полёта, где начинается оборот…
 const FLIP_TO := 0.8      # …и где заканчивается (дальше — раскрылся к приземлению)
 static func flip_angle(f: Fighter) -> float:
-	if f.state != Fighter.State.AIR or f.move >= 0 or f.vx == 0 or f.data.jump_vy <= 0:
+	if not FLIPS or f.state != Fighter.State.AIR or f.move >= 0 or f.vx == 0 or f.data.jump_vy <= 0:
 		return 0.0
 	var p := clampf((1.0 - float(f.vy) / f.data.jump_vy) * 0.5, 0.0, 1.0)
 	if p <= FLIP_FROM or p >= FLIP_TO:
@@ -569,7 +572,7 @@ const HIT_KEYS := ["hit_high", "hit_heavy", "hit_body", "hit_legs"]
 ## Подброшен высоко (апперкот, жонглирование): кувыркается назад через голову на полный оборот за полёт.
 const TUMBLE_VY := 1300
 static func tumble_angle(f: Fighter) -> float:
-	if f.state != Fighter.State.AIR_HIT or f.thrown_air or f.hp <= 0:
+	if not FLIPS or f.state != Fighter.State.AIR_HIT or f.thrown_air or f.hp <= 0:
 		return 0.0
 	var g: int = f.data.gravity
 	var v0: int = f.vy + g * f.state_frame  # скорость подброса

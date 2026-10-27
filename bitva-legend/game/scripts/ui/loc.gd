@@ -87,6 +87,7 @@ const EN := {
 	"Вперёд, назад + СР вплотную · %d": "Forward, back + HP up close · %d",
 	"Вперёд, назад + СР · %d": "Forward, back + HP · %d",
 	"Подойди ближе!": "Get closer!",
+	"Отойди дальше!": "Step back!",
 	"ДОБИВАНИЕ!": "FINISHER!",
 	"Добивание (после решающего нокаута)": "Finisher (after the deciding K.O.)",
 	"Вперёд, назад + СР": "Forward, back + HP",

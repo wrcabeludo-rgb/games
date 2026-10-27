@@ -547,6 +547,13 @@ func take_throw(grab: Dictionary, direction: int) -> void:
 	var dmg: int = scaled_damage(grab.damage, combo + 1) if grab.get("scaled", 0) else grab.damage
 	combo = 0
 	hp = maxi(hp - dmg, min_hp)
+	if hp == 0 and grab.has("land"):
+		# Нокаут парной сценой: в ролике соперник уже лежит — без полёта нокаута (иначе висит в воздухе).
+		y = 0
+		vx = 0
+		vy = 0
+		_set_state(State.DOWN)
+		return
 	if hp == 0:
 		vx = KO_VX * direction
 		vy = KO_VY
