@@ -1,23 +1,44 @@
 {
  "jump": {
-  "part_frames": 4,
-  "fit": 0.8865,
-  "pivot_y": "body_ground",
+  "frames": 34,
+  "grid": [
+   8,
+   5
+  ],
+  "fit": 1.755,
+  "drop_ref": true,
   "align_to": "idle:1",
-  "match_scale": true
+  "pivot_y": "body",
+  "ground_frames": [
+   1,
+   30,
+   31,
+   32,
+   33
+  ]
  },
  "block": {
-  "frames": 2,
-  "fit": 0.8865,
+  "fixed_pivot": true,
   "align_to": "idle:1",
-  "match_scale": true
+  "drop_ref": true,
+  "fit": 1.244,
+  "frames": 21,
+  "grid": [
+   8,
+   3
+  ]
  },
  "crouch": {
-  "frames": 2,
-  "fit": "h:2:371",
+  "fixed_pivot": true,
   "align_to": "idle:1",
-  "align_frame": 2,
-  "align_head": true
+  "drop_ref": true,
+  "fit": 1.244,
+  "frames": 56,
+  "grid": [
+   8,
+   8
+  ],
+  "cycle": 140
  },
  "backdash": {
   "frames": 3,
@@ -48,36 +69,54 @@
   "align_frame": 4
  },
  "block_low": {
-  "frames": 2,
-  "fit": 0.733,
-  "align_to": "crouch:2",
-  "align_head": true
+  "fixed_pivot": true,
+  "align_to": "idle:1",
+  "drop_ref": true,
+  "fit": 1.244,
+  "frames": 25,
+  "grid": [
+   8,
+   4
+  ]
  },
  "fall": {
-  "part_frames": 4,
-  "fit": 0.8865,
-  "pivot_y": "bottom_center",
-  "air_frames": 4,
-  "frame_scale": {
-   "6": 1.15,
-   "7": 1.15,
-   "8": 1.15
-  }
+  "fixed_pivot": true,
+  "align_to": "idle:1",
+  "drop_ref": true,
+  "fit": 1.244,
+  "frames": 25,
+  "grid": [
+   8,
+   4
+  ],
+  "air_frames": 23,
+  "ground_from": 24
  },
  "get_up": {
-  "frames": 4,
-  "fit": 0.8865,
-  "pivot_y": "bottom_center",
+  "fixed_pivot": true,
   "align_to": "idle:1",
-  "align_frame": 4
+  "drop_ref": true,
+  "fit": 1.244,
+  "frames": 49,
+  "grid": [
+   8,
+   7
+  ],
+  "ground_from": 1
  },
  "throw": {
-  "frames": 4,
-  "fit": 0.8865,
-  "hit": 1,
-  "hit_end": 1,
+  "fixed_pivot": true,
   "align_to": "idle:1",
-  "match_scale": true
+  "drop_ref": true,
+  "fit": 1.755,
+  "frames": 51,
+  "grid": [
+   8,
+   7
+  ],
+  "hit": 12,
+  "hit_end": 12,
+  "release": 37
  },
  "thrown": {
   "frames": 4,
@@ -85,35 +124,69 @@
   "pivot_y": "bottom_center"
  },
  "st_lp": {
-  "frames": 4,
-  "fit": 0.8865,
+  "fixed_pivot": true,
   "align_to": "idle:1",
-  "match_scale": true
+  "drop_ref": true,
+  "fit": 1.244,
+  "frames": 21,
+  "grid": [
+   8,
+   3
+  ],
+  "hit": 7,
+  "hit_end": 10
  },
  "st_lk": {
-  "frames": 4,
-  "fit": 0.8865,
+  "fixed_pivot": true,
   "align_to": "idle:1",
-  "match_scale": true
+  "drop_ref": true,
+  "fit": 1.218,
+  "frames": 24,
+  "grid": [
+   8,
+   4
+  ],
+  "hit": 7,
+  "hit_end": 13
  },
  "st_hp": {
-  "frames": 4,
-  "fit": 0.8865,
+  "fixed_pivot": true,
   "align_to": "idle:1",
-  "match_scale": true
+  "drop_ref": true,
+  "fit": 1.244,
+  "frames": 37,
+  "grid": [
+   8,
+   5
+  ],
+  "hit": 16,
+  "hit_end": 22
  },
  "st_hk": {
-  "frames": 4,
-  "fit": 0.8865,
+  "fixed_pivot": true,
   "align_to": "idle:1",
-  "match_scale": true
+  "drop_ref": true,
+  "fit": 1.218,
+  "frames": 23,
+  "grid": [
+   8,
+   3
+  ],
+  "hit": 7,
+  "hit_end": 14
  },
  "cr_lp": {
-  "frames": 4,
-  "fit": 0.8865,
-  "align_to": "crouch:2",
-  "match_scale": true,
-  "align_head": true
+  "fixed_pivot": true,
+  "align_to": "idle:1",
+  "drop_ref": true,
+  "fit": 1.244,
+  "frames": 32,
+  "grid": [
+   8,
+   5
+  ],
+  "hit": 15,
+  "hit_end": 22
  },
  "j_lp": {
   "frames": 4,
@@ -144,11 +217,17 @@
   "match_scale": true
  },
  "cr_lk": {
-  "frames": 4,
-  "fit": 0.8865,
-  "align_to": "crouch:2",
-  "match_scale": true,
-  "align_head": true
+  "fixed_pivot": true,
+  "align_to": "idle:1",
+  "drop_ref": true,
+  "fit": 1.244,
+  "frames": 37,
+  "grid": [
+   8,
+   5
+  ],
+  "hit": 9,
+  "hit_end": 25
  },
  "cr_hp": {
   "frames": 4,
@@ -200,5 +279,44 @@
   "align_top": 0.45,
   "align_each": true,
   "stride": 200
+ },
+ "sp_proj_l": {
+  "fixed_pivot": true,
+  "align_to": "idle:1",
+  "drop_ref": true,
+  "fit": 1.244,
+  "frames": 34,
+  "grid": [
+   8,
+   5
+  ],
+  "hit": 20,
+  "hit_end": 21
+ },
+ "sp_dd_l": {
+  "fixed_pivot": true,
+  "align_to": "idle:1",
+  "drop_ref": true,
+  "fit": 1.244,
+  "frames": 36,
+  "grid": [
+   8,
+   5
+  ],
+  "hit": 6,
+  "hit_end": 10
+ },
+ "sp_ff_l": {
+  "fixed_pivot": true,
+  "align_to": "idle:1",
+  "drop_ref": true,
+  "fit": 1.244,
+  "frames": 37,
+  "grid": [
+   8,
+   5
+  ],
+  "hit": 11,
+  "hit_end": 19
  }
 }

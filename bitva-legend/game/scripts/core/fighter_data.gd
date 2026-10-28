@@ -205,12 +205,12 @@ const CHARACTERS := {
 		],
 		"moves": {
 			# Руки короткие и быстрые, меч (сильный удар рукой) достаёт дальше всех.
-			"st_lp": {"startup": 5, "active": 2, "recovery": 8, "damage": 30, "hitstun": 14, "hitstop": 7, "push": 650, "box": [60, 200, 140, 40]},
-			"st_lk": {"startup": 6, "active": 3, "recovery": 10, "damage": 35, "hitstun": 15, "hitstop": 7, "push": 700, "box": [40, 70, 120, 40]},
+			"st_lp": {"startup": 5, "active": 2, "recovery": 8, "damage": 30, "hitstun": 14, "hitstop": 7, "push": 650, "box": [60, 200, 160, 40]},
+			"st_lk": {"startup": 6, "active": 3, "recovery": 10, "damage": 35, "hitstun": 15, "hitstop": 7, "push": 700, "box": [40, 70, 135, 40]},
 			"st_hp": {"startup": 11, "active": 4, "recovery": 20, "damage": 95, "hitstun": 21, "hitstop": 12, "push": 1050, "box": [70, 120, 230, 90]},
 			"st_hk": {"startup": 10, "active": 3, "recovery": 18, "damage": 80, "hitstun": 20, "hitstop": 11, "push": 1000, "box": [40, 150, 140, 90]},
-			"cr_lp": {"startup": 5, "active": 2, "recovery": 8, "damage": 25, "hitstun": 13, "hitstop": 6, "push": 600, "box": [60, 100, 120, 40]},
-			"cr_lk": {"startup": 5, "active": 3, "recovery": 9, "damage": 30, "hitstun": 13, "hitstop": 6, "push": 600, "box": [50, 0, 145, 35], "level": "low"},
+			"cr_lp": {"startup": 5, "active": 2, "recovery": 8, "damage": 25, "hitstun": 13, "hitstop": 6, "push": 600, "box": [60, 100, 215, 40]},
+			"cr_lk": {"startup": 5, "active": 3, "recovery": 9, "damage": 30, "hitstun": 13, "hitstop": 6, "push": 600, "box": [50, 0, 215, 35], "level": "low"},
 			# Апперкот мечом снизу вверх.
 			"cr_hp": {"startup": 9, "active": 4, "recovery": 22, "damage": 90, "hitstun": 21, "hitstop": 12, "push": 900, "box": [20, 60, 140, 250], "knockdown": 1, "launch": [220, 1650], "uppercut": 1},
 			# Меч по земле — самая длинная низкая атака.
@@ -227,7 +227,7 @@ const CHARACTERS := {
 			# Бессмертие (вниз, вниз + нога): удар проходит сквозь кости — ударивший застывает.
 			"sp_dd_l": {"buttons": "kick", "startup": 3, "active": 18, "recovery": 20, "counter": {"stun": 50}, "ex": {"active": 30, "counter": {"stun": 85}}},
 			# Удар кладенцом (вперёд, вперёд + рука): выпад мечом с шагом вперёд.
-			"sp_ff_l": {"buttons": "punch", "startup": 12, "active": 6, "recovery": 22, "lunge": 700, "damage": 100, "hitstun": 22, "hitstop": 12, "push": 1200, "chip": 10, "box": [40, 120, 200, 90], "ex": {"lunge": 950, "damage": 140, "chip": 16, "knockdown": 1, "launch": [500, 1200]}},
+			"sp_ff_l": {"buttons": "punch", "startup": 12, "active": 6, "recovery": 22, "lunge": 700, "damage": 100, "hitstun": 22, "hitstop": 12, "push": 1200, "chip": 10, "box": [40, 120, 320, 90], "ex": {"lunge": 950, "damage": 140, "chip": 16, "knockdown": 1, "launch": [500, 1200]}},
 			# Похищение (назад, назад + рука): захват, крадёт шкалу силы. Вырваться нельзя.
 			"sp_bb_l": {"buttons": "punch", "startup": 6, "active": 2, "recovery": 30, "grab": {"range": 85, "hold": 36, "damage": 110, "drain": 500, "launch": [400, 800], "tech": 0, "recovery": 12}, "ex": {"grab": {"range": 120, "damage": 150, "drain": 1000}}},
 			# «Смерть в игле» (блок + СР + СН): выпад; попал — игла ломается, и смерть достаётся сопернику.
