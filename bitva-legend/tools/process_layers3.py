@@ -5,6 +5,7 @@
 Результат: game/art/arenas/<арена>/layer_sky.png, layer_mid.png, layer_floor.png + layers.json:
   mid_bottom — доля высоты layer_mid, где стоят объекты (низ непрозрачной части);
   floor_top  — доля высоты layer_floor, где проходит линия пола (верх непрозрачной части).
+Поправки руками — art_src/arenas_live/<арена>/layers.json (например, у Нила верх пола — река: floor_top ниже).
 Пурпур вырезается так же, как у слоёв «Перепутья» (process_arena_art.chroma_key).
 Игра рисует слои в ArenaScenery._draw_layers3; движение (облака, качание, огонь) — её дело.
 
@@ -60,6 +61,8 @@ def main() -> int:
         floor_top = rows.min() / floor.height if rows.size else 0.55
         floor.save(out / "layer_floor.png", optimize=True)
         meta = {"mid_bottom": round(float(mid_bottom), 4), "floor_top": round(float(floor_top), 4)}
+        if (folder / "layers.json").exists():
+            meta.update(json.loads((folder / "layers.json").read_text()))
         (out / "layers.json").write_text(json.dumps(meta))
         print(f"  {arena}: {meta}")
     return 0
