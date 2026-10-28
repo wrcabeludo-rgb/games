@@ -1,1 +1,1 @@
-Слои живой карты «Перевал»: sky.png, sky.mp4, forest.png, ground.png (промпты — docs/arenas/pass_live.md).
+Слои карты «Перевал» (картинки, без роликов): sky, forest, ground (промпты — docs/arenas/pass_live.md).
