@@ -53,6 +53,7 @@ var _raven_frames: Array[Texture2D] = []
 var _life := {}
 var _water: Array[Texture2D] = []
 var sky_video: VideoStreamPlayer = null  # живое небо из ролика (ставит ArenaView)
+var _layers3 := {}  # карта из 3 картинок (layers.json: mid_bottom, floor_top) — tools/process_layers3.py
 var _hang: Texture2D = null   # предмет, подвешенный на дальнем плане (сундук Кощея на дубе)
 ## Ореол луны: свет плавно гаснет от края диска к краю текстуры.
 var _halo := _make_halo()
@@ -64,7 +65,7 @@ func _init(arena_id := Arenas.DEFAULT) -> void:
 	_sky_top = _d.sky[0]
 	_sky_light = _d.sky[1]
 	_sky_dark = _d.sky[2]
-	for name in ["backdrop", "garden", "floor", "sky", "moon", "mountains", "forest", "stone", "ground", "foreground"]:
+	for name in ["layer_sky", "layer_mid", "layer_floor", "backdrop", "garden", "floor", "sky", "moon", "mountains", "forest", "stone", "ground", "foreground"]:
 		var tex := _load(name)
 		if tex != null:
 			_tex[name] = tex
@@ -76,6 +77,9 @@ func _init(arena_id := Arenas.DEFAULT) -> void:
 		var r := _load("raven_%d" % i)
 		if r != null:
 			_raven_frames.append(r)
+	var lpath: String = _d.dir + "layers.json"
+	if FileAccess.file_exists(lpath):
+		_layers3 = JSON.parse_string(FileAccess.get_file_as_string(lpath))
 	var life_path: String = _d.dir + "life.json"
 	if _tex.has("mountains") and FileAccess.file_exists(life_path):
 		_life = JSON.parse_string(FileAccess.get_file_as_string(life_path))
@@ -132,6 +136,9 @@ func darkness(k: float, x_on_layer: float) -> float:
 # --- Задний план (до бойцов) ---------------------------------------------
 
 func draw_back(c: CanvasItem) -> void:
+	if _tex.has("layer_floor"):
+		_draw_layers3(c)
+		return
 	if _tex.has("garden"):
 		_draw_live_layers(c)
 		return
@@ -153,7 +160,7 @@ func draw_back(c: CanvasItem) -> void:
 
 ## Передний план (поверх бойцов): трава и кусты у нижнего края.
 func draw_front(c: CanvasItem) -> void:
-	if _tex.has("backdrop") or _tex.has("garden"):
+	if _tex.has("backdrop") or _tex.has("garden") or _tex.has("layer_floor"):
 		return
 	var k := K_FRONT
 	var x0 := layer_x(k)
@@ -212,6 +219,31 @@ func _draw_live_layers(c: CanvasItem) -> void:
 	var fh := fw * f.get_height() / f.get_width() * 0.8
 	var fk := (fw - view.x) / maxf(arena_w - view.x, 1.0)
 	var top := ground_y - 42 - fh * 0.497  # линия плиток пола в floor.png — на 49.7 % высоты
+	c.draw_texture_rect(f, Rect2(layer_x(fk), top, fw, fh), false)
+
+
+## Карта из 3 картинок (3.17.57): небо/дальняя стена, середина (качается на ветру, в помещении — нет), пол.
+## Середина стоит низом непрозрачной части чуть ниже линии боя, линия пола картинки — на линии боя.
+func _draw_layers3(c: CanvasItem) -> void:
+	var sky: Texture2D = _tex.layer_sky
+	var sw := view.x * 1.1
+	var sh := maxf(sw * sky.get_height() / sky.get_width(), ground_y + 120)
+	var sk := (sw - view.x) / maxf(arena_w - view.x, 1.0)
+	c.draw_texture_rect(sky, Rect2(layer_x(sk), ground_y + 120 - sh, sw, sh), false)
+	var m: Texture2D = _tex.layer_mid
+	var mw := view.x * 1.18
+	var mh := mw * m.get_height() / m.get_width()
+	var mk := (mw - view.x) / maxf(arena_w - view.x, 1.0)
+	var mrect := Rect2(layer_x(mk), ground_y + 20 - mh * float(_layers3.get("mid_bottom", 1.0)), mw, mh)
+	if _d.get("still", false):
+		c.draw_texture_rect(m, mrect, false)
+	else:
+		_draw_swaying(c, m, mrect, Color.WHITE, 3.0, 0.8)
+	var f: Texture2D = _tex.layer_floor
+	var fw := view.x * 1.25
+	var fh := fw * f.get_height() / f.get_width()
+	var fk := (fw - view.x) / maxf(arena_w - view.x, 1.0)
+	var top := ground_y - 30 - fh * float(_layers3.get("floor_top", 0.55))
 	c.draw_texture_rect(f, Rect2(layer_x(fk), top, fw, fh), false)
 
 

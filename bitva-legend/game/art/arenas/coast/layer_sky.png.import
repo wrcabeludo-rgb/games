@@ -2,20 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ctdgur7bg0ghw"
-path="res://.godot/imported/garden.png-5a8ce9411f98f7955e01e5e0f2abf70a.ctex"
+uid="uid://cikjmxkvfosk7"
+path.s3tc="res://.godot/imported/layer_sky.png-fb57b178cbc03658edfb222a0452690a.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
-source_file="res://art/arenas/hesperides/garden.png"
-dest_files=["res://.godot/imported/garden.png-5a8ce9411f98f7955e01e5e0f2abf70a.ctex"]
+source_file="res://art/arenas/coast/layer_sky.png"
+dest_files=["res://.godot/imported/layer_sky.png-fb57b178cbc03658edfb222a0452690a.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1
