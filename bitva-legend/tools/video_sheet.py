@@ -9,7 +9,7 @@ process_fighter_art.py.
   не из неё; в sheets.json тогда "drop_ref": true — после выравнивания он выбрасывается).
 Рядом пишется <выход>.cells.json — раскладка клеток (для "fixed_pivot" в sheets.json).
 Кадры обрезаются по общей рамке бойца (с запасом), фон приводится к чистому #FF00FF, водяной знак
-в правом нижнем углу (Kling) отрезается рамкой. Печатает число кадров и сетку для sheets.json.
+в правом нижнем углу (Kling) отрезается рамкой; полоса пола со стартовой картинки — фон. Печатает число кадров и сетку для sheets.json.
 """
 import json
 import subprocess
@@ -29,6 +29,17 @@ def is_bg(a: np.ndarray) -> np.ndarray:
     return (np.minimum(r, b) - g) > 90
 
 
+def floor_top(a: np.ndarray) -> int:
+    """Верх полосы пола со стартовой картинки (тёмно-серая полоса во всю ширину внизу кадра) или высота кадра."""
+    r, g, b = (a[..., i].astype(int) for i in range(3))
+    grey = (abs(r - g) < 14) & (abs(g - b) < 14) & (r > 30) & (r < 110)
+    rows = grey.mean(1) > 0.6
+    y = a.shape[0]
+    while y > 0 and rows[y - 1]:
+        y -= 1
+    return y if a.shape[0] - y >= 8 else a.shape[0]
+
+
 def main() -> int:
     if len(sys.argv) < 5:
         print(__doc__)
@@ -40,14 +51,19 @@ def main() -> int:
     subprocess.run(["ffmpeg", "-v", "error", "-i", video, str(tmp / "%04d.png")], check=True)
     ref = int(sys.argv[7]) if len(sys.argv) > 7 else 0
     idx = ([ref] if ref else []) + list(range(first, last, step))
-    frames = [np.asarray(Image.open(tmp / f"{i:04d}.png").convert("RGB")) for i in idx]
+    frames = [np.asarray(Image.open(tmp / f"{i:04d}.png").convert("RGB")).copy() for i in idx]
     h, w = frames[0].shape[:2]
+    # Полоса пола со стартовой картинки — фон (по первому кадру ролика: потом её могут закрыть ступни).
+    fy = floor_top(np.asarray(Image.open(tmp / "0001.png").convert("RGB")))
+    for a in frames:
+        a[fy:] = (255, 0, 255)
     # Общая рамка бойца по всем кадрам (без правого нижнего угла с водяным знаком).
     y0, y1, x0, x1 = h, 0, w, 0
     for a in frames:
         m = ~is_bg(a)
         m[int(h * 0.9):, int(w * 0.8):] = False
-        ys, xs = np.nonzero(m)
+        # Рамка — по строкам и столбцам, где фигуры больше нескольких пикселей (одиночные крапинки шума фона не в счёт).
+        ys, xs = np.nonzero(m.sum(1) > 4)[0], np.nonzero(m.sum(0) > 4)[0]
         if len(xs) == 0:
             continue  # пустой кадр (боец за краем кадра — прыжок за облака): в листе останется пустой клеткой
         y0, y1, x0, x1 = min(y0, ys.min()), max(y1, ys.max()), min(x0, xs.min()), max(x1, xs.max())
