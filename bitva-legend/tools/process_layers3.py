@@ -9,7 +9,9 @@
 Пурпур вырезается так же, как у слоёв «Перепутья» (process_arena_art.chroma_key).
 Игра рисует слои в ArenaScenery._draw_layers3; движение (облака, качание, огонь) — её дело.
 
-Запуск (из bitva-legend/): python3 tools/process_layers3.py <арена> [<арена> …]
+Запуск (из bitva-legend/): python3 tools/process_layers3.py [--upscale] <арена> [<арена> …]
+  --upscale — каждый исходник сначала через нейросетевой апскейлер ×2 (tools/upscale.py, ~2 мин на слой;
+  кэш в art_src/arenas_live/<арена>/.x2/) и повышение резкости: без него слой 1672 px растянут на экране ×1,8.
 """
 import json
 import sys
@@ -19,17 +21,30 @@ import numpy as np
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from process_arena_art import chroma_key  # noqa: E402
+from process_arena_art import chroma_key, sharpen  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 WIDTH = 3200   # 1440p с запасом на параллакс: экран 2560, слой шире на четверть
+
+
+UPSCALE = False
 
 
 def src(folder: Path, name: str) -> Image.Image:
     for ext in (".png", ".webp", ".jpg", ".jpeg"):
         p = folder / (name + ext)
         if p.exists():
-            return Image.open(p).convert("RGB")
+            img = Image.open(p).convert("RGB")
+            if not UPSCALE:
+                return img
+            cache = folder / ".x2" / (name + ".png")
+            if cache.exists() and cache.stat().st_mtime >= p.stat().st_mtime:
+                return Image.open(cache).convert("RGB")
+            from upscale import upscale
+            big = sharpen(upscale(img).convert("RGBA")).convert("RGB")
+            cache.parent.mkdir(exist_ok=True)
+            big.save(cache)
+            return big
     raise SystemExit(f"нет {folder}/{name}.*")
 
 
@@ -47,7 +62,12 @@ def rows_with(img: Image.Image, share: float = 0.02) -> np.ndarray:
 
 
 def main() -> int:
-    for arena in sys.argv[1:]:
+    global UPSCALE
+    args = sys.argv[1:]
+    if "--upscale" in args:
+        UPSCALE = True
+        args.remove("--upscale")
+    for arena in args:
         folder = ROOT / "art_src/arenas_live" / arena
         out = ROOT / "game/art/arenas" / arena
         out.mkdir(parents=True, exist_ok=True)
