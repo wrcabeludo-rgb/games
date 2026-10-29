@@ -427,5 +427,66 @@
    8,
    5
   ]
+ },
+ "thrown_fwd": {
+  "drop_ref": true,
+  "align_to": "idle:1",
+  "fit": 1.244,
+  "frames": 48,
+  "grid": [
+   8,
+   7
+  ],
+  "pivot_y": "bottom_center",
+  "hold_end": 16,
+  "air_frames": 39
+ },
+ "thrown_ankle": {
+  "drop_ref": true,
+  "align_to": "idle:1",
+  "fit": 1.244,
+  "frames": 80,
+  "grid": [
+   8,
+   11
+  ],
+  "pivot_y": "bottom_center",
+  "hold_end": 62,
+  "air_frames": 70
+ },
+ "thrown_over": {
+  "drop_ref": true,
+  "align_to": "idle:1",
+  "fit": 1.244,
+  "frames": 48,
+  "grid": [
+   8,
+   7
+  ],
+  "pivot_y": "bottom_center",
+  "hold_end": 16,
+  "frame_scale": {
+   "29": 0.978,
+   "30": 0.957,
+   "31": 0.935,
+   "32": 0.914,
+   "33": 0.892,
+   "34": 0.871,
+   "35": 0.849,
+   "36": 0.828,
+   "37": 0.806,
+   "38": 0.785,
+   "39": 0.763,
+   "40": 0.742,
+   "41": 0.72,
+   "42": 0.72,
+   "43": 0.72,
+   "44": 0.72,
+   "45": 0.72,
+   "46": 0.72,
+   "47": 0.72,
+   "48": 0.72
+  },
+  "air_frames": 39
  }
 }

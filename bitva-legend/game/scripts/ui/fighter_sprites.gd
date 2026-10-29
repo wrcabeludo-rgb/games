@@ -40,6 +40,8 @@ const LAND_TICKS_VIDEO := 12
 
 ## id бойца → {анимация: {"tex": Array[Texture2D], "pivot": Array[Vector2]}}
 var _bank := {}
+## Брошенный боец → его лист «бросаемого» (thrown_fwd/over/ankle) с момента захвата до приземления.
+var _thrown_kind := {}
 ## Боец → анимация последнего захвата (для доводки после броска, когда приём уже закончился).
 var _last_grab := {}
 ## id бойца → во сколько раз его кадры крупнее обычных (у новых бойцов — 2: чётко на мониторах 2K/4K).
@@ -122,6 +124,7 @@ static func _load_anim(id: String, meta: Dictionary) -> Dictionary:
 		"air": int(meta.get("air_frames", 1)), "res": float(meta.get("res", 1.0)),
 		"bob": float(meta.get("bob", 0.0)), "stride": float(meta.get("stride", 0.0)),
 		"cycle": int(meta.get("cycle", 0)), "release": int(meta.get("release", 0)),
+		"hold_end": int(meta.get("hold_end", 0)),
 		"mirror": bool(meta.get("mirror", false)), "lift": _lift_list(meta, n),
 		"foe_tex": foe_tex, "foe_pivot": foe_pivot}
 
@@ -256,6 +259,9 @@ func frame_for(f: Fighter, tick: int, foe: Fighter = null) -> Array:
 		_ensure_pairs(f.id, foe.id)
 	if anims.is_empty():
 		return []
+	var thrown := _thrown_frame(anims, f, foe)
+	if not thrown.is_empty():
+		return thrown
 	if anims.has("grabbed"):
 		var pose := grab_pose(f, foe)
 		if pose >= 0:
@@ -653,6 +659,48 @@ static func grab_pose(f: Fighter, foe: Fighter) -> int:
 	if foe.move != Fighter.MOVE_SUPER and m.has("grab"):
 		return 1
 	return 0
+
+
+## Лист «его бросают» из видео (3.17.63, общий для любого броска): thrown_fwd — схвачен за грудки и брошен
+## вперёд, thrown_over — через себя, thrown_ankle — за лодыжку (мельница и захваты-приёмы). "" — у броска своя
+## поза (укус, суперприём) или листа нет.
+static func thrown_kind(anims: Dictionary, foe: Fighter) -> String:
+	if foe == null or foe.state != Fighter.State.THROWING or foe.move < 0 or foe.move == Fighter.MOVE_SUPER:
+		return ""
+	var m := foe.move_data()
+	var g: Dictionary = m.grab if m.has("grab") else m.get("cinema", {})
+	if g.has("heal"):
+		return ""
+	var kind := "thrown_ankle"
+	if foe.move == Fighter.MOVE_THROW:
+		kind = "thrown_over" if g.get("over", 0) else "thrown_fwd"
+	return kind if anims.has(kind) else ""
+
+
+## Лист «бросаемого», которым боец сейчас нарисован, или "".
+func thrown_anim(f: Fighter) -> String:
+	return String(_thrown_kind.get(f, ""))
+
+
+## Кадр «его бросают»: пока держат — кадры до hold_end по ходу удержания, в полёте после броска — дальше по
+## времени, до кадра касания пола (air_frames); лёжа — уже обычное падение. [] — рисовать как раньше.
+func _thrown_frame(anims: Dictionary, f: Fighter, foe: Fighter) -> Array:
+	if f.state == Fighter.State.THROWN:
+		var kind := thrown_kind(anims, foe)
+		if kind == "":
+			_thrown_kind.erase(f)
+			return []
+		_thrown_kind[f] = kind
+		var a: Dictionary = anims[kind]
+		var he := clampi(int(a.hold_end), 1, a.tex.size())
+		return _pick(a, mini(int(Sim.throw_progress(foe) * he), he - 1))
+	if f.state == Fighter.State.AIR_HIT and f.thrown_air and _thrown_kind.has(f) and anims.has(_thrown_kind[f]):
+		var a: Dictionary = anims[_thrown_kind[f]]
+		var n: int = a.tex.size()
+		var land := clampi(int(a.air), int(a.hold_end) + 1, n)
+		return _pick(a, mini(int(a.hold_end) + f.state_frame / 2, land - 1))
+	_thrown_kind.erase(f)
+	return []
 
 
 ## Анимация захвата бойца: своя у приёма (мельница), у суперприёма — super_cinema, иначе обычный бросок.

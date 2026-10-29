@@ -381,7 +381,7 @@ def main() -> int:
         if RES.get(who, 1) != 1:
             meta["res"] = RES[who]
         # Ударные кадры (с 1): hit — первый кадр активной фазы, hit_end — последний.
-        for k in ("hit", "hit_end", "reverse", "air_frames", "bob", "stride", "cycle", "release", "mirror"):
+        for k in ("hit", "hit_end", "reverse", "air_frames", "bob", "stride", "cycle", "release", "mirror", "hold_end"):
             if k in opt:
                 meta[k] = opt[k]
         done = []

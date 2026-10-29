@@ -422,7 +422,7 @@ func _draw_sprite(f: Fighter, tex: Texture2D, pivot: Vector2, flex: Variant = nu
 		if foe.move_data().get("cinema", {}).has("heal"):
 			base.y -= sprites.visual_lift(foe)  # суперприём с укусом: уносит схваченного с собой в небо
 		var tm := Sim.throw_progress(foe)
-		if pose == 2 and tm >= 0.0:
+		if pose == 2 and tm >= 0.0 and sprites.thrown_anim(f) == "":
 			# Через плечо: летит по дуге над головой бросающего и переворачивается.
 			rot = -foe.facing * PI * 0.9 * smoothstep(Sim.THROW_GRIP, 1.0, tm)
 	var flip := FighterSprites.flip_angle(f) + FighterSprites.tumble_angle(f)
