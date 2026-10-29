@@ -212,15 +212,15 @@ const CHARACTERS := {
 			"cr_lp": {"startup": 5, "active": 2, "recovery": 8, "damage": 25, "hitstun": 13, "hitstop": 6, "push": 600, "box": [60, 100, 215, 40]},
 			"cr_lk": {"startup": 5, "active": 3, "recovery": 9, "damage": 30, "hitstun": 13, "hitstop": 6, "push": 600, "box": [50, 0, 215, 35], "level": "low"},
 			# Апперкот мечом снизу вверх.
-			"cr_hp": {"startup": 9, "active": 4, "recovery": 22, "damage": 90, "hitstun": 21, "hitstop": 12, "push": 900, "box": [20, 60, 140, 250], "knockdown": 1, "launch": [220, 1650], "uppercut": 1},
+			"cr_hp": {"startup": 9, "active": 4, "recovery": 22, "damage": 90, "hitstun": 21, "hitstop": 12, "push": 900, "box": [20, 60, 260, 250], "knockdown": 1, "launch": [220, 1650], "uppercut": 1},
 			# Меч по земле — самая длинная низкая атака.
 			"cr_hk": {"startup": 10, "active": 3, "recovery": 22, "damage": 70, "hitstun": 19, "hitstop": 10, "push": 1000, "box": [50, 0, 220, 35], "level": "low"},
-			"j_lp": {"startup": 5, "active": 5, "damage": 30, "hitstun": 14, "hitstop": 7, "push": 550, "box": [40, 80, 110, 50], "level": "overhead"},
-			"j_lk": {"startup": 5, "active": 7, "damage": 35, "hitstun": 15, "hitstop": 7, "push": 550, "box": [30, 10, 130, 55], "level": "overhead"},
-			"j_hp": {"startup": 8, "active": 4, "damage": 85, "hitstun": 20, "hitstop": 11, "push": 750, "box": [30, 0, 150, 100], "level": "overhead"},
-			"j_hk": {"startup": 7, "active": 5, "damage": 75, "hitstun": 19, "hitstop": 10, "push": 750, "box": [30, 10, 135, 60], "level": "overhead"},
+			"j_lp": {"startup": 5, "active": 5, "damage": 30, "hitstun": 14, "hitstop": 7, "push": 550, "box": [40, 80, 260, 50], "level": "overhead"},
+			"j_lk": {"startup": 5, "active": 7, "damage": 35, "hitstun": 15, "hitstop": 7, "push": 550, "box": [30, 10, 185, 55], "level": "overhead"},
+			"j_hp": {"startup": 8, "active": 4, "damage": 85, "hitstun": 20, "hitstop": 11, "push": 750, "box": [30, 0, 300, 100], "level": "overhead"},
+			"j_hk": {"startup": 7, "active": 5, "damage": 75, "hitstun": 19, "hitstop": 10, "push": 750, "box": [30, 10, 185, 60], "level": "overhead"},
 			# Классика.
-			"st_sweep": {"startup": 8, "active": 3, "recovery": 19, "damage": 60, "hitstun": 20, "hitstop": 10, "push": 600, "box": [30, 0, 150, 30], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
+			"st_sweep": {"startup": 8, "active": 3, "recovery": 19, "damage": 60, "hitstun": 20, "hitstop": 10, "push": 600, "box": [30, 0, 360, 30], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
 			"st_round": {"startup": 13, "active": 4, "recovery": 22, "damage": 105, "hitstun": 22, "hitstop": 13, "push": 1100, "box": [25, 160, 125, 100], "knockdown": 1, "launch": [600, 900], "kick": 1},
 			# Кощеева игла (назад, вперёд + рука): быстрый тонкий снаряд.
 			"sp_proj_l": {"buttons": "punch", "startup": 11, "active": 1, "recovery": 18, "proj": {"x": 60, "y": 200, "vx": 1300, "vy": 0, "gravity": 0, "w": 70, "h": 20, "kind": 6, "damage": 50, "hitstun": 16, "hitstop": 8, "push": 600, "chip": 5}, "ex": {"startup": 8, "proj": {"vx": 1700, "damage": 80, "hitstun": 24, "chip": 9, "kind": 106}}},
@@ -231,7 +231,7 @@ const CHARACTERS := {
 			# Похищение (назад, назад + рука): захват, крадёт шкалу силы. Вырваться нельзя.
 			"sp_bb_l": {"buttons": "punch", "startup": 6, "active": 2, "recovery": 30, "grab": {"range": 85, "hold": 36, "damage": 110, "drain": 500, "launch": [400, 800], "tech": 0, "recovery": 12}, "ex": {"grab": {"range": 120, "damage": 150, "drain": 1000}}},
 			# «Смерть в игле» (блок + СР + СН): выпад; попал — игла ломается, и смерть достаётся сопернику.
-			"super": {"name": "СМЕРТЬ В ИГЛЕ", "startup": 7, "active": 8, "recovery": 42, "lunge": 850, "damage": 50, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 40, "box": [25, 40, 150, 230], "cinema": {"hold": 100, "damage": 310, "launch": [650, 1600], "tech": 0, "recovery": 20, "scaled": 1}},
+			"super": {"name": "СМЕРТЬ В ИГЛЕ", "startup": 7, "active": 8, "recovery": 42, "lunge": 850, "damage": 50, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 40, "box": [25, 40, 330, 230], "cinema": {"hold": 100, "damage": 310, "launch": [650, 1600], "tech": 0, "recovery": 20, "scaled": 1}},
 			"throw": {"startup": 4, "active": 2, "recovery": 18, "grab": {"range": 25, "hold": 24, "damage": 100, "launch": [450, 900], "tech": 1, "recovery": 10}},
 		},
 	},

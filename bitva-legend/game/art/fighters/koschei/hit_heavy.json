@@ -1,0 +1,411 @@
+{
+ "frames": [
+  {
+   "file": "hit_heavy_1.png",
+   "pivot": [
+    182,
+    613
+   ],
+   "size": [
+    464,
+    614
+   ]
+  },
+  {
+   "file": "hit_heavy_2.png",
+   "pivot": [
+    188,
+    613
+   ],
+   "size": [
+    467,
+    614
+   ]
+  },
+  {
+   "file": "hit_heavy_3.png",
+   "pivot": [
+    189,
+    607
+   ],
+   "size": [
+    568,
+    608
+   ]
+  },
+  {
+   "file": "hit_heavy_4.png",
+   "pivot": [
+    241,
+    647
+   ],
+   "size": [
+    659,
+    648
+   ]
+  },
+  {
+   "file": "hit_heavy_5.png",
+   "pivot": [
+    178,
+    713
+   ],
+   "size": [
+    504,
+    714
+   ]
+  },
+  {
+   "file": "hit_heavy_6.png",
+   "pivot": [
+    182,
+    806
+   ],
+   "size": [
+    498,
+    807
+   ]
+  },
+  {
+   "file": "hit_heavy_7.png",
+   "pivot": [
+    182,
+    873
+   ],
+   "size": [
+    488,
+    874
+   ]
+  },
+  {
+   "file": "hit_heavy_8.png",
+   "pivot": [
+    182,
+    926
+   ],
+   "size": [
+    484,
+    927
+   ]
+  },
+  {
+   "file": "hit_heavy_9.png",
+   "pivot": [
+    182,
+    959
+   ],
+   "size": [
+    474,
+    960
+   ]
+  },
+  {
+   "file": "hit_heavy_10.png",
+   "pivot": [
+    169,
+    979
+   ],
+   "size": [
+    448,
+    980
+   ]
+  },
+  {
+   "file": "hit_heavy_11.png",
+   "pivot": [
+    169,
+    966
+   ],
+   "size": [
+    451,
+    967
+   ]
+  },
+  {
+   "file": "hit_heavy_12.png",
+   "pivot": [
+    175,
+    966
+   ],
+   "size": [
+    457,
+    967
+   ]
+  },
+  {
+   "file": "hit_heavy_13.png",
+   "pivot": [
+    182,
+    966
+   ],
+   "size": [
+    467,
+    967
+   ]
+  },
+  {
+   "file": "hit_heavy_14.png",
+   "pivot": [
+    182,
+    959
+   ],
+   "size": [
+    468,
+    960
+   ]
+  },
+  {
+   "file": "hit_heavy_15.png",
+   "pivot": [
+    182,
+    946
+   ],
+   "size": [
+    468,
+    947
+   ]
+  },
+  {
+   "file": "hit_heavy_16.png",
+   "pivot": [
+    178,
+    946
+   ],
+   "size": [
+    464,
+    947
+   ]
+  },
+  {
+   "file": "hit_heavy_17.png",
+   "pivot": [
+    169,
+    946
+   ],
+   "size": [
+    461,
+    947
+   ]
+  },
+  {
+   "file": "hit_heavy_18.png",
+   "pivot": [
+    162,
+    940
+   ],
+   "size": [
+    448,
+    941
+   ]
+  },
+  {
+   "file": "hit_heavy_19.png",
+   "pivot": [
+    162,
+    920
+   ],
+   "size": [
+    451,
+    921
+   ]
+  },
+  {
+   "file": "hit_heavy_20.png",
+   "pivot": [
+    162,
+    880
+   ],
+   "size": [
+    451,
+    881
+   ]
+  },
+  {
+   "file": "hit_heavy_21.png",
+   "pivot": [
+    169,
+    766
+   ],
+   "size": [
+    455,
+    767
+   ]
+  },
+  {
+   "file": "hit_heavy_22.png",
+   "pivot": [
+    169,
+    607
+   ],
+   "size": [
+    444,
+    608
+   ]
+  },
+  {
+   "file": "hit_heavy_23.png",
+   "pivot": [
+    169,
+    600
+   ],
+   "size": [
+    451,
+    601
+   ]
+  },
+  {
+   "file": "hit_heavy_24.png",
+   "pivot": [
+    241,
+    593
+   ],
+   "size": [
+    659,
+    594
+   ]
+  },
+  {
+   "file": "hit_heavy_25.png",
+   "pivot": [
+    241,
+    590
+   ],
+   "size": [
+    659,
+    591
+   ]
+  },
+  {
+   "file": "hit_heavy_26.png",
+   "pivot": [
+    241,
+    590
+   ],
+   "size": [
+    659,
+    591
+   ]
+  },
+  {
+   "file": "hit_heavy_27.png",
+   "pivot": [
+    241,
+    593
+   ],
+   "size": [
+    659,
+    594
+   ]
+  },
+  {
+   "file": "hit_heavy_28.png",
+   "pivot": [
+    241,
+    593
+   ],
+   "size": [
+    659,
+    594
+   ]
+  },
+  {
+   "file": "hit_heavy_29.png",
+   "pivot": [
+    241,
+    593
+   ],
+   "size": [
+    659,
+    594
+   ]
+  },
+  {
+   "file": "hit_heavy_30.png",
+   "pivot": [
+    241,
+    610
+   ],
+   "size": [
+    659,
+    611
+   ]
+  },
+  {
+   "file": "hit_heavy_31.png",
+   "pivot": [
+    241,
+    637
+   ],
+   "size": [
+    659,
+    638
+   ]
+  },
+  {
+   "file": "hit_heavy_32.png",
+   "pivot": [
+    241,
+    620
+   ],
+   "size": [
+    659,
+    621
+   ]
+  },
+  {
+   "file": "hit_heavy_33.png",
+   "pivot": [
+    241,
+    613
+   ],
+   "size": [
+    659,
+    614
+   ]
+  },
+  {
+   "file": "hit_heavy_34.png",
+   "pivot": [
+    189,
+    587
+   ],
+   "size": [
+    418,
+    588
+   ]
+  },
+  {
+   "file": "hit_heavy_35.png",
+   "pivot": [
+    241,
+    580
+   ],
+   "size": [
+    659,
+    581
+   ]
+  },
+  {
+   "file": "hit_heavy_36.png",
+   "pivot": [
+    241,
+    587
+   ],
+   "size": [
+    659,
+    588
+   ]
+  },
+  {
+   "file": "hit_heavy_37.png",
+   "pivot": [
+    241,
+    610
+   ],
+   "size": [
+    659,
+    611
+   ]
+  }
+ ]
+}

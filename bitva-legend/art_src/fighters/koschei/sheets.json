@@ -55,11 +55,15 @@
   "align_to": "idle:1"
  },
  "hit_high": {
-  "frames": 4,
-  "fit": 0.8865,
+  "fixed_pivot": true,
   "align_to": "idle:1",
-  "align_frame": 4,
-  "match_scale": true
+  "drop_ref": true,
+  "fit": 1.665,
+  "frames": 22,
+  "grid": [
+   8,
+   3
+  ]
  },
  "hit_low": {
   "frames": 4,
@@ -188,33 +192,31 @@
   "hit": 15,
   "hit_end": 22
  },
- "j_lp": {
-  "frames": 4,
-  "fit": 0.8865,
-  "pivot_y": "body_ground",
-  "align_to": "jump:5",
-  "match_scale": true
- },
- "j_lk": {
-  "frames": 4,
-  "fit": 0.8865,
-  "pivot_y": "body_ground",
-  "align_to": "jump:5",
-  "match_scale": true
- },
  "j_hp": {
-  "frames": 4,
-  "fit": 0.8865,
-  "pivot_y": "body_ground",
-  "align_to": "jump:5",
-  "match_scale": true
+  "frames": 21,
+  "grid": [
+   8,
+   3
+  ],
+  "fit": 1.755,
+  "drop_ref": true,
+  "align_to": "idle:1",
+  "pivot_y": "body",
+  "hit": 6,
+  "hit_end": 14
  },
  "j_hk": {
-  "frames": 4,
-  "fit": 0.8865,
-  "pivot_y": "body_ground",
-  "align_to": "jump:5",
-  "match_scale": true
+  "frames": 20,
+  "grid": [
+   8,
+   3
+  ],
+  "fit": 1.755,
+  "drop_ref": true,
+  "align_to": "idle:1",
+  "pivot_y": "body",
+  "hit": 3,
+  "hit_end": 15
  },
  "cr_lk": {
   "fixed_pivot": true,
@@ -230,11 +232,17 @@
   "hit_end": 25
  },
  "cr_hp": {
-  "frames": 4,
-  "fit": 0.8865,
-  "align_to": "crouch:2",
-  "match_scale": true,
-  "align_head": true
+  "fixed_pivot": true,
+  "align_to": "idle:1",
+  "drop_ref": true,
+  "fit": 1.755,
+  "frames": 53,
+  "grid": [
+   8,
+   7
+  ],
+  "hit": 20,
+  "hit_end": 28
  },
  "cr_hk": {
   "frames": 4,
@@ -244,11 +252,17 @@
   "align_head": true
  },
  "st_sweep": {
-  "frames": 4,
-  "fit": 0.8865,
+  "fixed_pivot": true,
   "align_to": "idle:1",
-  "match_scale": true,
-  "align_head": true
+  "drop_ref": true,
+  "fit": 1.755,
+  "frames": 29,
+  "grid": [
+   8,
+   4
+  ],
+  "hit": 9,
+  "hit_end": 19
  },
  "st_round": {
   "frames": 4,
@@ -318,5 +332,43 @@
   ],
   "hit": 11,
   "hit_end": 19
+ },
+ "hit_heavy": {
+  "fixed_pivot": true,
+  "align_to": "idle:1",
+  "drop_ref": true,
+  "fit": 1.665,
+  "frames": 37,
+  "grid": [
+   8,
+   5
+  ]
+ },
+ "super": {
+  "fixed_pivot": true,
+  "align_to": "idle:1",
+  "drop_ref": true,
+  "fit": 1.449,
+  "frames": 28,
+  "grid": [
+   8,
+   4
+  ],
+  "hit": 7,
+  "hit_end": 18
+ },
+ "super_cinema": {
+  "fixed_pivot": true,
+  "align_to": "idle:1",
+  "drop_ref": true,
+  "fit": 1.449,
+  "frames": 70,
+  "grid": [
+   8,
+   9
+  ],
+  "hit": 1,
+  "hit_end": 1,
+  "release": 39
  }
 }
