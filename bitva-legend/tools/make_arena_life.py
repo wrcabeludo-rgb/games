@@ -74,6 +74,28 @@ LIFE_ARENAS = {
         "forest_sparkle_band": (0, 0, 7491, 540),
         "creature": {"file": "dragon", "frames": 4, "x": 4110, "y": 660, "h": 420, "base": 0.564},
     },
+    # Остров Горгон: штормовое море, змея выглядывает из-за камней, зелёное свечение в проёме пещеры Медузы.
+    "gorgon_isle": {
+        "water": [[(x, 330), (min(x + 1000, 5172), 330), (min(x + 1000, 5172), 594), (x, 594)] for x in range(0, 5172, 1000)],
+        "water_blue": True,
+        "fall": [],
+        "chimneys": [],
+        "windows_band": (0, 0, 1, 1),
+        "windows_skip": [],
+        "creature": {"file": "snakes", "frames": 4, "x": 3650, "y": 800, "h": 230, "base": 0.645},
+        "glow": {"x": 4786, "y": 540, "r": 210, "color": [0.45, 1.0, 0.55]},
+    },
+    # Храм Афины: море у Афин, сова на карнизе портика, огонь в бронзовых чашах (и в подвесной лампе).
+    "temple": {
+        "water": [[(x, 330), (min(x + 1000, 5173), 330), (min(x + 1000, 5173), 537), (x, 537)] for x in range(0, 5173, 1000)],
+        "water_blue": True,
+        "fall": [],
+        "chimneys": [],
+        "windows_band": (0, 0, 1, 1),
+        "windows_skip": [],
+        "creature": {"file": "owl", "frames": 4, "x": 3000, "y": 45, "h": 230, "base": 0.533},
+        "fires": [(742, 466), (4132, 466), (5263, 466), (6070, 352)],
+    },
 }
 
 
@@ -190,7 +212,7 @@ def main() -> int:
         make_water(src, mask, (x0, y0, x1, y1), False, n).save(folder / f"water_{n}.png", optimize=True)
         meta["water"].append({"file": f"water_{n}.png", "rect": [x0, y0, x1 - x0, y1 - y0], "frames": FRAMES, "period": 1.2})
     meta["window_color"] = LIFE.get("window_color", "warm")
-    for key in ("hang", "flag", "forest_chimneys", "creature"):
+    for key in ("hang", "flag", "forest_chimneys", "creature", "glow", "fires"):
         if key in LIFE:
             meta[key] = LIFE[key]
     if "sparkle_band" in LIFE:

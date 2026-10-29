@@ -19,7 +19,7 @@ extends RefCounted
 ##                (по умолчанию 270 и −30: низ леса уходит за землю); mountains_rise — то же для дальнего плана;
 ##                forest_k — параллакс среднего плана (0,3), forest_squash — сжатие по ширине: полоса шире экрана,
 ##                а её края (башня, изба) должны попадать в кадр при крайних положениях камеры; mountains_fill — нижний край дальнего плана (море) тянется до земли;
-##   petals     — белые лепестки летят по всей арене
+##   petals     — белые лепестки летят по всей арене; motes — пылинки в солнечных лучах
 
 const DEFAULT := "crossroads"
 
@@ -70,18 +70,20 @@ const LIST := {
 		"ground": Color(0.22, 0.12, 0.14), "birds": "bats",
 	},
 	"temple": {
-		"name": "Храм Афины", "still": true, "dir": "res://art/arenas/temple/", "indoor": true,
+		"name": "Храм Афины", "still": true, "dir": "res://art/arenas/temple/", "motes": true,
+		"forest_h": 270.0, "forest_rise": 110.0, "forest_k": 0.9, "forest_squash": 0.8, "mountains_rise": 215.0, "mountains_fill": true,
 		"sky": [Color(0.55, 0.6, 0.7), Color(0.95, 0.9, 0.8), Color(0.95, 0.9, 0.8)], "stars": false,
-		"light": ["none", 0.5], "hills": Color(0.85, 0.82, 0.75), "shape": ["flat", "flat"],
+		"light": ["sun", 0.1], "hills": Color(0.85, 0.82, 0.75), "shape": ["flat", "flat"],
 		"marks": [["statue", 0.5, 1.2]], "trees": ["column", "column"],
-		"ground": Color(0.8, 0.76, 0.68), "birds": "none",
+		"ground": Color(0.8, 0.76, 0.68), "birds": "ravens",  # кадры raven_* у храма — голубь
 	},
 	"gorgon_isle": {
-		"name": "Остров Горгон", "dir": "res://art/arenas/gorgon_isle/",
+		"name": "Остров Горгон", "still": true, "dir": "res://art/arenas/gorgon_isle/",
+		"forest_h": 260.0, "forest_rise": 110.0, "forest_k": 0.9, "forest_squash": 0.8, "mountains_rise": 100.0,
 		"sky": [Color(0.12, 0.18, 0.22), Color(0.4, 0.5, 0.45), Color(0.25, 0.32, 0.35)], "stars": false,
 		"light": ["sun", 0.5], "hills": Color(0.3, 0.38, 0.38), "shape": ["sea", "sharp"],
 		"marks": [["cave", 0.5, 1.0], ["statue", 0.25, 0.8], ["statue", 0.75, 0.8]], "trees": ["dead", "dead"],
-		"ground": Color(0.4, 0.42, 0.38), "birds": "gulls",
+		"ground": Color(0.4, 0.42, 0.38), "birds": "ravens",  # кадры raven_* у Горгон — чайка
 	},
 	"hesperides": {
 		"name": "Сад Гесперид", "still": true, "dir": "res://art/arenas/hesperides/", "petals": true,

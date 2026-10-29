@@ -491,12 +491,43 @@ func _draw_forest_life(c: CanvasItem, origin: Vector2, sc: Vector2) -> void:
 	for i in pipes.size():
 		_draw_smoke(c, origin + Vector2(pipes[i][0], pipes[i][1]) * sc, sc.y * 2.2, i, 0.0)
 	_draw_sparkles(c, _life.get("forest_sparkles", []), origin, sc)
+	if _life.has("glow"):
+		# Свечение из глубины (пещера Медузы): медленно дышит.
+		var gl: Dictionary = _life.glow
+		var gc: Array = gl.color
+		var gp := origin + Vector2(gl.x, gl.y) * sc
+		var gr: float = float(gl.r) * sc.y * (1.0 + 0.08 * sin(t * 1.3))
+		var ga := 0.45 + 0.2 * sin(t * 1.3) + 0.08 * sin(t * 4.1)
+		c.draw_texture_rect(_halo, Rect2(gp - Vector2(gr, gr), Vector2(gr, gr) * 2.0), false, Color(gc[0], gc[1], gc[2], ga))
+	var fires: Array = _life.get("fires", [])
+	for i in fires.size():
+		_draw_fire(c, origin + Vector2(fires[i][0], fires[i][1]) * sc, sc.y, i)
+
+
+## Огонь в чаше: ореол и несколько языков пламени, каждый со своим неровным дрожанием; вверх летят искры.
+func _draw_fire(c: CanvasItem, base: Vector2, sc: float, i: int) -> void:
+	var s := sc * 3.2
+	var fl := 0.8 + 0.2 * sin(t * 9.0 + i * 1.7) + 0.1 * sin(t * 23.0 + i)
+	c.draw_texture_rect(_halo, Rect2(base - Vector2(60, 70) * s, Vector2(120, 120) * s), false, Color(1.0, 0.65, 0.25, 0.55 * fl))
+	for j in 4:
+		var ph := t * (7.0 + j * 1.3) + i * 2.0 + j
+		var h := (26.0 - j * 4.0) * s * (0.8 + 0.25 * sin(ph))
+		var w := (11.0 - j * 1.5) * s
+		var dx := (j - 1.5) * 4.5 * s + sin(ph * 0.7) * 2.0 * s
+		var col := Color(1.0, 0.45 + 0.13 * j, 0.1 + 0.15 * j, 0.9)
+		c.draw_colored_polygon(PackedVector2Array([base + Vector2(dx - w, 0), base + Vector2(dx + sin(ph) * 3.0 * s, -h), base + Vector2(dx + w, 0)]), col)
+	for j in 3:
+		var age := fmod(t * 0.9 + j / 3.0 + i * 0.31, 1.0)
+		var p := base + Vector2(sin(t * 3.0 + j * 2.0 + i) * 6.0 * s, -age * 60.0 * s)
+		c.draw_circle(p, 1.4 * s * (1.0 - age), Color(1.0, 0.8, 0.4, 1.0 - age))
 
 
 ## Листья берёз летят на светлой стороне: кружатся, падают на дорогу и тают.
 func _draw_leaves(c: CanvasItem) -> void:
 	if _d.get("petals", false):
 		_draw_petals(c)
+	if _d.get("motes", false):
+		_draw_motes(c)
 	if not _d.get("leaves", false):
 		return
 	var k := 0.6
@@ -535,6 +566,19 @@ func _draw_petals(c: CanvasItem) -> void:
 		c.draw_set_transform(p, spin * 0.4, Vector2(4.5 * cos(spin), 3.0))
 		c.draw_circle(Vector2.ZERO, 1.0, Color(1.0, 0.97, 0.88, a))
 		c.draw_set_transform(Vector2.ZERO)
+
+
+## Пылинки в солнечных лучах: медленно плывут и вспыхивают, когда попадают в свет.
+func _draw_motes(c: CanvasItem) -> void:
+	var k := 0.7
+	var w := layer_w(k)
+	for i in 18:
+		var lx := fmod(w * (0.05 * i + 0.013 * (i % 3)) + t * (6.0 + i % 4) , w)
+		var p := Vector2(layer_x(k) + lx + sin(t * 0.5 + i) * 20.0, 160.0 + fmod(i * 97.0, ground_y - 200.0) + sin(t * 0.7 + i * 1.3) * 25.0)
+		if p.x < -10 or p.x > view.x + 10:
+			continue
+		var a := clampf(0.25 + 0.6 * sin(t * 0.9 + i * 2.1), 0.0, 0.85)
+		c.draw_circle(p, 1.6, Color(1.0, 0.96, 0.82, a))
 
 
 ## Светлячки на тёмной стороне: медленно плывут и мерцают.

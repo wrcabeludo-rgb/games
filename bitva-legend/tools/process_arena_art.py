@@ -9,7 +9,7 @@
 Запуск: python3 tools/process_arena_art.py <папка с исходниками> [арена]
 Арена — id из game/scripts/ui/arenas.gd (coast, pass, nile, zastava, …, feed); без неё — «Перепутье»
 (game/art/arena/), с ней — game/art/arenas/<арена>/.
-Ожидаемые имена: sky, moon, clouds, mountains, forest, stone, ground, foreground, ravens, banner, dragon (.png/.jpg/.webp).
+Ожидаемые имена: sky, moon, clouds, mountains, forest, stone, ground, foreground, ravens, banner, dragon / snakes / owl (.png/.jpg/.webp).
 Полосу (mountains, forest, ground, foreground) можно прислать панелями: forest_1, forest_2, forest_3 — склеятся.
 Отсутствующие слои пропускаются — в игре вместо них останутся заглушки.
 """
@@ -39,8 +39,9 @@ CLOUD_MAX_WIDTH = 720
 RAVEN_HEIGHT = 220
 FLAG_HEIGHT = 300
 CREATURE_HEIGHT = 420
+CREATURES = ("dragon", "snakes", "owl")  # листы зверей среднего плана (4 кадра в ряд)
 # Небо шире 16:9 обрезается по бокам; у этих арен солнце нарисовано у левого края — режем справа.
-SKY_KEEP_LEFT = {"zastava"}
+SKY_KEEP_LEFT = {"zastava", "temple"}
 
 
 def despill_red(img: Image.Image) -> Image.Image:
@@ -411,9 +412,12 @@ def main() -> int:
             canvas.paste(f, (0, 0))
             save(resize_h(canvas, FLAG_HEIGHT), f"banner_{i}")
         done += 1
-    if p := find(src, "dragon"):
-        # Зверь, выглядывающий из-за ограды (дракон Ладон): шея растёт из низа кадра, низ шеи — общая опорная
-        # точка всех кадров (середина нижнего ряда фигуры), двигаются голова и верх шеи.
+    for cname in CREATURES:
+        p = find(src, cname)
+        if not p:
+            continue
+        # Зверь на среднем плане (дракон Ладон за оградой, змея из трещины, сова на карнизе): низ фигуры —
+        # общая опорная точка всех кадров (середина нижнего ряда), двигаются голова и верх тела.
         frames = list(split_objects(chroma_key(Image.open(p))))
         bases = []
         for f in frames:
@@ -424,12 +428,12 @@ def main() -> int:
         left = max(bx for bx, _ in bases)
         right = max(f.width - bx for f, (bx, _) in zip(frames, bases))
         top = max(by for _, by in bases)
-        for old in OUT.glob("dragon_*.png"):
+        for old in OUT.glob(f"{cname}_*.png"):
             old.unlink()
         for i, (f, (bx, by)) in enumerate(zip(frames, bases), 1):
             canvas = Image.new("RGBA", (round(left + right), round(top)), (0, 0, 0, 0))
             canvas.paste(f, (round(left - bx), round(top - by)))
-            save(resize_h(canvas, CREATURE_HEIGHT), f"dragon_{i}")
+            save(resize_h(canvas, CREATURE_HEIGHT), f"{cname}_{i}")
         done += 1
     print(f"Готово слоёв: {done}. Папка: {OUT}")
     return 0
