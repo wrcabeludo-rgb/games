@@ -221,7 +221,7 @@ const CHARACTERS := {
 			"j_hk": {"startup": 7, "active": 5, "damage": 75, "hitstun": 19, "hitstop": 10, "push": 750, "box": [30, 10, 185, 60], "level": "overhead"},
 			# Классика.
 			"st_sweep": {"startup": 8, "active": 3, "recovery": 19, "damage": 60, "hitstun": 20, "hitstop": 10, "push": 600, "box": [30, 0, 360, 30], "level": "low", "knockdown": 1, "launch": [150, 500], "kick": 1},
-			"st_round": {"startup": 13, "active": 4, "recovery": 22, "damage": 105, "hitstun": 22, "hitstop": 13, "push": 1100, "box": [25, 160, 125, 100], "knockdown": 1, "launch": [600, 900], "kick": 1},
+			"st_round": {"startup": 13, "active": 4, "recovery": 22, "damage": 105, "hitstun": 22, "hitstop": 13, "push": 1100, "box": [25, 160, 175, 100], "knockdown": 1, "launch": [600, 900], "kick": 1},
 			# Кощеева игла (назад, вперёд + рука): быстрый тонкий снаряд.
 			"sp_proj_l": {"buttons": "punch", "startup": 11, "active": 1, "recovery": 18, "proj": {"x": 60, "y": 200, "vx": 1300, "vy": 0, "gravity": 0, "w": 70, "h": 20, "kind": 6, "damage": 50, "hitstun": 16, "hitstop": 8, "push": 600, "chip": 5}, "ex": {"startup": 8, "proj": {"vx": 1700, "damage": 80, "hitstun": 24, "chip": 9, "kind": 106}}},
 			# Бессмертие (вниз, вниз + нога): удар проходит сквозь кости — ударивший застывает.

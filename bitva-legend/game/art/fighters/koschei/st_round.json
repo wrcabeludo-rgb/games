@@ -3,46 +3,356 @@
   {
    "file": "st_round_1.png",
    "pivot": [
-    146,
-    263
+    136,
+    613
    ],
    "size": [
-    365,
-    264
+    452,
+    615
    ]
   },
   {
    "file": "st_round_2.png",
    "pivot": [
-    192,
-    352
+    132,
+    613
    ],
    "size": [
-    349,
-    353
+    441,
+    615
    ]
   },
   {
    "file": "st_round_3.png",
    "pivot": [
-    167,
-    293
+    189,
+    611
    ],
    "size": [
-    484,
-    294
+    582,
+    613
    ]
   },
   {
    "file": "st_round_4.png",
    "pivot": [
-    148,
-    265
+    122,
+    609
    ],
    "size": [
-    364,
-    266
+    417,
+    611
+   ]
+  },
+  {
+   "file": "st_round_5.png",
+   "pivot": [
+    189,
+    611
+   ],
+   "size": [
+    582,
+    613
+   ]
+  },
+  {
+   "file": "st_round_6.png",
+   "pivot": [
+    189,
+    611
+   ],
+   "size": [
+    582,
+    613
+   ]
+  },
+  {
+   "file": "st_round_7.png",
+   "pivot": [
+    189,
+    609
+   ],
+   "size": [
+    582,
+    611
+   ]
+  },
+  {
+   "file": "st_round_8.png",
+   "pivot": [
+    189,
+    609
+   ],
+   "size": [
+    582,
+    611
+   ]
+  },
+  {
+   "file": "st_round_9.png",
+   "pivot": [
+    117,
+    609
+   ],
+   "size": [
+    428,
+    611
+   ]
+  },
+  {
+   "file": "st_round_10.png",
+   "pivot": [
+    117,
+    604
+   ],
+   "size": [
+    465,
+    606
+   ]
+  },
+  {
+   "file": "st_round_11.png",
+   "pivot": [
+    122,
+    604
+   ],
+   "size": [
+    487,
+    606
+   ]
+  },
+  {
+   "file": "st_round_12.png",
+   "pivot": [
+    124,
+    604
+   ],
+   "size": [
+    484,
+    606
+   ]
+  },
+  {
+   "file": "st_round_13.png",
+   "pivot": [
+    189,
+    604
+   ],
+   "size": [
+    582,
+    606
+   ]
+  },
+  {
+   "file": "st_round_14.png",
+   "pivot": [
+    189,
+    601
+   ],
+   "size": [
+    582,
+    603
+   ]
+  },
+  {
+   "file": "st_round_15.png",
+   "pivot": [
+    132,
+    599
+   ],
+   "size": [
+    448,
+    601
+   ]
+  },
+  {
+   "file": "st_round_16.png",
+   "pivot": [
+    189,
+    599
+   ],
+   "size": [
+    582,
+    601
+   ]
+  },
+  {
+   "file": "st_round_17.png",
+   "pivot": [
+    189,
+    604
+   ],
+   "size": [
+    582,
+    606
+   ]
+  },
+  {
+   "file": "st_round_18.png",
+   "pivot": [
+    189,
+    606
+   ],
+   "size": [
+    582,
+    608
+   ]
+  },
+  {
+   "file": "st_round_19.png",
+   "pivot": [
+    189,
+    604
+   ],
+   "size": [
+    582,
+    606
+   ]
+  },
+  {
+   "file": "st_round_20.png",
+   "pivot": [
+    189,
+    599
+   ],
+   "size": [
+    582,
+    601
+   ]
+  },
+  {
+   "file": "st_round_21.png",
+   "pivot": [
+    136,
+    599
+   ],
+   "size": [
+    452,
+    601
+   ]
+  },
+  {
+   "file": "st_round_22.png",
+   "pivot": [
+    189,
+    604
+   ],
+   "size": [
+    582,
+    606
+   ]
+  },
+  {
+   "file": "st_round_23.png",
+   "pivot": [
+    124,
+    575
+   ],
+   "size": [
+    428,
+    577
+   ]
+  },
+  {
+   "file": "st_round_24.png",
+   "pivot": [
+    129,
+    575
+   ],
+   "size": [
+    453,
+    577
+   ]
+  },
+  {
+   "file": "st_round_25.png",
+   "pivot": [
+    136,
+    575
+   ],
+   "size": [
+    464,
+    577
+   ]
+  },
+  {
+   "file": "st_round_26.png",
+   "pivot": [
+    151,
+    580
+   ],
+   "size": [
+    441,
+    582
+   ]
+  },
+  {
+   "file": "st_round_27.png",
+   "pivot": [
+    156,
+    580
+   ],
+   "size": [
+    460,
+    582
+   ]
+  },
+  {
+   "file": "st_round_28.png",
+   "pivot": [
+    161,
+    584
+   ],
+   "size": [
+    477,
+    586
+   ]
+  },
+  {
+   "file": "st_round_29.png",
+   "pivot": [
+    189,
+    589
+   ],
+   "size": [
+    582,
+    591
+   ]
+  },
+  {
+   "file": "st_round_30.png",
+   "pivot": [
+    156,
+    589
+   ],
+   "size": [
+    487,
+    591
+   ]
+  },
+  {
+   "file": "st_round_31.png",
+   "pivot": [
+    151,
+    594
+   ],
+   "size": [
+    483,
+    596
+   ]
+  },
+  {
+   "file": "st_round_32.png",
+   "pivot": [
+    146,
+    594
+   ],
+   "size": [
+    479,
+    596
    ]
   }
- ]
+ ],
+ "hit": 18,
+ "hit_end": 23
 }

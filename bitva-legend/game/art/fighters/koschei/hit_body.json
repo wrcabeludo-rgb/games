@@ -1,0 +1,378 @@
+{
+ "frames": [
+  {
+   "file": "hit_body_1.png",
+   "pivot": [
+    608,
+    600
+   ],
+   "size": [
+    945,
+    601
+   ]
+  },
+  {
+   "file": "hit_body_2.png",
+   "pivot": [
+    608,
+    597
+   ],
+   "size": [
+    945,
+    598
+   ]
+  },
+  {
+   "file": "hit_body_3.png",
+   "pivot": [
+    608,
+    595
+   ],
+   "size": [
+    945,
+    596
+   ]
+  },
+  {
+   "file": "hit_body_4.png",
+   "pivot": [
+    608,
+    640
+   ],
+   "size": [
+    945,
+    641
+   ]
+  },
+  {
+   "file": "hit_body_5.png",
+   "pivot": [
+    608,
+    647
+   ],
+   "size": [
+    945,
+    648
+   ]
+  },
+  {
+   "file": "hit_body_6.png",
+   "pivot": [
+    608,
+    635
+   ],
+   "size": [
+    945,
+    636
+   ]
+  },
+  {
+   "file": "hit_body_7.png",
+   "pivot": [
+    608,
+    565
+   ],
+   "size": [
+    945,
+    566
+   ]
+  },
+  {
+   "file": "hit_body_8.png",
+   "pivot": [
+    608,
+    508
+   ],
+   "size": [
+    945,
+    509
+   ]
+  },
+  {
+   "file": "hit_body_9.png",
+   "pivot": [
+    608,
+    505
+   ],
+   "size": [
+    945,
+    506
+   ]
+  },
+  {
+   "file": "hit_body_10.png",
+   "pivot": [
+    608,
+    495
+   ],
+   "size": [
+    945,
+    496
+   ]
+  },
+  {
+   "file": "hit_body_11.png",
+   "pivot": [
+    608,
+    490
+   ],
+   "size": [
+    945,
+    491
+   ]
+  },
+  {
+   "file": "hit_body_12.png",
+   "pivot": [
+    608,
+    490
+   ],
+   "size": [
+    945,
+    491
+   ]
+  },
+  {
+   "file": "hit_body_13.png",
+   "pivot": [
+    608,
+    485
+   ],
+   "size": [
+    945,
+    486
+   ]
+  },
+  {
+   "file": "hit_body_14.png",
+   "pivot": [
+    608,
+    485
+   ],
+   "size": [
+    945,
+    486
+   ]
+  },
+  {
+   "file": "hit_body_15.png",
+   "pivot": [
+    608,
+    490
+   ],
+   "size": [
+    945,
+    491
+   ]
+  },
+  {
+   "file": "hit_body_16.png",
+   "pivot": [
+    608,
+    495
+   ],
+   "size": [
+    945,
+    496
+   ]
+  },
+  {
+   "file": "hit_body_17.png",
+   "pivot": [
+    608,
+    495
+   ],
+   "size": [
+    945,
+    496
+   ]
+  },
+  {
+   "file": "hit_body_18.png",
+   "pivot": [
+    608,
+    495
+   ],
+   "size": [
+    945,
+    496
+   ]
+  },
+  {
+   "file": "hit_body_19.png",
+   "pivot": [
+    608,
+    495
+   ],
+   "size": [
+    945,
+    496
+   ]
+  },
+  {
+   "file": "hit_body_20.png",
+   "pivot": [
+    608,
+    495
+   ],
+   "size": [
+    945,
+    496
+   ]
+  },
+  {
+   "file": "hit_body_21.png",
+   "pivot": [
+    608,
+    495
+   ],
+   "size": [
+    945,
+    496
+   ]
+  },
+  {
+   "file": "hit_body_22.png",
+   "pivot": [
+    608,
+    495
+   ],
+   "size": [
+    945,
+    496
+   ]
+  },
+  {
+   "file": "hit_body_23.png",
+   "pivot": [
+    608,
+    495
+   ],
+   "size": [
+    945,
+    496
+   ]
+  },
+  {
+   "file": "hit_body_24.png",
+   "pivot": [
+    608,
+    495
+   ],
+   "size": [
+    945,
+    496
+   ]
+  },
+  {
+   "file": "hit_body_25.png",
+   "pivot": [
+    608,
+    495
+   ],
+   "size": [
+    945,
+    496
+   ]
+  },
+  {
+   "file": "hit_body_26.png",
+   "pivot": [
+    608,
+    498
+   ],
+   "size": [
+    945,
+    499
+   ]
+  },
+  {
+   "file": "hit_body_27.png",
+   "pivot": [
+    608,
+    495
+   ],
+   "size": [
+    945,
+    496
+   ]
+  },
+  {
+   "file": "hit_body_28.png",
+   "pivot": [
+    608,
+    503
+   ],
+   "size": [
+    945,
+    504
+   ]
+  },
+  {
+   "file": "hit_body_29.png",
+   "pivot": [
+    608,
+    510
+   ],
+   "size": [
+    945,
+    511
+   ]
+  },
+  {
+   "file": "hit_body_30.png",
+   "pivot": [
+    608,
+    535
+   ],
+   "size": [
+    945,
+    536
+   ]
+  },
+  {
+   "file": "hit_body_31.png",
+   "pivot": [
+    608,
+    575
+   ],
+   "size": [
+    945,
+    576
+   ]
+  },
+  {
+   "file": "hit_body_32.png",
+   "pivot": [
+    608,
+    590
+   ],
+   "size": [
+    945,
+    591
+   ]
+  },
+  {
+   "file": "hit_body_33.png",
+   "pivot": [
+    608,
+    595
+   ],
+   "size": [
+    945,
+    596
+   ]
+  },
+  {
+   "file": "hit_body_34.png",
+   "pivot": [
+    608,
+    595
+   ],
+   "size": [
+    945,
+    596
+   ]
+  }
+ ]
+}
