@@ -55,6 +55,7 @@ var _water: Array[Texture2D] = []
 var sky_video: VideoStreamPlayer = null  # живое небо из ролика (ставит ArenaView)
 var _layers3 := {}  # карта из 3 картинок (layers.json: mid_bottom, floor_top) — tools/process_layers3.py
 var _hang: Texture2D = null   # предмет, подвешенный на дальнем плане (сундук Кощея на дубе)
+var _flag_frames: Array[Texture2D] = []  # знамя на ветру на среднем плане (life.json: flag)
 ## Ореол луны: свет плавно гаснет от края диска к краю текстуры.
 var _halo := _make_halo()
 
@@ -87,6 +88,11 @@ func _init(arena_id := Arenas.DEFAULT) -> void:
 			_water.append(load(_d.dir + String(w.file)))
 		if _life.has("hang"):
 			_hang = _load(String(_life.hang.file).get_basename())
+		if _life.has("flag"):
+			for i in range(1, int(_life.flag.frames) + 1):
+				var f := _load("%s_%d" % [_life.flag.file, i])
+				if f != null:
+					_flag_frames.append(f)
 
 
 static func _make_halo() -> Texture2D:
@@ -293,6 +299,8 @@ func _draw_moon(c: CanvasItem) -> void:
 	var kind: String = _d.light[0]
 	if kind == "none" or (_d.get("indoor", false) and not _tex.has("moon")):
 		return
+	if kind == "sun" and _tex.has("sky") and not _tex.has("moon"):
+		return  # солнце уже нарисовано на картинке неба
 	var pos := Vector2(layer_x(k) + layer_w(k) * float(_d.light[1]), 215)
 	if kind == "sun" and not _tex.has("moon"):
 		var glow := Color(1.0, 0.9, 0.65)
@@ -333,8 +341,9 @@ func _draw_clouds(c: CanvasItem) -> void:
 		if not _clouds.is_empty():
 			var tex := _clouds[i % _clouds.size()]
 			var sz := Vector2(tex.get_width(), tex.get_height()) * scale * 0.5
-			# Светлая сторона — тёплые тучи, тёмная — сизые.
-			c.draw_texture_rect(tex, Rect2(pos - sz / 2.0, sz), false, Color(1, 0.92, 0.82).lerp(Color(0.55, 0.5, 0.65), dark))
+			# Светлая сторона — тёплые тучи, тёмная — сизые. Днём (солнце на картинке неба) тучи как нарисованы.
+			var tint := Color.WHITE if _d.light[0] == "sun" and _tex.has("sky") else Color(1, 0.92, 0.82).lerp(Color(0.55, 0.5, 0.65), dark)
+			c.draw_texture_rect(tex, Rect2(pos - sz / 2.0, sz), false, tint)
 			continue
 		var col := Color(1.0, 0.86, 0.7, 0.75).lerp(Color(0.3, 0.24, 0.34, 0.85), dark)
 		for b in 5:
@@ -349,7 +358,7 @@ func _draw_mountains(c: CanvasItem) -> void:
 	if _tex.has("mountains"):
 		# Дальний план из панелей (широкий): поднят, чтобы холмы, деревни и замок были видны над лесом.
 		var wide: bool = float(_tex.mountains.get_width()) / _tex.mountains.get_height() > 5.0
-		var bottom := ground_y - 95 if wide else ground_y + 70
+		var bottom := ground_y - float(_d.get("mountains_rise", 95.0)) if wide else ground_y + 70
 		_draw_strip(c, _tex.mountains, k, bottom)
 		if not _life.is_empty():
 			var sc: float = w / _tex.mountains.get_width()
@@ -419,18 +428,36 @@ func _draw_life(c: CanvasItem, origin: Vector2, sc: float) -> void:
 		c.draw_set_transform(top, ang, Vector2.ONE)
 		c.draw_texture_rect(_hang, Rect2(-hw / 2.0, 0, hw, hh), false, Color(0.85, 0.9, 0.85))
 		c.draw_set_transform(Vector2.ZERO)
-	# Дым: клубы поднимаются, растут, относятся ветром вправо и тают.
 	var pipes: Array = _life.chimneys
 	for i in pipes.size():
 		var base := origin + Vector2(pipes[i][0], pipes[i][1]) * sc
-		var dark := darkness(K_MOUNTAINS, base.x - layer_x(K_MOUNTAINS))
-		var col := Color(0.92, 0.86, 0.78).lerp(Color(0.62, 0.6, 0.7), dark)
-		for j in 5:
-			var age := fmod(t * 0.16 + j / 5.0 + i * 0.37, 1.0)
-			var drift := Vector2(age * age * 34.0 + sin(t * 0.9 + j + i) * 3.0 * age, -age * 70.0)
-			var rad := (4.0 + age * 14.0) * sc * 2.0
-			var a := 0.7 * minf(age * 6.0, 1.0) * (1.0 - age)
-			c.draw_texture_rect(_halo, Rect2(base + drift * sc - Vector2(rad, rad), Vector2(rad, rad) * 2.0), false, Color(col, a))
+		_draw_smoke(c, base, sc, i, darkness(K_MOUNTAINS, base.x - layer_x(K_MOUNTAINS)))
+
+
+## Дым: клубы поднимаются, растут, относятся ветром вправо и тают.
+func _draw_smoke(c: CanvasItem, base: Vector2, sc: float, i: int, dark: float) -> void:
+	var col := Color(0.92, 0.86, 0.78).lerp(Color(0.62, 0.6, 0.7), dark)
+	for j in 5:
+		var age := fmod(t * 0.16 + j / 5.0 + i * 0.37, 1.0)
+		var drift := Vector2(age * age * 34.0 + sin(t * 0.9 + j + i) * 3.0 * age, -age * 70.0)
+		var rad := (4.0 + age * 14.0) * sc * 2.0
+		var a := 0.7 * minf(age * 6.0, 1.0) * (1.0 - age)
+		c.draw_texture_rect(_halo, Rect2(base + drift * sc - Vector2(rad, rad), Vector2(rad, rad) * 2.0), false, Color(col, a))
+
+
+## Жизнь среднего плана (life.json, координаты — пиксели forest.png): знамя на башне, дым из трубы избы.
+## origin — экранная точка левого верхнего угла картинки forest, sc — её масштаб на экране (по x и y).
+func _draw_forest_life(c: CanvasItem, origin: Vector2, sc: Vector2) -> void:
+	if not _flag_frames.is_empty():
+		var fl: Dictionary = _life.flag
+		var tex := _flag_frames[int(t * 7.0) % _flag_frames.size()]
+		var fh: float = float(fl.h) * sc.y
+		var fw := fh * tex.get_width() / tex.get_height()
+		var pos := origin + Vector2(fl.x, fl.y) * sc - Vector2(fw * float(fl.get("pole", 0.0)), 0)
+		c.draw_texture_rect(tex, Rect2(pos, Vector2(fw, fh)), false, Color(0.82, 0.8, 0.88))
+	var pipes: Array = _life.get("forest_chimneys", [])
+	for i in pipes.size():
+		_draw_smoke(c, origin + Vector2(pipes[i][0], pipes[i][1]) * sc, sc.y * 2.2, i, 0.0)
 
 
 ## Листья берёз летят на светлой стороне: кружатся, падают на дорогу и тают.
@@ -639,17 +666,20 @@ func _draw_ravens(c: CanvasItem) -> void:
 
 
 func _draw_forest(c: CanvasItem) -> void:
-	var k := K_FOREST
+	var k: float = _d.get("forest_k", K_FOREST)
 	var x0 := layer_x(k)
 	var w := layer_w(k)
 	if _tex.has("forest"):
 		# Нижняя часть леса уходит за землю; чуть приглушён, чтобы бойцы читались.
 		# Лес из панелей шире слоя: рисуем заданной высоты по центру слоя, края уходят за кадр.
 		var tex: Texture2D = _tex.forest
-		var fh := FOREST_HEIGHT
-		var fw := fh * tex.get_width() / tex.get_height()
+		var fh: float = _d.get("forest_h", FOREST_HEIGHT)
+		var fw := fh * tex.get_width() / tex.get_height() * float(_d.get("forest_squash", 1.0))
 		var fx := layer_x(k) + (layer_w(k) - fw) / 2.0
-		_draw_swaying(c, tex, Rect2(fx, ground_y + 30 - fh, fw, fh), Color(0.82, 0.8, 0.88), 0.0 if _d.get("still", false) else 5.0, 1.1)
+		var fy := ground_y - float(_d.get("forest_rise", -30.0)) - fh
+		_draw_swaying(c, tex, Rect2(fx, fy, fw, fh), Color(0.82, 0.8, 0.88), 0.0 if _d.get("still", false) else 5.0, 1.1)
+		if not _life.is_empty():
+			_draw_forest_life(c, Vector2(fx, fy), Vector2(fw / tex.get_width(), fh / tex.get_height()))
 		return
 	var i := 0
 	var x := 30.0

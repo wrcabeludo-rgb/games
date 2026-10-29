@@ -2,20 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ct4m3uc1x3j1k"
-path="res://.godot/imported/backdrop.png-9e09a358c74f0e62dcb5549ee53a29f3.ctex"
+uid="uid://dmh2iwti138oo"
+path.s3tc="res://.godot/imported/ground.png-cbe85dfe4993e1fc41165469694a100c.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
-source_file="res://art/arenas/zastava/backdrop.png"
-dest_files=["res://.godot/imported/backdrop.png-9e09a358c74f0e62dcb5549ee53a29f3.ctex"]
+source_file="res://art/arenas/zastava/ground.png"
+dest_files=["res://.godot/imported/ground.png-cbe85dfe4993e1fc41165469694a100c.s3tc.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.75
 compress/hdr_compression=1

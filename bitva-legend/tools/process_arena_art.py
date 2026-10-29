@@ -9,7 +9,7 @@
 Запуск: python3 tools/process_arena_art.py <папка с исходниками> [арена]
 Арена — id из game/scripts/ui/arenas.gd (coast, pass, nile, zastava, …, feed); без неё — «Перепутье»
 (game/art/arena/), с ней — game/art/arenas/<арена>/.
-Ожидаемые имена: sky, moon, clouds, mountains, forest, stone, ground, foreground, ravens (.png/.jpg/.webp).
+Ожидаемые имена: sky, moon, clouds, mountains, forest, stone, ground, foreground, ravens, banner (.png/.jpg/.webp).
 Полосу (mountains, forest, ground, foreground) можно прислать панелями: forest_1, forest_2, forest_3 — склеятся.
 Отсутствующие слои пропускаются — в игре вместо них останутся заглушки.
 """
@@ -37,6 +37,9 @@ STONE_HEIGHT = 520  # 2× высоты в игре (STONE_H в arena_scenery.gd)
 STITCH_OVERLAP = {"ground": 0.12, "mountains": 0.15, "forest": 0.03}  # перетекание соседних панелей сплошных полос
 CLOUD_MAX_WIDTH = 720
 RAVEN_HEIGHT = 220
+FLAG_HEIGHT = 300
+# Небо шире 16:9 обрезается по бокам; у этих арен солнце нарисовано у левого края — режем справа.
+SKY_KEEP_LEFT = {"zastava"}
 
 
 def despill_red(img: Image.Image) -> Image.Image:
@@ -167,13 +170,13 @@ def resize_h(img: Image.Image, h: int) -> Image.Image:
     return img.resize((max(1, round(img.width * h / img.height)), h), Image.LANCZOS)
 
 
-def cover(img: Image.Image, size) -> Image.Image:
-    """Заполнить size целиком, обрезав лишнее: по ширине — по центру, по высоте — сверху
-    (низ с горизонтом и солнцем сохраняется)."""
+def cover(img: Image.Image, size, keep_left: bool = False) -> Image.Image:
+    """Заполнить size целиком, обрезав лишнее: по ширине — по центру (keep_left — справа),
+    по высоте — сверху (низ с горизонтом и солнцем сохраняется)."""
     tw, th = size
     k = max(tw / img.width, th / img.height)
     img = img.resize((round(img.width * k), round(img.height * k)), Image.LANCZOS)
-    l = (img.width - tw) // 2
+    l = 0 if keep_left else (img.width - tw) // 2
     t = img.height - th
     return img.crop((l, t, l + tw, t + th))
 
@@ -209,6 +212,45 @@ def split_objects(img: Image.Image, min_gap: int = 12, min_share: float = 0.002)
             if band[:, left:right].sum() < total * min_share:
                 continue  # пылинка
             yield trim(img.crop((left, top, right, bottom)))
+
+
+def split_components(img: Image.Image, cell: int = 6, min_share: float = 0.002):
+    """Отдельные объекты листа по связным областям (когда нейросеть поставила их тесно и пустых полос
+    между рядами нет): маска огрубляется до клеток cell×cell, области ищутся обходом в ширину.
+    Порядок — сверху вниз по рядам, в ряду слева направо."""
+    alpha = np.asarray(img.getchannel("A")) > 24
+    h, w = alpha.shape
+    gh, gw = -(-h // cell), -(-w // cell)
+    pad = np.zeros((gh * cell, gw * cell), dtype=bool)
+    pad[:h, :w] = alpha
+    grid = pad.reshape(gh, cell, gw, cell).any(axis=(1, 3))
+    label = np.zeros(grid.shape, dtype=np.int32)
+    boxes = []
+    for sy, sx in zip(*np.nonzero(grid)):
+        if label[sy, sx]:
+            continue
+        n = len(boxes) + 1
+        label[sy, sx] = n
+        queue, box = [(sy, sx)], [sx, sy, sx, sy]
+        while queue:
+            y, x = queue.pop()
+            box = [min(box[0], x), min(box[1], y), max(box[2], x), max(box[3], y)]
+            for ny, nx in ((y + 1, x), (y - 1, x), (y, x + 1), (y, x - 1)):
+                if 0 <= ny < gh and 0 <= nx < gw and grid[ny, nx] and not label[ny, nx]:
+                    label[ny, nx] = n
+                    queue.append((ny, nx))
+        boxes.append(box)
+    objs = []
+    for n, (x0, y0, x1, y1) in enumerate(boxes, 1):
+        mask = np.kron(label == n, np.ones((cell, cell), dtype=bool))[:h, :w] & alpha
+        if mask.sum() < alpha.size * min_share:
+            continue  # пылинка
+        a = np.asarray(img).copy()
+        a[..., 3] = np.where(mask, a[..., 3], 0)
+        objs.append(((y0 + y1) / 2 * cell, x0 * cell, trim(Image.fromarray(a))))
+    row_h = h / 4
+    objs.sort(key=lambda o: (int(o[0] // row_h), o[1]))
+    return [o[2] for o in objs]
 
 
 def _eye(img: Image.Image):
@@ -306,8 +348,9 @@ def main() -> int:
     if len(sys.argv) == 3 and sys.argv[2] != "crossroads" and "ART_OUT" not in os.environ:
         OUT = OUT.parent / "arenas" / sys.argv[2]
     done = 0
+    arena = sys.argv[2] if len(sys.argv) == 3 else "crossroads"
     if p := find(src, "sky"):
-        save(cover(Image.open(p).convert("RGB"), SKY_SIZE), "sky")
+        save(cover(Image.open(p).convert("RGB"), SKY_SIZE, arena in SKY_KEEP_LEFT), "sky")
         done += 1
     if p := find(src, "moon"):
         moon = trim(chroma_key(Image.open(p)))
@@ -333,7 +376,13 @@ def main() -> int:
         save(resize_h(trim(chroma_key(Image.open(p))), STONE_HEIGHT), "stone")
         done += 1
     if p := find(src, "clouds"):
-        for i, cloud in enumerate(split_objects(strip_outline(chroma_key(Image.open(p)))), 1):
+        sheet = strip_outline(chroma_key(Image.open(p)))
+        clouds = list(split_objects(sheet))
+        if len(clouds) < 3:  # тучи стоят тесно, пустых полос нет — режем по связным областям
+            clouds = split_components(sheet)
+        for old in OUT.glob("cloud_*.png"):
+            old.unlink()
+        for i, cloud in enumerate(clouds, 1):
             if cloud.width > CLOUD_MAX_WIDTH:
                 cloud = resize_w(cloud, CLOUD_MAX_WIDTH)
             save(cloud, f"cloud_{i}")
@@ -348,6 +397,17 @@ def main() -> int:
             old.unlink()
         for i, frame in enumerate(frames, 1):
             save(resize_h(frame, RAVEN_HEIGHT), f"raven_{i}")
+        done += 1
+    if p := find(src, "banner"):
+        # Знамя на ветру: кадры на общем холсте, верх древка (наконечник) — в левом верхнем углу у всех.
+        frames = list(split_objects(chroma_key(Image.open(p))))
+        size = (max(f.width for f in frames), max(f.height for f in frames))
+        for old in OUT.glob("banner_*.png"):
+            old.unlink()
+        for i, f in enumerate(frames, 1):
+            canvas = Image.new("RGBA", size, (0, 0, 0, 0))
+            canvas.paste(f, (0, 0))
+            save(resize_h(canvas, FLAG_HEIGHT), f"banner_{i}")
         done += 1
     print(f"Готово слоёв: {done}. Папка: {OUT}")
     return 0

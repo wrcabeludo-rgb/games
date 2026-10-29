@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://tnk806bl7783"
-path.s3tc="res://.godot/imported/layer_sky.png-a69a4913348caf965e9607833d64b4aa.s3tc.ctex"
+uid="uid://7l3ecldmc2wn"
+path.s3tc="res://.godot/imported/banner_2.png-84d3384bcbace29d876cae0e1b9e94c7.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://art/arenas/zastava/layer_sky.png"
-dest_files=["res://.godot/imported/layer_sky.png-a69a4913348caf965e9607833d64b4aa.s3tc.ctex"]
+source_file="res://art/arenas/zastava/banner_2.png"
+dest_files=["res://.godot/imported/banner_2.png-84d3384bcbace29d876cae0e1b9e94c7.s3tc.ctex"]
 
 [params]
 

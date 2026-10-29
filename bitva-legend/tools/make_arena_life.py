@@ -50,6 +50,18 @@ LIFE_ARENAS = {
         "sparkle_band": (290, 480, 460, 620),
         "hang": {"file": "chest.png", "x": 2822, "y": 318, "h": 170},
     },
+    # Богатырская застава: река через весь дальний план (вода — синие гладкие пиксели), дымок над дальними
+    # деревнями; знамя на башне и дым из трубы избы — на среднем плане (координаты — пиксели forest.png).
+    "zastava": {
+        "water": [[(x, 330), (min(x + 1000, 5173), 330), (min(x + 1000, 5173), 485), (x, 485)] for x in range(0, 5173, 1000)],
+        "water_blue": True,
+        "fall": [],
+        "chimneys": [(108, 118), (238, 146), (418, 142), (2905, 172), (3072, 182)],
+        "windows_band": (0, 0, 1, 1),
+        "windows_skip": [],
+        "flag": {"file": "banner", "frames": 4, "x": 485, "y": -40, "h": 170, "pole": 0.045},
+        "forest_chimneys": [(6900, 205)],
+    },
 }
 
 
@@ -147,7 +159,10 @@ def main() -> int:
         ImageDraw.Draw(pm).polygon(poly, fill=255)
         # Слева вода гладкая — отсекаем мазки крон; справа картинка вся в мелких деталях — только тёмные ели.
         mask = (np.asarray(pm) > 0) & (src[..., 3] > 200)
-        mask &= (rough < 85) if n == 0 else (gray > 70)
+        if LIFE.get("water_blue"):
+            mask &= (rough < 85) & (src[..., 2].astype(int) > src[..., 0].astype(int) + 40)
+        else:
+            mask &= (rough < 85) if n == 0 else (gray > 70)
         xs = [p[0] for p in poly]
         ys = [p[1] for p in poly]
         box = (min(xs), min(ys), max(xs) + 1, max(ys) + 1)
@@ -163,8 +178,9 @@ def main() -> int:
         make_water(src, mask, (x0, y0, x1, y1), False, n).save(folder / f"water_{n}.png", optimize=True)
         meta["water"].append({"file": f"water_{n}.png", "rect": [x0, y0, x1 - x0, y1 - y0], "frames": FRAMES, "period": 1.2})
     meta["window_color"] = LIFE.get("window_color", "warm")
-    if "hang" in LIFE:
-        meta["hang"] = LIFE["hang"]
+    for key in ("hang", "flag", "forest_chimneys"):
+        if key in LIFE:
+            meta[key] = LIFE[key]
     if "sparkle_band" in LIFE:
         x0, y0, x1, y1 = LIFE["sparkle_band"]
         sub = src[y0:y1, x0:x1].astype(float)

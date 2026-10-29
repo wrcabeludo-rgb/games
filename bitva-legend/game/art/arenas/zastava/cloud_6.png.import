@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://0n17e1nngjav"
-path.s3tc="res://.godot/imported/layer_mid.png-de06c00d2c9d7ee7e3eb048f299c3a4b.s3tc.ctex"
+uid="uid://ctddikd13gwfo"
+path.s3tc="res://.godot/imported/cloud_6.png-b75d6442f3d5f20c7246d6df832d97f2.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://art/arenas/zastava/layer_mid.png"
-dest_files=["res://.godot/imported/layer_mid.png-de06c00d2c9d7ee7e3eb048f299c3a4b.s3tc.ctex"]
+source_file="res://art/arenas/zastava/cloud_6.png"
+dest_files=["res://.godot/imported/cloud_6.png-b75d6442f3d5f20c7246d6df832d97f2.s3tc.ctex"]
 
 [params]
 

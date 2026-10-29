@@ -15,6 +15,10 @@ extends RefCounted
 ##   stone      — камень на перепутье в центре; glitch — помехи и пиксельная пыль (логово Скроллера)
 ##   leaves     — листья летят на светлой стороне; fireflies — светлячки на тёмной
 ##   still      — средний план не качается на ветру (колонны, статуи, экраны)
+##   forest_h, forest_rise — высота среднего плана на экране и насколько его низ выше линии бойцов, px
+##                (по умолчанию 270 и −30: низ леса уходит за землю); mountains_rise — то же для дальнего плана;
+##                forest_k — параллакс среднего плана (0,3), forest_squash — сжатие по ширине: полоса шире экрана,
+##                а её края (башня, изба) должны попадать в кадр при крайних положениях камеры
 
 const DEFAULT := "crossroads"
 
@@ -50,11 +54,12 @@ const LIST := {
 	},
 	# --- Свои арены бойцов ---
 	"zastava": {
-		"name": "Богатырская застава", "dir": "res://art/arenas/zastava/",
+		"name": "Богатырская застава", "still": true, "dir": "res://art/arenas/zastava/",
+		"forest_h": 260.0, "forest_rise": 115.0, "forest_k": 0.9, "forest_squash": 0.8, "mountains_rise": 150.0,
 		"sky": [Color(0.25, 0.4, 0.65), Color(0.95, 0.85, 0.6), Color(0.85, 0.75, 0.6)], "stars": false,
 		"light": ["sun", 0.5], "hills": Color(0.4, 0.5, 0.3), "shape": ["soft", "soft"],
 		"marks": [["fort", 0.5, 1.2]], "trees": ["birch", "pine"],
-		"ground": Color(0.38, 0.32, 0.22), "birds": "none",
+		"ground": Color(0.38, 0.32, 0.22), "birds": "ravens",  # кадры raven_* у заставы — ласточка
 	},
 	"castle_hall": {
 		"name": "Замок графа", "still": true, "dir": "res://art/arenas/castle_hall/", "indoor": true,
