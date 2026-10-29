@@ -60,6 +60,9 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
+# Увеличенный ×2 лист парной сцены или добивания — больше 300 млн пикселей: Pillow считает такое «бомбой».
+Image.MAX_IMAGE_PIXELS = None
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from process_arena_art import chroma_key, split_objects, sharpen  # noqa: E402
 

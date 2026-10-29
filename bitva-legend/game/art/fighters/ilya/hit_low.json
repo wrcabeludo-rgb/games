@@ -3,7 +3,7 @@
   {
    "file": "hit_low_1.png",
    "pivot": [
-    228,
+    227,
     410
    ],
    "size": [
@@ -14,7 +14,7 @@
   {
    "file": "hit_low_2.png",
    "pivot": [
-    228,
+    227,
     410
    ],
    "size": [
@@ -25,7 +25,7 @@
   {
    "file": "hit_low_3.png",
    "pivot": [
-    228,
+    227,
     413
    ],
    "size": [
@@ -36,7 +36,7 @@
   {
    "file": "hit_low_4.png",
    "pivot": [
-    228,
+    227,
     413
    ],
    "size": [
@@ -47,7 +47,7 @@
   {
    "file": "hit_low_5.png",
    "pivot": [
-    228,
+    227,
     415
    ],
    "size": [
@@ -58,7 +58,7 @@
   {
    "file": "hit_low_6.png",
    "pivot": [
-    242,
+    241,
     462
    ],
    "size": [
@@ -69,29 +69,29 @@
   {
    "file": "hit_low_7.png",
    "pivot": [
-    238,
-    460
+    237,
+    459
    ],
    "size": [
     427,
-    461
+    460
    ]
   },
   {
    "file": "hit_low_8.png",
    "pivot": [
-    240,
+    237,
     455
    ],
    "size": [
-    429,
+    427,
     456
    ]
   },
   {
    "file": "hit_low_9.png",
    "pivot": [
-    237,
+    236,
     453
    ],
    "size": [
@@ -102,7 +102,7 @@
   {
    "file": "hit_low_10.png",
    "pivot": [
-    233,
+    232,
     453
    ],
    "size": [
@@ -113,7 +113,7 @@
   {
    "file": "hit_low_11.png",
    "pivot": [
-    231,
+    230,
     451
    ],
    "size": [
@@ -124,7 +124,7 @@
   {
    "file": "hit_low_12.png",
    "pivot": [
-    231,
+    230,
     446
    ],
    "size": [
@@ -135,7 +135,7 @@
   {
    "file": "hit_low_13.png",
    "pivot": [
-    233,
+    232,
     439
    ],
    "size": [
@@ -146,18 +146,18 @@
   {
    "file": "hit_low_14.png",
    "pivot": [
-    233,
-    431
+    232,
+    430
    ],
    "size": [
     429,
-    432
+    431
    ]
   },
   {
    "file": "hit_low_15.png",
    "pivot": [
-    233,
+    232,
     422
    ],
    "size": [
@@ -168,17 +168,6 @@
   {
    "file": "hit_low_16.png",
    "pivot": [
-    233,
-    419
-   ],
-   "size": [
-    434,
-    420
-   ]
-  },
-  {
-   "file": "hit_low_17.png",
-   "pivot": [
     232,
     419
    ],
@@ -188,46 +177,57 @@
    ]
   },
   {
+   "file": "hit_low_17.png",
+   "pivot": [
+    230,
+    419
+   ],
+   "size": [
+    431,
+    420
+   ]
+  },
+  {
    "file": "hit_low_18.png",
    "pivot": [
-    231,
+    229,
     422
    ],
    "size": [
-    432,
+    430,
     423
    ]
   },
   {
    "file": "hit_low_19.png",
    "pivot": [
-    228,
+    227,
     424
    ],
    "size": [
-    429,
+    428,
     425
    ]
   },
   {
    "file": "hit_low_20.png",
    "pivot": [
-    228,
+    226,
     424
    ],
    "size": [
-    429,
+    428,
     425
    ]
   },
   {
    "file": "hit_low_21.png",
    "pivot": [
-    226,
+    225,
     424
    ],
    "size": [
-    427,
+    426,
     425
    ]
   }
