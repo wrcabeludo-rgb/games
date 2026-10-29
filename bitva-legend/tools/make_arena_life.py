@@ -62,6 +62,18 @@ LIFE_ARENAS = {
         "flag": {"file": "banner", "frames": 4, "x": 485, "y": -40, "h": 170, "pole": 0.045},
         "forest_chimneys": [(6900, 205)],
     },
+    # Сад Гесперид: море на закате (синие гладкие пиксели ниже линии моря), блеск золотых яблок и ваз на среднем
+    # плане, дракон Ладон выглядывает из-за ограды у священной яблони (пиксели forest.png, x — низ шеи).
+    "hesperides": {
+        "water": [[(x, 438), (min(x + 1000, 5172), 438), (min(x + 1000, 5172), 599), (x, 599)] for x in range(0, 5172, 1000)],
+        "water_blue": True,
+        "fall": [],
+        "chimneys": [],
+        "windows_band": (0, 0, 1, 1),
+        "windows_skip": [],
+        "forest_sparkle_band": (0, 0, 7491, 540),
+        "creature": {"file": "dragon", "frames": 4, "x": 4110, "y": 660, "h": 420, "base": 0.564},
+    },
 }
 
 
@@ -178,7 +190,7 @@ def main() -> int:
         make_water(src, mask, (x0, y0, x1, y1), False, n).save(folder / f"water_{n}.png", optimize=True)
         meta["water"].append({"file": f"water_{n}.png", "rect": [x0, y0, x1 - x0, y1 - y0], "frames": FRAMES, "period": 1.2})
     meta["window_color"] = LIFE.get("window_color", "warm")
-    for key in ("hang", "flag", "forest_chimneys"):
+    for key in ("hang", "flag", "forest_chimneys", "creature"):
         if key in LIFE:
             meta[key] = LIFE[key]
     if "sparkle_band" in LIFE:
@@ -189,6 +201,16 @@ def main() -> int:
         rng = np.random.default_rng(7)
         pick = rng.choice(len(xs), size=min(18, len(xs)), replace=False) if len(xs) else []
         meta["sparkles"] = [[int(xs[i] + x0), int(ys[i] + y0)] for i in pick]
+    if "forest_sparkle_band" in LIFE:
+        # Блеск золота на среднем плане (яблоки, вазы): случайные золотые точки forest.png в полосе.
+        fsrc = np.asarray(Image.open(folder / "forest.png").convert("RGBA")).astype(int)
+        x0, y0, x1, y1 = LIFE["forest_sparkle_band"]
+        sub = fsrc[y0:y1, x0:x1]
+        gold = (sub[..., 3] > 200) & (sub[..., 0] > 200) & (sub[..., 1] > 150) & (sub[..., 1] < 215) & (sub[..., 2] < 90)
+        ys, xs = np.nonzero(gold)
+        rng = np.random.default_rng(11)
+        pick = rng.choice(len(xs), size=min(40, len(xs)), replace=False) if len(xs) else []
+        meta["forest_sparkles"] = [[int(xs[i] + x0), int(ys[i] + y0)] for i in pick]
     meta["windows"] = [w for w in find_windows(src, LIFE["windows_band"], LIFE.get("window_color", "warm"))
                        if not any(a <= w[0] < c and b <= w[1] < d for a, b, c, d in LIFE["windows_skip"])]
     (folder / "life.json").write_text(json.dumps(meta, ensure_ascii=False))

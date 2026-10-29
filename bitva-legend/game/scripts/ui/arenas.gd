@@ -18,7 +18,8 @@ extends RefCounted
 ##   forest_h, forest_rise — высота среднего плана на экране и насколько его низ выше линии бойцов, px
 ##                (по умолчанию 270 и −30: низ леса уходит за землю); mountains_rise — то же для дальнего плана;
 ##                forest_k — параллакс среднего плана (0,3), forest_squash — сжатие по ширине: полоса шире экрана,
-##                а её края (башня, изба) должны попадать в кадр при крайних положениях камеры
+##                а её края (башня, изба) должны попадать в кадр при крайних положениях камеры; mountains_fill — нижний край дальнего плана (море) тянется до земли;
+##   petals     — белые лепестки летят по всей арене
 
 const DEFAULT := "crossroads"
 
@@ -83,11 +84,12 @@ const LIST := {
 		"ground": Color(0.4, 0.42, 0.38), "birds": "gulls",
 	},
 	"hesperides": {
-		"name": "Сад Гесперид", "dir": "res://art/arenas/hesperides/",
+		"name": "Сад Гесперид", "still": true, "dir": "res://art/arenas/hesperides/", "petals": true,
+		"forest_h": 260.0, "forest_rise": 110.0, "forest_k": 0.9, "forest_squash": 0.8, "mountains_rise": 215.0, "mountains_fill": true,
 		"sky": [Color(0.3, 0.2, 0.45), Color(1.0, 0.75, 0.45), Color(0.95, 0.6, 0.45)], "stars": false,
-		"light": ["sun", 0.6], "hills": Color(0.45, 0.5, 0.35), "shape": ["soft", "soft"],
+		"light": ["sun", 0.75], "hills": Color(0.45, 0.5, 0.35), "shape": ["soft", "soft"],
 		"marks": [["giant", 0.85, 1.0]], "trees": ["apple", "apple"],
-		"ground": Color(0.4, 0.45, 0.28), "birds": "none",
+		"ground": Color(0.4, 0.45, 0.28), "birds": "ravens",  # кадры raven_* у Сада — чайка
 	},
 	"koschei_realm": {
 		"name": "Кощеево царство", "dir": "res://art/arenas/koschei_realm/",

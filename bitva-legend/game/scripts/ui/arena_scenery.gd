@@ -56,6 +56,7 @@ var sky_video: VideoStreamPlayer = null  # живое небо из ролика
 var _layers3 := {}  # карта из 3 картинок (layers.json: mid_bottom, floor_top) — tools/process_layers3.py
 var _hang: Texture2D = null   # предмет, подвешенный на дальнем плане (сундук Кощея на дубе)
 var _flag_frames: Array[Texture2D] = []  # знамя на ветру на среднем плане (life.json: flag)
+var _creature_frames: Array[Texture2D] = []  # зверь за оградой среднего плана (life.json: creature — дракон Ладон)
 ## Ореол луны: свет плавно гаснет от края диска к краю текстуры.
 var _halo := _make_halo()
 
@@ -93,6 +94,11 @@ func _init(arena_id := Arenas.DEFAULT) -> void:
 				var f := _load("%s_%d" % [_life.flag.file, i])
 				if f != null:
 					_flag_frames.append(f)
+		if _life.has("creature"):
+			for i in range(1, int(_life.creature.frames) + 1):
+				var f := _load("%s_%d" % [_life.creature.file, i])
+				if f != null:
+					_creature_frames.append(f)
 
 
 static func _make_halo() -> Texture2D:
@@ -360,6 +366,10 @@ func _draw_mountains(c: CanvasItem) -> void:
 		var wide: bool = float(_tex.mountains.get_width()) / _tex.mountains.get_height() > 5.0
 		var bottom := ground_y - float(_d.get("mountains_rise", 95.0)) if wide else ground_y + 70
 		_draw_strip(c, _tex.mountains, k, bottom)
+		if _d.get("mountains_fill", false):
+			# Море до самой земли: нижние ряды картинки тянутся вниз, иначе между дальним планом и оградой — небо.
+			var tm: Texture2D = _tex.mountains
+			c.draw_texture_rect_region(tm, Rect2(x0, bottom - 1, w, ground_y + 40 - bottom), Rect2(0, tm.get_height() - 3, tm.get_width(), 2))
 		if not _life.is_empty():
 			var sc: float = w / _tex.mountains.get_width()
 			_draw_life(c, Vector2(x0, bottom - _tex.mountains.get_height() * sc), sc)
@@ -407,17 +417,7 @@ func _draw_life(c: CanvasItem, origin: Vector2, sc: float) -> void:
 		var fl := 0.55 + 0.25 * sin(t * (2.1 + (i % 5) * 0.6) + i * 1.7) + 0.2 * sin(t * (5.3 + (i % 3)) + i * 0.9)
 		var rad := (7.0 + minf(wins[i][2], 12.0) * 0.6) * sc * 2.2
 		c.draw_texture_rect(_halo, Rect2(p - Vector2(rad, rad), Vector2(rad, rad) * 2.0), false, Color(glow_col, 0.25 + 0.55 * fl))
-	# Блеск чахнущего золота: короткие искры то тут, то там.
-	var sp: Array = _life.get("sparkles", [])
-	for i in sp.size():
-		var ph := fmod(t * 0.35 + i * 0.618, 1.0)
-		if ph > 0.12:
-			continue
-		var k := sin(ph / 0.12 * PI)
-		var q := origin + Vector2(sp[i][0], sp[i][1]) * sc
-		var len := 9.0 * k
-		c.draw_line(q - Vector2(len, 0), q + Vector2(len, 0), Color(1, 0.92, 0.6, k), 1.5)
-		c.draw_line(q - Vector2(0, len), q + Vector2(0, len), Color(1, 0.92, 0.6, k), 1.5)
+	_draw_sparkles(c, _life.get("sparkles", []), origin, Vector2(sc, sc))
 	# Сундук со смертью Кощея качается на цепях под ветром, иногда налетает порыв.
 	if _hang != null:
 		var hg: Dictionary = _life.hang
@@ -432,6 +432,38 @@ func _draw_life(c: CanvasItem, origin: Vector2, sc: float) -> void:
 	for i in pipes.size():
 		var base := origin + Vector2(pipes[i][0], pipes[i][1]) * sc
 		_draw_smoke(c, base, sc, i, darkness(K_MOUNTAINS, base.x - layer_x(K_MOUNTAINS)))
+
+
+## Блеск золота: короткие искры то тут, то там (точки — пиксели картинки слоя от origin с масштабом sc).
+func _draw_sparkles(c: CanvasItem, sp: Array, origin: Vector2, sc: Vector2) -> void:
+	for i in sp.size():
+		var ph := fmod(t * 0.35 + i * 0.618, 1.0)
+		if ph > 0.12:
+			continue
+		var k := sin(ph / 0.12 * PI)
+		var q := origin + Vector2(sp[i][0], sp[i][1]) * sc
+		var len := 9.0 * k
+		c.draw_line(q - Vector2(len, 0), q + Vector2(len, 0), Color(1, 0.92, 0.6, k), 1.5)
+		c.draw_line(q - Vector2(0, len), q + Vector2(0, len), Color(1, 0.92, 0.6, k), 1.5)
+
+
+## Зверь за оградой среднего плана (дракон Ладон): рисуется ДО слоя — перила закрывают низ шеи.
+## Кадры медленно сменяют друг друга (дыхание, поворот головы) с коротким наплывом, голова чуть покачивается.
+func _draw_creature(c: CanvasItem, origin: Vector2, sc: Vector2) -> void:
+	var cr: Dictionary = _life.creature
+	var n := _creature_frames.size()
+	var ft := fmod(t / 1.1, float(n))
+	var f0 := int(ft)
+	var mix := smoothstep(0.7, 1.0, ft - f0)
+	var tex := _creature_frames[f0]
+	var h: float = float(cr.h) * sc.y
+	var w := h * tex.get_width() / tex.get_height()
+	var base := origin + Vector2(cr.x, cr.y) * sc + Vector2(0, sin(t * 1.3) * 2.0)
+	var rect := Rect2(base - Vector2(w * float(cr.get("base", 0.5)), h), Vector2(w, h))
+	var tint := Color(0.82, 0.8, 0.88)
+	c.draw_texture_rect(tex, rect, false, tint)
+	if mix > 0.0:
+		c.draw_texture_rect(_creature_frames[(f0 + 1) % n], rect, false, Color(tint, mix))
 
 
 ## Дым: клубы поднимаются, растут, относятся ветром вправо и тают.
@@ -458,10 +490,13 @@ func _draw_forest_life(c: CanvasItem, origin: Vector2, sc: Vector2) -> void:
 	var pipes: Array = _life.get("forest_chimneys", [])
 	for i in pipes.size():
 		_draw_smoke(c, origin + Vector2(pipes[i][0], pipes[i][1]) * sc, sc.y * 2.2, i, 0.0)
+	_draw_sparkles(c, _life.get("forest_sparkles", []), origin, sc)
 
 
 ## Листья берёз летят на светлой стороне: кружатся, падают на дорогу и тают.
 func _draw_leaves(c: CanvasItem) -> void:
+	if _d.get("petals", false):
+		_draw_petals(c)
 	if not _d.get("leaves", false):
 		return
 	var k := 0.6
@@ -481,6 +516,24 @@ func _draw_leaves(c: CanvasItem) -> void:
 		var leaf := PackedVector2Array([Vector2(-1, 0), Vector2(0, -0.6), Vector2(1, 0), Vector2(0, 0.6), Vector2(-1, 0)])
 		c.draw_colored_polygon(leaf, col)
 		c.draw_polyline(leaf, Color(col.darkened(0.55), a), 1.0)
+		c.draw_set_transform(Vector2.ZERO)
+
+
+## Белые лепестки цветущих деревьев летят по всей арене: ветер несёт их вправо, они кружатся и тают у земли.
+func _draw_petals(c: CanvasItem) -> void:
+	var k := 0.6
+	var w := layer_w(k)
+	for i in 12:
+		var life := 8.0 + (i % 4) * 1.5
+		var age := fmod(t / life + i * 0.37, 1.0)
+		var lx := w * (0.03 + 0.08 * i) + age * 220.0 + sin(t * 1.1 + i * 2.3) * 30.0
+		var p := Vector2(layer_x(k) + lx, lerpf(180.0 + 40.0 * (i % 4), ground_y - 10.0, age))
+		if p.x < -20 or p.x > view.x + 20:
+			continue
+		var a := minf(age * 8.0, 1.0) * minf((1.0 - age) * 10.0, 1.0) * 0.9
+		var spin := t * (2.2 + (i % 3) * 0.6) + i
+		c.draw_set_transform(p, spin * 0.4, Vector2(4.5 * cos(spin), 3.0))
+		c.draw_circle(Vector2.ZERO, 1.0, Color(1.0, 0.97, 0.88, a))
 		c.draw_set_transform(Vector2.ZERO)
 
 
@@ -677,9 +730,12 @@ func _draw_forest(c: CanvasItem) -> void:
 		var fw := fh * tex.get_width() / tex.get_height() * float(_d.get("forest_squash", 1.0))
 		var fx := layer_x(k) + (layer_w(k) - fw) / 2.0
 		var fy := ground_y - float(_d.get("forest_rise", -30.0)) - fh
+		var fsc := Vector2(fw / tex.get_width(), fh / tex.get_height())
+		if not _creature_frames.is_empty():
+			_draw_creature(c, Vector2(fx, fy), fsc)
 		_draw_swaying(c, tex, Rect2(fx, fy, fw, fh), Color(0.82, 0.8, 0.88), 0.0 if _d.get("still", false) else 5.0, 1.1)
 		if not _life.is_empty():
-			_draw_forest_life(c, Vector2(fx, fy), Vector2(fw / tex.get_width(), fh / tex.get_height()))
+			_draw_forest_life(c, Vector2(fx, fy), fsc)
 		return
 	var i := 0
 	var x := 30.0

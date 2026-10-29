@@ -9,7 +9,7 @@
 Запуск: python3 tools/process_arena_art.py <папка с исходниками> [арена]
 Арена — id из game/scripts/ui/arenas.gd (coast, pass, nile, zastava, …, feed); без неё — «Перепутье»
 (game/art/arena/), с ней — game/art/arenas/<арена>/.
-Ожидаемые имена: sky, moon, clouds, mountains, forest, stone, ground, foreground, ravens, banner (.png/.jpg/.webp).
+Ожидаемые имена: sky, moon, clouds, mountains, forest, stone, ground, foreground, ravens, banner, dragon (.png/.jpg/.webp).
 Полосу (mountains, forest, ground, foreground) можно прислать панелями: forest_1, forest_2, forest_3 — склеятся.
 Отсутствующие слои пропускаются — в игре вместо них останутся заглушки.
 """
@@ -38,6 +38,7 @@ STITCH_OVERLAP = {"ground": 0.12, "mountains": 0.15, "forest": 0.03}  # пере
 CLOUD_MAX_WIDTH = 720
 RAVEN_HEIGHT = 220
 FLAG_HEIGHT = 300
+CREATURE_HEIGHT = 420
 # Небо шире 16:9 обрезается по бокам; у этих арен солнце нарисовано у левого края — режем справа.
 SKY_KEEP_LEFT = {"zastava"}
 
@@ -378,8 +379,9 @@ def main() -> int:
     if p := find(src, "clouds"):
         sheet = strip_outline(chroma_key(Image.open(p)))
         clouds = list(split_objects(sheet))
-        if len(clouds) < 3:  # тучи стоят тесно, пустых полос нет — режем по связным областям
-            clouds = split_components(sheet)
+        comps = split_components(sheet)
+        if len(comps) > len(clouds):  # тучи стоят тесно, пустых полос между ними нет — режем по связным областям
+            clouds = comps
         for old in OUT.glob("cloud_*.png"):
             old.unlink()
         for i, cloud in enumerate(clouds, 1):
@@ -408,6 +410,26 @@ def main() -> int:
             canvas = Image.new("RGBA", size, (0, 0, 0, 0))
             canvas.paste(f, (0, 0))
             save(resize_h(canvas, FLAG_HEIGHT), f"banner_{i}")
+        done += 1
+    if p := find(src, "dragon"):
+        # Зверь, выглядывающий из-за ограды (дракон Ладон): шея растёт из низа кадра, низ шеи — общая опорная
+        # точка всех кадров (середина нижнего ряда фигуры), двигаются голова и верх шеи.
+        frames = list(split_objects(chroma_key(Image.open(p))))
+        bases = []
+        for f in frames:
+            a = np.asarray(f.getchannel("A")) > 128
+            rows = np.nonzero(a.any(axis=1))[0]
+            xs = np.nonzero(a[rows[-1] - 6:rows[-1] + 1].any(axis=0))[0]
+            bases.append(((xs.min() + xs.max()) / 2.0, rows[-1] + 1))
+        left = max(bx for bx, _ in bases)
+        right = max(f.width - bx for f, (bx, _) in zip(frames, bases))
+        top = max(by for _, by in bases)
+        for old in OUT.glob("dragon_*.png"):
+            old.unlink()
+        for i, (f, (bx, by)) in enumerate(zip(frames, bases), 1):
+            canvas = Image.new("RGBA", (round(left + right), round(top)), (0, 0, 0, 0))
+            canvas.paste(f, (round(left - bx), round(top - by)))
+            save(resize_h(canvas, CREATURE_HEIGHT), f"dragon_{i}")
         done += 1
     print(f"Готово слоёв: {done}. Папка: {OUT}")
     return 0

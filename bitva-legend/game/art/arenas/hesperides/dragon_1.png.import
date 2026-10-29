@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cuqqjdaev0oo5"
-path.s3tc="res://.godot/imported/layer_sky.png-f254d40e3920351247397e83d540bf8d.s3tc.ctex"
+uid="uid://7ihugyqdpxe"
+path.s3tc="res://.godot/imported/dragon_1.png-c50cca3239a11659aee58866efc8dc0e.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://art/arenas/hesperides/layer_sky.png"
-dest_files=["res://.godot/imported/layer_sky.png-f254d40e3920351247397e83d540bf8d.s3tc.ctex"]
+source_file="res://art/arenas/hesperides/dragon_1.png"
+dest_files=["res://.godot/imported/dragon_1.png-c50cca3239a11659aee58866efc8dc0e.s3tc.ctex"]
 
 [params]
 

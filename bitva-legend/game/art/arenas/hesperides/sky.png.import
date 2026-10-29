@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cl0lmqmwuwo4u"
-path.s3tc="res://.godot/imported/layer_floor.png-73ba7cf5aeb80d984771d0328ddfd67f.s3tc.ctex"
+uid="uid://8vs3h2xjgt80"
+path.s3tc="res://.godot/imported/sky.png-083238ad59888e75dd9dfbc9be7dceb2.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://art/arenas/hesperides/layer_floor.png"
-dest_files=["res://.godot/imported/layer_floor.png-73ba7cf5aeb80d984771d0328ddfd67f.s3tc.ctex"]
+source_file="res://art/arenas/hesperides/sky.png"
+dest_files=["res://.godot/imported/sky.png-083238ad59888e75dd9dfbc9be7dceb2.s3tc.ctex"]
 
 [params]
 
