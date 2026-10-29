@@ -3,73 +3,73 @@
   {
    "file": "super_cinema_1.png",
    "pivot": [
-    179,
+    178,
     631
    ],
    "size": [
-    462,
+    459,
     632
    ]
   },
   {
    "file": "super_cinema_2.png",
    "pivot": [
-    179,
-    631
+    178,
+    630
    ],
    "size": [
-    462,
-    632
+    459,
+    631
    ]
   },
   {
    "file": "super_cinema_3.png",
    "pivot": [
-    180,
+    179,
     631
    ],
    "size": [
-    463,
+    460,
     632
    ]
   },
   {
    "file": "super_cinema_4.png",
    "pivot": [
-    179,
-    629
+    178,
+    628
    ],
    "size": [
-    462,
-    630
+    459,
+    629
    ]
   },
   {
    "file": "super_cinema_5.png",
    "pivot": [
-    179,
-    629
+    178,
+    628
    ],
    "size": [
-    462,
-    630
+    459,
+    629
    ]
   },
   {
    "file": "super_cinema_6.png",
    "pivot": [
-    177,
-    629
+    176,
+    628
    ],
    "size": [
     456,
-    630
+    629
    ]
   },
   {
    "file": "super_cinema_7.png",
    "pivot": [
-    164,
+    163,
     631
    ],
    "size": [
@@ -80,62 +80,62 @@
   {
    "file": "super_cinema_8.png",
    "pivot": [
-    210,
-    631
+    209,
+    630
    ],
    "size": [
     493,
-    632
+    631
    ]
   },
   {
    "file": "super_cinema_9.png",
    "pivot": [
-    282,
-    642
+    281,
+    641
    ],
    "size": [
-    617,
-    639
+    616,
+    638
    ]
   },
   {
    "file": "super_cinema_10.png",
    "pivot": [
-    210,
+    209,
     666
    ],
    "size": [
-    487,
-    654
+    486,
+    653
    ]
   },
   {
    "file": "super_cinema_11.png",
    "pivot": [
-    204,
+    202,
     733
    ],
    "size": [
-    474,
+    473,
     657
    ]
   },
   {
    "file": "super_cinema_12.png",
    "pivot": [
-    266,
-    788
+    264,
+    787
    ],
    "size": [
-    583,
-    655
+    581,
+    654
    ]
   },
   {
    "file": "super_cinema_13.png",
    "pivot": [
-    342,
+    341,
     836
    ],
    "size": [
@@ -146,84 +146,84 @@
   {
    "file": "super_cinema_14.png",
    "pivot": [
-    395,
+    394,
     883
    ],
    "size": [
     823,
-    656
+    655
    ]
   },
   {
    "file": "super_cinema_15.png",
    "pivot": [
-    456,
+    454,
     925
    ],
    "size": [
-    929,
-    655
+    928,
+    654
    ]
   },
   {
    "file": "super_cinema_16.png",
    "pivot": [
-    458,
-    1008
+    457,
+    1010
    ],
    "size": [
     926,
-    694
+    696
    ]
   },
   {
    "file": "super_cinema_17.png",
    "pivot": [
-    440,
+    439,
     1086
    ],
    "size": [
-    893,
-    726
+    892,
+    725
    ]
   },
   {
    "file": "super_cinema_18.png",
    "pivot": [
-    409,
+    407,
     1150
    ],
    "size": [
-    825,
-    737
+    823,
+    736
    ]
   },
   {
    "file": "super_cinema_19.png",
    "pivot": [
-    438,
+    436,
     1122
    ],
    "size": [
-    873,
+    872,
     653
    ]
   },
   {
    "file": "super_cinema_20.png",
    "pivot": [
-    433,
-    1180
+    436,
+    1182
    ],
    "size": [
-    888,
-    652
+    894,
+    654
    ]
   },
   {
    "file": "super_cinema_21.png",
    "pivot": [
-    327,
+    326,
     1189
    ],
    "size": [
@@ -234,29 +234,29 @@
   {
    "file": "super_cinema_22.png",
    "pivot": [
-    179,
-    1194
+    178,
+    1193
    ],
    "size": [
     424,
-    657
+    656
    ]
   },
   {
    "file": "super_cinema_23.png",
    "pivot": [
-    208,
+    207,
     1189
    ],
    "size": [
-    485,
-    657
+    483,
+    656
    ]
   },
   {
    "file": "super_cinema_24.png",
    "pivot": [
-    293,
+    292,
     1182
    ],
    "size": [
@@ -267,18 +267,18 @@
   {
    "file": "super_cinema_25.png",
    "pivot": [
-    364,
+    363,
     1171
    ],
    "size": [
-    765,
+    764,
     654
    ]
   },
   {
    "file": "super_cinema_26.png",
    "pivot": [
-    422,
+    421,
     1162
    ],
    "size": [
@@ -289,51 +289,51 @@
   {
    "file": "super_cinema_27.png",
    "pivot": [
-    457,
+    456,
     1173
    ],
    "size": [
-    928,
-    672
+    927,
+    671
    ]
   },
   {
    "file": "super_cinema_28.png",
    "pivot": [
-    429,
-    1234
+    428,
+    1233
    ],
    "size": [
     869,
-    733
+    732
    ]
   },
   {
    "file": "super_cinema_29.png",
    "pivot": [
-    398,
-    1247
+    396,
+    1245
    ],
    "size": [
-    806,
-    741
+    805,
+    739
    ]
   },
   {
    "file": "super_cinema_30.png",
    "pivot": [
-    433,
-    1170
+    432,
+    1169
    ],
    "size": [
     883,
-    656
+    655
    ]
   },
   {
    "file": "super_cinema_31.png",
    "pivot": [
-    421,
+    420,
     1180
    ],
    "size": [
@@ -344,7 +344,7 @@
   {
    "file": "super_cinema_32.png",
    "pivot": [
-    306,
+    305,
     1187
    ],
    "size": [
@@ -355,73 +355,73 @@
   {
    "file": "super_cinema_33.png",
    "pivot": [
-    184,
+    182,
     1187
    ],
    "size": [
-    434,
+    432,
     657
    ]
   },
   {
    "file": "super_cinema_34.png",
    "pivot": [
-    224,
+    223,
     1185
    ],
    "size": [
-    510,
+    508,
     659
    ]
   },
   {
    "file": "super_cinema_35.png",
    "pivot": [
-    304,
-    1177
+    303,
+    1176
    ],
    "size": [
-    661,
-    658
+    660,
+    656
    ]
   },
   {
    "file": "super_cinema_36.png",
    "pivot": [
-    378,
+    377,
     1169
    ],
    "size": [
-    793,
+    792,
     657
    ]
   },
   {
    "file": "super_cinema_37.png",
    "pivot": [
-    431,
+    429,
     1160
    ],
    "size": [
-    893,
-    657
+    892,
+    656
    ]
   },
   {
    "file": "super_cinema_38.png",
    "pivot": [
-    458,
-    1169
+    457,
+    1168
    ],
    "size": [
     929,
-    672
+    671
    ]
   },
   {
    "file": "super_cinema_39.png",
    "pivot": [
-    442,
+    441,
     1211
    ],
    "size": [
@@ -432,7 +432,7 @@
   {
    "file": "super_cinema_40.png",
    "pivot": [
-    420,
+    419,
     1234
    ],
    "size": [
@@ -443,7 +443,7 @@
   {
    "file": "super_cinema_41.png",
    "pivot": [
-    430,
+    429,
     1172
    ],
    "size": [
@@ -465,84 +465,84 @@
   {
    "file": "super_cinema_43.png",
    "pivot": [
-    277,
-    1162
+    276,
+    1164
    ],
    "size": [
     623,
-    651
+    653
    ]
   },
   {
    "file": "super_cinema_44.png",
    "pivot": [
-    161,
-    1167
+    160,
+    1166
    ],
    "size": [
     344,
-    653
+    652
    ]
   },
   {
    "file": "super_cinema_45.png",
    "pivot": [
-    123,
-    1165
+    122,
+    1164
    ],
    "size": [
-    277,
-    653
+    276,
+    652
    ]
   },
   {
    "file": "super_cinema_46.png",
    "pivot": [
-    155,
-    1156
+    154,
+    1155
    ],
    "size": [
     302,
-    637
+    636
    ]
   },
   {
    "file": "super_cinema_47.png",
    "pivot": [
-    206,
-    1071
+    205,
+    1070
    ],
    "size": [
     422,
-    577
+    576
    ]
   },
   {
    "file": "super_cinema_48.png",
    "pivot": [
-    239,
-    977
+    238,
+    976
    ],
    "size": [
-    498,
-    492
+    497,
+    491
    ]
   },
   {
    "file": "super_cinema_49.png",
    "pivot": [
-    264,
-    880
+    263,
+    879
    ],
    "size": [
-    547,
-    398
+    546,
+    397
    ]
   },
   {
    "file": "super_cinema_50.png",
    "pivot": [
-    279,
+    278,
     783
    ],
    "size": [
@@ -553,18 +553,18 @@
   {
    "file": "super_cinema_51.png",
    "pivot": [
-    286,
+    284,
     733
    ],
    "size": [
-    587,
+    584,
     335
    ]
   },
   {
    "file": "super_cinema_52.png",
    "pivot": [
-    285,
+    284,
     679
    ],
    "size": [
@@ -575,18 +575,18 @@
   {
    "file": "super_cinema_53.png",
    "pivot": [
-    283,
+    282,
     618
    ],
    "size": [
-    591,
+    590,
     391
    ]
   },
   {
    "file": "super_cinema_54.png",
    "pivot": [
-    326,
+    323,
     542
    ],
    "size": [
@@ -597,29 +597,29 @@
   {
    "file": "super_cinema_55.png",
    "pivot": [
-    389,
+    388,
     535
    ],
    "size": [
-    568,
+    567,
     545
    ]
   },
   {
    "file": "super_cinema_56.png",
    "pivot": [
-    401,
-    564
+    400,
+    563
    ],
    "size": [
-    640,
-    572
+    639,
+    570
    ]
   },
   {
    "file": "super_cinema_57.png",
    "pivot": [
-    395,
+    394,
     568
    ],
    "size": [
@@ -630,29 +630,29 @@
   {
    "file": "super_cinema_58.png",
    "pivot": [
-    365,
-    571
+    364,
+    570
    ],
    "size": [
     586,
-    575
+    573
    ]
   },
   {
    "file": "super_cinema_59.png",
    "pivot": [
-    326,
+    324,
     573
    ],
    "size": [
-    540,
+    538,
     574
    ]
   },
   {
    "file": "super_cinema_60.png",
    "pivot": [
-    284,
+    283,
     575
    ],
    "size": [
@@ -663,7 +663,7 @@
   {
    "file": "super_cinema_61.png",
    "pivot": [
-    259,
+    258,
     575
    ],
    "size": [
@@ -674,29 +674,29 @@
   {
    "file": "super_cinema_62.png",
    "pivot": [
-    246,
+    243,
     575
    ],
    "size": [
-    447,
+    445,
     576
    ]
   },
   {
    "file": "super_cinema_63.png",
    "pivot": [
-    239,
+    236,
     575
    ],
    "size": [
-    439,
+    437,
     576
    ]
   },
   {
    "file": "super_cinema_64.png",
    "pivot": [
-    244,
+    243,
     575
    ],
    "size": [
@@ -707,18 +707,18 @@
   {
    "file": "super_cinema_65.png",
    "pivot": [
-    257,
-    571
+    256,
+    570
    ],
    "size": [
     451,
-    572
+    571
    ]
   },
   {
    "file": "super_cinema_66.png",
    "pivot": [
-    269,
+    268,
     564
    ],
    "size": [
@@ -729,51 +729,51 @@
   {
    "file": "super_cinema_67.png",
    "pivot": [
-    279,
-    562
+    278,
+    561
    ],
    "size": [
     469,
-    563
+    562
    ]
   },
   {
    "file": "super_cinema_68.png",
    "pivot": [
-    284,
-    562
+    283,
+    561
    ],
    "size": [
-    471,
-    563
+    472,
+    562
    ]
   },
   {
    "file": "super_cinema_69.png",
    "pivot": [
-    282,
+    280,
     559
    ],
    "size": [
-    469,
+    468,
     560
    ]
   },
   {
    "file": "super_cinema_70.png",
    "pivot": [
-    277,
+    275,
     559
    ],
    "size": [
-    464,
+    463,
     560
    ]
   },
   {
    "file": "super_cinema_71.png",
    "pivot": [
-    271,
+    270,
     559
    ],
    "size": [
@@ -784,7 +784,7 @@
   {
    "file": "super_cinema_72.png",
    "pivot": [
-    268,
+    267,
     559
    ],
    "size": [
@@ -795,7 +795,7 @@
   {
    "file": "super_cinema_73.png",
    "pivot": [
-    266,
+    265,
     559
    ],
    "size": [
@@ -806,7 +806,7 @@
   {
    "file": "super_cinema_74.png",
    "pivot": [
-    266,
+    265,
     559
    ],
    "size": [
@@ -817,18 +817,18 @@
   {
    "file": "super_cinema_75.png",
    "pivot": [
-    268,
+    266,
     559
    ],
    "size": [
-    455,
+    454,
     560
    ]
   },
   {
    "file": "super_cinema_76.png",
    "pivot": [
-    268,
+    267,
     559
    ],
    "size": [
@@ -839,7 +839,7 @@
   {
    "file": "super_cinema_77.png",
    "pivot": [
-    268,
+    267,
     559
    ],
    "size": [
@@ -850,18 +850,18 @@
   {
    "file": "super_cinema_78.png",
    "pivot": [
-    266,
-    562
+    265,
+    561
    ],
    "size": [
     453,
-    563
+    562
    ]
   },
   {
    "file": "super_cinema_79.png",
    "pivot": [
-    263,
+    262,
     566
    ],
    "size": [
@@ -872,22 +872,22 @@
   {
    "file": "super_cinema_80.png",
    "pivot": [
-    257,
-    575
+    256,
+    574
    ],
    "size": [
-    442,
-    576
+    440,
+    575
    ]
   },
   {
    "file": "super_cinema_81.png",
    "pivot": [
-    248,
+    249,
     584
    ],
    "size": [
-    422,
+    423,
     585
    ]
   }
