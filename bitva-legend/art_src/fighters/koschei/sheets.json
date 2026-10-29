@@ -5,7 +5,7 @@
    8,
    5
   ],
-  "fit": 1.755,
+  "fit": 0.8775,
   "drop_ref": true,
   "align_to": "idle:1",
   "pivot_y": "body",
@@ -15,7 +15,8 @@
    31,
    32,
    33
-  ]
+  ],
+  "upscale": true
  },
  "block": {
   "fixed_pivot": true,
@@ -146,53 +147,57 @@
   "fixed_pivot": true,
   "align_to": "idle:1",
   "drop_ref": true,
-  "fit": 1.244,
+  "fit": 0.622,
   "frames": 21,
   "grid": [
    8,
    3
   ],
   "hit": 7,
-  "hit_end": 10
+  "hit_end": 10,
+  "upscale": true
  },
  "st_lk": {
   "fixed_pivot": true,
   "align_to": "idle:1",
   "drop_ref": true,
-  "fit": 1.218,
+  "fit": 0.609,
   "frames": 24,
   "grid": [
    8,
    4
   ],
   "hit": 7,
-  "hit_end": 13
+  "hit_end": 13,
+  "upscale": true
  },
  "st_hp": {
   "fixed_pivot": true,
   "align_to": "idle:1",
   "drop_ref": true,
-  "fit": 1.244,
+  "fit": 0.622,
   "frames": 37,
   "grid": [
    8,
    5
   ],
   "hit": 16,
-  "hit_end": 22
+  "hit_end": 22,
+  "upscale": true
  },
  "st_hk": {
   "fixed_pivot": true,
   "align_to": "idle:1",
   "drop_ref": true,
-  "fit": 1.208,
+  "fit": 0.604,
   "frames": 32,
   "grid": [
    8,
    5
   ],
   "hit": 18,
-  "hit_end": 23
+  "hit_end": 23,
+  "upscale": true
  },
  "cr_lp": {
   "fixed_pivot": true,
@@ -308,12 +313,13 @@
    8,
    5
   ],
-  "fit": 1.244,
+  "fit": 0.622,
   "pivot_y": "body_ground",
   "align_to": "idle:1",
   "align_top": 0.45,
   "align_each": true,
-  "stride": 200
+  "stride": 200,
+  "upscale": true
  },
  "sp_proj_l": {
   "fixed_pivot": true,
