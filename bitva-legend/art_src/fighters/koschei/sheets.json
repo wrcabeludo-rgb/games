@@ -185,14 +185,14 @@
   "fixed_pivot": true,
   "align_to": "idle:1",
   "drop_ref": true,
-  "fit": 1.218,
-  "frames": 23,
+  "fit": 1.208,
+  "frames": 32,
   "grid": [
    8,
-   3
+   5
   ],
-  "hit": 7,
-  "hit_end": 14
+  "hit": 18,
+  "hit_end": 23
  },
  "cr_lp": {
   "fixed_pivot": true,
@@ -333,10 +333,10 @@
   "align_to": "idle:1",
   "drop_ref": true,
   "fit": 1.244,
-  "frames": 36,
+  "frames": 31,
   "grid": [
    8,
-   5
+   4
   ],
   "hit": 6,
   "hit_end": 10

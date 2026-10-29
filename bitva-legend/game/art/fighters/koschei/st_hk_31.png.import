@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ceyl6wx2ww703"
-path.s3tc="res://.godot/imported/sp_dd_l_35.png-45e7e53d622ed075e08d5677381a2251.s3tc.ctex"
+uid="uid://bs065e1h77gyg"
+path.s3tc="res://.godot/imported/st_hk_31.png-7a34cc6481d43a1737789e03acbbf0f3.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://art/fighters/koschei/sp_dd_l_35.png"
-dest_files=["res://.godot/imported/sp_dd_l_35.png-45e7e53d622ed075e08d5677381a2251.s3tc.ctex"]
+source_file="res://art/fighters/koschei/st_hk_31.png"
+dest_files=["res://.godot/imported/st_hk_31.png-7a34cc6481d43a1737789e03acbbf0f3.s3tc.ctex"]
 
 [params]
 

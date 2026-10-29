@@ -1,1 +1,875 @@
-{"frames": [{"file": "thrown_ankle_1.png", "pivot": [305, 604], "size": [851, 605]}, {"file": "thrown_ankle_2.png", "pivot": [305, 604], "size": [851, 605]}, {"file": "thrown_ankle_3.png", "pivot": [305, 604], "size": [851, 605]}, {"file": "thrown_ankle_4.png", "pivot": [305, 596], "size": [851, 597]}, {"file": "thrown_ankle_5.png", "pivot": [305, 579], "size": [851, 580]}, {"file": "thrown_ankle_6.png", "pivot": [305, 549], "size": [851, 550]}, {"file": "thrown_ankle_7.png", "pivot": [305, 519], "size": [851, 520]}, {"file": "thrown_ankle_8.png", "pivot": [305, 489], "size": [851, 490]}, {"file": "thrown_ankle_9.png", "pivot": [305, 469], "size": [851, 470]}, {"file": "thrown_ankle_10.png", "pivot": [305, 477], "size": [851, 478]}, {"file": "thrown_ankle_11.png", "pivot": [305, 497], "size": [851, 498]}, {"file": "thrown_ankle_12.png", "pivot": [305, 519], "size": [851, 520]}, {"file": "thrown_ankle_13.png", "pivot": [182, 504], "size": [605, 505]}, {"file": "thrown_ankle_14.png", "pivot": [196, 474], "size": [634, 475]}, {"file": "thrown_ankle_15.png", "pivot": [305, 574], "size": [851, 575]}, {"file": "thrown_ankle_16.png", "pivot": [198, 559], "size": [637, 560]}, {"file": "thrown_ankle_17.png", "pivot": [224, 648], "size": [689, 649]}, {"file": "thrown_ankle_18.png", "pivot": [234, 693], "size": [710, 694]}, {"file": "thrown_ankle_19.png", "pivot": [228, 691], "size": [697, 692]}, {"file": "thrown_ankle_20.png", "pivot": [172, 696], "size": [585, 697]}, {"file": "thrown_ankle_21.png", "pivot": [147, 743], "size": [535, 744]}, {"file": "thrown_ankle_22.png", "pivot": [121, 773], "size": [483, 774]}, {"file": "thrown_ankle_23.png", "pivot": [116, 793], "size": [474, 794]}, {"file": "thrown_ankle_24.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_25.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_26.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_27.png", "pivot": [305, 880], "size": [851, 881]}, {"file": "thrown_ankle_28.png", "pivot": [305, 880], "size": [851, 881]}, {"file": "thrown_ankle_29.png", "pivot": [305, 880], "size": [851, 881]}, {"file": "thrown_ankle_30.png", "pivot": [305, 880], "size": [851, 881]}, {"file": "thrown_ankle_31.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_32.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_33.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_34.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_35.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_36.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_37.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_38.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_39.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_40.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_41.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_42.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_43.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_44.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_45.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_46.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_47.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_48.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_49.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_50.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_51.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_52.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_53.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_54.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_55.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_56.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_57.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_58.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_59.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_60.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_61.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_62.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_63.png", "pivot": [305, 798], "size": [851, 799]}, {"file": "thrown_ankle_64.png", "pivot": [305, 623], "size": [851, 624]}, {"file": "thrown_ankle_65.png", "pivot": [305, 539], "size": [851, 540]}, {"file": "thrown_ankle_66.png", "pivot": [305, 419], "size": [851, 420]}, {"file": "thrown_ankle_67.png", "pivot": [259, 397], "size": [759, 398]}, {"file": "thrown_ankle_68.png", "pivot": [240, 255], "size": [722, 256]}, {"file": "thrown_ankle_69.png", "pivot": [266, 223], "size": [774, 224]}, {"file": "thrown_ankle_70.png", "pivot": [272, 233], "size": [786, 234]}, {"file": "thrown_ankle_71.png", "pivot": [305, 234], "size": [851, 235]}, {"file": "thrown_ankle_72.png", "pivot": [305, 208], "size": [851, 209]}, {"file": "thrown_ankle_73.png", "pivot": [305, 178], "size": [851, 179]}, {"file": "thrown_ankle_74.png", "pivot": [305, 136], "size": [851, 137]}, {"file": "thrown_ankle_75.png", "pivot": [305, 128], "size": [851, 129]}, {"file": "thrown_ankle_76.png", "pivot": [305, 128], "size": [851, 129]}, {"file": "thrown_ankle_77.png", "pivot": [305, 128], "size": [851, 129]}, {"file": "thrown_ankle_78.png", "pivot": [305, 128], "size": [851, 129]}, {"file": "thrown_ankle_79.png", "pivot": [305, 128], "size": [851, 129]}], "hold_end": 62, "air_frames": 70}
+{
+ "frames": [
+  {
+   "file": "thrown_ankle_1.png",
+   "pivot": [
+    164,
+    601
+   ],
+   "size": [
+    466,
+    602
+   ]
+  },
+  {
+   "file": "thrown_ankle_2.png",
+   "pivot": [
+    164,
+    601
+   ],
+   "size": [
+    465,
+    602
+   ]
+  },
+  {
+   "file": "thrown_ankle_3.png",
+   "pivot": [
+    164,
+    601
+   ],
+   "size": [
+    465,
+    602
+   ]
+  },
+  {
+   "file": "thrown_ankle_4.png",
+   "pivot": [
+    168,
+    594
+   ],
+   "size": [
+    473,
+    595
+   ]
+  },
+  {
+   "file": "thrown_ankle_5.png",
+   "pivot": [
+    175,
+    576
+   ],
+   "size": [
+    488,
+    577
+   ]
+  },
+  {
+   "file": "thrown_ankle_6.png",
+   "pivot": [
+    186,
+    549
+   ],
+   "size": [
+    510,
+    550
+   ]
+  },
+  {
+   "file": "thrown_ankle_7.png",
+   "pivot": [
+    197,
+    517
+   ],
+   "size": [
+    532,
+    518
+   ]
+  },
+  {
+   "file": "thrown_ankle_8.png",
+   "pivot": [
+    212,
+    487
+   ],
+   "size": [
+    562,
+    488
+   ]
+  },
+  {
+   "file": "thrown_ankle_9.png",
+   "pivot": [
+    220,
+    467
+   ],
+   "size": [
+    577,
+    468
+   ]
+  },
+  {
+   "file": "thrown_ankle_10.png",
+   "pivot": [
+    224,
+    474
+   ],
+   "size": [
+    585,
+    475
+   ]
+  },
+  {
+   "file": "thrown_ankle_11.png",
+   "pivot": [
+    217,
+    494
+   ],
+   "size": [
+    572,
+    495
+   ]
+  },
+  {
+   "file": "thrown_ankle_12.png",
+   "pivot": [
+    216,
+    517
+   ],
+   "size": [
+    570,
+    518
+   ]
+  },
+  {
+   "file": "thrown_ankle_13.png",
+   "pivot": [
+    234,
+    504
+   ],
+   "size": [
+    607,
+    505
+   ]
+  },
+  {
+   "file": "thrown_ankle_14.png",
+   "pivot": [
+    248,
+    474
+   ],
+   "size": [
+    634,
+    475
+   ]
+  },
+  {
+   "file": "thrown_ankle_15.png",
+   "pivot": [
+    246,
+    447
+   ],
+   "size": [
+    629,
+    448
+   ]
+  },
+  {
+   "file": "thrown_ankle_16.png",
+   "pivot": [
+    250,
+    559
+   ],
+   "size": [
+    637,
+    560
+   ]
+  },
+  {
+   "file": "thrown_ankle_17.png",
+   "pivot": [
+    276,
+    648
+   ],
+   "size": [
+    689,
+    649
+   ]
+  },
+  {
+   "file": "thrown_ankle_18.png",
+   "pivot": [
+    286,
+    693
+   ],
+   "size": [
+    710,
+    694
+   ]
+  },
+  {
+   "file": "thrown_ankle_19.png",
+   "pivot": [
+    280,
+    691
+   ],
+   "size": [
+    697,
+    692
+   ]
+  },
+  {
+   "file": "thrown_ankle_20.png",
+   "pivot": [
+    222,
+    696
+   ],
+   "size": [
+    582,
+    697
+   ]
+  },
+  {
+   "file": "thrown_ankle_21.png",
+   "pivot": [
+    198,
+    743
+   ],
+   "size": [
+    535,
+    744
+   ]
+  },
+  {
+   "file": "thrown_ankle_22.png",
+   "pivot": [
+    170,
+    775
+   ],
+   "size": [
+    479,
+    776
+   ]
+  },
+  {
+   "file": "thrown_ankle_23.png",
+   "pivot": [
+    168,
+    793
+   ],
+   "size": [
+    475,
+    794
+   ]
+  },
+  {
+   "file": "thrown_ankle_24.png",
+   "pivot": [
+    204,
+    793
+   ],
+   "size": [
+    547,
+    794
+   ]
+  },
+  {
+   "file": "thrown_ankle_25.png",
+   "pivot": [
+    200,
+    793
+   ],
+   "size": [
+    537,
+    794
+   ]
+  },
+  {
+   "file": "thrown_ankle_26.png",
+   "pivot": [
+    152,
+    793
+   ],
+   "size": [
+    442,
+    794
+   ]
+  },
+  {
+   "file": "thrown_ankle_27.png",
+   "pivot": [
+    129,
+    795
+   ],
+   "size": [
+    396,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_28.png",
+   "pivot": [
+    126,
+    795
+   ],
+   "size": [
+    391,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_29.png",
+   "pivot": [
+    124,
+    793
+   ],
+   "size": [
+    386,
+    794
+   ]
+  },
+  {
+   "file": "thrown_ankle_30.png",
+   "pivot": [
+    126,
+    795
+   ],
+   "size": [
+    391,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_31.png",
+   "pivot": [
+    129,
+    795
+   ],
+   "size": [
+    396,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_32.png",
+   "pivot": [
+    136,
+    795
+   ],
+   "size": [
+    411,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_33.png",
+   "pivot": [
+    155,
+    795
+   ],
+   "size": [
+    448,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_34.png",
+   "pivot": [
+    179,
+    795
+   ],
+   "size": [
+    496,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_35.png",
+   "pivot": [
+    190,
+    795
+   ],
+   "size": [
+    518,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_36.png",
+   "pivot": [
+    184,
+    795
+   ],
+   "size": [
+    506,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_37.png",
+   "pivot": [
+    175,
+    795
+   ],
+   "size": [
+    488,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_38.png",
+   "pivot": [
+    153,
+    795
+   ],
+   "size": [
+    444,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_39.png",
+   "pivot": [
+    122,
+    795
+   ],
+   "size": [
+    381,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_40.png",
+   "pivot": [
+    134,
+    795
+   ],
+   "size": [
+    406,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_41.png",
+   "pivot": [
+    188,
+    795
+   ],
+   "size": [
+    515,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_42.png",
+   "pivot": [
+    240,
+    795
+   ],
+   "size": [
+    617,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_43.png",
+   "pivot": [
+    175,
+    795
+   ],
+   "size": [
+    488,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_44.png",
+   "pivot": [
+    182,
+    795
+   ],
+   "size": [
+    501,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_45.png",
+   "pivot": [
+    241,
+    795
+   ],
+   "size": [
+    620,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_46.png",
+   "pivot": [
+    165,
+    795
+   ],
+   "size": [
+    468,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_47.png",
+   "pivot": [
+    145,
+    795
+   ],
+   "size": [
+    428,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_48.png",
+   "pivot": [
+    248,
+    795
+   ],
+   "size": [
+    634,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_49.png",
+   "pivot": [
+    222,
+    795
+   ],
+   "size": [
+    581,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_50.png",
+   "pivot": [
+    158,
+    795
+   ],
+   "size": [
+    454,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_51.png",
+   "pivot": [
+    222,
+    795
+   ],
+   "size": [
+    582,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_52.png",
+   "pivot": [
+    186,
+    795
+   ],
+   "size": [
+    510,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_53.png",
+   "pivot": [
+    182,
+    795
+   ],
+   "size": [
+    503,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_54.png",
+   "pivot": [
+    239,
+    795
+   ],
+   "size": [
+    616,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_55.png",
+   "pivot": [
+    247,
+    795
+   ],
+   "size": [
+    632,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_56.png",
+   "pivot": [
+    178,
+    795
+   ],
+   "size": [
+    495,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_57.png",
+   "pivot": [
+    247,
+    795
+   ],
+   "size": [
+    632,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_58.png",
+   "pivot": [
+    180,
+    795
+   ],
+   "size": [
+    498,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_59.png",
+   "pivot": [
+    230,
+    795
+   ],
+   "size": [
+    597,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_60.png",
+   "pivot": [
+    214,
+    795
+   ],
+   "size": [
+    567,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_61.png",
+   "pivot": [
+    162,
+    795
+   ],
+   "size": [
+    462,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_62.png",
+   "pivot": [
+    148,
+    795
+   ],
+   "size": [
+    435,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_63.png",
+   "pivot": [
+    148,
+    795
+   ],
+   "size": [
+    433,
+    796
+   ]
+  },
+  {
+   "file": "thrown_ankle_64.png",
+   "pivot": [
+    168,
+    623
+   ],
+   "size": [
+    473,
+    624
+   ]
+  },
+  {
+   "file": "thrown_ankle_65.png",
+   "pivot": [
+    241,
+    536
+   ],
+   "size": [
+    620,
+    537
+   ]
+  },
+  {
+   "file": "thrown_ankle_66.png",
+   "pivot": [
+    228,
+    419
+   ],
+   "size": [
+    595,
+    420
+   ]
+  },
+  {
+   "file": "thrown_ankle_67.png",
+   "pivot": [
+    262,
+    395
+   ],
+   "size": [
+    662,
+    396
+   ]
+  },
+  {
+   "file": "thrown_ankle_68.png",
+   "pivot": [
+    293,
+    255
+   ],
+   "size": [
+    724,
+    256
+   ]
+  },
+  {
+   "file": "thrown_ankle_69.png",
+   "pivot": [
+    318,
+    220
+   ],
+   "size": [
+    774,
+    221
+   ]
+  },
+  {
+   "file": "thrown_ankle_70.png",
+   "pivot": [
+    324,
+    230
+   ],
+   "size": [
+    786,
+    231
+   ]
+  },
+  {
+   "file": "thrown_ankle_71.png",
+   "pivot": [
+    319,
+    232
+   ],
+   "size": [
+    776,
+    233
+   ]
+  },
+  {
+   "file": "thrown_ankle_72.png",
+   "pivot": [
+    313,
+    203
+   ],
+   "size": [
+    764,
+    204
+   ]
+  },
+  {
+   "file": "thrown_ankle_73.png",
+   "pivot": [
+    304,
+    176
+   ],
+   "size": [
+    746,
+    177
+   ]
+  },
+  {
+   "file": "thrown_ankle_74.png",
+   "pivot": [
+    306,
+    133
+   ],
+   "size": [
+    749,
+    134
+   ]
+  },
+  {
+   "file": "thrown_ankle_75.png",
+   "pivot": [
+    308,
+    126
+   ],
+   "size": [
+    754,
+    127
+   ]
+  },
+  {
+   "file": "thrown_ankle_76.png",
+   "pivot": [
+    306,
+    126
+   ],
+   "size": [
+    751,
+    127
+   ]
+  },
+  {
+   "file": "thrown_ankle_77.png",
+   "pivot": [
+    308,
+    126
+   ],
+   "size": [
+    754,
+    127
+   ]
+  },
+  {
+   "file": "thrown_ankle_78.png",
+   "pivot": [
+    308,
+    126
+   ],
+   "size": [
+    754,
+    127
+   ]
+  },
+  {
+   "file": "thrown_ankle_79.png",
+   "pivot": [
+    309,
+    126
+   ],
+   "size": [
+    756,
+    127
+   ]
+  }
+ ],
+ "air_frames": 70,
+ "hold_end": 62
+}

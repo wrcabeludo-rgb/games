@@ -32,12 +32,20 @@ def is_bg(a: np.ndarray) -> np.ndarray:
 def floor_top(a: np.ndarray) -> int:
     """Верх полосы пола со стартовой картинки (тёмно-серая полоса во всю ширину внизу кадра) или высота кадра."""
     r, g, b = (a[..., i].astype(int) for i in range(3))
-    grey = (abs(r - g) < 14) & (abs(g - b) < 14) & (r > 30) & (r < 110)
+    # Допуск 22: верхние ряды полосы — переход к пурпуру (67, 53, 70), с допуском 14 они оставались серой
+    # полоской под ногами (Кощей до 3.17.64).
+    grey = (abs(r - g) < 22) & (abs(g - b) < 22) & (r > 30) & (r < 120)
     rows = grey.mean(1) > 0.6
     y = a.shape[0]
     while y > 0 and rows[y - 1]:
         y -= 1
-    return y if a.shape[0] - y >= 8 else a.shape[0]
+    if a.shape[0] - y < 8:
+        return a.shape[0]
+    # Ряды перехода от пурпура к полосе (тёмные, не фон, почти во всю ширину) — тоже пол.
+    dark = ~is_bg(a) & (r < 150) & (g < 120)
+    while y > 0 and dark[y - 1].mean() > 0.6:
+        y -= 1
+    return y
 
 
 def main() -> int:

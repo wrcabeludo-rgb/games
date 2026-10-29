@@ -315,6 +315,10 @@ func _hold_position(a: Fighter, d: Fighter) -> void:
 
 
 ## Удержание в захвате: можно вырваться (ЛР в первые TECH_WINDOW тиков), иначе — бросок.
+## Заморозка на каждом ударе серии в «кино» суперприёма ("hits" в cinema).
+const CINEMA_HITSTOP := 5
+
+
 func _hold_throws() -> void:
 	for p in PLAYERS:
 		var a := fighters[p]
@@ -331,6 +335,11 @@ func _hold_throws() -> void:
 			_set_spark(1 - p, (a.x + d.x) / 2, a.data.height * SUB / 2, 2)
 			continue
 		a.stun -= 1
+		if g.has("hits") and int(g.hold) - a.stun in g.hits:
+			# Серия ударов в «кино» суперприёма (тики от захвата): искра и короткая заморозка на каждом.
+			_set_spark(p, d.x, d.data.height * SUB * 3 / 5, 1)
+			hitstop = CINEMA_HITSTOP
+			hitstop_total = CINEMA_HITSTOP
 		if a.stun > 0:
 			continue
 		if g.has("land"):
