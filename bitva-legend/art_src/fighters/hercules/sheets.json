@@ -278,5 +278,10 @@
   "pivot_y": "body_ground",
   "align_to": "idle:1",
   "upscale": true
+ },
+ "select": {
+  "frames": 1,
+  "fit": "h:1:900",
+  "pivot_y": "bottom_center"
  }
 }
