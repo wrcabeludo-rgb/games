@@ -1,0 +1,268 @@
+{
+ "frames": [
+  {
+   "file": "backdash_1.png",
+   "pivot": [
+    214,
+    623
+   ],
+   "size": [
+    390,
+    624
+   ]
+  },
+  {
+   "file": "backdash_2.png",
+   "pivot": [
+    183,
+    609
+   ],
+   "size": [
+    362,
+    610
+   ]
+  },
+  {
+   "file": "backdash_3.png",
+   "pivot": [
+    194,
+    596
+   ],
+   "size": [
+    374,
+    597
+   ]
+  },
+  {
+   "file": "backdash_4.png",
+   "pivot": [
+    200,
+    587
+   ],
+   "size": [
+    382,
+    588
+   ]
+  },
+  {
+   "file": "backdash_5.png",
+   "pivot": [
+    213,
+    579
+   ],
+   "size": [
+    397,
+    580
+   ]
+  },
+  {
+   "file": "backdash_6.png",
+   "pivot": [
+    220,
+    577
+   ],
+   "size": [
+    403,
+    578
+   ]
+  },
+  {
+   "file": "backdash_7.png",
+   "pivot": [
+    227,
+    576
+   ],
+   "size": [
+    409,
+    577
+   ]
+  },
+  {
+   "file": "backdash_8.png",
+   "pivot": [
+    232,
+    579
+   ],
+   "size": [
+    411,
+    580
+   ]
+  },
+  {
+   "file": "backdash_9.png",
+   "pivot": [
+    240,
+    582
+   ],
+   "size": [
+    413,
+    583
+   ]
+  },
+  {
+   "file": "backdash_10.png",
+   "pivot": [
+    243,
+    587
+   ],
+   "size": [
+    411,
+    588
+   ]
+  },
+  {
+   "file": "backdash_11.png",
+   "pivot": [
+    239,
+    593
+   ],
+   "size": [
+    401,
+    594
+   ]
+  },
+  {
+   "file": "backdash_12.png",
+   "pivot": [
+    221,
+    598
+   ],
+   "size": [
+    379,
+    599
+   ]
+  },
+  {
+   "file": "backdash_13.png",
+   "pivot": [
+    195,
+    603
+   ],
+   "size": [
+    350,
+    604
+   ]
+  },
+  {
+   "file": "backdash_14.png",
+   "pivot": [
+    163,
+    608
+   ],
+   "size": [
+    318,
+    609
+   ]
+  },
+  {
+   "file": "backdash_15.png",
+   "pivot": [
+    119,
+    608
+   ],
+   "size": [
+    274,
+    609
+   ]
+  },
+  {
+   "file": "backdash_16.png",
+   "pivot": [
+    118,
+    611
+   ],
+   "size": [
+    272,
+    612
+   ]
+  },
+  {
+   "file": "backdash_17.png",
+   "pivot": [
+    117,
+    611
+   ],
+   "size": [
+    272,
+    612
+   ]
+  },
+  {
+   "file": "backdash_18.png",
+   "pivot": [
+    117,
+    611
+   ],
+   "size": [
+    272,
+    612
+   ]
+  },
+  {
+   "file": "backdash_19.png",
+   "pivot": [
+    117,
+    611
+   ],
+   "size": [
+    272,
+    612
+   ]
+  },
+  {
+   "file": "backdash_20.png",
+   "pivot": [
+    117,
+    611
+   ],
+   "size": [
+    272,
+    612
+   ]
+  },
+  {
+   "file": "backdash_21.png",
+   "pivot": [
+    117,
+    611
+   ],
+   "size": [
+    272,
+    612
+   ]
+  },
+  {
+   "file": "backdash_22.png",
+   "pivot": [
+    116,
+    611
+   ],
+   "size": [
+    272,
+    612
+   ]
+  },
+  {
+   "file": "backdash_23.png",
+   "pivot": [
+    115,
+    610
+   ],
+   "size": [
+    272,
+    611
+   ]
+  },
+  {
+   "file": "backdash_24.png",
+   "pivot": [
+    115,
+    607
+   ],
+   "size": [
+    272,
+    608
+   ]
+  }
+ ]
+}

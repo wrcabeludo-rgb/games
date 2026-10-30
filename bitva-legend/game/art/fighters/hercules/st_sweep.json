@@ -1,0 +1,303 @@
+{
+ "frames": [
+  {
+   "file": "st_sweep_1.png",
+   "pivot": [
+    256,
+    433
+   ],
+   "size": [
+    609,
+    434
+   ]
+  },
+  {
+   "file": "st_sweep_2.png",
+   "pivot": [
+    261,
+    433
+   ],
+   "size": [
+    627,
+    434
+   ]
+  },
+  {
+   "file": "st_sweep_3.png",
+   "pivot": [
+    258,
+    430
+   ],
+   "size": [
+    698,
+    431
+   ]
+  },
+  {
+   "file": "st_sweep_4.png",
+   "pivot": [
+    260,
+    415
+   ],
+   "size": [
+    749,
+    416
+   ]
+  },
+  {
+   "file": "st_sweep_5.png",
+   "pivot": [
+    232,
+    435
+   ],
+   "size": [
+    759,
+    436
+   ]
+  },
+  {
+   "file": "st_sweep_6.png",
+   "pivot": [
+    227,
+    432
+   ],
+   "size": [
+    765,
+    433
+   ]
+  },
+  {
+   "file": "st_sweep_7.png",
+   "pivot": [
+    207,
+    426
+   ],
+   "size": [
+    749,
+    427
+   ]
+  },
+  {
+   "file": "st_sweep_8.png",
+   "pivot": [
+    192,
+    413
+   ],
+   "size": [
+    737,
+    414
+   ]
+  },
+  {
+   "file": "st_sweep_9.png",
+   "pivot": [
+    183,
+    401
+   ],
+   "size": [
+    728,
+    402
+   ]
+  },
+  {
+   "file": "st_sweep_10.png",
+   "pivot": [
+    165,
+    401
+   ],
+   "size": [
+    710,
+    402
+   ]
+  },
+  {
+   "file": "st_sweep_11.png",
+   "pivot": [
+    175,
+    403
+   ],
+   "size": [
+    717,
+    404
+   ]
+  },
+  {
+   "file": "st_sweep_12.png",
+   "pivot": [
+    143,
+    404
+   ],
+   "size": [
+    646,
+    405
+   ]
+  },
+  {
+   "file": "st_sweep_13.png",
+   "pivot": [
+    146,
+    405
+   ],
+   "size": [
+    542,
+    406
+   ]
+  },
+  {
+   "file": "st_sweep_14.png",
+   "pivot": [
+    246,
+    406
+   ],
+   "size": [
+    661,
+    407
+   ]
+  },
+  {
+   "file": "st_sweep_15.png",
+   "pivot": [
+    271,
+    547
+   ],
+   "size": [
+    644,
+    548
+   ]
+  },
+  {
+   "file": "st_sweep_16.png",
+   "pivot": [
+    271,
+    563
+   ],
+   "size": [
+    674,
+    564
+   ]
+  },
+  {
+   "file": "st_sweep_17.png",
+   "pivot": [
+    273,
+    574
+   ],
+   "size": [
+    744,
+    575
+   ]
+  },
+  {
+   "file": "st_sweep_18.png",
+   "pivot": [
+    195,
+    421
+   ],
+   "size": [
+    706,
+    422
+   ]
+  },
+  {
+   "file": "st_sweep_19.png",
+   "pivot": [
+    69,
+    582
+   ],
+   "size": [
+    584,
+    583
+   ]
+  },
+  {
+   "file": "st_sweep_20.png",
+   "pivot": [
+    48,
+    618
+   ],
+   "size": [
+    563,
+    609
+   ]
+  },
+  {
+   "file": "st_sweep_21.png",
+   "pivot": [
+    -6,
+    462
+   ],
+   "size": [
+    434,
+    451
+   ]
+  },
+  {
+   "file": "st_sweep_22.png",
+   "pivot": [
+    -2,
+    477
+   ],
+   "size": [
+    291,
+    468
+   ]
+  },
+  {
+   "file": "st_sweep_23.png",
+   "pivot": [
+    62,
+    484
+   ],
+   "size": [
+    372,
+    477
+   ]
+  },
+  {
+   "file": "st_sweep_24.png",
+   "pivot": [
+    131,
+    494
+   ],
+   "size": [
+    436,
+    491
+   ]
+  },
+  {
+   "file": "st_sweep_25.png",
+   "pivot": [
+    187,
+    498
+   ],
+   "size": [
+    480,
+    499
+   ]
+  },
+  {
+   "file": "st_sweep_26.png",
+   "pivot": [
+    222,
+    585
+   ],
+   "size": [
+    679,
+    586
+   ]
+  },
+  {
+   "file": "st_sweep_27.png",
+   "pivot": [
+    236,
+    476
+   ],
+   "size": [
+    514,
+    477
+   ]
+  }
+ ],
+ "hit": 5,
+ "hit_end": 11
+}

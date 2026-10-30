@@ -164,6 +164,7 @@ func _draw() -> void:
 ## держится 3 с и тает за 1 с. Только картинка — на бой не влияет.
 const CRATER_TEX := preload("res://art/fx/crater.png")
 const MACE_TEX := preload("res://art/fx/mace.png")
+const BOULDER_TEX := preload("res://art/fx/boulder.png")
 ## Эффекты (art/fx/<имя>_1..4.png, 4 кадра по ходу; кадр — клетка 500×667, центр эффекта в центре клетки).
 const FX := {
 	"hit_light": [preload("res://art/fx/hit_light_1.png"), preload("res://art/fx/hit_light_2.png"),
@@ -1015,8 +1016,14 @@ func _draw_projectile_new(pr: PackedInt32Array, c: Vector2, age: int, dir: float
 			draw_line(c - Vector2(dir * hw, 0), c + Vector2(dir * hw, 0), Color(0.85, 0.85, 0.9), 4)
 			draw_circle(c - Vector2(dir * hw, 0), 5, Color(0.6, 0.6, 0.65))
 			draw_line(c - Vector2(dir * (hw + 40), 0), c - Vector2(dir * hw, 0), Color(0.6, 0.9, 0.6, 0.4), 3)
-		7:  # валун
+		7:  # валун — камень из ролика Геракла (art/fx/boulder.png), вращается в полёте
 			var a := age * 0.2 * dir
+			if BOULDER_TEX:
+				var d := hw * 2.6
+				draw_set_transform(c, a, Vector2.ONE * d / BOULDER_TEX.get_width())
+				draw_texture(BOULDER_TEX, -BOULDER_TEX.get_size() / 2.0)
+				draw_set_transform(Vector2.ZERO, 0, Vector2.ONE)
+				return
 			var pts := PackedVector2Array()
 			for i in 7:
 				pts.append(c + Vector2.from_angle(a + TAU * i / 7.0) * hw * (0.85 + 0.15 * sin(i * 2.3)))

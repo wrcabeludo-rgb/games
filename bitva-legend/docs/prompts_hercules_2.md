@@ -57,3 +57,8 @@ Edit task. Image 1 is the approved model sheet of HERCULES, image 2 is his appro
 NEGATIVE PROMPT:
 standing, half crouch, kneeling on the ground, sitting, front view, back view, several figures, model sheet, extra arms, extra legs, different face, weapon, floor, shadow, gradient background, pink, magenta or purple on the character, text
 ```
+
+## H. Немейский натиск, бег, отскок (`sp_ff_l`, `run`, `backdash`) — стартовая `hercules_stance_start.png`
+```
+Animate this 2D fighting game character in strict side view as a flat 2D cartoon character that never turns toward the camera, always facing right, with exactly the same design, colors, size and drawing style. He is a tall lean ancient Greek boxer in a lion pelt. There is no opponent and everything happens on the spot, as if on a treadmill: he never travels across the frame. 0-1 s: boxer's guard. 1-4 s: the lion charge: he pulls the lion's head with the open fanged jaws down over his face like a helmet, roars, crouches low and pounces forward like a lion with both wrapped fists stretched out in front like paws, then lands and returns to guard. 4-7 s: he runs fast on the spot with a powerful leaning sprint, fists pumping, the lion cape flying behind him, then stops in guard. 7-9 s: a quick hop backward on the spot, landing light on the balls of his feet in guard. 9-10 s: guard. Static camera, no zoom, no pan; he keeps the same size and stays on the grey floor strip. Exactly two arms and two legs. The background above the floor stays flat solid magenta the whole time. Sound: a lion roar, running footsteps and a light landing, no music, no speech.
+```
