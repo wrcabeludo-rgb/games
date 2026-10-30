@@ -773,5 +773,16 @@
   "hit": 12,
   "hit_end": 16,
   "upscale": true
+ },
+ "finisher_koschei": {
+  "frames": 120,
+  "grid": [
+   10,
+   12
+  ],
+  "fit": 0.613,
+  "align_to": "idle:1",
+  "fixed_pivot": true,
+  "upscale": true
  }
 }

@@ -622,5 +622,16 @@
   "align_to": "idle:1",
   "fixed_pivot": true,
   "upscale": true
+ },
+ "finisher_koschei": {
+  "frames": 105,
+  "grid": [
+   10,
+   11
+  ],
+  "fit": 0.615,
+  "align_to": "idle:1",
+  "fixed_pivot": true,
+  "upscale": true
  }
 }

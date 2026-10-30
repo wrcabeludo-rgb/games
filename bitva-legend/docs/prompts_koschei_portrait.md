@@ -42,3 +42,19 @@ Animate this 2D fighting game finisher in strict side view as flat 2D cartoon ch
 ```
 Илья: {OPP} = bearded bogatyr warrior in chainmail with a spiked mace, {OPP2} = warrior, {BOOT} = red leather boot.
 Дракула: {OPP} = pale vampire count in a black-and-red cape, {OPP2} = vampire, {BOOT} = black shoe and the edge of his red cape.
+
+## 6–7. Добивания против Кощея (`ilya/finisher_koschei`, `dracula/finisher_koschei`, ролики Veo в Gemini)
+Опросник: Илья — «вытряхивает золото» (переворачивает за лодыжки, трясёт, сыплются монеты и корона, последней
+падает игла — ломает её); Дракула — «укус — одни кости» (кусает, во рту пыль, плюётся; Кощей рассыпается грудой
+костей, корона сверху). Стартовые картинки: `art_src/start_images/finisher_ilya_koschei_start.png`,
+`finisher_dracula_koschei_start.png`.
+
+Илья:
+```
+Animate this 2D fighting game finisher in strict side view as flat 2D cartoon characters that never turn toward the camera; both keep exactly the same design, colors, size and drawing style. The bearded bogatyr warrior in chainmail on the left is the winner; the old sorcerer-king with the gold crown on the right is beaten and dizzy, swaying on his feet. 0-2 s: the warrior drops his spiked mace on the floor, steps up, grabs the old king by both ankles and lifts him upside down. 2-6 s: he shakes him up and down like a piggy bank, and a shower of gold coins, the gold crown and the sword fall out of the robe onto the floor. 6-8 s: last, one tiny golden needle drops out; the warrior catches it, snaps it in two with his fingers, the old king goes limp and the warrior drops him onto the pile of coins, dusts off his hands and laughs heartily. Funny cartoon slapstick, no blood, no injuries. Static camera, no zoom, no pan; both stay the same size, everyone stays on the grey floor strip. Exactly two arms each. The background above the floor stays flat solid magenta the whole time. Sound: jingling coins, a tiny snap and a hearty laugh, no music, no speech.
+```
+
+Дракула:
+```
+Animate this 2D fighting game finisher in strict side view as flat 2D cartoon characters that never turn toward the camera; both keep exactly the same design, colors, size and drawing style. The pale vampire count in the black-and-red cape on the left is the winner; the old sorcerer-king with the gold crown on the right is beaten and dizzy, swaying on his feet. 0-2 s: the vampire glides forward, grabs the old king by the shoulders and bites his bony neck. 2-5 s: his face twists in disgust: only dry grey dust puffs out of his mouth, he lets go, coughs and spits. 5-8 s: the old king rattles and falls apart into a heap of dry bones on the floor with his gold crown landing on top; the vampire wipes his mouth with a white handkerchief, shudders and turns up his nose. Funny cartoon slapstick, no blood, no injuries. Static camera, no zoom, no pan; both stay the same size, everyone stays on the grey floor strip. Exactly two arms each. The background above the floor stays flat solid magenta the whole time. Sound: a crunchy bite, coughing, rattling bones, no music, no speech.
+```
