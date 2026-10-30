@@ -526,5 +526,45 @@
   },
   "air_frames": 39,
   "upscale": true
+ },
+ "select": {
+  "frames": 1,
+  "fit": "h:1:900",
+  "pivot_y": "bottom_center"
+ },
+ "select_win": {
+  "frames": 59,
+  "grid": [
+   10,
+   6
+  ],
+  "fit": 0.632,
+  "fixed_pivot": true,
+  "align_to": "select:1",
+  "upscale": true
+ },
+ "select_win_b": {
+  "frames": 61,
+  "grid": [
+   10,
+   7
+  ],
+  "fit": 0.632,
+  "fixed_pivot": true,
+  "align_to": "select:1",
+  "upscale": true
+ },
+ "st_lp_b": {
+  "frames": 26,
+  "grid": [
+   8,
+   4
+  ],
+  "fit": 0.622,
+  "fixed_pivot": true,
+  "align_to": "idle:1",
+  "hit": 21,
+  "hit_end": 24,
+  "upscale": true
  }
 }
