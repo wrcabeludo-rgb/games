@@ -1,0 +1,424 @@
+{
+ "frames": [
+  {
+   "file": "super_1.png",
+   "pivot": [
+    155,
+    610
+   ],
+   "size": [
+    319,
+    612
+   ]
+  },
+  {
+   "file": "super_2.png",
+   "pivot": [
+    153,
+    608
+   ],
+   "size": [
+    314,
+    610
+   ]
+  },
+  {
+   "file": "super_3.png",
+   "pivot": [
+    153,
+    603
+   ],
+   "size": [
+    314,
+    605
+   ]
+  },
+  {
+   "file": "super_4.png",
+   "pivot": [
+    153,
+    598
+   ],
+   "size": [
+    314,
+    600
+   ]
+  },
+  {
+   "file": "super_5.png",
+   "pivot": [
+    152,
+    593
+   ],
+   "size": [
+    314,
+    595
+   ]
+  },
+  {
+   "file": "super_6.png",
+   "pivot": [
+    150,
+    591
+   ],
+   "size": [
+    316,
+    593
+   ]
+  },
+  {
+   "file": "super_7.png",
+   "pivot": [
+    148,
+    594
+   ],
+   "size": [
+    326,
+    596
+   ]
+  },
+  {
+   "file": "super_8.png",
+   "pivot": [
+    145,
+    600
+   ],
+   "size": [
+    340,
+    602
+   ]
+  },
+  {
+   "file": "super_9.png",
+   "pivot": [
+    143,
+    604
+   ],
+   "size": [
+    353,
+    606
+   ]
+  },
+  {
+   "file": "super_10.png",
+   "pivot": [
+    143,
+    604
+   ],
+   "size": [
+    416,
+    606
+   ]
+  },
+  {
+   "file": "super_11.png",
+   "pivot": [
+    143,
+    600
+   ],
+   "size": [
+    475,
+    602
+   ]
+  },
+  {
+   "file": "super_12.png",
+   "pivot": [
+    148,
+    596
+   ],
+   "size": [
+    488,
+    598
+   ]
+  },
+  {
+   "file": "super_13.png",
+   "pivot": [
+    150,
+    595
+   ],
+   "size": [
+    468,
+    597
+   ]
+  },
+  {
+   "file": "super_14.png",
+   "pivot": [
+    152,
+    596
+   ],
+   "size": [
+    428,
+    598
+   ]
+  },
+  {
+   "file": "super_15.png",
+   "pivot": [
+    157,
+    596
+   ],
+   "size": [
+    384,
+    597
+   ]
+  },
+  {
+   "file": "super_16.png",
+   "pivot": [
+    162,
+    593
+   ],
+   "size": [
+    440,
+    594
+   ]
+  },
+  {
+   "file": "super_17.png",
+   "pivot": [
+    167,
+    588
+   ],
+   "size": [
+    492,
+    589
+   ]
+  },
+  {
+   "file": "super_18.png",
+   "pivot": [
+    176,
+    586
+   ],
+   "size": [
+    506,
+    587
+   ]
+  },
+  {
+   "file": "super_19.png",
+   "pivot": [
+    186,
+    584
+   ],
+   "size": [
+    518,
+    585
+   ]
+  },
+  {
+   "file": "super_20.png",
+   "pivot": [
+    194,
+    582
+   ],
+   "size": [
+    524,
+    583
+   ]
+  },
+  {
+   "file": "super_21.png",
+   "pivot": [
+    200,
+    583
+   ],
+   "size": [
+    530,
+    584
+   ]
+  },
+  {
+   "file": "super_22.png",
+   "pivot": [
+    208,
+    582
+   ],
+   "size": [
+    536,
+    583
+   ]
+  },
+  {
+   "file": "super_23.png",
+   "pivot": [
+    214,
+    584
+   ],
+   "size": [
+    541,
+    585
+   ]
+  },
+  {
+   "file": "super_24.png",
+   "pivot": [
+    216,
+    584
+   ],
+   "size": [
+    543,
+    585
+   ]
+  },
+  {
+   "file": "super_25.png",
+   "pivot": [
+    214,
+    584
+   ],
+   "size": [
+    539,
+    585
+   ]
+  },
+  {
+   "file": "super_26.png",
+   "pivot": [
+    209,
+    584
+   ],
+   "size": [
+    532,
+    585
+   ]
+  },
+  {
+   "file": "super_27.png",
+   "pivot": [
+    204,
+    584
+   ],
+   "size": [
+    526,
+    585
+   ]
+  },
+  {
+   "file": "super_28.png",
+   "pivot": [
+    197,
+    584
+   ],
+   "size": [
+    514,
+    585
+   ]
+  },
+  {
+   "file": "super_29.png",
+   "pivot": [
+    187,
+    586
+   ],
+   "size": [
+    495,
+    587
+   ]
+  },
+  {
+   "file": "super_30.png",
+   "pivot": [
+    184,
+    587
+   ],
+   "size": [
+    479,
+    588
+   ]
+  },
+  {
+   "file": "super_31.png",
+   "pivot": [
+    184,
+    589
+   ],
+   "size": [
+    462,
+    590
+   ]
+  },
+  {
+   "file": "super_32.png",
+   "pivot": [
+    184,
+    591
+   ],
+   "size": [
+    443,
+    592
+   ]
+  },
+  {
+   "file": "super_33.png",
+   "pivot": [
+    184,
+    594
+   ],
+   "size": [
+    421,
+    595
+   ]
+  },
+  {
+   "file": "super_34.png",
+   "pivot": [
+    184,
+    596
+   ],
+   "size": [
+    399,
+    597
+   ]
+  },
+  {
+   "file": "super_35.png",
+   "pivot": [
+    184,
+    598
+   ],
+   "size": [
+    374,
+    599
+   ]
+  },
+  {
+   "file": "super_36.png",
+   "pivot": [
+    184,
+    601
+   ],
+   "size": [
+    355,
+    602
+   ]
+  },
+  {
+   "file": "super_37.png",
+   "pivot": [
+    184,
+    601
+   ],
+   "size": [
+    354,
+    602
+   ]
+  },
+  {
+   "file": "super_38.png",
+   "pivot": [
+    182,
+    603
+   ],
+   "size": [
+    352,
+    604
+   ]
+  }
+ ],
+ "hit": 11,
+ "hit_end": 25
+}

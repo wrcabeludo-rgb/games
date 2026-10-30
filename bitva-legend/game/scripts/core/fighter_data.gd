@@ -293,7 +293,7 @@ const CHARACTERS := {
 			# Объятия Антея (назад, назад + рука): отрывает от земли и сжимает. Вырваться нельзя.
 			"sp_bb_l": {"buttons": "punch", "startup": 6, "active": 2, "recovery": 32, "grab": {"range": 80, "hold": 50, "damage": 200, "launch": [800, 1400], "tech": 0, "recovery": 14}, "ex": {"grab": {"range": 120, "damage": 270}}},
 			# «Двенадцать подвигов» (блок + СР + СН): рывок; попал — двенадцать ударов, по одному за подвиг.
-			"super": {"name": "ДВЕНАДЦАТЬ ПОДВИГОВ", "startup": 8, "active": 8, "recovery": 45, "lunge": 750, "damage": 60, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 45, "box": [25, 40, 140, 240], "cinema": {"hold": 110, "damage": 340, "launch": [700, 1700], "tech": 0, "recovery": 20, "scaled": 1}},
+			"super": {"name": "ДВЕНАДЦАТЬ ПОДВИГОВ", "startup": 8, "active": 8, "recovery": 45, "lunge": 750, "damage": 60, "hitstun": 30, "hitstop": 12, "push": 900, "chip": 45, "box": [25, 40, 140, 240], "cinema": {"hold": 110, "hits": [10, 18, 26, 34, 42, 50, 58, 66, 74], "damage": 340, "launch": [700, 1700], "tech": 0, "recovery": 20, "scaled": 1}},
 			"throw": {"startup": 4, "active": 2, "recovery": 18, "grab": {"range": 40, "hold": 30, "damage": 150, "launch": [600, 1100], "tech": 1, "recovery": 10}},
 		},
 	},

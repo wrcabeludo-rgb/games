@@ -1,0 +1,279 @@
+{
+ "frames": [
+  {
+   "file": "hit_body_1.png",
+   "pivot": [
+    143,
+    614
+   ],
+   "size": [
+    305,
+    615
+   ]
+  },
+  {
+   "file": "hit_body_2.png",
+   "pivot": [
+    150,
+    585
+   ],
+   "size": [
+    341,
+    586
+   ]
+  },
+  {
+   "file": "hit_body_3.png",
+   "pivot": [
+    162,
+    545
+   ],
+   "size": [
+    364,
+    546
+   ]
+  },
+  {
+   "file": "hit_body_4.png",
+   "pivot": [
+    177,
+    508
+   ],
+   "size": [
+    410,
+    509
+   ]
+  },
+  {
+   "file": "hit_body_5.png",
+   "pivot": [
+    196,
+    487
+   ],
+   "size": [
+    438,
+    488
+   ]
+  },
+  {
+   "file": "hit_body_6.png",
+   "pivot": [
+    214,
+    482
+   ],
+   "size": [
+    461,
+    483
+   ]
+  },
+  {
+   "file": "hit_body_7.png",
+   "pivot": [
+    226,
+    479
+   ],
+   "size": [
+    471,
+    480
+   ]
+  },
+  {
+   "file": "hit_body_8.png",
+   "pivot": [
+    238,
+    481
+   ],
+   "size": [
+    483,
+    482
+   ]
+  },
+  {
+   "file": "hit_body_9.png",
+   "pivot": [
+    245,
+    482
+   ],
+   "size": [
+    487,
+    483
+   ]
+  },
+  {
+   "file": "hit_body_10.png",
+   "pivot": [
+    243,
+    489
+   ],
+   "size": [
+    485,
+    490
+   ]
+  },
+  {
+   "file": "hit_body_11.png",
+   "pivot": [
+    235,
+    492
+   ],
+   "size": [
+    477,
+    493
+   ]
+  },
+  {
+   "file": "hit_body_12.png",
+   "pivot": [
+    224,
+    489
+   ],
+   "size": [
+    467,
+    490
+   ]
+  },
+  {
+   "file": "hit_body_13.png",
+   "pivot": [
+    214,
+    494
+   ],
+   "size": [
+    457,
+    495
+   ]
+  },
+  {
+   "file": "hit_body_14.png",
+   "pivot": [
+    210,
+    494
+   ],
+   "size": [
+    453,
+    495
+   ]
+  },
+  {
+   "file": "hit_body_15.png",
+   "pivot": [
+    208,
+    492
+   ],
+   "size": [
+    450,
+    493
+   ]
+  },
+  {
+   "file": "hit_body_16.png",
+   "pivot": [
+    206,
+    486
+   ],
+   "size": [
+    448,
+    487
+   ]
+  },
+  {
+   "file": "hit_body_17.png",
+   "pivot": [
+    209,
+    486
+   ],
+   "size": [
+    451,
+    487
+   ]
+  },
+  {
+   "file": "hit_body_18.png",
+   "pivot": [
+    209,
+    489
+   ],
+   "size": [
+    449,
+    490
+   ]
+  },
+  {
+   "file": "hit_body_19.png",
+   "pivot": [
+    206,
+    504
+   ],
+   "size": [
+    436,
+    505
+   ]
+  },
+  {
+   "file": "hit_body_20.png",
+   "pivot": [
+    203,
+    532
+   ],
+   "size": [
+    416,
+    533
+   ]
+  },
+  {
+   "file": "hit_body_21.png",
+   "pivot": [
+    198,
+    558
+   ],
+   "size": [
+    387,
+    559
+   ]
+  },
+  {
+   "file": "hit_body_22.png",
+   "pivot": [
+    194,
+    580
+   ],
+   "size": [
+    368,
+    581
+   ]
+  },
+  {
+   "file": "hit_body_23.png",
+   "pivot": [
+    187,
+    599
+   ],
+   "size": [
+    351,
+    600
+   ]
+  },
+  {
+   "file": "hit_body_24.png",
+   "pivot": [
+    179,
+    609
+   ],
+   "size": [
+    340,
+    610
+   ]
+  },
+  {
+   "file": "hit_body_25.png",
+   "pivot": [
+    167,
+    612
+   ],
+   "size": [
+    328,
+    613
+   ]
+  }
+ ]
+}

@@ -1,0 +1,302 @@
+{
+ "frames": [
+  {
+   "file": "block_1.png",
+   "pivot": [
+    229,
+    606
+   ],
+   "size": [
+    584,
+    607
+   ]
+  },
+  {
+   "file": "block_2.png",
+   "pivot": [
+    224,
+    604
+   ],
+   "size": [
+    574,
+    605
+   ]
+  },
+  {
+   "file": "block_3.png",
+   "pivot": [
+    229,
+    602
+   ],
+   "size": [
+    552,
+    603
+   ]
+  },
+  {
+   "file": "block_4.png",
+   "pivot": [
+    234,
+    601
+   ],
+   "size": [
+    515,
+    602
+   ]
+  },
+  {
+   "file": "block_5.png",
+   "pivot": [
+    236,
+    601
+   ],
+   "size": [
+    475,
+    602
+   ]
+  },
+  {
+   "file": "block_6.png",
+   "pivot": [
+    231,
+    599
+   ],
+   "size": [
+    436,
+    600
+   ]
+  },
+  {
+   "file": "block_7.png",
+   "pivot": [
+    217,
+    599
+   ],
+   "size": [
+    422,
+    600
+   ]
+  },
+  {
+   "file": "block_8.png",
+   "pivot": [
+    199,
+    599
+   ],
+   "size": [
+    404,
+    600
+   ]
+  },
+  {
+   "file": "block_9.png",
+   "pivot": [
+    182,
+    600
+   ],
+   "size": [
+    387,
+    601
+   ]
+  },
+  {
+   "file": "block_10.png",
+   "pivot": [
+    166,
+    601
+   ],
+   "size": [
+    372,
+    602
+   ]
+  },
+  {
+   "file": "block_11.png",
+   "pivot": [
+    143,
+    601
+   ],
+   "size": [
+    349,
+    602
+   ]
+  },
+  {
+   "file": "block_12.png",
+   "pivot": [
+    121,
+    602
+   ],
+   "size": [
+    328,
+    603
+   ]
+  },
+  {
+   "file": "block_13.png",
+   "pivot": [
+    108,
+    602
+   ],
+   "size": [
+    315,
+    603
+   ]
+  },
+  {
+   "file": "block_14.png",
+   "pivot": [
+    108,
+    602
+   ],
+   "size": [
+    316,
+    603
+   ]
+  },
+  {
+   "file": "block_15.png",
+   "pivot": [
+    108,
+    603
+   ],
+   "size": [
+    315,
+    604
+   ]
+  },
+  {
+   "file": "block_16.png",
+   "pivot": [
+    108,
+    604
+   ],
+   "size": [
+    316,
+    605
+   ]
+  },
+  {
+   "file": "block_17.png",
+   "pivot": [
+    108,
+    604
+   ],
+   "size": [
+    316,
+    605
+   ]
+  },
+  {
+   "file": "block_18.png",
+   "pivot": [
+    106,
+    604
+   ],
+   "size": [
+    314,
+    605
+   ]
+  },
+  {
+   "file": "block_19.png",
+   "pivot": [
+    108,
+    604
+   ],
+   "size": [
+    320,
+    605
+   ]
+  },
+  {
+   "file": "block_20.png",
+   "pivot": [
+    108,
+    604
+   ],
+   "size": [
+    326,
+    605
+   ]
+  },
+  {
+   "file": "block_21.png",
+   "pivot": [
+    108,
+    604
+   ],
+   "size": [
+    331,
+    605
+   ]
+  },
+  {
+   "file": "block_22.png",
+   "pivot": [
+    108,
+    606
+   ],
+   "size": [
+    335,
+    607
+   ]
+  },
+  {
+   "file": "block_23.png",
+   "pivot": [
+    108,
+    606
+   ],
+   "size": [
+    340,
+    607
+   ]
+  },
+  {
+   "file": "block_24.png",
+   "pivot": [
+    108,
+    606
+   ],
+   "size": [
+    349,
+    607
+   ]
+  },
+  {
+   "file": "block_25.png",
+   "pivot": [
+    108,
+    606
+   ],
+   "size": [
+    365,
+    607
+   ]
+  },
+  {
+   "file": "block_26.png",
+   "pivot": [
+    111,
+    608
+   ],
+   "size": [
+    370,
+    609
+   ]
+  },
+  {
+   "file": "block_27.png",
+   "pivot": [
+    114,
+    609
+   ],
+   "size": [
+    353,
+    610
+   ]
+  }
+ ],
+ "cycle": 68
+}
