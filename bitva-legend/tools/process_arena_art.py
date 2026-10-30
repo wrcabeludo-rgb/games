@@ -39,9 +39,9 @@ CLOUD_MAX_WIDTH = 720
 RAVEN_HEIGHT = 220
 FLAG_HEIGHT = 300
 CREATURE_HEIGHT = 420
-CREATURES = ("dragon", "snakes", "owl")  # листы зверей среднего плана (4 кадра в ряд)
+CREATURES = ("dragon", "snakes", "owl", "crow", "cat")  # листы зверей среднего плана (4 кадра в ряд)
 # Небо шире 16:9 обрезается по бокам; у этих арен солнце нарисовано у левого края — режем справа.
-SKY_KEEP_LEFT = {"zastava", "temple"}
+SKY_KEEP_LEFT = {"zastava", "temple", "coast"}
 
 
 def despill_red(img: Image.Image) -> Image.Image:

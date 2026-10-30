@@ -33,11 +33,12 @@ const LIST := {
 		"ground": Color(0.2, 0.17, 0.16), "birds": "ravens", "stone": true, "leaves": true, "fireflies": true,
 	},
 	"coast": {
-		"name": "Эгейский берег", "dir": "res://art/arenas/coast/",
+		"name": "Эгейский берег", "still": true, "dir": "res://art/arenas/coast/",
+		"forest_h": 260.0, "forest_rise": 110.0, "forest_k": 0.9, "forest_squash": 0.8, "mountains_rise": 215.0, "mountains_fill": true,
 		"sky": [Color(0.15, 0.3, 0.55), Color(0.98, 0.85, 0.6), Color(0.35, 0.45, 0.5)], "stars": false,
-		"light": ["sun", 0.2], "hills": Color(0.25, 0.45, 0.6), "shape": ["sea", "sharp"],
+		"light": ["sun", 0.1], "hills": Color(0.25, 0.45, 0.6), "shape": ["sea", "sharp"],
 		"marks": [["temple", 0.22, 1.0], ["rocks", 0.85, 1.2]], "trees": ["olive", "dead"],
-		"ground": Color(0.78, 0.68, 0.5), "birds": "gulls",
+		"ground": Color(0.78, 0.68, 0.5), "birds": "ravens",  # кадры raven_* у берега — чайка
 	},
 	"pass": {
 		"name": "Перевал", "dir": "res://art/arenas/pass/",
@@ -64,10 +65,11 @@ const LIST := {
 	},
 	"castle_hall": {
 		"name": "Замок графа", "still": true, "dir": "res://art/arenas/castle_hall/", "indoor": true,
+		"forest_h": 260.0, "forest_rise": 110.0, "forest_k": 0.9, "forest_squash": 0.8, "mountains_rise": 215.0,
 		"sky": [Color(0.08, 0.03, 0.06), Color(0.3, 0.06, 0.1), Color(0.3, 0.06, 0.1)], "stars": false,
 		"light": ["moon", 0.5], "hills": Color(0.18, 0.1, 0.14), "shape": ["flat", "flat"],
 		"marks": [["window", 0.3, 1.0], ["throne", 0.5, 1.0], ["window", 0.7, 1.0]], "trees": ["column", "column"],
-		"ground": Color(0.22, 0.12, 0.14), "birds": "bats",
+		"ground": Color(0.22, 0.12, 0.14), "birds": "ravens",  # кадры raven_* у склепа — летучая мышь
 	},
 	"temple": {
 		"name": "Храм Афины", "still": true, "dir": "res://art/arenas/temple/", "motes": true,

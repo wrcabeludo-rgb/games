@@ -501,7 +501,8 @@ func _draw_forest_life(c: CanvasItem, origin: Vector2, sc: Vector2) -> void:
 		c.draw_texture_rect(_halo, Rect2(gp - Vector2(gr, gr), Vector2(gr, gr) * 2.0), false, Color(gc[0], gc[1], gc[2], ga))
 	var fires: Array = _life.get("fires", [])
 	for i in fires.size():
-		_draw_fire(c, origin + Vector2(fires[i][0], fires[i][1]) * sc, sc.y, i)
+		var fs: float = fires[i][2] if fires[i].size() > 2 else 1.0
+		_draw_fire(c, origin + Vector2(fires[i][0], fires[i][1]) * sc, sc.y * fs, i)
 
 
 ## Огонь в чаше: ореол и несколько языков пламени, каждый со своим неровным дрожанием; вверх летят искры.
