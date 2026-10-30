@@ -18,14 +18,14 @@
     601
    ],
    "size": [
-    465,
+    466,
     602
    ]
   },
   {
    "file": "thrown_ankle_3.png",
    "pivot": [
-    164,
+    163,
     601
    ],
    "size": [
@@ -36,7 +36,7 @@
   {
    "file": "thrown_ankle_4.png",
    "pivot": [
-    168,
+    167,
     594
    ],
    "size": [
@@ -47,11 +47,11 @@
   {
    "file": "thrown_ankle_5.png",
    "pivot": [
-    175,
+    173,
     576
    ],
    "size": [
-    488,
+    485,
     577
    ]
   },
@@ -62,7 +62,7 @@
     549
    ],
    "size": [
-    510,
+    511,
     550
    ]
   },
@@ -70,11 +70,11 @@
    "file": "thrown_ankle_7.png",
    "pivot": [
     197,
-    517
+    516
    ],
    "size": [
-    532,
-    518
+    533,
+    517
    ]
   },
   {
@@ -95,14 +95,14 @@
     467
    ],
    "size": [
-    577,
+    578,
     468
    ]
   },
   {
    "file": "thrown_ankle_10.png",
    "pivot": [
-    224,
+    223,
     474
    ],
    "size": [
@@ -113,7 +113,7 @@
   {
    "file": "thrown_ankle_11.png",
    "pivot": [
-    217,
+    216,
     494
    ],
    "size": [
@@ -125,22 +125,22 @@
    "file": "thrown_ankle_12.png",
    "pivot": [
     216,
-    517
+    516
    ],
    "size": [
     570,
-    518
+    517
    ]
   },
   {
    "file": "thrown_ankle_13.png",
    "pivot": [
     234,
-    504
+    503
    ],
    "size": [
     607,
-    505
+    504
    ]
   },
   {
@@ -157,56 +157,56 @@
   {
    "file": "thrown_ankle_15.png",
    "pivot": [
-    246,
+    244,
     447
    ],
    "size": [
-    629,
+    628,
     448
    ]
   },
   {
    "file": "thrown_ankle_16.png",
    "pivot": [
-    250,
+    248,
     559
    ],
    "size": [
-    637,
+    636,
     560
    ]
   },
   {
    "file": "thrown_ankle_17.png",
    "pivot": [
-    276,
+    274,
     648
    ],
    "size": [
-    689,
+    688,
     649
    ]
   },
   {
    "file": "thrown_ankle_18.png",
    "pivot": [
-    286,
+    285,
     693
    ],
    "size": [
-    710,
+    709,
     694
    ]
   },
   {
    "file": "thrown_ankle_19.png",
    "pivot": [
-    280,
-    691
+    278,
+    690
    ],
    "size": [
-    697,
-    692
+    696,
+    691
    ]
   },
   {
@@ -224,32 +224,32 @@
    "file": "thrown_ankle_21.png",
    "pivot": [
     198,
-    743
+    744
    ],
    "size": [
-    535,
-    744
+    534,
+    745
    ]
   },
   {
    "file": "thrown_ankle_22.png",
    "pivot": [
-    170,
+    178,
     775
    ],
    "size": [
-    479,
+    494,
     776
    ]
   },
   {
    "file": "thrown_ankle_23.png",
    "pivot": [
-    168,
+    170,
     793
    ],
    "size": [
-    475,
+    478,
     794
    ]
   },
@@ -257,54 +257,54 @@
    "file": "thrown_ankle_24.png",
    "pivot": [
     204,
-    793
+    795
    ],
    "size": [
     547,
-    794
+    796
    ]
   },
   {
    "file": "thrown_ankle_25.png",
    "pivot": [
     200,
-    793
+    795
    ],
    "size": [
-    537,
-    794
+    539,
+    796
    ]
   },
   {
    "file": "thrown_ankle_26.png",
    "pivot": [
     152,
-    793
+    795
    ],
    "size": [
-    442,
-    794
+    443,
+    796
    ]
   },
   {
    "file": "thrown_ankle_27.png",
    "pivot": [
-    129,
+    128,
     795
    ],
    "size": [
-    396,
+    394,
     796
    ]
   },
   {
    "file": "thrown_ankle_28.png",
    "pivot": [
-    126,
+    125,
     795
    ],
    "size": [
-    391,
+    389,
     796
    ]
   },
@@ -312,28 +312,28 @@
    "file": "thrown_ankle_29.png",
    "pivot": [
     124,
-    793
+    795
    ],
    "size": [
-    386,
-    794
+    388,
+    796
    ]
   },
   {
    "file": "thrown_ankle_30.png",
    "pivot": [
-    126,
+    125,
     795
    ],
    "size": [
-    391,
+    389,
     796
    ]
   },
   {
    "file": "thrown_ankle_31.png",
    "pivot": [
-    129,
+    128,
     795
    ],
    "size": [
@@ -355,18 +355,18 @@
   {
    "file": "thrown_ankle_33.png",
    "pivot": [
-    155,
-    795
+    154,
+    796
    ],
    "size": [
     448,
-    796
+    797
    ]
   },
   {
    "file": "thrown_ankle_34.png",
    "pivot": [
-    179,
+    178,
     795
    ],
    "size": [
@@ -377,29 +377,29 @@
   {
    "file": "thrown_ankle_35.png",
    "pivot": [
-    190,
+    191,
     795
    ],
    "size": [
-    518,
+    521,
     796
    ]
   },
   {
    "file": "thrown_ankle_36.png",
    "pivot": [
-    184,
+    185,
     795
    ],
    "size": [
-    506,
+    509,
     796
    ]
   },
   {
    "file": "thrown_ankle_37.png",
    "pivot": [
-    175,
+    174,
     795
    ],
    "size": [
@@ -410,7 +410,7 @@
   {
    "file": "thrown_ankle_38.png",
    "pivot": [
-    153,
+    152,
     795
    ],
    "size": [
@@ -421,7 +421,7 @@
   {
    "file": "thrown_ankle_39.png",
    "pivot": [
-    122,
+    121,
     795
    ],
    "size": [
@@ -432,29 +432,29 @@
   {
    "file": "thrown_ankle_40.png",
    "pivot": [
-    134,
+    132,
     795
    ],
    "size": [
-    406,
+    403,
     796
    ]
   },
   {
    "file": "thrown_ankle_41.png",
    "pivot": [
-    188,
+    190,
     795
    ],
    "size": [
-    515,
+    518,
     796
    ]
   },
   {
    "file": "thrown_ankle_42.png",
    "pivot": [
-    240,
+    239,
     795
    ],
    "size": [
@@ -465,22 +465,22 @@
   {
    "file": "thrown_ankle_43.png",
    "pivot": [
-    175,
+    174,
     795
    ],
    "size": [
-    488,
+    487,
     796
    ]
   },
   {
    "file": "thrown_ankle_44.png",
    "pivot": [
-    182,
+    180,
     795
    ],
    "size": [
-    501,
+    500,
     796
    ]
   },
@@ -491,25 +491,25 @@
     795
    ],
    "size": [
-    620,
+    621,
     796
    ]
   },
   {
    "file": "thrown_ankle_46.png",
    "pivot": [
-    165,
+    164,
     795
    ],
    "size": [
-    468,
+    466,
     796
    ]
   },
   {
    "file": "thrown_ankle_47.png",
    "pivot": [
-    145,
+    144,
     795
    ],
    "size": [
@@ -535,18 +535,18 @@
     795
    ],
    "size": [
-    581,
+    583,
     796
    ]
   },
   {
    "file": "thrown_ankle_50.png",
    "pivot": [
-    158,
+    160,
     795
    ],
    "size": [
-    454,
+    459,
     796
    ]
   },
@@ -568,7 +568,7 @@
     795
    ],
    "size": [
-    510,
+    511,
     796
    ]
   },
@@ -579,25 +579,25 @@
     795
    ],
    "size": [
-    503,
+    504,
     796
    ]
   },
   {
    "file": "thrown_ankle_54.png",
    "pivot": [
-    239,
+    240,
     795
    ],
    "size": [
-    616,
+    618,
     796
    ]
   },
   {
    "file": "thrown_ankle_55.png",
    "pivot": [
-    247,
+    246,
     795
    ],
    "size": [
@@ -619,29 +619,29 @@
   {
    "file": "thrown_ankle_57.png",
    "pivot": [
-    247,
+    248,
     795
    ],
    "size": [
-    632,
+    634,
     796
    ]
   },
   {
    "file": "thrown_ankle_58.png",
    "pivot": [
-    180,
+    178,
     795
    ],
    "size": [
-    498,
+    495,
     796
    ]
   },
   {
    "file": "thrown_ankle_59.png",
    "pivot": [
-    230,
+    229,
     795
    ],
    "size": [
@@ -652,11 +652,11 @@
   {
    "file": "thrown_ankle_60.png",
    "pivot": [
-    214,
+    216,
     795
    ],
    "size": [
-    567,
+    572,
     796
    ]
   },
@@ -667,7 +667,7 @@
     795
    ],
    "size": [
-    462,
+    464,
     796
    ]
   },
@@ -685,7 +685,7 @@
   {
    "file": "thrown_ankle_63.png",
    "pivot": [
-    148,
+    147,
     795
    ],
    "size": [
@@ -696,22 +696,22 @@
   {
    "file": "thrown_ankle_64.png",
    "pivot": [
-    168,
+    166,
     623
    ],
    "size": [
-    473,
+    471,
     624
    ]
   },
   {
    "file": "thrown_ankle_65.png",
    "pivot": [
-    241,
+    240,
     536
    ],
    "size": [
-    620,
+    618,
     537
    ]
   },
@@ -722,7 +722,7 @@
     419
    ],
    "size": [
-    595,
+    594,
     420
    ]
   },
@@ -730,21 +730,21 @@
    "file": "thrown_ankle_67.png",
    "pivot": [
     262,
-    395
+    393
    ],
    "size": [
     662,
-    396
+    394
    ]
   },
   {
    "file": "thrown_ankle_68.png",
    "pivot": [
-    293,
+    292,
     255
    ],
    "size": [
-    724,
+    723,
     256
    ]
   },
@@ -763,17 +763,17 @@
    "file": "thrown_ankle_70.png",
    "pivot": [
     324,
-    230
+    231
    ],
    "size": [
-    786,
-    231
+    787,
+    232
    ]
   },
   {
    "file": "thrown_ankle_71.png",
    "pivot": [
-    319,
+    318,
     232
    ],
    "size": [
@@ -784,29 +784,29 @@
   {
    "file": "thrown_ankle_72.png",
    "pivot": [
-    313,
-    203
+    316,
+    206
    ],
    "size": [
-    764,
-    204
+    771,
+    207
    ]
   },
   {
    "file": "thrown_ankle_73.png",
    "pivot": [
     304,
-    176
+    175
    ],
    "size": [
     746,
-    177
+    176
    ]
   },
   {
    "file": "thrown_ankle_74.png",
    "pivot": [
-    306,
+    305,
     133
    ],
    "size": [
@@ -817,11 +817,11 @@
   {
    "file": "thrown_ankle_75.png",
    "pivot": [
-    308,
+    306,
     126
    ],
    "size": [
-    754,
+    751,
     127
    ]
   },
@@ -861,7 +861,7 @@
   {
    "file": "thrown_ankle_79.png",
    "pivot": [
-    309,
+    308,
     126
    ],
    "size": [
