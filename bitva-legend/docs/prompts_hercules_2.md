@@ -1,0 +1,59 @@
+# Геракл — стартовая картинка стойки (ChatGPT, режим редактирования)
+Картинка 1 — модельный лист `art_src/fighters/hercules/model.png`. Результат приводится к кадру 1280×720 с полосой
+пола (`art_src/start_images/hercules_stance_start.png`, высокий вариант `_tall` — ×0.72 у нижнего края).
+```
+PROMPT:
+Edit task. Image 1 is the approved model sheet of HERCULES. Redraw THIS EXACT character — copy his design faithfully: the same face with the ginger beard and sly smile, the same Nemean lion pelt hood with open fanged jaws, the golden mane and the pelt cape with the tail, the lion paws knotted on the chest, the white chiton with the gold meander border, the brown belt with the bronze lion buckle, the bronze lion bracers, the leather wraps on the fists, the tall laced sandals, the same tall lean boxer proportions, colors, line thickness and shading. Do NOT redesign anything. New content: ONE single full-body figure, 16:9 image, STRICT SIDE VIEW facing RIGHT, in his fighting stance: an ancient Greek boxer's guard — standing tall, the front (left) foot forward and the rear foot back at shoulder width, knees slightly bent, weight on the balls of the feet, both wrapped fists raised in front of the chin and chest, the front fist a little further forward, elbows down, chin tucked, a confident sly half-smile, looking to the right. He is in the center, the whole figure fully inside the image with empty space above the lion head and below the sandals. Anatomy rules: correct anatomy, EXACTLY TWO arms, two hands and two legs — count them, there is NO third arm and NO extra hand; natural joints. HD hand-painted fighting-game style exactly like image 1. Background: perfectly flat solid magenta #FF00FF, no gradient, no floor, no cast shadow. Do not use pink, magenta or purple anywhere on the character. NO text, NO watermark, NO frame.
+
+NEGATIVE PROMPT:
+front view, three-quarter view, back view, several figures, model sheet, extra arms, extra hands, extra legs, bulky bodybuilder, anime style, different face, weapon, club, cropped head, cropped feet, floor, cast shadow, gradient background, pink, magenta or purple on the character, text, watermark, frame
+```
+
+# Ролики Veo (Gemini «Создание видео», 10 с, 2–3 движения в ролике)
+Стартовая картинка — `art_src/start_images/hercules_stance_start.png` (для G — `_tall`). Gemini берёт только короткий
+связный текст, поэтому каждый промпт — один абзац.
+
+## A. Стойка и шаг (`idle`, `walk_f`)
+```
+Animate this 2D fighting game character in strict side view as a flat 2D cartoon character that never turns toward the camera, always facing right, with exactly the same design, colors, size and drawing style. He is a tall lean ancient Greek boxer in a lion pelt. 0-3 s: he stays in his boxer's guard, bouncing lightly on the balls of his feet and breathing, fists up. 3-7 s: he walks forward with light springy boxer steps, gliding the front foot forward and pulling the rear foot after it, fists up the whole time, then steps back to the starting spot. 7-10 s: he stands in exactly the guard of the image, bouncing lightly. Static camera, no zoom, no pan; he keeps the same size and stays on the grey floor strip. Exactly two arms and two legs. The background above the floor stays flat solid magenta the whole time. Silent video, no audio.
+```
+
+## B. Удары руками (`st_lp` джеб-хук, `st_hp` замах из-за спины, `st_round` бэкфист с разворота)
+```
+Animate this 2D fighting game character in strict side view as a flat 2D cartoon character that never turns toward the camera, always facing right, with exactly the same design, colors, size and drawing style. He is a tall lean ancient Greek boxer in a lion pelt, fighting with bare wrapped fists. He punches the empty air in place; there is no opponent. 0-1 s: boxer's guard. 1-3 s: a short heavy jab-hook with the FRONT fist, the shoulder and hips turning into it, then back to guard. 3-6.5 s: a huge overhead blow: he winds the REAR fist far back behind his back, rises on his toes and smashes it down in front of him with his whole body like chopping wood, sinking low, then recovers to guard. 6.5-9 s: a spinning backfist: he spins around in place on the balls of his feet, the lion cape flaring, and whips the back of his fist with the bronze bracer at head height, then lands back in guard. 9-10 s: guard, still. Static camera, no zoom, no pan; he keeps the same size and stays on the grey floor strip. Exactly two arms and two legs. The background above the floor stays flat solid magenta. Sound: whooshes and short effort grunts, no music, no speech.
+```
+
+## C. Удары ногами (`st_lk` спартанский пинок, `st_hk` маваши с разворотом)
+```
+Animate this 2D fighting game character in strict side view as a flat 2D cartoon character that never turns toward the camera, always facing right, with exactly the same design, colors, size and drawing style. He is a tall lean ancient Greek boxer in a lion pelt. He kicks the empty air in place; there is no opponent. 0-1.5 s: boxer's guard. 1.5-4.5 s: a Spartan kick: leaning his torso back with his arms spread wide, he thrusts the FRONT leg straight forward and drives the sole of his sandal into the air at belly height, then pulls it back to guard. 4.5-8 s: a big spinning roundhouse kick: he spins on the front foot and swings the REAR leg in a huge wide arc to head height, the lion cape whirling around him, then lands back in guard. 8-10 s: guard, bouncing lightly. Static camera, no zoom, no pan; he keeps the same size and stays on the grey floor strip. Exactly two arms and two legs. The background above the floor stays flat solid magenta. Sound: whooshes and short effort grunts, no music, no speech.
+```
+
+## D. Присед и удары сидя (`crouch`, `cr_lp` джеб в корпус, `cr_lk` пинок по голени) — стартовая `hercules_crouch_start.png`
+Первая проба (`video/D_veo.mp4`) не годится: Veo присел лишь на 15 % и встал. Теперь ролик целиком из приседа.
+```
+Animate this 2D fighting game character in strict side view as a flat 2D cartoon character that never turns toward the camera, always facing right, with exactly the same design, colors, size and drawing style. He is a tall lean ancient Greek boxer in a lion pelt, crouching low. He stays in this low crouch for the whole video and never stands up; there is no opponent. 0-2 s: he holds the crouch of the image, breathing, fists up. 2-4 s: from the crouch a quick low jab with the FRONT fist straight forward at knee height, then back to the crouch. 4-6.5 s: still crouching, a short stomping kick with the FRONT sandal forward at shin height, then back to the crouch. 6.5-10 s: he holds exactly the crouch of the image, breathing slowly. Static camera, no zoom, no pan; he keeps the same size and stays on the grey floor strip. Exactly two arms and two legs. The background above the floor stays flat solid magenta the whole time. Sound: short whooshes and grunts, no music, no speech.
+```
+
+## E. Апперкот сидя и подсечка (`cr_hp`, `st_sweep`) — стартовая `hercules_crouch_start.png`
+```
+Animate this 2D fighting game character in strict side view as a flat 2D cartoon character that never turns toward the camera, always facing right, with exactly the same design, colors, size and drawing style. He is a tall lean ancient Greek boxer in a lion pelt, crouching low. There is no opponent. 0-1 s: he holds the crouch of the image. 1-4.5 s: he explodes upward out of the crouch with a huge uppercut of the REAR fist, straightening up and hopping off the floor with the fist high above his head, then drops back into exactly the crouch of the image. 4.5-8 s: from the crouch a spinning sweep: one hand on the floor, he swings the REAR leg in a wide circle low along the floor, the lion pelt sweeping the ground, then returns to exactly the crouch of the image. 8-10 s: he holds the crouch. The whole body stays fully inside the frame at all times. Static camera, no zoom, no pan; he keeps the same size and stays on the grey floor strip. Exactly two arms and two legs. The background above the floor stays flat solid magenta. Sound: whooshes and grunts, no music, no speech.
+```
+
+## F. Прыжок и удары в прыжке (`jump`, `j_hp` кросс сверху, `j_hk` колено) — стартовая `_tall`
+```
+Animate this 2D fighting game character in strict side view as a flat 2D cartoon character that never turns toward the camera, always facing right, with exactly the same design, colors, size and drawing style. He is a tall lean ancient Greek boxer in a lion pelt. There is no opponent; he jumps straight up in place three times. 0-3 s: a powerful jump straight up, pushing off with both feet, knees tucked at the top, and lands back in guard. 3-6.5 s: a second jump straight up; at the top he throws a downward cross punch with the REAR fist, then lands in guard. 6.5-10 s: a third jump straight up; at the top he drives the FRONT knee forward in a flying knee strike, then lands in guard. The whole body stays fully inside the frame at all times. Static camera, no zoom, no pan; he keeps the same size; the grey floor strip never moves. Exactly two arms and two legs. The background above the floor stays flat solid magenta. Sound: jump thuds, whooshes and grunts, no music, no speech.
+```
+
+## G. Валун и Землетрясение (`sp_proj_l`, `sp_dd_l`) — стартовая `_tall`
+```
+Animate this 2D fighting game character in strict side view as a flat 2D cartoon character that never turns toward the camera, always facing right, with exactly the same design, colors, size and drawing style. He is a tall lean ancient Greek boxer in a lion pelt. There is no opponent. 0-1 s: boxer's guard. 1-5 s: he digs his fingers into the floor in front of him, strains and tears out a big grey boulder, lifts it high over his head with both hands and hurls it forward in a high arc; the boulder flies out of the frame to the right and his hands are empty again; he returns to guard. 5-9 s: he jumps up and with a roar slams BOTH fists down into the floor in front of him, the floor cracks with a puff of dust, then he rises back to guard. 9-10 s: guard. The whole body stays fully inside the frame at all times. Static camera, no zoom, no pan; he keeps the same size; the grey floor strip never moves. Exactly two arms and two legs. The background above the floor stays flat solid magenta. Sound: grunt of effort, rock cracking, a heavy thud and a roar, no music, no speech.
+```
+
+## Стартовая картинка приседа (ChatGPT, режим редактирования; картинка 1 — модельный лист, 2 — стойка)
+```
+PROMPT:
+Edit task. Image 1 is the approved model sheet of HERCULES, image 2 is his approved fighting stance. Redraw THIS EXACT character with exactly the same design, proportions, colors and style, only change the pose. ONE single full-body figure, 16:9 image, STRICT SIDE VIEW facing RIGHT: a DEEP low boxer's crouch — both knees deeply bent, hips dropped low, the torso leaning slightly forward, the head ducked down to about TWO THIRDS of his standing height, both wrapped fists up in front of his face, feet flat on the ground at the same positions as in image 2, the lion cape hanging down behind him. Same scale as image 2. Anatomy rules: EXACTLY TWO arms, two hands and two legs — count them. Background: perfectly flat solid magenta #FF00FF, no floor, no cast shadow. Do not use pink, magenta or purple on the character. NO text.
+
+NEGATIVE PROMPT:
+standing, half crouch, kneeling on the ground, sitting, front view, back view, several figures, model sheet, extra arms, extra legs, different face, weapon, floor, shadow, gradient background, pink, magenta or purple on the character, text
+```

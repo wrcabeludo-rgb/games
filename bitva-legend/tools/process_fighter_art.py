@@ -68,7 +68,7 @@ from process_arena_art import chroma_key, split_objects, sharpen  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 # Рост бойца стоя в пикселях 1440p (= рост в игре × 2, см. FighterData "height").
-HEIGHT = {"ilya": 600, "dracula": 620, "koschei": 586}
+HEIGHT = {"ilya": 600, "dracula": 620, "koschei": 586, "hercules": 610}
 # Двойное разрешение: исходники увеличиваются нейросетью (tools/upscale.py), кадры хранятся вдвое крупнее,
 # игра рисует их с масштабом SCALE / res — на экране тот же размер, на 2K/4K — чётче.
 RES = {}  # Кощей с 3.17.57 — обычное разрешение (кадры из видео, без апскейла)
