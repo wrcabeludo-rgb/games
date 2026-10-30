@@ -198,6 +198,9 @@ const CHARACTERS := {
 		"backdash_v0": 1500,
 		"backdash_decel": 105,
 		"backdash_recovery": 5,
+		# Добивание из видео (лист finisher_<соперник>): «в сундук» — from — центр победителя на 1-м кадре (px листа
+		# от опорной точки), dist — на сколько px игры перед ним стоит соперник.
+		"finishers": {"ilya": {"from": 0, "dist": 347}, "dracula": {"from": 0, "dist": 347}},
 		"strings": [
 			{"name": "Костяная пляска", "moves": ["st_lp", "st_lp", "st_lk"]},
 			{"name": "Меч-кладенец", "moves": ["st_hp", "st_hk"]},

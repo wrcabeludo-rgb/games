@@ -32,3 +32,13 @@ PROMPT:
 NEGATIVE PROMPT:
 zoom in, zoom out, close-up, camera movement, pan, growing, shrinking, changing size, hovering, below the floor, turning toward the camera, front view, back view, three-quarter view, turning around, second character, visible opponent, weapons coming from outside the frame, two swords, sword disappearing, sword attack, extra chains appearing, chain flying away, extra arms, extra hands, extra legs, cropped by the frame edge, floor changes, shadow, dust, sparks, glow effects, magic effects, smoke, motion trails, pink, magenta or purple on the character, music, speech, text, watermark, travelling across the frame, second lash
 ```
+
+## 4–5. Добивание «в сундук» (`finisher_ilya`, `finisher_dracula`, ролики Veo в Gemini)
+Опросник: Кощей ставит огромный сундук, цепью затягивает туда соперника, захлопывает, садится сверху и хихикает;
+из-под крышки торчит сапог/край плаща. Стартовые картинки: `art_src/start_images/finisher_koschei_ilya_start.png`,
+`finisher_koschei_dracula_start.png` (оба бойца, полоса пола). Gemini принимает только короткий связный текст:
+```
+Animate this 2D fighting game finisher in strict side view as flat 2D cartoon characters that never turn toward the camera; both keep exactly the same design, colors, size and drawing style. The old sorcerer-king on the left is the winner; the {OPP} on the right is beaten and dizzy, swaying on his feet. 0-2 s: the old king grins and snaps his bony fingers, and a big old iron-bound wooden chest with its lid open rises out of the floor between them. 2-5 s: he swings the heavy gold chain from his neck like a lasso, wraps it around the {OPP2} and yanks him head first into the chest, the {OPP2} kicking his legs comically. 5-8 s: he slams the lid shut with his foot, sits on top of the chest and cackles, rubbing his bony hands, while one {BOOT} sticks out from under the lid and wiggles. Funny cartoon slapstick, no blood, no injuries. Static camera, no zoom, no pan; both stay the same size, everyone stays on the grey floor strip. Exactly two arms each. The background above the floor stays flat solid magenta the whole time. Sound: chain rattle, a heavy wooden thud of the lid and a dry old-man cackle, no music, no speech.
+```
+Илья: {OPP} = bearded bogatyr warrior in chainmail with a spiked mace, {OPP2} = warrior, {BOOT} = red leather boot.
+Дракула: {OPP} = pale vampire count in a black-and-red cape, {OPP2} = vampire, {BOOT} = black shoe and the edge of his red cape.

@@ -566,5 +566,27 @@
   "hit": 21,
   "hit_end": 24,
   "upscale": true
+ },
+ "finisher_ilya": {
+  "frames": 120,
+  "grid": [
+   10,
+   12
+  ],
+  "fit": 0.622,
+  "align_to": "idle:1",
+  "fixed_pivot": true,
+  "upscale": true
+ },
+ "finisher_dracula": {
+  "frames": 120,
+  "grid": [
+   10,
+   12
+  ],
+  "fit": 0.622,
+  "align_to": "idle:1",
+  "fixed_pivot": true,
+  "upscale": true
  }
 }
