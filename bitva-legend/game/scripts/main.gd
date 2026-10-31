@@ -160,6 +160,8 @@ func _physics_process(_delta: float) -> void:
 		menu.step(raw)
 		if _screenshot_path != "" and menu.tick == _shot_at:
 			_save_screenshot.call_deferred()
+		elif _screenshot_path != "" and _shot_every > 0 and menu.tick >= _shot_from and (menu.tick - _shot_from) % _shot_every == 0:
+			_save_series_shot.call_deferred(menu.tick)
 		return
 	var frame := raw
 	if _screenshot_path != "":

@@ -1,7 +1,8 @@
 class_name MenuView
 extends Control
-## Стартовый экран и выбор бойцов. Арт — game/art/menu/ (title.png) и листы бойцов
-## select (портрет) и select_win (радуется после выбора), см. docs/ART_FIGHTERS.md.
+## Стартовый экран и выбор бойцов. Арт — game/art/menu/ (заставка: bg.png «расколотый мир», cloud_*.png) и листы
+## бойцов select (портрет), select_idle (живой портрет заставки: дышит, подмигивает), select_win (радуется после выбора).
+## Промпты — docs/prompts_menu.md.
 ## Пока арта нет — рисуются заглушки: градиент, луна, стойка бойца.
 
 signal fight_requested(chars: PackedStringArray)
@@ -20,7 +21,10 @@ const LADDER_SKIP_AFTER := 20
 ## Слева — свет, справа — тьма, зеркально: соперники стоят симметрично (Илья ↔ Дракула по краям,
 ## Геракл ↔ Кощей ближе к центру; во втором ряду — Афина ↔ Медуза, Сунь Укун ↔ Анубис).
 ## Тьма в сетке смотрит влево — на свет.
-const ROSTER := ["ilya", "hercules", "koschei", "dracula", "athena", "sunwukong", "anubis", "medusa"]
+## Пока готовы четверо — второй ряд закрыт (Афина, Сунь Укун, Анубис, Медуза: "athena", "sunwukong", "anubis", "medusa").
+const ROSTER := ["ilya", "hercules", "koschei", "dracula", "", "", "", ""]
+## Все герои (для реплик, эпилогов и тестов) — и скрытые из сетки.
+const ALL_HEROES := ["ilya", "hercules", "koschei", "dracula", "athena", "sunwukong", "anubis", "medusa"]
 const COLS := 4
 const CELL := Vector2(104, 104)
 const CELL_GAP := 12.0
@@ -68,6 +72,9 @@ var _font: Font = load("res://fonts/RussoOne-Regular.ttf")
 var _title_font: Font = load("res://fonts/RuslanDisplay-Regular.ttf")
 var _sprites: FighterSprites
 var _title: Texture2D
+var _clouds: Array[Texture2D] = []
+var _bats: Array[Texture2D] = []
+var _ravens: Array[Texture2D] = []
 var _sky: Texture2D
 var _moon: Texture2D
 var _prev := PackedInt32Array([0, 0])
@@ -77,8 +84,16 @@ var _dialog: Array = []
 
 
 func _ready() -> void:
-	if ResourceLoader.exists("res://art/menu/title.png"):
-		_title = load("res://art/menu/title.png")
+	if ResourceLoader.exists("res://art/menu/bg.png"):
+		_title = load("res://art/menu/bg.png")
+	for i in range(1, 5):
+		if ResourceLoader.exists("res://art/menu/cloud_%d.png" % i):
+			_clouds.append(load("res://art/menu/cloud_%d.png" % i))
+		if ResourceLoader.exists("res://art/fx/bats_%d.png" % i):
+			_bats.append(load("res://art/fx/bats_%d.png" % i))
+	for i in range(1, 12):
+		if ResourceLoader.exists("res://art/arena/raven_%d.png" % i):
+			_ravens.append(load("res://art/arena/raven_%d.png" % i))
 	# Экран выбора — ночное небо арены (на заставке те же герои: рядом с портретами путались бы).
 	if ResourceLoader.exists("res://art/arena/sky.png"):
 		_sky = load("res://art/arena/sky.png")
@@ -270,15 +285,7 @@ func _draw() -> void:
 func _draw_background() -> void:
 	var r := Rect2(Vector2.ZERO, size)
 	if screen == Screen.TITLE and _title != null:
-		# Заставка целиком (на широком мониторе — с полями), чтобы герои не уходили за край экрана.
-		draw_rect(r, Color.BLACK)
-		draw_texture_rect(_title, _contain(_title.get_size()), false)
-		# Низ затемнён — на нём название и подсказка.
-		var clear := Color(0, 0, 0, 0)
-		var dark := Color(0, 0, 0, 0.8)
-		var y0 := size.y * 0.6
-		draw_polygon(PackedVector2Array([Vector2(0, y0), Vector2(size.x, y0), size, Vector2(0, size.y)]),
-			PackedColorArray([clear, clear, dark, dark]))
+		_draw_title_scene()
 		return
 	if screen != Screen.TITLE and _sky != null:
 		draw_texture_rect(_sky, _cover(_sky.get_size()), false, Color(0.55, 0.55, 0.65))
@@ -309,6 +316,102 @@ func _cover(img: Vector2) -> Rect2:
 	var k := maxf(size.x / img.x, size.y / img.y)
 	var s := img * k
 	return Rect2((size - s) / 2.0, s)
+
+
+## Заставка «Расколотый мир»: фон, облака и молнии на тёмной стороне, пульсирующий портал Скроллера в трещине,
+## летучие мыши и вороны, живые портреты Ильи (свет, слева) и Дракулы (тьма, справа).
+const TITLE_CRACK_X := 0.49       # трещина-портал на фоне (доля ширины картинки)
+const LIGHTNING_EVERY := 260      # молния — примерно раз в столько тиков
+const TITLE_PORTRAIT := 0.44      # масштаб портретов заставки (кадр 900 px — 400 px на экране)
+
+func _draw_title_scene() -> void:
+	var r := _cover(_title.get_size())
+	draw_rect(Rect2(Vector2.ZERO, size), Color.BLACK)
+	draw_texture_rect(_title, r, false)
+	var t := float(tick)
+	var crack_x := r.position.x + r.size.x * TITLE_CRACK_X
+	# Облака тёмной стороны медленно плывут вправо: выходят из-за трещины и уходят за край экрана.
+	for i in _clouds.size():
+		var c: Texture2D = _clouds[i]
+		var k := 0.6 + 0.1 * (i % 2)
+		var cw := c.get_width() * k
+		var span := size.x - crack_x + cw
+		var x := crack_x + fmod(t * (0.22 + 0.06 * i) + i * span / _clouds.size(), span) - cw * 0.3
+		var y := size.y * (0.02 + 0.06 * i)
+		var fade := clampf((x - crack_x) / 160.0, 0.0, 1.0) * clampf((size.x + cw * 0.3 - x) / 160.0, 0.0, 1.0)
+		draw_texture_rect(c, Rect2(x - cw * 0.5, y, cw, c.get_height() * k), false, Color(1, 1, 1, 0.75 * fade))
+	# Молния: вспышка тёмной половины и ломаная от туч к горам.
+	var lt := tick % LIGHTNING_EVERY
+	var seed_bolt := tick / LIGHTNING_EVERY
+	if lt < 14:
+		var flash := (1.0 - lt / 14.0) * (0.5 if lt % 4 < 2 else 0.25)
+		draw_rect(Rect2(crack_x, 0, size.x - crack_x, size.y * 0.7), Color(0.75, 0.85, 1.0, flash * 0.35))
+		var rng := RandomNumberGenerator.new()
+		rng.seed = seed_bolt * 7919 + 13
+		var p := Vector2(lerpf(crack_x + 80, size.x - 60, rng.randf()), size.y * 0.08)
+		var pts := PackedVector2Array([p])
+		while p.y < size.y * 0.42:
+			p += Vector2(rng.randf_range(-28, 28), rng.randf_range(14, 30))
+			pts.append(p)
+		draw_polyline(pts, Color(0.6, 0.8, 1.0, flash * 1.4), 7.0)
+		draw_polyline(pts, Color(1, 1, 1, flash * 2.0), 2.5)
+	# Портал Скроллера: трещина дышит светом, вдоль неё поднимаются «цифровые» искры.
+	var pulse := 0.5 + 0.5 * sin(t * 0.06)
+	for i in 5:
+		var w := 26.0 + i * 22.0
+		draw_rect(Rect2(crack_x - w / 2.0, 0, w, size.y * 0.72), Color(0.4, 0.9, 1.0, (0.05 + 0.05 * pulse) / (i + 1)))
+	for i in 26:
+		var life := fmod(t * (0.9 + 0.02 * (i % 7)) + i * 37.0, 420.0) / 420.0
+		var py := size.y * 0.72 * (1.0 - life)
+		var px := crack_x + sin(life * 9.0 + i) * (10.0 + (i % 5) * 6.0)
+		var s := 3.0 + (i % 3)
+		draw_rect(Rect2(px - s / 2.0, py, s, s), Color(0.55, 0.95, 1.0, 0.85 * sin(PI * life)))
+	# Летучие мыши — через тёмную сторону, вороны — через всё небо.
+	if not _bats.is_empty():
+		var bx := fmod(t * 1.6, size.x + 400.0) - 200.0
+		var bt: Texture2D = _bats[(tick / 5) % _bats.size()]
+		var bk := 120.0 / bt.get_height()
+		draw_set_transform(Vector2(size.x - bx, size.y * 0.24 + sin(t * 0.05) * 18.0), 0, Vector2(-bk, bk))
+		draw_texture(bt, -bt.get_size() / 2.0)
+		draw_set_transform(Vector2.ZERO)
+	if not _ravens.is_empty():
+		for i in 2:
+			var rx := fmod(t * (1.1 + 0.3 * i) + i * 700.0, size.x + 300.0) - 150.0
+			var rt: Texture2D = _ravens[(tick / 4 + i * 3) % _ravens.size()]
+			var rk := (34.0 + 10.0 * i) / rt.get_height()
+			draw_set_transform(Vector2(rx, size.y * (0.13 + 0.06 * i) + sin(t * 0.04 + i) * 10.0), 0, Vector2(rk, rk))
+			draw_texture(rt, -rt.get_size() / 2.0)
+			draw_set_transform(Vector2.ZERO)
+	# Живые портреты: свет слева, тьма справа, смотрят друг на друга.
+	_draw_title_hero("ilya", Vector2(size.x * 0.15, size.y), 1.0)
+	_draw_title_hero("dracula", Vector2(size.x * 0.85, size.y), -1.0)
+	# Низ затемнён — на нём название и подсказка.
+	var clear := Color(0, 0, 0, 0)
+	var dark := Color(0, 0, 0, 0.8)
+	var y0 := size.y * 0.62
+	draw_polygon(PackedVector2Array([Vector2(0, y0), Vector2(size.x, y0), size, Vector2(0, size.y)]),
+		PackedColorArray([clear, clear, dark, dark]))
+
+
+## Портрет по пояс на заставке: живой (select_idle — дышит и подмигивает, из видео) или обычный с дыханием.
+func _draw_title_hero(id: String, waist: Vector2, face: float) -> void:
+	if _sprites == null:
+		return
+	var a := _sprites.anim(id, "select_idle")
+	if not a.is_empty():
+		var i: int = (tick / 2) % a.tex.size()
+		draw_set_transform(waist, 0, Vector2(TITLE_PORTRAIT * face, TITLE_PORTRAIT))
+		draw_texture(a.tex[i], -a.pivot[i])
+		draw_set_transform(Vector2.ZERO)
+		return
+	a = _sprites.anim(id, "select")
+	if a.is_empty():
+		return
+	var tex: Texture2D = a.tex[0]
+	var phase := 0.5 - 0.5 * cos(TAU * float(tick) / FighterSprites.BREATH_TICKS)
+	draw_set_transform(waist, 0, Vector2(TITLE_PORTRAIT * face, TITLE_PORTRAIT))
+	FighterSprites.draw_breathing(self, tex, a.pivot[0], Color.WHITE, tex.get_height() * 0.9, phase, 8.0)
+	draw_set_transform(Vector2.ZERO)
 
 
 func _draw_title() -> void:

@@ -87,9 +87,10 @@ static func _scan_character(id: String) -> Dictionary:
 
 
 ## Тяжёлые листы, которые нужны редко: парные сцены и добивания (только против своего соперника),
-## радость после выбора (только в меню) — грузятся при первом обращении.
+## радость после выбора и живой портрет заставки (только в меню) — грузятся при первом обращении.
 static func _deferred(name: String) -> bool:
-	return name.begins_with("pair_") or name.begins_with("finisher_") or name.begins_with("select_win")
+	return name.begins_with("pair_") or name.begins_with("finisher_") or name.begins_with("select_win") \
+		or name == "select_idle"
 
 
 static func _load_anim(id: String, meta: Dictionary) -> Dictionary:

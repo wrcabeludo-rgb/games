@@ -633,5 +633,16 @@
   "align_to": "idle:1",
   "fixed_pivot": true,
   "upscale": true
+ },
+ "select_idle": {
+  "frames": 120,
+  "grid": [
+   10,
+   12
+  ],
+  "fit": 0.768,
+  "fixed_pivot": true,
+  "align_to": "select:1",
+  "upscale": true
  }
 }

@@ -72,17 +72,25 @@ func _test_controls() -> bool:
 
 
 func _test_arcade() -> bool:
+	# Лестница: все открытые герои, кроме себя (заклятый соперник — последним из них), потом Аватар и Скроллер.
+	var open_count := 0
 	for id in MenuView.ROSTER:
+		if id != "":
+			open_count += 1
+	var n := open_count + 1
+	for id in MenuView.ROSTER:
+		if id == "":
+			continue
 		for seed_value in [1, 2, 3]:
 			var run := Arcade.new(id, MenuView.ROSTER, seed_value)
 			var uniq := {}
 			for o in run.ladder:
 				uniq[o] = true
-			if run.ladder.size() != 9 or uniq.size() != 9 or uniq.has(id) or run.ladder[6] != Arcade.RIVALS[id] \
-					or run.ladder[7] != Arcade.AVATAR or run.ladder[8] != Arcade.BOSS:
+			if run.ladder.size() != n or uniq.size() != n or uniq.has(id) or run.ladder[n - 3] != Arcade.RIVALS[id] \
+					or run.ladder[n - 2] != Arcade.AVATAR or run.ladder[n - 1] != Arcade.BOSS:
 				print("  ", id, run.ladder)
 				return false
-			for i in 8:
+			for i in n - 1:
 				if run.advance():
 					return false
 			if not run.is_final() or not run.advance():
@@ -91,7 +99,7 @@ func _test_arcade() -> bool:
 
 
 func _test_endings() -> bool:
-	for id in MenuView.ROSTER:
+	for id in MenuView.ALL_HEROES:
 		var rows: Array = Endings.ENDINGS.get(id, [])
 		if rows.size() < 2:
 			return false
@@ -133,7 +141,7 @@ func _test_arena_choice() -> bool:
 
 
 func _test_quotes_variety() -> bool:
-	var heroes: Array = MenuView.ROSTER
+	var heroes: Array = MenuView.ALL_HEROES
 	for id in heroes + Arcade.FINALS:
 		if Quotes.GENERIC_INTRO.get(id, []).size() < 3 or Quotes.GENERIC_WIN.get(id, []).size() < 3:
 			print("  мало общих реплик: ", id)
