@@ -518,6 +518,12 @@ func finisher_launch(direction: int) -> void:
 	_launch_knockdown([700, 3400], direction)
 
 
+## Добивание «соло»: апперкот из ролика победителя — невысокий подброс, падает на спину и лежит (hp 0 → DOWN).
+func finisher_pop(direction: int) -> void:
+	staggered = 0
+	_launch_knockdown([250, 1300], direction)
+
+
 ## Реакция на удар по месту попадания: по ногам (низкий или хитбокс у земли), в корпус (середина хитбокса ниже
 ## плеч), иначе в голову — лёгкий или сильный (по заморозке).
 func _hit_kind(m: Dictionary) -> int:

@@ -35,6 +35,7 @@ const FINISH_RANGE := 420           # дистанция удара: не дал
 const FINISHER_TICKS := 160         # ролик добивания
 const FINISHER_SCENE_TICKS := 520   # добивание из видео: 104 кадра через один = 8,7 с, как в ролике (звук из ролика совпадает)
 const FINISHER_APPROACH := 14       # перед роликом добивания проигравший отшатывается туда, где он стоит в ролике
+const HITSTOP_FINISH_POP := 10      # заморозка на апперкоте в добивании «соло»
 const ATTACK_MASK := InputBits.LP | InputBits.LK | InputBits.HP | InputBits.HK
 
 ## Поля снаряда (PackedInt32Array): владелец, позиция, скорость, гравитация, размер,
@@ -175,6 +176,10 @@ func step(frame_inputs: PackedInt32Array) -> void:
 		Phase.FINISHER:
 			if finisher_scene(round_winner) and phase_frame < FINISHER_APPROACH:
 				_finisher_approach()
+			elif finisher_solo(round_winner) and phase_frame == FINISHER_APPROACH + int(finisher_entry(round_winner).get("hit", 0)):
+				fighters[1 - round_winner].finisher_pop(fighters[round_winner].facing)
+				hitstop = HITSTOP_FINISH_POP
+				_set_spark(round_winner, fighters[1 - round_winner].x, fighters[1 - round_winner].data.height * SUB * 3 / 4, 1)
 			_combat_step(PackedInt32Array([0, 0]), false)
 			if phase_frame >= finisher_ticks():
 				_set_phase(Phase.MATCH_END)
@@ -596,7 +601,7 @@ func finish_gap() -> int:
 	var dx := absi(fighters[0].x - fighters[1].x)
 	if finisher_scene(round_winner):
 		var a := fighters[round_winner]
-		var dist: int = int(a.data.finishers[fighters[1 - round_winner].id].dist)
+		var dist: int = int(finisher_entry(round_winner).dist)
 		if dx > (dist + FINISH_TOL) * SUB:
 			return 1
 		return -1 if dx < (dist - FINISH_TOL) * SUB else 0
@@ -664,14 +669,26 @@ func _start_finisher(w: int) -> void:
 func _finisher_approach() -> void:
 	var a := fighters[round_winner]
 	var d := fighters[1 - round_winner]
-	var dist: int = int(a.data.finishers[d.id].dist)
+	var dist: int = int(finisher_entry(round_winner).dist)
 	var target := clampi(a.x + a.facing * dist * SUB, d.push_half(), ARENA_WIDTH * SUB - d.push_half())
 	d.x += (target - d.x) / (FINISHER_APPROACH - phase_frame)
 
 
 ## У победителя w есть добивание-ролик против этого соперника (finishers в данных бойца).
 func finisher_scene(w: int) -> bool:
-	return w >= 0 and w <= 1 and fighters[w].data.get("finishers", {}).has(fighters[1 - w].id)
+	return w >= 0 and w <= 1 and not finisher_entry(w).is_empty()
+
+
+## Данные добивания победителя w: своё против соперника или общее "*" — ролик «соло» без соперника
+## (Gemini отказывается снимать Геракла с соперником): соперника рисует игра, на тике "hit" он падает.
+func finisher_entry(w: int) -> Dictionary:
+	var fin: Dictionary = fighters[w].data.get("finishers", {})
+	return fin.get(fighters[1 - w].id, fin.get("*", {}))
+
+
+## Добивание «соло»: проигравшего рисует игра, а не ролик.
+func finisher_solo(w: int) -> bool:
+	return finisher_scene(w) and int(finisher_entry(w).get("solo", 0)) != 0
 
 
 ## Длительность добивания: ролик из видео или заглушка.

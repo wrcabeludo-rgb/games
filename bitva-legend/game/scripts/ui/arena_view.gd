@@ -509,7 +509,7 @@ func _draw_finisher_scene() -> bool:
 		return false
 	var a: Fighter = _sim.fighters[w]
 	var d: Fighter = _sim.fighters[1 - w]
-	var anim := sprites.anim(a.id, "finisher_" + d.id)
+	var anim := sprites.anim(a.id, "finisher_solo" if _sim.finisher_solo(w) else "finisher_" + d.id)
 	if anim.is_empty():
 		return false
 	var n: int = anim.tex.size()
@@ -520,8 +520,11 @@ func _draw_finisher_scene() -> bool:
 		i = clampi((_sim.phase_frame - Sim.FINISHER_APPROACH) * n / Sim.FINISHER_SCENE_TICKS, 0, n - 1)
 	var k := FighterSprites.SCALE / sprites.res(a.id)
 	# Победитель в ролике — там, где он стоит в бою (центр его фигуры на 1-м кадре — finishers.from).
-	var from := float(a.data.finishers[d.id].from) * k
+	var from := float(_sim.finisher_entry(w).from) * k
 	var base := to_screen(float(a.x) / Sim.SUB - a.facing * from, 0.0)
+	if _sim.finisher_solo(w):
+		_draw_shadow(d)  # «соло»: проигравший — обычными кадрами (оглушён, падает от апперкота, лежит)
+		_draw_fighter(d)
 	_draw_scene_shadows(anim.tex[i], anim.pivot[i], base, k * a.facing, k)
 	draw_set_transform(base, 0, Vector2(k * a.facing, k))
 	draw_texture(anim.tex[i], -anim.pivot[i])

@@ -52,3 +52,18 @@ Edit task. Image 1 is the approved model sheet of HERCULES, image 2 is his appro
 NEGATIVE PROMPT:
 side view, profile, back view, full body, legs, feet, floor, cast shadow, extra arms, extra hands, weapon, club, redesign, different face, hair on the head, black hair, bulky bodybuilder, anime style, pink, magenta or purple on the character, gradient background, text, letters, watermark, frame, border, blur, photo, 3D render
 ```
+
+## O. Добивание «нокаут и счёт» (`finisher_ilya|dracula|koschei`) — стартовые `finisher_hercules_<соперник>_start.png`
+Gemini — короткий связный текст; {OPP} — описание соперника.
+```
+Animate this 2D fighting game finisher in strict side view as flat 2D cartoon characters that never turn toward the camera; both keep exactly the same design, colors, size and drawing style. The tall lean ancient Greek boxer in a lion pelt on the left is the winner; the {OPP} on the right is beaten and dizzy, swaying on his feet. 0-2 s: the boxer steps in and knocks him out with one huge uppercut; the {OPP2} flies up a little and falls flat on his back on the grey floor, knocked out, with little stars circling over his head. 2-8 s: the boxer kneels beside him like a referee and counts loudly on his fingers, raising one finger after another, one to ten, swinging his arm down with each count. 8-10 s: he stands up, raises his own fist high above his head in victory and grins. Funny cartoon slapstick, no blood, no injuries. Static camera, no zoom, no pan; both stay the same size, everyone stays on the grey floor strip. Exactly two arms each. The background above the floor stays flat solid magenta the whole time. Sound: a punch, a heavy thud, counting voice like a referee and a cheer, no music.
+```
+Илья: {OPP} = bearded bogatyr warrior in chainmail with a spiked mace, {OPP2} = warrior. Дракула: {OPP} = pale vampire count
+in a black-and-red cape, {OPP2} = vampire. Кощей: {OPP} = old bony sorcerer-king with a gold crown, {OPP2} = old king.
+
+## P. Добивание «соло» (`finisher_solo`, на всех соперников) — стартовая `hercules_stance_start.png`
+Gemini отказал во всех парных добиваниях Геракла («интересы правообладателей»), поэтому ролик без соперника: соперника
+рисует игра (`finishers["*"]` с `solo`, на тике `hit` он подлетает от апперкота и ложится).
+```
+Animate this 2D fighting game character in strict side view as a flat 2D cartoon character that never turns toward the camera, always facing right, with exactly the same design, colors, size and drawing style. He is a tall lean ancient Greek boxer in a lion pelt. There is no opponent; he acts in place on the spot. 0-1.5 s: boxer's guard. 1.5-3 s: he steps forward and throws one huge uppercut into the empty air in front of him, then looks down at the floor in front of him. 3-8 s: he kneels on one knee and, looking down at the floor in front of him, counts loudly like a boxing referee, raising one finger after another from one to ten and swinging his arm down with each count. 8-10 s: he stands up, raises his own fist high above his head in victory and grins at the floor in front of him. Static camera, no zoom, no pan; he keeps the same size and stays on the grey floor strip. Exactly two arms and two legs. The background above the floor stays flat solid magenta the whole time. Sound: a whoosh, counting voice and a happy laugh, no music.
+```

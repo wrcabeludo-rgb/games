@@ -193,7 +193,8 @@ func prefetch(ids: PackedStringArray) -> void:
 ## Парные сцены и добивание бойца id против этого соперника (грузятся, когда они впервые встретились).
 func _ensure_pairs(id: String, foe_id: String) -> void:
 	for name in _meta.get(id, {}):
-		if (name.begins_with("pair_") or name.begins_with("finisher_")) and String(name).ends_with("_" + foe_id):
+		if (name.begins_with("pair_") or name.begins_with("finisher_")) and String(name).ends_with("_" + foe_id) \
+				or name == "finisher_solo":  # добивание «соло» — одно на всех соперников
 			_one(id, name)
 
 

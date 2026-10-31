@@ -171,7 +171,8 @@ func update(sim: Sim, vs_ai: bool) -> void:
 			and sim.finisher_scene(sim.round_winner):
 		# Добивание из видео: звук всего ролика (удары, «Фу, чеснок!»), идёт вровень с кадрами.
 		var w := sim.round_winner
-		play("%s_finisher_%s" % [sim.fighters[w].id, sim.fighters[1 - w].id], 1.0, -3.0)
+		var foe := "solo" if sim.finisher_solo(w) else sim.fighters[1 - w].id
+		play("%s_finisher_%s" % [sim.fighters[w].id, foe], 1.0, -3.0)
 	for p in 2:
 		var t := sim.sparks[p * 4]
 		if t != _last_spark[p]:

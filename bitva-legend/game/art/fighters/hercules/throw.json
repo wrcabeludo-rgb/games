@@ -1,0 +1,425 @@
+{
+ "frames": [
+  {
+   "file": "throw_1.png",
+   "pivot": [
+    157,
+    603
+   ],
+   "size": [
+    329,
+    605
+   ]
+  },
+  {
+   "file": "throw_2.png",
+   "pivot": [
+    162,
+    605
+   ],
+   "size": [
+    358,
+    607
+   ]
+  },
+  {
+   "file": "throw_3.png",
+   "pivot": [
+    174,
+    601
+   ],
+   "size": [
+    387,
+    603
+   ]
+  },
+  {
+   "file": "throw_4.png",
+   "pivot": [
+    184,
+    591
+   ],
+   "size": [
+    400,
+    593
+   ]
+  },
+  {
+   "file": "throw_5.png",
+   "pivot": [
+    191,
+    576
+   ],
+   "size": [
+    453,
+    577
+   ]
+  },
+  {
+   "file": "throw_6.png",
+   "pivot": [
+    194,
+    554
+   ],
+   "size": [
+    506,
+    555
+   ]
+  },
+  {
+   "file": "throw_7.png",
+   "pivot": [
+    194,
+    522
+   ],
+   "size": [
+    544,
+    518
+   ]
+  },
+  {
+   "file": "throw_8.png",
+   "pivot": [
+    199,
+    488
+   ],
+   "size": [
+    571,
+    480
+   ]
+  },
+  {
+   "file": "throw_9.png",
+   "pivot": [
+    216,
+    462
+   ],
+   "size": [
+    581,
+    454
+   ]
+  },
+  {
+   "file": "throw_10.png",
+   "pivot": [
+    228,
+    447
+   ],
+   "size": [
+    566,
+    441
+   ]
+  },
+  {
+   "file": "throw_11.png",
+   "pivot": [
+    231,
+    435
+   ],
+   "size": [
+    542,
+    429
+   ]
+  },
+  {
+   "file": "throw_12.png",
+   "pivot": [
+    233,
+    429
+   ],
+   "size": [
+    539,
+    423
+   ]
+  },
+  {
+   "file": "throw_13.png",
+   "pivot": [
+    233,
+    427
+   ],
+   "size": [
+    541,
+    421
+   ]
+  },
+  {
+   "file": "throw_14.png",
+   "pivot": [
+    233,
+    430
+   ],
+   "size": [
+    540,
+    424
+   ]
+  },
+  {
+   "file": "throw_15.png",
+   "pivot": [
+    228,
+    439
+   ],
+   "size": [
+    534,
+    432
+   ]
+  },
+  {
+   "file": "throw_16.png",
+   "pivot": [
+    223,
+    449
+   ],
+   "size": [
+    523,
+    441
+   ]
+  },
+  {
+   "file": "throw_17.png",
+   "pivot": [
+    199,
+    469
+   ],
+   "size": [
+    486,
+    459
+   ]
+  },
+  {
+   "file": "throw_18.png",
+   "pivot": [
+    160,
+    508
+   ],
+   "size": [
+    419,
+    498
+   ]
+  },
+  {
+   "file": "throw_19.png",
+   "pivot": [
+    142,
+    554
+   ],
+   "size": [
+    360,
+    549
+   ]
+  },
+  {
+   "file": "throw_20.png",
+   "pivot": [
+    144,
+    586
+   ],
+   "size": [
+    327,
+    588
+   ]
+  },
+  {
+   "file": "throw_21.png",
+   "pivot": [
+    141,
+    604
+   ],
+   "size": [
+    344,
+    606
+   ]
+  },
+  {
+   "file": "throw_22.png",
+   "pivot": [
+    135,
+    613
+   ],
+   "size": [
+    350,
+    615
+   ]
+  },
+  {
+   "file": "throw_23.png",
+   "pivot": [
+    130,
+    618
+   ],
+   "size": [
+    311,
+    620
+   ]
+  },
+  {
+   "file": "throw_24.png",
+   "pivot": [
+    152,
+    619
+   ],
+   "size": [
+    314,
+    621
+   ]
+  },
+  {
+   "file": "throw_25.png",
+   "pivot": [
+    157,
+    617
+   ],
+   "size": [
+    319,
+    619
+   ]
+  },
+  {
+   "file": "throw_26.png",
+   "pivot": [
+    157,
+    613
+   ],
+   "size": [
+    319,
+    615
+   ]
+  },
+  {
+   "file": "throw_27.png",
+   "pivot": [
+    155,
+    611
+   ],
+   "size": [
+    317,
+    613
+   ]
+  },
+  {
+   "file": "throw_28.png",
+   "pivot": [
+    155,
+    611
+   ],
+   "size": [
+    317,
+    613
+   ]
+  },
+  {
+   "file": "throw_29.png",
+   "pivot": [
+    155,
+    611
+   ],
+   "size": [
+    317,
+    613
+   ]
+  },
+  {
+   "file": "throw_30.png",
+   "pivot": [
+    152,
+    611
+   ],
+   "size": [
+    314,
+    613
+   ]
+  },
+  {
+   "file": "throw_31.png",
+   "pivot": [
+    152,
+    611
+   ],
+   "size": [
+    314,
+    613
+   ]
+  },
+  {
+   "file": "throw_32.png",
+   "pivot": [
+    152,
+    613
+   ],
+   "size": [
+    314,
+    615
+   ]
+  },
+  {
+   "file": "throw_33.png",
+   "pivot": [
+    150,
+    611
+   ],
+   "size": [
+    312,
+    613
+   ]
+  },
+  {
+   "file": "throw_34.png",
+   "pivot": [
+    150,
+    613
+   ],
+   "size": [
+    312,
+    615
+   ]
+  },
+  {
+   "file": "throw_35.png",
+   "pivot": [
+    137,
+    613
+   ],
+   "size": [
+    299,
+    615
+   ]
+  },
+  {
+   "file": "throw_36.png",
+   "pivot": [
+    116,
+    612
+   ],
+   "size": [
+    278,
+    614
+   ]
+  },
+  {
+   "file": "throw_37.png",
+   "pivot": [
+    113,
+    611
+   ],
+   "size": [
+    282,
+    613
+   ]
+  },
+  {
+   "file": "throw_38.png",
+   "pivot": [
+    114,
+    608
+   ],
+   "size": [
+    283,
+    610
+   ]
+  }
+ ],
+ "hit": 8,
+ "hit_end": 8,
+ "release": 17
+}

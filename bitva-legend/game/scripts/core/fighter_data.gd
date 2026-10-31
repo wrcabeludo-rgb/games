@@ -262,6 +262,7 @@ const CHARACTERS := {
 		"backdash_v0": 1200,
 		"backdash_decel": 70,
 		"backdash_recovery": 6,
+		"finishers": {"*": {"from": 0, "dist": 230, "solo": 1, "hit": 95}},
 		"strings": [
 			{"name": "Немейский лев", "moves": ["st_lp", "st_lp", "st_hk"]},
 			{"name": "Дубина", "moves": ["st_lk", "st_hp"]},

@@ -413,5 +413,68 @@
   "hit": 1,
   "hit_end": 1,
   "release": 77
+ },
+ "throw": {
+  "fixed_pivot": true,
+  "align_to": "idle:1",
+  "drop_ref": true,
+  "fit": 0.612,
+  "upscale": true,
+  "frames": 39,
+  "grid": [
+   8,
+   5
+  ],
+  "hit": 8,
+  "hit_end": 8,
+  "release": 17
+ },
+ "sp_bb_l": {
+  "fixed_pivot": true,
+  "align_to": "idle:1",
+  "drop_ref": true,
+  "fit": 0.612,
+  "upscale": true,
+  "frames": 56,
+  "grid": [
+   8,
+   7
+  ],
+  "hit": 6,
+  "hit_end": 6,
+  "release": 48
+ },
+ "select_win": {
+  "frames": 60,
+  "grid": [
+   10,
+   6
+  ],
+  "fit": 0.631,
+  "fixed_pivot": true,
+  "align_to": "select:1",
+  "upscale": true
+ },
+ "select_win_b": {
+  "frames": 60,
+  "grid": [
+   10,
+   6
+  ],
+  "fit": 0.631,
+  "fixed_pivot": true,
+  "align_to": "select:1",
+  "upscale": true
+ },
+ "finisher_solo": {
+  "frames": 120,
+  "grid": [
+   10,
+   12
+  ],
+  "fit": 0.612,
+  "align_to": "idle:1",
+  "fixed_pivot": true,
+  "upscale": true
  }
 }
