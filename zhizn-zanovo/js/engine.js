@@ -2,9 +2,12 @@
 (function () {
   'use strict';
   var Z = window.Z = window.Z || {};
-  Z.VERSION = '0.4.0';
+  Z.VERSION = '0.5.0';
   Z.EV = {};
   Z.evList = [];
+  // Крючки: после выбора (s, e, choice, ctx, inst, done) и после сборки хода (s, turn)
+  Z.onApply = [];
+  Z.onTurn = [];
 
   // Регистрация событий. once — по умолчанию одноразовое; rep: N — повторяется не чаще раза в N месяцев.
   Z.def = function (list) {
@@ -65,8 +68,9 @@
   };
   // Путь к картинке: сначала картинка темы в стиле возраста, иначе обложка периода. Z.ART — список готовых файлов (js/data/art.js).
   Z.artFor = function (s, id) {
-    var st = Z.styleFor(s).id, A = (Z.ART || {})[st] || {};
-    return A[Z.themeOf(id)] || A.stage || null;
+    var st = Z.styleFor(s).id, A = (Z.ART || {})[st] || {}, a = Z.age(s);
+    var stage = (a >= 90 && A.stage_90) || (a >= 80 && A.stage_80) || A.stage;
+    return A[Z.themeOf(id)] || stage || null;
   };
 
   // ---------- Склонение имён (эвристика для русских имён) ----------
@@ -168,6 +172,8 @@
     s.pgap = { mom: 25 + R.int(0, 4), dad: 27 + R.int(0, 4) };
     s.pdeath = { mom: R.int(85, 97), dad: R.int(82, 94) };
     s.wifeEnd = R.int(80, 97);
+    s.id = Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36);
+    s.opt = { stranger: setup.stranger !== false, sound: true };
     s.queue.push({ id: 'y_start', at: 0 });
     return s;
   };
@@ -236,6 +242,7 @@
       }
       if ((m = tok.match(/^fit\.(\w+)([+-]\d+)$/))) { s.fit[m[1]] = clamp((s.fit[m[1]] || 0) + Number(m[2]), 0, 100); return; }
       if ((m = tok.match(/^hobby\.(\w+)([+-]\d+)$/))) { (Z.HOBBY[m[1]].jobs).forEach(function (j) { s.fit[j] = clamp((s.fit[j] || 0) + Number(m[2]), 0, 100); }); s.f['h_' + m[1]] = true; return; }
+      if ((m = tok.match(/^mem:(\w+)(?::(\w+))?$/))) { Z.remember(s, m[1], m[2] || null, ctx); return; }
       if ((m = tok.match(/^met:(\w+)$/))) { Z.meet(s, Z.relId(s, ctx, m[1]), 15); return; }
       if ((m = tok.match(/^>(\w+)(?:@(\d+)(?:-(\d+))?)?$/))) {
         var a = m[2] ? Number(m[2]) : 1, b = m[3] ? Number(m[3]) : a;
@@ -264,6 +271,7 @@
     if (s.f.mortgage) v -= 8;
     if (s.f.debt) v -= 12;
     if (s.f.savings) v += 4;
+    if (s.f.abroad && s.job) v += 10;
     return clamp(v, 2, 100);
   };
   Z.joyBase = function (s) {
@@ -277,7 +285,7 @@
     Z.kids(s).forEach(function (k) { b += 2 + (k.rel - 50) * 0.06; });
     if (s.job && !s.student) {
       var J = Z.JOBS[s.job]; b += Math.min(40, s.fit[s.job] || 0) * 0.3 - J.stress * 0.5 + s.lvl;
-    } else if (!s.student && a > 23 && !s.f.retired) b -= 10;
+    } else if (!s.student && a > 23 && !s.f.retired && !s.f.inarmy) b -= 10;
     b += (s.st.hp - 60) * 0.15 + (s.st.money - 35) * 0.12;
     if (s.f.hobby) b += 4;
     if (s.focus.indexOf('self') >= 0) b += 3;
@@ -319,7 +327,7 @@
     Object.keys(s.pp).forEach(function (id) {
       var p = s.pp[id]; if (!p.alive || !p.met) return;
       var d = 0;
-      if (p.kind === 'parent') d = has('parents') ? 1.2 : -0.22;
+      if (p.kind === 'parent') d = (has('parents') ? 1.2 : -0.22) - (f.abroad ? 0.15 : 0);
       else if (p.kind === 'kid') d = has('love') ? 1.0 : (has('work') ? -0.5 : -0.3);
       else if (p.kind === 'friend') {
         var close = Z.isClose(s, id);
@@ -349,6 +357,8 @@
     if (e.once && s.seen[k] != null) return false;
     if (e.rep && s.seen[k] != null && s.m - s.seen[k] < e.rep) return false;
     if (e.gray && !Z.gray(s)) return false;
+    if (s.f.inarmy && !e.army && !e.prio && !e.manual && Z.ARMY_OK.indexOf(e.id) < 0) return false;
+    if (e.army && !s.f.inarmy) return false;
     if (e.if && !e.if(s, ctx || {})) return false;
     return true;
   };
@@ -478,6 +488,7 @@
     if (quietFrom != null && quietFrom < s.m) t.notes.push(Z.quietNote(s, quietFrom, s.m - 1));
     t.to = s.m; t.span = s.lastStep || 1;
     s.turn = t;
+    if (!s.over) Z.onTurn.forEach(function (fn) { fn(s, t); });
     return t;
   };
 
@@ -551,6 +562,7 @@
     var r = {}; Object.keys(s.pp).forEach(function (id) { var p = s.pp[id]; if (p.met && p.alive) r[id] = p.rel; });
     return { st: JSON.parse(JSON.stringify(s.st)), r: r };
   };
+  Z.ARMY_OK = ['pa_call', 'p_romance', 'f_invite'];
   Z.STAT_N = { hp: 'Здоровье', joy: 'Счастье', money: 'Достаток', sk: 'Мастерство' };
   Z.diff = function (s, a) {
     var out = [];
@@ -566,8 +578,9 @@
   // Применить выбор
   Z.apply = function (s, ci, input) {
     var t = s.turn, inst = t.q[t.i], e = Z.EV[inst.id], ctx = inst.ctx || {};
-    var c = Z.view(s, inst).choices[ci];
+    var V0 = Z.view(s, inst), c = V0.choices[ci];
     if (!c) c = { t: 'Дальше', res: '' };
+    inst.opts = V0.choices.map(function (x) { return Z.t(x.t, s, ctx); });
     s.seen[Z.key(e, ctx)] = s.m;
     var snap = Z.snapshot(s);
     if (c.fx) Z.fx(s, c.fx, ctx);
@@ -577,6 +590,7 @@
     if (c.go) t.q.splice(t.i + 1, 0, { id: c.go, ctx: ctx });
     Z.checkEnd(s);
     inst.done = { res: res, d: Z.diff(s, snap), ci: ci };
+    Z.onApply.forEach(function (fn) { fn(s, e, c, ctx, inst, inst.done); });
     return inst.done;
   };
 
@@ -585,7 +599,8 @@
     var t = s.turn; t.i++;
     while (t.i < t.q.length) {
       var inst = t.q[t.i], e = Z.EV[inst.id];
-      if (!e.if || e.if(s, inst.ctx || {})) break;
+      var armyBlock = s.f.inarmy && !e.army && !e.prio && !e.manual && Z.ARMY_OK.indexOf(e.id) < 0;
+      if (!armyBlock && (!e.if || e.if(s, inst.ctx || {}))) break;
       t.i++;
     }
     return t.i < t.q.length;

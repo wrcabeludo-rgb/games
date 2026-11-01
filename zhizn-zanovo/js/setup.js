@@ -29,6 +29,8 @@
       o: function () { return Object.keys(Z.JOBS).filter(function (id) { return id !== 'biz'; }).map(function (id) { return [id, Z.cap(Z.JOBS[id].n)]; }).concat([['biz', 'Предприниматель'], ['other', 'Другое']]); } },
     { k: 'regrets', type: 'multi', q: 'Что бы ты хотел изменить?', hint: 'Выбери до трёх. В конце игра покажет, получилось ли.', max: 3,
       o: function () { return Object.keys(Z.REGRETS).map(function (k) { return [k, Z.REGRETS[k]]; }); } },
+    { k: 'valuesSel', type: 'multi', q: 'Что для тебя важнее всего в жизни?', hint: 'Выбери три. Это не цели, а компас: в конце игра покажет, насколько твоя новая жизнь совпала с тем, что тебе важно.', max: 3, min: 3,
+      o: function () { return Object.keys(Z.VALUES).map(function (k) { return [k, Z.VALUES[k].n + ' — ' + Z.VALUES[k].d]; }); } },
     { k: 'tempo', type: 'one', q: 'Как подробно проживать жизнь?', hint: 'Можно поменять потом в меню.', o: [['slow', 'Подробно — много событий'], ['normal', 'Обычно'], ['fast', 'Быстро — только главное']] }
   ];
   Z.setupSteps = function (su) { return Z.SETUP.filter(function (st) { return !st.show || st.show(su); }); };

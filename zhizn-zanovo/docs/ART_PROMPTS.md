@@ -21,7 +21,7 @@
 Готовые картинки кладём в `art/<стиль>/<тема>.webp` (1200×800) и вписываем в `js/data/art.js`.
 Темы (`Z.themeOf`): `stage` (обложка периода), `parents`, `friends`, `love`, `family`, `work`, `youth`, `gray`, `old`, `life`.
 
-## Партия 1: обложки периодов (6 картинок)
+## Партия 1: обложки десятилетий (8 картинок — тест стиля)
 
 ### 1. 18–29 · цветные карандаши → `art/pencils/stage.webp`
 ```
@@ -53,10 +53,22 @@ Delicate watercolor painting in soft pastel tones (powder blue, lavender, peach,
 Negative: photorealism, 3D render, saturated colors, heavy dark tones, oil paint, markers, anime, text, letters, watermark, signature, frame, border, logos, detailed faces.
 ```
 
-### 6. 70–100 · простой карандаш → `art/graphite/stage.webp`
+### 6. 70–79 · простой карандаш → `art/graphite/stage.webp`
 ```
-Drawing with a single graphite pencil on clean white paper: clear, simple, beautiful confident lines, economical contour drawing with only light delicate shading, a lot of empty white space, elegant like a master's sketch. Monochrome grey only. Scene: an old man of about 85 with white hair, seen from behind, sits in an armchair by a large window, the same kind of window as in a student dormitory; on his knees he holds an old photograph of a group of young students laughing. On the windowsill: a pair of glasses, a cup, a small potted plant; outside the window — the bare outline of a tree and a few birds. Mood: the circle closes, peace, gratitude for two lives. Horizontal composition 3:2. No text, no letters, no logos, no visible face details.
+Drawing with a single graphite pencil on clean white paper: clear, simple, beautiful confident lines, economical contour drawing with only light delicate shading, a lot of empty white space, elegant like a master's sketch. Monochrome grey only. Scene: an old man of about 75 with white hair, seen from behind, sits in an armchair by a large window, the same kind of window as in a student dormitory; on his knees he holds an old photograph of a group of young students laughing. On the windowsill: a pair of glasses, a cup, a small potted plant; outside the window — the bare outline of a tree and a few birds. Mood: the circle closes, peace, gratitude for two lives. Horizontal composition 3:2. No text, no letters, no logos, no visible face details.
 Negative: color, colored pencils, ink wash, heavy dark shading, smudged charcoal, photorealism, 3D render, anime, text, letters, watermark, signature, frame, border, logos, detailed faces.
+```
+
+### 7. 80–89 · простой карандаш → `art/graphite/stage_80.webp`
+```
+Drawing with a single graphite pencil on clean white paper: clear, simple, beautiful confident lines, economical contour drawing with only light delicate shading, a lot of empty white space, elegant like a master's sketch. Monochrome grey only. Scene: an old man of about 85 with thin white hair, seen from behind and slightly to the side, sits at a small kitchen table by the window writing by hand in a thick notebook; next to him a stack of old letters tied with string, a teapot, a pair of glasses, a sleeping cat curled on the chair beside him. Through the window — a quiet courtyard with a bench and a lamp post. Mood: remembering, writing down two lives so that someone will read them one day. Horizontal composition 3:2. No text or readable writing in the notebook, no letters, no logos, no visible face details.
+Negative: color, colored pencils, ink wash, heavy dark shading, smudged charcoal, photorealism, 3D render, anime, readable text, letters, watermark, signature, frame, border, logos, detailed faces.
+```
+
+### 8. 90–100 · простой карандаш → `art/graphite/stage_90.webp`
+```
+Drawing with a single graphite pencil on clean white paper: clear, simple, beautiful confident lines, economical contour drawing with only light delicate shading, a lot of empty white space, elegant like a master's sketch. Monochrome grey only. Scene: a very old man of about 95 with a walking stick, seen from behind, stands at dawn on the wooden porch of a small house and looks at a large old apple tree in blossom that he planted long ago; petals drift in the air, a few birds fly over the low hills on the horizon, the first light of the sun just touches the treetops. Mood: serenity, a whole century behind, nothing left unsaid. Horizontal composition 3:2. No text, no letters, no logos, no visible face details.
+Negative: color, colored pencils, ink wash, heavy dark shading, smudged charcoal, photorealism, 3D render, anime, text, letters, watermark, signature, frame, border, logos, detailed faces, gloomy mood.
 ```
 
 ## Партия 2 (потом): темы в каждом стиле

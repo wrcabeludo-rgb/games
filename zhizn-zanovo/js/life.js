@@ -59,7 +59,7 @@
     return p;
   };
   Z.kidsAged = function (s, a, b) {
-    return Z.kids(s).filter(function (k) { var x = Z.kidAge(s, k); return x >= a && x < b; }).map(function (k) { return { K: k.id }; });
+    return Z.kids(s).filter(function (k) { var x = Z.kidAge(s, k); return x >= a && x < b && (!k.away || k.rel >= 40); }).map(function (k) { return { K: k.id }; });
   };
 
   // ---------- Работа ----------

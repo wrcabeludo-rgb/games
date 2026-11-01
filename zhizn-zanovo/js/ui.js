@@ -26,9 +26,12 @@
       '<p class="tag">Ты просыпаешься в восемнадцать. Родители живы. Всё ещё впереди.<br>Что ты сделаешь иначе?</p>' +
       (saved && !saved.over ? '<button class="btn primary" id="cont">Продолжить жизнь<small>' + esc(saved.setup.name) + ', ' + Z.ageInt(saved) + ' ' + Z.plural(Z.ageInt(saved), 'год', 'года', 'лет') + '</small></button>' : '') +
       '<button class="btn ' + (saved && !saved.over ? '' : 'primary') + '" id="new">Новая жизнь</button>' +
+      (Z.album().length ? '<button class="btn" id="alb">Альбом жизней · ' + Z.album().length + '</button>' : '') +
       '<p class="fine">Версия ' + Z.VERSION + '</p>' +
       '<p class="fine">Это игра о втором шансе. Она не заменяет помощь специалиста — но может помочь задуматься о главном.</p>' +
       '</div>';
+    if (h('#alb')) h('#alb').onclick = albumScreen;
+    Z.Sound.set(false);
     if (h('#cont')) h('#cont').onclick = function () { S = saved; migrate(S); view = 'life'; render(); };
     h('#new').onclick = function () {
       if (saved && !saved.over && !confirm('Начать новую жизнь? Текущая будет стёрта.')) return;
@@ -40,6 +43,9 @@
     // сохранения версии 0.1: карьерный трек и мастерство по профессиям
     if (!s.career) { s.career = []; (s.jobsHad || []).forEach(function (j) { if (Z.JOBS[j]) s.career.push({ j: j, from: s.m, to: s.m, lvl: 0 }); }); if (s.job) s.career.push({ j: s.job, from: s.m - (s.jobM || 0), to: null, lvl: s.lvl }); }
     if (!s.xp) s.xp = {}; if (!s.vu) s.vu = {};
+    if (!s.opt) s.opt = { stranger: true, sound: true };
+    if (!s.setup.values) s.setup.values = [];
+    if (!s.id) s.id = Date.now().toString(36);
   }
 
   // ---------- Анкета ----------
@@ -55,10 +61,10 @@
     } else {
       var opts = Z.stepOpts(st, su);
       html += '<div class="opts' + (st.grid ? ' grid' : '') + '">' + opts.map(function (o, i) {
-        var on = st.type === 'multi' ? !!su.regrets[o[0]] : su[st.k] === o[0];
+        var on = st.type === 'multi' ? !!(su[st.k] || {})[o[0]] : su[st.k] === o[0];
         return '<button class="opt' + (on ? ' on' : '') + '" data-i="' + i + '">' + esc(o[1]) + '</button>';
       }).join('') + '</div>';
-      if (st.type === 'multi') html += '<button class="btn primary" id="tn">Дальше</button>';
+      if (st.type === 'multi') { var cnt = Object.keys(su[st.k] || {}).length; html += '<button class="btn primary" id="tn"' + (st.min && cnt < st.min ? ' disabled' : '') + '>' + (st.min && cnt < st.min ? 'Выбери ещё ' + (st.min - cnt) : 'Дальше') + '</button>'; }
     }
     if (stepI > 0) html += '<button class="btn ghost" id="back">← Назад</button>';
     html += '</div>';
@@ -75,8 +81,9 @@
         b.onclick = function () {
           var v = opts2[+b.dataset.i][0];
           if (st.type === 'multi') {
-            if (su.regrets[v]) delete su.regrets[v];
-            else if (Object.keys(su.regrets).length < st.max) su.regrets[v] = true;
+            var box = su[st.k] = su[st.k] || {};
+            if (box[v]) delete box[v];
+            else if (Object.keys(box).length < st.max) box[v] = true;
             setupScreen(); return;
           }
           su[st.k] = v; stepI++; setupScreen();
@@ -97,6 +104,7 @@
     scrollTop();
     h('#go').onclick = function () {
       if (su.job === 'other') su.job = null;
+      su.values = Object.keys(su.valuesSel || {});
       S = Z.newLife(su); S.tempo = su.tempo || 'normal';
       app.innerHTML = '<div class="fade-black"></div>';
       setTimeout(function () { Z.newTurn(S); save(); view = 'life'; render(); }, 1200);
@@ -142,11 +150,14 @@
     var html = '';
     t.notes.forEach(function (n) {
       if (typeof n === 'string') html += '<div class="note">' + esc(n) + '</div>';
+      else if (n.news) html += '<div class="note news"><b>Тем временем</b>' + esc(n.t.replace(/^Тем временем: /, '')) + '</div>';
+      else if (n.era) html += '<div class="note era">' + esc(n.t) + '</div>';
       else html += '<div class="note gray">' + esc(n.t) + '</div>';
     });
     // уже прожитые карточки этого хода — свернуты
     for (var i = 0; i < t.i; i++) {
       var d = t.q[i]; if (!d.done) continue;
+      if (Z.EV[d.id].chapter || Z.EV[d.id].pause) continue;
       html += '<div class="past"><b>' + esc(Z.view(S, d).title) + '</b> — ' + esc(d.done.res.split('\n')[0]) + '</div>';
     }
     var inst = t.q[t.i];
@@ -158,17 +169,20 @@
     var V = Z.view(S, inst), e = V.e, ctx = V.ctx;
     save();
     var art = Z.artFor(S, inst.id);
-    html += '<article class="card">' + (art ? '<img class="illus" src="' + art + '" alt="" loading="lazy">' : '') + (V.title ? '<h3>' + esc(V.title) + '</h3>' : '') + paras(V.text);
+    var cls = e.map ? ' chapend' : e.chapter ? ' chapter' : e.pause ? ' pause' : inst.id === 'stranger' || inst.id === 'stranger_reveal' ? ' stranger' : '';
+    html += '<article class="card' + cls + '">' + (art && !e.chapter && !e.pause ? '<img class="illus" src="' + art + '" alt="" loading="lazy">' : '') + (V.title ? '<h3>' + esc(V.title) + '</h3>' : '') + paras(V.text);
+    if (e.map) html += mapHtml(S, ctx.C);
     if (!inst.done) {
       if (e.ask) {
         var a = e.ask(S, ctx); inst.ph = inst.ph || a.ph;
-        html += '<label class="ask">' + esc(a.label) + '<input class="inp" id="askv" maxlength="20" placeholder="' + esc(inst.ph) + '"></label>';
+        if (a.multi) html += '<textarea class="inp area" id="askv" maxlength="600" rows="4" placeholder="' + esc(a.ph) + '"></textarea>';
+        else html += '<label class="ask">' + esc(a.label) + '<input class="inp" id="askv" maxlength="20" placeholder="' + esc(inst.ph) + '"></label>';
       }
       html += '<div class="choices">' + V.choices.map(function (c, i) {
         return '<button class="choice" data-i="' + i + '">' + esc(Z.t(c.t, S, ctx)) + '</button>';
       }).join('') + '</div>';
     } else {
-      html += '<div class="result">' + paras(inst.done.res) + '</div>';
+      if (inst.done.res) html += '<div class="result">' + paras(inst.done.res) + '</div>';
       if (inst.done.d.length) html += '<div class="deltas">' + inst.done.d.map(function (x) {
         return '<span class="' + (x.d > 0 ? 'up' : 'down') + '">' + (x.rel ? '♥ ' : '') + esc(x.n) + ' ' + (x.d > 0 ? '+' : '−') + Math.abs(x.d) + '</span>';
       }).join('') + '</div>';
@@ -213,12 +227,62 @@
     requestAnimationFrame(frame);
   }
 
+  function sound() { if (S) Z.Sound.set(S.opt && S.opt.sound !== false && !S.over, Z.styleFor(S).id, Z.gray(S)); }
+
+  // ---------- Карта судьбы ----------
+  function mapHtml(s, ch) {
+    var list = Z.forkMap(s, ch);
+    if (!list.length) return '';
+    return '<div class="fmap">' + list.map(function (f) {
+      if (!f.reached) return '<div class="fork un"><b>' + esc(f.n) + '</b><small>' + (f.opts.length ? 'Не случилось в этой жизни. Варианты из прошлых жизней: ' + f.opts.length : 'Не случилось в этой жизни') + '</small></div>';
+      return '<div class="fork"><b>' + esc(f.n) + '</b>' + f.opts.map(function (o) {
+        return '<div class="fo' + (o.taken ? ' taken' : '') + '"><span>' + (o.taken ? '●' : o.known ? '○' : '?') + '</span><div>' + esc(o.t) +
+          (o.taken && o.r ? '<small>' + esc(o.r) + '</small>' : !o.taken && o.known ? '<small>В другой жизни: ' + esc(o.r) + '</small>' : '') + '</div></div>';
+      }).join('') + '</div>';
+    }).join('') + '</div>';
+  }
+  function mapScreen() {
+    var upto = S ? (S.chI || 0) : 6, html = '';
+    for (var c = 0; c <= upto; c++) html += '<h4>Глава ' + Z.ROMAN[c] + ' · ' + esc(Z.CHAPTERS[c].n) + '</h4>' + (mapHtml(S, c) || '<p class="hint">Развилок пока нет.</p>');
+    var box = document.createElement('div');
+    box.innerHTML = '<div class="modal"><div class="sheet tall"><h3>Карта судьбы</h3><p class="hint">● — твой выбор, ○ — дорога, пройденная в другой жизни, ? — ещё не пройденная.</p>' + html + '<button class="btn" id="cl">Закрыть</button></div></div>';
+    document.body.appendChild(box.firstChild);
+    document.querySelector('#cl').onclick = function () { document.querySelector('.modal').remove(); };
+  }
+
+  // ---------- Альбом жизней ----------
+  function albumScreen() {
+    var list = Z.album(), sel = [];
+    var ROWS = [['Итог', 'title'], ['Прожил', 'age'], ['Было лет в начале', 'from'], ['Жена', 'wife'], ['Дети', 'kids'], ['Близкие друзья', 'friends'], ['Родители', 'parents'], ['Путь в работе', 'track'], ['Ценности', 'values'], ['Цели', 'fixed'], ['Развилок пройдено', 'forks']];
+    var draw = function () {
+      var html = '<div class="modal"><div class="sheet tall"><h3>Альбом жизней</h3><p class="hint">Отметь две жизни, чтобы сравнить.</p><div class="alb">' +
+        list.map(function (x, i) {
+          var d = new Date(x.at);
+          return '<button class="albc' + (sel.indexOf(i) >= 0 ? ' on' : '') + '" data-i="' + i + '"><b>' + esc(x.title) + '</b><small>' + esc(x.name) + ' · ' + x.age + ' ' + Z.plural(x.age, 'год', 'года', 'лет') + ' · ' + d.toLocaleDateString('ru-RU') + '</small><small>' + esc(x.track) + '</small></button>';
+        }).join('') + '</div>';
+      if (sel.length === 2) {
+        var a = list[sel[0]], b = list[sel[1]];
+        html += '<h4>Сравнение</h4><table class="cmp"><tr><th></th><th>Жизнь 1</th><th>Жизнь 2</th></tr>' + ROWS.map(function (r) { return '<tr><td>' + r[0] + '</td><td>' + esc(String(a[r[1]])) + '</td><td>' + esc(String(b[r[1]])) + '</td></tr>'; }).join('') + '</table>';
+      }
+      html += '<button class="btn" id="cl">Закрыть</button></div></div>';
+      var old = document.querySelector('.modal'); if (old) old.remove();
+      var box = document.createElement('div'); box.innerHTML = html; document.body.appendChild(box.firstChild);
+      document.querySelectorAll('.albc').forEach(function (bt) { bt.onclick = function () { var i = +bt.dataset.i, k = sel.indexOf(i); if (k >= 0) sel.splice(k, 1); else { if (sel.length >= 2) sel.shift(); sel.push(i); } draw(); }; });
+      document.querySelector('#cl').onclick = function () { document.querySelector('.modal').remove(); };
+    };
+    draw();
+  }
+
   function bindLife() {
     app.querySelectorAll('.choice').forEach(function (b) {
       b.onclick = function () {
         var t = S.turn, inst = t.q[t.i];
-        var inp = h('#askv'); var val = inp ? (inp.value.trim() || inst.ph) : null;
+        var inp = h('#askv'), multi = inp && inp.tagName === 'TEXTAREA';
+        var val = inp ? (inp.value.trim() || (multi ? '' : inst.ph)) : null;
+        var logN = S.log.length;
         Z.apply(S, +b.dataset.i, val);
+        if (S.log.slice(logN).some(function (l) { return /loss|kid|love/.test(l.k); })) Z.buzz([30, 60, 30]);
+        sound();
         save(); render();
         var r = h('.result'); if (r) r.scrollIntoView({ behavior: 'smooth', block: 'center' });
       };
@@ -229,7 +293,8 @@
       if (S.over) { save(); return render(); }
       if (t.q[t.i] && Z.next(S)) { save(); render(); scrollTop(); return; }
       var from = S.m;
-      Z.newTurn(S); save();
+      Z.newTurn(S); save(); sound();
+      var first = S.turn.q[S.turn.i]; if (first && (Z.EV[first.id].chapter || Z.EV[first.id].pause)) Z.buzz(15);
       passage(from, S.m, S.turn.notes.some(function (n) { return n && n.gray; }), function () { render(); scrollTop(); });
     };
   }
@@ -297,7 +362,11 @@
   function menu() {
     var html = '<div class="modal"><div class="sheet"><h3>Меню</h3>' +
       '<p class="hint">Темп жизни</p><div class="opts">' + [['slow', 'Подробно'], ['normal', 'Обычно'], ['fast', 'Быстро']].map(function (o) { return '<button class="opt' + (S.tempo === o[0] ? ' on' : '') + '" data-t="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>' +
+      '<div class="opts"><button class="opt' + (S.opt.sound !== false ? ' on' : '') + '" id="snd">🎵 Звук: ' + (S.opt.sound !== false ? 'вкл' : 'выкл') + '</button>' +
+      '<button class="opt' + (S.opt.stranger !== false ? ' on' : '') + '" id="strg">🕯 Незнакомец (тест): ' + (S.opt.stranger !== false ? 'вкл' : 'выкл') + '</button></div>' +
+      '<button class="btn" id="fmapb">Карта судьбы</button>' +
       '<button class="btn" id="ach">Достижения</button>' +
+      (Z.album().length ? '<button class="btn" id="albm">Альбом жизней</button>' : '') +
       '<button class="btn" id="home">На главный экран</button>' +
       '<button class="btn danger" id="reset">Начать жизнь заново</button>' +
       '<p class="fine">Версия ' + Z.VERSION + '. Прогресс сохраняется на этом устройстве.</p></div></div>';
@@ -307,6 +376,10 @@
     md.querySelectorAll('[data-t]').forEach(function (b) { b.onclick = function () { S.tempo = b.dataset.t; save(); md.remove(); }; });
     md.querySelector('#home').onclick = function () { md.remove(); title(); };
     md.querySelector('#ach').onclick = function () { md.remove(); achScreen(); };
+    md.querySelector('#fmapb').onclick = function () { md.remove(); mapScreen(); };
+    if (md.querySelector('#albm')) md.querySelector('#albm').onclick = function () { md.remove(); albumScreen(); };
+    md.querySelector('#snd').onclick = function () { S.opt.sound = S.opt.sound === false; save(); sound(); md.remove(); menu(); };
+    md.querySelector('#strg').onclick = function () { S.opt.stranger = S.opt.stranger === false; save(); md.remove(); menu(); };
     md.querySelector('#reset').onclick = function () { if (confirm('Стереть эту жизнь и начать новую?')) { clearSave(); S = null; md.remove(); su = { regrets: {} }; stepI = 0; setupScreen(); } };
   }
 
@@ -330,16 +403,23 @@
     var E = Z.ending(S);
     var html = '<div class="ending' + (E.death ? ' death' : '') + '"><p class="kicker">' + (E.death ? 'Итог' : (E.old ? 'Итог долгой жизни · ' : 'Итог жизни · ') + E.age + ' ' + Z.plural(E.age, 'год', 'года', 'лет')) + '</p><h1>' + esc(E.title) + '</h1>' +
       E.paragraphs.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('');
+    if (S.f.forgave) html += '<p>Ты простил себя прежнего — того, кто прожил первую жизнь. Может быть, ради этого всё и было.</p>';
+    var cmp = Z.compass(S);
+    if (cmp.rows.length) html += '<h4>Компас ценностей</h4><p class="hint">' + esc(cmp.text) + '</p><ul class="vals">' + cmp.rows.map(function (r) { return '<li><b>' + esc(r.n) + '</b><span>' + esc(r.word) + '</span><i><u style="width:' + Math.min(100, r.pct * 3) + '%"></u></i></li>'; }).join('') + '</ul>';
     if (E.goals.length) html += '<h4>Что ты хотел изменить · ' + E.fixed + ' из ' + E.goals.length + '</h4><ul class="goals res">' + E.goals.map(function (g) { return '<li class="' + (g.ok ? 'ok' : 'no') + '"><b>' + (g.ok ? '✓ ' : '○ ') + esc(g.n) + '</b><span>' + esc(g.t) + '</span></li>'; }).join('') + '</ul>';
     html += '<h4>Тогда и сейчас</h4><table class="cmp"><tr><th></th><th>Прошлая жизнь</th><th>Новая жизнь</th></tr>' + E.compare.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td><td>' + esc(r[2]) + '</td></tr>'; }).join('') + '</table>';
     var got = Z.achCheck(S, E), have = Z.achLoad(), fresh = got.filter(function (id) { return !have[id]; });
     got.forEach(function (id) { if (!have[id]) have[id] = Date.now(); }); Z.achSave(have);
     var gotSet = {}; got.forEach(function (id) { gotSet[id] = 1; });
     if (got.length) html += '<h4>Достижения этой жизни · ' + got.length + '</h4>' + achList(gotSet, fresh, true);
+    if ((S.diary || []).length) html += '<h4>Ты сам сказал</h4><ul class="diary">' + S.diary.map(function (d) { return '<li>' + esc(d.t) + '</li>'; }).join('') + '</ul>';
     html += '<h4>Что взять с собой в настоящую жизнь</h4><ul class="refl">' + E.refl.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>';
-    html += '<p class="ver">Жизнь заново · версия ' + Z.VERSION + '</p><button class="btn" id="achall">Все достижения</button><button class="btn" id="chron">Летопись этой жизни</button><button class="btn primary" id="again">Прожить ещё раз</button></div>';
-    app.innerHTML = html; scrollTop();
+    html += '<p class="ver">Жизнь заново · версия ' + Z.VERSION + '</p><button class="btn" id="mape">Карта судьбы</button><button class="btn" id="albe">Альбом жизней</button><button class="btn" id="achall">Все достижения</button><button class="btn" id="chron">Летопись этой жизни</button><button class="btn primary" id="again">Прожить ещё раз</button></div>';
+    Z.albumAdd(S, E);
+    app.innerHTML = html; scrollTop(); Z.Sound.set(false);
     h('#achall').onclick = achScreen;
+    h('#albe').onclick = albumScreen;
+    h('#mape').onclick = mapScreen;
     h('#again').onclick = function () { clearSave(); S = null; su = { regrets: {} }; stepI = 0; setupScreen(); };
     h('#chron').onclick = function () { var box = document.createElement('div'); box.innerHTML = '<div class="modal"><div class="sheet tall">' + logView() + '<button class="btn" id="cl">Закрыть</button></div></div>'; document.body.appendChild(box.firstChild); document.querySelector('#cl').onclick = function () { document.querySelector('.modal').remove(); }; };
   }

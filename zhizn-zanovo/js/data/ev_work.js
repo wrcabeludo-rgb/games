@@ -24,7 +24,7 @@
       }
     },
     {
-      id: 'w_unemployed', prio: 3, rep: 5, if: function (s) { return !s.job && !s.student && A(s) > 22 && A(s) < 63 && !s.queue.some(function (q) { return q.id === 'w_offer'; }); }, title: 'Без работы',
+      id: 'w_unemployed', prio: 3, rep: 5, if: function (s) { return !s.job && !s.student && !s.f.inarmy && A(s) > 22 && A(s) < 63 && !s.queue.some(function (q) { return q.id === 'w_offer'; }); }, title: 'Без работы',
       text: 'Деньги тают. Утром некуда идти. Мама по телефону осторожно спрашивает «ну как, нашёл что-нибудь?».',
       choices: [
         { t: 'Искать всерьёз', fx: 'joy-2', run: function (s) { Z.chain(s, 'w_offer'); }, res: 'Ты садишься за объявления.' },

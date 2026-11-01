@@ -20,6 +20,7 @@ const N = Number(process.argv[2] || 600);
 const VERBOSE = process.argv.includes('--verbose');
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const seen = {}, endings = {}, problems = [];
+const stat = { mem: 0, repair: 0, news: 0, era: 0, pauses: 0, stranger: 0, forks: 0, army: 0, abroad: 0, noinst: 0, early: 0, chapters: 0 };
 const achCount = {}; let cont = 0, to100 = 0; const oldAges = [];
 let turns = 0, cards = 0, deaths = 0, totalGoals = 0, fixedGoals = 0, switches = 0, synergy = 0;
 const repeatWorst = {}; // событие → худшее число повторов одного и того же текста в одной жизни
@@ -40,6 +41,7 @@ function randomSetup() {
   su.job = pick(Object.keys(Z.JOBS).concat([null]));
   Object.keys(Z.REGRETS).filter(() => Math.random() < 0.35).slice(0, 3).forEach(k => su.regrets[k] = true);
   su.tempo = pick(['slow', 'normal', 'fast']);
+  su.values = Object.keys(Z.VALUES).sort(() => Math.random() - 0.5).slice(0, 3);
   return su;
 }
 
@@ -90,13 +92,14 @@ for (let n = 0; n < N; n++) {
   const s = Z.newLife(su);
   const focuses = Object.keys(Z.FOCUS);
   const texts = {};
-  let guard = 0, lastJob = null, lastSk = 0, lifeCards = 0;
+  let guard = 0, lastJob = null, lastSk = 0, lifeCards = 0, lifePauses = 0;
   try {
     while (!s.over && guard++ < 3000) {
       if (Math.random() < 0.08) { const a = pick(focuses); let b = pick(focuses); while (b === a) b = pick(focuses); s.focus = [a, b]; }
       const ageBefore = Z.age(s), stepWanted = Z.step(s);
       Z.newTurn(s); turns++;
       const t = s.turn;
+      t.notes.forEach(n => { if (n && n.news) { stat.news++; check(n.t, 'новости'); genderCheck(n.t, s, {}, 'новости'); } if (n && n.era) { stat.era++; check(n.t, 'приметы'); } });
       // Длина хода: без серой перемотки ход равен шагу возраста (на границе возраста — шаг до или после)
       if (!t.notes.some(x => x && x.gray) && t.span !== stepWanted && t.span !== Z.step(s) && s.m > 1 && !s.over)
         problem(`ход длиной ${t.span} мес. в ${ageBefore.toFixed(1)} лет (ожидалось ${stepWanted})`);
@@ -110,6 +113,14 @@ for (let n = 0; n < N; n++) {
         // Работа: карточки про профессию — только про нынешнюю
         if (c.J && ['w_switch_doubt', 'w_retrain_done'].indexOf(inst.id) < 0 && c.J !== s.job) problem(`${inst.id}: карточка про «${Z.JOBS[c.J].n}», а работа сейчас «${s.job ? Z.JOBS[s.job].n : 'нет'}»`);
         if (inst.id === 'w_promo' && !V.text.includes(Z.JOBS[s.job].t[s.lvl + 1])) problem('w_promo: повышение не по нынешней профессии');
+        if (inst.id === 'mem_back') stat.mem++;
+        if (inst.id === 'r_repair') stat.repair++;
+        if (inst.id === 'pause') { lifePauses++; stat.pauses++; }
+        if (inst.id === 'stranger' || inst.id === 'stranger_reveal') stat.stranger++;
+        if (inst.id === 'ch_start') stat.chapters++;
+        // В армии — только армейское и самое важное
+        const ev = Z.EV[inst.id];
+        if (s.f.inarmy && !ev.army && !ev.prio && !ev.manual && Z.ARMY_OK.indexOf(inst.id) < 0) problem(`${inst.id}: обычная карточка во время армии`);
         // Варианты выбора не меняются между показом и нажатием
         const again = Z.view(s, inst).choices.map(ch => Z.t(ch.t, s, c)).join('|');
         if (again !== V.choices.map(ch => Z.t(ch.t, s, c)).join('|')) problem(inst.id + ': варианты выбора меняются между показом и нажатием');
@@ -151,7 +162,7 @@ for (let n = 0; n < N; n++) {
           if (before) {
             switches++;
             const J = Z.JOBS[s.job], earlier = (s.career || []).slice(0, -1).map(c => c.j);
-            const legit = earlier.some(j => Z.famShare(j, s.job)) || (s.degree && J.edu.indexOf(s.edu) >= 0) || (s.fit[s.job] || 0) >= 20 || s.f['re_' + s.job];
+            const legit = earlier.some(j => Z.famShare(j, s.job)) || (s.degree && J.edu.indexOf(s.edu) >= 0) || (s.fit[s.job] || 0) >= 20 || s.f['re_' + s.job] || s.job === 'biz';
             if (!legit && s.st.sk > skBefore + 3) problem(`мастерство выросло при переходе ${before} → ${s.job} без опыта и диплома (${skBefore.toFixed(0)} → ${s.st.sk.toFixed(0)})`);
           }
         }
@@ -162,6 +173,10 @@ for (let n = 0; n < N; n++) {
       if (s.job && s.job !== lastJob) { lastJob = s.job; lastSk = s.st.sk; }
     }
     if (!s.over) problem('Жизнь не закончилась: ' + JSON.stringify(s.setup));
+    if (lifePauses > 3) problem('пауз-вопросов больше трёх: ' + lifePauses);
+    stat.forks += Object.keys(s.forks || {}).length;
+    if (s.f.army) stat.army++; if (s.f.abroad || s.f.abroadM != null) stat.abroad++; if (s.f.noinst) stat.noinst++; if (s.f.earlydad) stat.early++;
+    const cmp = Z.compass(s); cmp.rows.forEach(r => check(r.n + r.word, 'компас')); check(cmp.text, 'компас');
     const E = Z.ending(s);
     E.paragraphs.concat(E.refl).forEach(p => check(p, 'итоги'));
     E.goals.forEach(g => check(g.t, 'цель'));
@@ -186,6 +201,8 @@ console.log('Карточек за жизнь по возрасту игрока
 console.log(`Цели: исправлено ${fixedGoals} из ${totalGoals}. Смен профессии: ${switches}, «старый опыт пригодился»: ${synergy}`);
 console.log(`Жили дальше: ${cont}, дожили до 100: ${to100}, остальные ушли в среднем в ${(oldAges.reduce((a, b) => a + b, 0) / Math.max(1, oldAges.length)).toFixed(0)} (от ${Math.min(...oldAges)} до ${Math.max(...oldAges)})`);
 console.log('Достижения (сколько жизней получили): ' + Z.ACH.map(a => `${a.n} ${achCount[a.id] || 0}`).join(', '));
+console.log(`Мир: напоминаний ${stat.mem}, примирений ${stat.repair}, «тем временем» ${stat.news}, примет времени ${stat.era}, пауз ${stat.pauses}, незнакомец ${stat.stranger}, глав ${stat.chapters}, развилок ${stat.forks}`);
+console.log(`Большие развилки (жизней): армия ${stat.army}, заграница ${stat.abroad}, без института ${stat.noinst}, ранний ребёнок ${stat.early}`);
 console.log('Концовки:', Object.entries(endings).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(', '));
 console.log(`Событий: ${Z.evList.length}, ни разу не выпали (${never.length}): ${never.join(', ')}`);
 // Семейные и дружеские события не должны повторять один и тот же текст больше двух раз за жизнь
