@@ -156,6 +156,8 @@ body[data-style="markers"] { --acc: #ff7aa8; --acc2: #ffb347; }
 body[data-style="acrylic"] { --acc: #e8c547; --acc2: #d9534f; }
 body[data-style="watercolor"] { --acc: #b9a7e0; --acc2: #8fc9c0; }
 body[data-style="graphite"] { --acc: #c9c4bd; --acc2: #8d8794; }
+body[data-style="liner"] { --acc: #ece8e1; --acc2: #a9a3ad; }
+body[data-style="oneline"] { --acc: #e3b15a; --acc2: #c99545; }
 
 .ver { text-align: center; color: var(--gray); font-size: 11.5px; margin: 26px 0 6px; opacity: .8; }
 

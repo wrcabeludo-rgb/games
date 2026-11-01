@@ -11,7 +11,9 @@
     markers:    { inst: 'piano', every: 3600, chords: [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]], rain: 0.05 },
     acrylic:    { inst: 'pad', every: 4200, chords: [[48, 55, 60, 64], [45, 52, 57, 60], [41, 48, 53, 57], [43, 50, 55, 59]], rain: 0 },
     watercolor: { inst: 'piano', every: 4600, chords: [[72, 76, 79], [69, 72, 76], [65, 69, 72], [67, 71, 74]], rain: 0, birds: true },
-    graphite:   { inst: 'piano', every: 6500, chords: [[64], [67], [60], [62], [59]], rain: 0 }
+    graphite:   { inst: 'piano', every: 6500, chords: [[64, 67], [60, 64], [62, 65], [59, 62]], rain: 0 },
+    liner:      { inst: 'piano', every: 7500, chords: [[64], [67], [60], [62], [59]], rain: 0 },
+    oneline:    { inst: 'piano', every: 9500, chords: [[72], [76], [79], [74]], rain: 0, birds: true }
   };
   function hz(n) { return 440 * Math.pow(2, (n - 69) / 12); }
   function init() {

@@ -9,6 +9,8 @@
     markers: { stage: 'art/markers/stage.webp' },     // до 50 — фломастеры
     acrylic: { stage: 'art/acrylic/stage.webp' },     // до 60 — акриловые краски
     watercolor: { stage: 'art/watercolor/stage.webp' },  // до 70 — пастельная акварель
-    graphite: {}     // 70–100 — простой карандаш
+    graphite: { stage: 'art/graphite/stage.webp' },  // 70–79 — простой карандаш
+    liner: { stage: 'art/liner/stage.webp' },        // 80–89 — тонкий линер, только контуры (пока временно — карандашная)
+    oneline: { stage: 'art/oneline/stage.webp' }     // 90–100 — одна непрерывная линия (пока временно — карандашная)
   };
 })();

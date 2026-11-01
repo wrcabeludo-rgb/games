@@ -10,7 +10,9 @@
 | 40–49 | фломастеры | `markers` |
 | 50–59 | акриловые краски | `acrylic` |
 | 60–69 | акварель пастельных оттенков | `watercolor` |
-| 70–100 | простой карандаш: чёткие, простые, красивые линии | `graphite` |
+| 70–79 | простой карандаш | `graphite` |
+| 80–89 | тонкий линер: только контуры, без штриховки | `liner` |
+| 90–100 | одна непрерывная линия и один золотой акцент (солнце) | `oneline` |
 
 Общие правила для всех картинок:
 - Героя видно со спины, в профиль издалека или вполоборота **без деталей лица** — чтобы каждый игрок узнал в нём себя.
@@ -59,17 +61,19 @@ Drawing with a single graphite pencil on clean white paper: clear, simple, beaut
 Negative: color, colored pencils, ink wash, heavy dark shading, smudged charcoal, photorealism, 3D render, anime, text, letters, watermark, signature, frame, border, logos, detailed faces.
 ```
 
-### 7. 80–89 · простой карандаш → `art/graphite/stage_80.webp`
+### 7. 80–89 · тонкий линер, только контуры → `art/liner/stage.webp`
 ```
-Drawing with a single graphite pencil on clean white paper: clear, simple, beautiful confident lines, economical contour drawing with only light delicate shading, a lot of empty white space, elegant like a master's sketch. Monochrome grey only. Scene: an old man of about 85 with thin white hair, seen from behind and slightly to the side, sits at a small kitchen table by the window writing by hand in a thick notebook; next to him a stack of old letters tied with string, a teapot, a pair of glasses, a sleeping cat curled on the chair beside him. Through the window — a quiet courtyard with a bench and a lamp post. Mood: remembering, writing down two lives so that someone will read them one day. Horizontal composition 3:2. No text or readable writing in the notebook, no letters, no logos, no visible face details.
-Negative: color, colored pencils, ink wash, heavy dark shading, smudged charcoal, photorealism, 3D render, anime, readable text, letters, watermark, signature, frame, border, logos, detailed faces.
+Minimalist line drawing made only with a thin black fineliner pen on clean white paper: clean confident outlines and only the essential contour lines, uniform thin line weight, absolutely no shading, no hatching, no grey tones, no fills, a lot of empty white space, calm and precise like an architect's travel sketch. Scene: an old man of about 85 with thin white hair, seen from behind and slightly to the side, sits at a small round kitchen table by a window writing by hand in a thick notebook; on the table a stack of old letters tied with string, a teapot, a cup, a pair of glasses; a cat sleeps curled on the chair beside him. Through the window — the simple outline of a courtyard with a bench, a lamp post and a tree. Mood: remembering, writing down two lives, clarity and peace. Horizontal composition 3:2. No text or readable writing, no letters, no logos, no visible face details.
+Negative: shading, hatching, cross-hatching, grey tones, pencil texture, color, watercolor, fills, heavy black areas, photorealism, 3D render, anime, readable text, letters, watermark, signature, frame, border, logos, detailed faces.
 ```
 
-### 8. 90–100 · простой карандаш → `art/graphite/stage_90.webp`
+### 8. 90–100 · одна непрерывная линия → `art/oneline/stage.webp`
 ```
-Drawing with a single graphite pencil on clean white paper: clear, simple, beautiful confident lines, economical contour drawing with only light delicate shading, a lot of empty white space, elegant like a master's sketch. Monochrome grey only. Scene: a very old man of about 95 with a walking stick, seen from behind, stands at dawn on the wooden porch of a small house and looks at a large old apple tree in blossom that he planted long ago; petals drift in the air, a few birds fly over the low hills on the horizon, the first light of the sun just touches the treetops. Mood: serenity, a whole century behind, nothing left unsaid. Horizontal composition 3:2. No text, no letters, no logos, no visible face details.
-Negative: color, colored pencils, ink wash, heavy dark shading, smudged charcoal, photorealism, 3D render, anime, text, letters, watermark, signature, frame, border, logos, detailed faces, gloomy mood.
+Single continuous line drawing: the entire picture is drawn with one unbroken thin black line that never lifts from the paper, flowing, elegant and minimal, on pure white paper with a vast amount of empty space. The only color in the whole image is one small soft accent of warm golden watercolor for the rising sun. Scene: a very old man of about 95 with a walking stick, seen from behind, stands on the porch of a small wooden house and looks at a large old apple tree in blossom; the sun rises over low hills on the horizon, a few birds fly, a couple of petals drift in the air. Mood: serenity, a whole century behind, the whole life as one line, nothing left unsaid. Horizontal composition 3:2. No text, no letters, no logos, no visible face details.
+Negative: shading, hatching, multiple lines overlapping as sketch, grey tones, pencil texture, fills, more than one color, saturated colors, photorealism, 3D render, anime, text, letters, watermark, signature, frame, border, logos, detailed faces.
 ```
+
+Другие варианты для старости: 80-е — тушь кистью (сумиэ), сангина; 90-е — линогравюра.
 
 ## Партия 2 (потом): темы в каждом стиле
 Для каждого из 6 стилей — 9 тем: `parents` (родители), `friends` (друзья), `love` (любовь), `family` (дом и дети),

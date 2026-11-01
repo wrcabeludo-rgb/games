@@ -50,7 +50,9 @@
     { max: 50, id: 'markers', n: 'фломастеры' },
     { max: 60, id: 'acrylic', n: 'акриловые краски' },
     { max: 70, id: 'watercolor', n: 'пастельная акварель' },
-    { max: 101, id: 'graphite', n: 'простой карандаш' }
+    { max: 80, id: 'graphite', n: 'простой карандаш' },
+    { max: 90, id: 'liner', n: 'тонкий линер, только контуры' },
+    { max: 101, id: 'oneline', n: 'одна непрерывная линия' }
   ];
   Z.styleFor = function (s) { var a = Z.age(s); for (var i = 0; i < Z.STYLES.length; i++) if (a < Z.STYLES[i].max) return Z.STYLES[i]; return Z.STYLES[Z.STYLES.length - 1]; };
   // Тема картинки по событию: родители, друзья, любовь, семья, работа, юность, серый период, старость, жизнь
@@ -69,7 +71,7 @@
   // Путь к картинке: сначала картинка темы в стиле возраста, иначе обложка периода. Z.ART — список готовых файлов (js/data/art.js).
   Z.artFor = function (s, id) {
     var st = Z.styleFor(s).id, A = (Z.ART || {})[st] || {}, a = Z.age(s);
-    var stage = (a >= 90 && A.stage_90) || (a >= 80 && A.stage_80) || A.stage;
+    var stage = A.stage;
     if (A[Z.themeOf(id)]) return A[Z.themeOf(id)];
     // Обложка десятилетия — только на ключевых карточках, чтобы не повторяться
     return /^(ch_start|y_start|final_now|l_b\d+)$/.test(id) ? stage || null : null;
