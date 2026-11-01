@@ -34,7 +34,12 @@
       su = { regrets: {} }; stepI = 0; setupScreen();
     };
   }
-  function migrate(s) { if (!s.cnt) s.cnt = {}; if (!s.endAge) s.endAge = s.target; }
+  function migrate(s) {
+    if (!s.cnt) s.cnt = {}; if (!s.endAge) s.endAge = s.target;
+    // сохранения версии 0.1: карьерный трек и мастерство по профессиям
+    if (!s.career) { s.career = []; (s.jobsHad || []).forEach(function (j) { if (Z.JOBS[j]) s.career.push({ j: j, from: s.m, to: s.m, lvl: 0 }); }); if (s.job) s.career.push({ j: s.job, from: s.m - (s.jobM || 0), to: null, lvl: s.lvl }); }
+    if (!s.xp) s.xp = {}; if (!s.vu) s.vu = {};
+  }
 
   // ---------- Анкета ----------
   function setupScreen() {
@@ -102,9 +107,13 @@
     return '<div class="stat" title="' + Z.STAT_N[k] + '"><span>' + icon + '</span><b><i style="width:' + Math.round(v) + '%"></i></b></div>';
   }
   function header() {
-    var c = Z.cal(S);
+    var c = Z.cal(S), span = (S.turn && S.turn.span) || 1, when;
+    if (span > 1) {
+      var c0 = Z.cal(S, S.m - span + 1);
+      when = Z.cap(Z.MONTHS[c0.mon]) + (c0.year !== c.year ? ' ' + c0.year : '') + ' — ' + Z.MONTHS[c.mon] + ' ' + c.year;
+    } else when = Z.cap(Z.MONTHS[c.mon]) + ' ' + c.year;
     return '<header class="top">' +
-      '<div class="when"><b>' + Z.cap(Z.MONTHS[c.mon]) + ' ' + c.year + '</b><span>' + Z.ageInt(S) + ' ' + Z.plural(Z.ageInt(S), 'год', 'года', 'лет') + (Z.gray(S) ? ' · <em>серый период</em>' : '') + '</span></div>' +
+      '<div class="when"><b>' + when + '</b><span>' + Z.ageInt(S) + ' ' + Z.plural(Z.ageInt(S), 'год', 'года', 'лет') + (Z.gray(S) ? ' · <em>серый период</em>' : '') + '</span></div>' +
       '<button class="icon" id="menu">☰</button></header>' +
       '<div class="stats">' + bar('hp', '❤️‍🩹', S.st.hp) + bar('joy', '☀️', S.st.joy) + bar('money', '💰', S.st.money) + bar('sk', '🎓', S.st.sk) + '</div>' +
       '<button class="focus" id="focus">Фокус: ' + S.focus.map(function (k) { return Z.FOCUS[k].i + ' ' + Z.FOCUS[k].n; }).join(' · ') + ' <u>изменить</u></button>';
@@ -136,7 +145,7 @@
     // уже прожитые карточки этого хода — свернуты
     for (var i = 0; i < t.i; i++) {
       var d = t.q[i]; if (!d.done) continue;
-      html += '<div class="past"><b>' + esc(Z.t(Z.EV[d.id].title || '', S, d.ctx)) + '</b> — ' + esc(d.done.res.split('\n')[0]) + '</div>';
+      html += '<div class="past"><b>' + esc(Z.view(S, d).title) + '</b> — ' + esc(d.done.res.split('\n')[0]) + '</div>';
     }
     var inst = t.q[t.i];
     if (!inst) {
@@ -144,14 +153,15 @@
       html += '<button class="btn primary next" id="next">Следующий месяц →</button>';
       return html;
     }
-    var e = Z.EV[inst.id], ctx = inst.ctx || {};
-    html += '<article class="card">' + (e.title ? '<h3>' + esc(Z.t(e.title, S, ctx)) + '</h3>' : '') + paras(Z.t(e.text, S, ctx));
+    var V = Z.view(S, inst), e = V.e, ctx = V.ctx;
+    save();
+    html += '<article class="card">' + (V.title ? '<h3>' + esc(V.title) + '</h3>' : '') + paras(V.text);
     if (!inst.done) {
       if (e.ask) {
         var a = e.ask(S, ctx); inst.ph = inst.ph || a.ph;
         html += '<label class="ask">' + esc(a.label) + '<input class="inp" id="askv" maxlength="20" placeholder="' + esc(inst.ph) + '"></label>';
       }
-      html += '<div class="choices">' + Z.choicesOf(S, e, ctx).map(function (c, i) {
+      html += '<div class="choices">' + V.choices.map(function (c, i) {
         return '<button class="choice" data-i="' + i + '">' + esc(Z.t(c.t, S, ctx)) + '</button>';
       }).join('') + '</div>';
     } else {
@@ -207,7 +217,9 @@
     if (ws.length) html += '<h4>Они</h4><ul>' + ws.map(function (id) { var p = s.pp[id]; return personRow(p, (s.exes.indexOf(id) >= 0 ? 'бывшая · ' : s.f['taken_' + id] ? 'замужем · ' : '') + Z.PARTNERS[id].desc); }).join('') + '</ul>';
     html += '<h4>Дело</h4><ul><li><div><b>' + (s.student ? 'Студент' : s.job ? Z.cap(Z.jobTitle(s)) : 'Без работы') + '</b><small>' +
       (s.edu ? Z.EDU[s.edu].n + ' факультет' + (s.degree ? ', диплом' : s.f.dropout ? ', без диплома' : '') : '') +
-      (s.job && !s.student ? ' · ' + (s.fit[s.job] >= 30 ? 'любимая работа' : s.fit[s.job] >= 15 ? 'нравится' : 'просто работа') : '') + '</small></div></li></ul>';
+      (s.job && !s.student ? ' · ' + (s.fit[s.job] >= 30 ? 'любимая работа' : s.fit[s.job] >= 15 ? 'нравится' : 'просто работа') : '') + '</small></div></li>' +
+      ((s.career || []).length ? '<li><div><b>Путь</b><small>' + (s.career || []).map(function (c) { var y = Math.max(0, Math.round(((c.to == null ? s.m : c.to) - c.from) / 12)); return esc(Z.cap(Z.JOBS[c.j].n)) + ' — ' + (y ? Z.yearsStr(y) : 'меньше года') + (c.to == null ? ' (сейчас)' : ''); }).join('<br>') + '</small></div></li>' : '') +
+      '<li><div><b>Мастерство</b><small>' + (s.job && !s.student ? 'В нынешней профессии. В каждой профессии оно своё: опыт смежных дел частично переносится.' : 'Учёба и общие навыки.') + '</small></div></li></ul>';
     var R = s.setup.regrets || {};
     if (Object.keys(R).length) html += '<h4>Что я хочу изменить</h4><ul class="goals">' + Object.keys(R).map(function (k) { return '<li>' + esc(Z.REGRETS[k]) + '</li>'; }).join('') + '</ul>';
     return html + '</section>';

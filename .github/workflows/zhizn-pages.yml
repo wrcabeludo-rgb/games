@@ -29,8 +29,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Автотест (600 случайных жизней)
-        run: node zhizn-zanovo/tools/sim.js 600
+      - name: Автотест (1000 случайных жизней)
+        run: node zhizn-zanovo/tools/sim.js 1000
       - name: Сборка сайта
         run: |
           mkdir -p _site

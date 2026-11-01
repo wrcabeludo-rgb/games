@@ -3,8 +3,9 @@
 Текстовая терапевтическая игра-PWA (чистый JS, без сборки) в папке `zhizn-zanovo/`. Владелец тестирует на телефоне.
 Общаемся по-русски. Замысел и механика — `docs/DESIGN.md`, структура — `README.md`.
 
-- Проверка перед пушем: `node zhizn-zanovo/tools/sim.js 600` (0 проблем) и прогон в Chromium (Playwright) на 390×844.
-- Новые события: `Z.def([...])` в `js/data/ev_*.js`; эффекты — мини-язык `Z.fx` (`engine.js`), шаблоны — `Z.t`.
+- Проверка перед пушем: `node zhizn-zanovo/tools/sim.js 1000` (0 проблем) и прогон в Chromium (Playwright) на 390×844.
+- Новые события: `Z.def([...])` в `js/data/ev_*.js`; частые события — только с вариантами `vars` (`ev_variety.js`);
+  у детей и друзей род — всегда через `{K~пошёл|пошла}`; эффекты — мини-язык `Z.fx` (`engine.js`), шаблоны — `Z.t`.
   Новый файл добавить в `index.html` и в список `FILES` в `sw.js`.
 - При выпуске поднять `Z.VERSION` (`engine.js`) и `CACHE` в `sw.js`.
 - Публикация — GitHub Actions `.github/workflows/zhizn-pages.yml` при пуше в `main`:

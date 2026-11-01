@@ -4,7 +4,7 @@
   var Z = window.Z, R = Z.R;
   var A = Z.age;
   var working = function (s) { return Z.working(s); };
-  var hbJob = function (s) { return ['writer', 'music', 'photo', 'design'].filter(function (x) { return (s.fit[x] || 0) >= Z.JOBS[x].fit && s.job !== x; })[0] || 'writer'; };
+  var hbJob = function (s) { return ['writer', 'music', 'photo', 'design', 'actor', 'carpenter', 'coach', 'vet', 'farmer', 'translator', 'guide'].filter(function (x) { return (s.fit[x] || 0) >= Z.JOBS[x].fit && s.job !== x; })[0] || 'writer'; };
 
   Z.def([
     {
@@ -47,14 +47,7 @@
         { t: 'Отказаться — мне хорошо там, где я есть', fx: 'joy+2', run: function (s) { s.lvlM = 0; }, res: 'Начальник удивлён. Ты — нет. Ты знаешь, сколько стоят вечера.' }
       ]
     },
-    {
-      id: 'w_daily', per: 'J', rep: 14, w: 8, ctx: function (s) { return s.job && working(s) ? { J: s.job } : null; }, if: function (s, c) { return s.job === c.J; }, title: 'Хороший день',
-      text: function (s, c) { return Z.JOBS[c.J].good; },
-      choices: [
-        { t: 'Запомнить этот день', fx: 'joy+5 sk+1', run: function (s) { s.fit[s.job] = (s.fit[s.job] || 0) + 3; }, res: 'Такие дни — ради них всё и затевалось.' },
-        { t: 'Отметить с коллегами', fx: 'joy+4 @lyokha+3', res: 'Вы празднуете в кафе за углом. Лёха произносит издевательски-трогательный тост.' }
-      ]
-    },
+
     {
       id: 'w_dilemma', per: 'J', w: 14, ctx: function (s) { return s.job && working(s) && s.jobM > 6 ? { J: s.job } : null; }, if: function (s, c) { return s.job === c.J; }, title: 'Выбор',
       text: function (s, c) { return Z.JOBS[c.J].dl.q; },
@@ -63,15 +56,7 @@
         return [{ t: d.a[0], fx: d.a[1], res: d.a[2] }, { t: d.b[0], fx: d.b[1], res: d.b[2] }];
       }
     },
-    {
-      id: 'w_overtime', rep: 10, w: 9, if: function (s) { return working(s); }, title: 'Выходные',
-      text: function (s) { return 'Пятница, шесть вечера. Начальник: «Надо выйти в субботу и воскресенье. Аврал».' + (Z.married(s) ? ' А ты обещал {P.d} поехать за город.' : '') + (s.setup.why === 'work' && s.f.pastwife === s.partner ? ' Ты помнишь, сколько таких суббот стоил тебе прошлый брак.' : ''); },
-      choices: [
-        { t: 'Выйти — карьера важна', fx: 'sk+3 money+3 @P-6 @kids-3 joy-2', run: function (s) { s.cnt.overtime = (s.cnt.overtime || 0) + 1; }, res: 'Выходные в офисе. Аврал закрыт. Дома тебя встречает тишина.' },
-        { t: 'Отказаться: «У меня планы с семьёй»', fx: '@P+5 @kids+3 joy+3', run: function (s) { if (R.chance(0.15)) { s.lvlM = Math.max(0, s.lvlM - 6); return 'Начальник поджимает губы. Это запомнят. Но выходные — твои.'; } }, res: 'Начальник ворчит, но отпускает. Мир не рухнул.' },
-        { t: 'Выйти на один день', fx: 'sk+1 money+1 @P-2', res: 'Компромисс. Никто не доволен, все живы.' }
-      ]
-    },
+
     {
       id: 'w_boss', rep: 40, w: 6, if: function (s) { return working(s) && s.lvl < 3 && s.job !== 'biz'; }, title: 'Начальник',
       text: 'Новый начальник унижает людей на планёрках. Сегодня — тебя, при всех, за чужую ошибку.',
@@ -114,7 +99,7 @@
       choices: function (s) {
         var best = Object.keys(Z.JOBS).filter(function (j) { return j !== 'biz' && j !== s.job; }).sort(function (a, b) { return (s.fit[b] || 0) - (s.fit[a] || 0); }).slice(0, 3);
         var list = best.map(function (j) {
-          return { t: 'Переучиться: ' + Z.JOBS[j].n, run: function (st) { st.f.retraining = j; Z.fx(st, 'money-10 joy+6 +brave'); st.fit[j] = (st.fit[j] || 0) + 15; Z.schedule(st, 'w_retrain_done', 10); Z.logLine(st, 'Начал переучиваться: ' + Z.JOBS[j].n + '.', 'work'); return 'Вечерние курсы, книги, практика. Ты самый старший в группе — и самый жадный до знаний.'; } };
+          return { t: 'Переучиться: ' + Z.JOBS[j].n, run: function (st) { st.f.retraining = j; Z.fx(st, 'money-10 joy+6 +brave'); st.fit[j] = (st.fit[j] || 0) + 15; Z.schedule(st, 'w_retrain_done', 10, { J: j }); Z.logLine(st, 'Начал переучиваться: ' + Z.JOBS[j].n + '.', 'work'); return 'Вечерние курсы, книги, практика. Ты самый старший в группе — и самый жадный до знаний.'; } };
         });
         list.push({ t: 'Не сейчас', fx: 'joy-2', res: 'Понедельники продолжаются.' });
         return list;
@@ -122,9 +107,9 @@
     },
     {
       id: 'w_retrain_done', manual: true, title: 'Новая профессия',
-      text: function (s) { return 'Курсы позади. Диплом, портфолио, первые заказы. Ты — ' + Z.JOBS[s.f.retraining].n + '.'; },
+      text: function (s, c) { return 'Курсы позади. Диплом, портфолио, первые заказы. Ты — ' + Z.JOBS[c.J || s.f.retraining || 'teacher'].n + '.'; },
       choices: [
-        { t: 'Начать с нуля на новом месте', run: function (s) { var j = s.f.retraining; delete s.f.retraining; s.f['re_' + j] = true; if (s.job) Z.quitJob(s, 'Сменил профессию'); Z.setJob(s, j, 0); s.st.joy += 10; s.st.sk = Math.max(s.st.sk - 10, 25); return 'Ты снова новичок. В ' + Z.ageInt(s) + '. И тебе нравится каждый день.'; } }
+        { t: 'Начать с нуля на новом месте', run: function (s, c) { var j = c.J || s.f.retraining; delete s.f.retraining; s.f['re_' + j] = true; if (s.job) Z.quitJob(s, 'Сменил профессию'); Z.setJob(s, j, 0); s.st.joy += 10; s.st.sk = Math.max(s.st.sk - 10, 25); return 'Ты снова новичок. В ' + Z.ageInt(s) + '. И тебе нравится каждый день.'; } }
       ]
     },
     {
@@ -165,8 +150,15 @@
       choices: [{ t: 'Подвести итоги', run: function (s) { if (R.chance(0.55 + s.st.sk / 300)) { Z.fx(s, 'money+20 joy+10'); return 'Дело живёт. Ты платишь людям зарплату и засыпаешь спокойно — ну, почти.'; } Z.fx(s, 'money-12 joy-8'); s.lvl = 1; return 'Тяжело. Пришлось закрыться и вернуться под чужую вывеску. Но опыт — твой.'; } }]
     },
     {
-      id: 'w_hobby_break', age: [22, 65], w: 7, if: function (s) { return ['writer', 'music', 'photo', 'design'].some(function (j) { return (s.fit[j] || 0) >= Z.JOBS[j].fit && s.job !== j; }); }, title: 'Шанс',
-      text: function (s) { var j = hbJob(s); return { writer: 'Твой рассказ, отправленный наугад в журнал, напечатали. Редактор пишет: «Есть ещё?»', music: 'Тебя слышат на квартирнике, и владелец клуба предлагает выступать каждую пятницу. За деньги.', photo: 'Твои снимки берут на выставку. Посетители подолгу стоят у каждого.', design: 'Твои рисунки замечает агентство: «Хотите работать у нас?»' }[j]; },
+      id: 'w_hobby_break', age: [22, 65], w: 7, if: function (s) { return ['writer', 'music', 'photo', 'design', 'actor', 'carpenter', 'coach', 'vet', 'farmer', 'translator', 'guide'].some(function (j) { return (s.fit[j] || 0) >= Z.JOBS[j].fit && s.job !== j; }); }, title: 'Шанс',
+      text: function (s) { var j = hbJob(s); return { writer: 'Твой рассказ, отправленный наугад в журнал, напечатали. Редактор пишет: «Есть ещё?»', music: 'Тебя слышат на квартирнике, и владелец клуба предлагает выступать каждую пятницу. За деньги.', photo: 'Твои снимки берут на выставку. Посетители подолгу стоят у каждого.', design: 'Твои рисунки замечает агентство: «Хотите работать у нас?»',
+        actor: 'После любительского спектакля к тебе подходит режиссёр настоящего театра: «Приходите на пробы».',
+        carpenter: 'Полку, которую ты сделал для друга, увидел владелец мебельной мастерской: «Беру к себе. Руки у вас — золотые».',
+        coach: 'Детская спортивная школа ищет тренера. Тебя порекомендовал знакомый: «Он умеет зажигать».',
+        vet: 'Ветеринар из приюта, где ты помогаешь, говорит: «Иди учиться, а потом — к нам. Звери тебя слушаются».',
+        farmer: 'Твой огород на даче — лучший в посёлке. Сосед предлагает взять в аренду поле: «Ты же этим живёшь».',
+        translator: 'Издательство берёт на пробу твой перевод — и просит ещё. Платят.',
+        guide: 'Турагентство, увидев твои фото и рассказы о походах, предлагает водить собственные маршруты.' }[j]; },
       choices: [
         { t: 'Сделать это своей работой', fx: '+brave', run: function (s) { var j = hbJob(s); if (s.job) Z.quitJob(s, 'Ушёл, чтобы заниматься любимым делом'); Z.setJob(s, j, 0); s.st.joy += 12; Z.logLine(s, 'Увлечение стало профессией: ' + Z.JOBS[j].n + '.', 'work'); return 'Ты превращаешь мечту в работу. Денег пока меньше. Счастья — несравнимо больше.'; } },
         { t: 'Оставить как увлечение', fx: 'joy+6', res: 'Пусть будет для души. Это тоже прекрасно.' }

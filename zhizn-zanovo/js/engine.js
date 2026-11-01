@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var Z = window.Z = window.Z || {};
-  Z.VERSION = '0.1.0';
+  Z.VERSION = '0.2.0';
   Z.EV = {};
   Z.evList = [];
 
@@ -23,6 +23,7 @@
     pick: function (arr) { return arr[Math.floor(R.rnd() * arr.length)]; },
     shuffle: function (arr) { arr = arr.slice(); for (var i = arr.length - 1; i > 0; i--) { var j = Math.floor(R.rnd() * (i + 1)); var t = arr[i]; arr[i] = arr[j]; arr[j] = t; } return arr; }
   };
+  Z.C = function (t, fx, res, extra) { var c = { t: t, fx: fx, res: res }; if (extra) Object.keys(extra).forEach(function (k) { c[k] = extra[k]; }); return c; };
   var clamp = Z.clamp = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
 
   Z.MONTHS = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'];
@@ -53,6 +54,22 @@
       else if (/[бвгджзклмнпрстфхцчшщ]/.test(last)) { f.g = n + 'а'; f.d = n + 'у'; f.a = n + 'а'; f.i = n + ('жчшщц'.indexOf(last) >= 0 ? 'ем' : 'ом'); f.p = n + 'е'; }
     }
     return f;
+  };
+
+  // Пол по имени: true — женское, false — мужское, null — непонятно (Саша, Женя…)
+  Z.AMBIG = ['саша', 'женя', 'валя', 'слава', 'шура', 'сева'];
+  Z.MALE_A = ['миша', 'никита', 'илья', 'ваня', 'даня', 'дима', 'лёша', 'леша', 'алёша', 'алеша', 'паша', 'петя', 'серёжа', 'сережа', 'костя', 'вова', 'гоша',
+    'лёва', 'лева', 'федя', 'яша', 'тёма', 'тема', 'гриша', 'боря', 'митя', 'коля', 'толя', 'юра', 'кузьма', 'фома', 'лука', 'савва', 'сеня', 'стёпа', 'степа',
+    'добрыня', 'ярик', 'вася', 'гена', 'рома', 'вадя', 'стас', 'лёня', 'леня', 'кеша', 'тимоша', 'данила', 'гаврила', 'никола', 'жора', 'эдя', 'артёмка'];
+  Z.FEM_SOFT = ['любовь', 'нинель', 'адель', 'ассоль', 'изабель', 'эсфирь', 'юдифь'];
+  Z.guessFem = function (name) {
+    var n = String(name || '').trim().toLowerCase().split(/\s+/)[0];
+    if (!n) return null;
+    if (Z.AMBIG.indexOf(n) >= 0) return null;
+    if (Z.MALE_A.indexOf(n) >= 0) return false;
+    if (Z.FEM_SOFT.indexOf(n) >= 0) return true;
+    if (/[ая]$/.test(n)) return true;
+    return false;
   };
 
   // ---------- Люди ----------
@@ -147,6 +164,8 @@
         case 'pastjob': return s.setup.job && Z.JOBS[s.setup.job] ? Z.JOBS[s.setup.job].n : 'тем, кем ты был';
         case 'pastjobi': return s.setup.job && Z.JOB_I[s.setup.job] ? Z.JOB_I[s.setup.job] : 'тем, кем был';
         case 'jobi': return s.job ? Z.JOB_I[s.job] : '';
+        case 'prevjob': var pj = Z.prevJob(s); return pj ? Z.JOBS[pj].n : '';
+        case 'prevjobi': var pj2 = Z.prevJob(s); return pj2 ? Z.JOB_I[pj2] : '';
         case 'pastage': return String(s.setup.age);
         case 'edu': return s.edu ? Z.EDU[s.edu].n.toLowerCase() : '';
       }
@@ -309,9 +328,17 @@
     if (e.gray) w *= 3;
     return w;
   };
+  // Сколько месяцев в одном ходе: до 30 — 1, после 30 — 2, после 40 — 3, после 50 — 4.
+  Z.step = function (s) { var a = Z.age(s); return a < 30 ? 1 : a < 40 ? 2 : a < 50 ? 3 : 4; };
+  // Попадает ли в текущий ход один из месяцев (0 — январь … 11 — декабрь)
+  Z.inMonth = function (s, mons) {
+    var n = s.lastStep || 1;
+    for (var k = 0; k < n; k++) if (mons.indexOf(Z.cal(s, s.m - k).mon) >= 0) return true;
+    return false;
+  };
   Z.density = function (s) {
     var a = Z.age(s);
-    var d = a < 23 ? 0.75 : a < 35 ? 0.5 : a < 50 ? 0.4 : 0.33;
+    var d = a < 23 ? 0.75 : a < 30 ? 0.55 : a < 40 ? 0.7 : a < 50 ? 0.75 : 0.8;
     d *= { slow: 1.25, normal: 1, fast: 0.6 }[s.tempo] || 1;
     return d;
   };
@@ -375,7 +402,8 @@
   Z.newTurn = function (s) {
     var t = { from: s.m, notes: [], q: [], i: 0 };
     var taken = {};
-    if (s.started) Z.tick(s);
+    var adv = function () { var n = Z.step(s); s.lastStep = n; for (var i = 0; i < n && !s.over; i++) { Z.tick(s); Z.checkEnd(s); } };
+    if (s.started) adv();
     s.started = true;
     var quietFrom = null;
     for (var guard = 0; guard < 40 && !s.over; guard++) {
@@ -386,10 +414,11 @@
       // Серый период — проматываем месяцы
       if (!forced.length && Z.gray(s) && !s.f.noskip && s.m > 6) {
         if (quietFrom != null) { t.notes.push(Z.quietNote(s, quietFrom, s.m - 1)); quietFrom = null; }
-        var k = s.st.joy < 15 ? R.int(6, 18) : R.int(2, 6);
+        var k = (s.st.joy < 15 ? R.int(6, 18) : R.int(2, 6)) * Math.max(1, Math.round(Z.step(s) / 1.5));
         if (Z.age(s) + k / 12 > s.endAge) k = Math.max(1, Math.floor((s.endAge - Z.age(s)) * 12));
         var from = s.m;
         for (var i = 0; i < k && !s.over; i++) { Z.tick(s); Z.checkEnd(s); }
+        s.lastStep = Math.min(12, k);
         t.notes.push({ gray: true, t: Z.cap(Z.dateStr(s, from)) + ' — ' + Z.dateStr(s, s.m) + '. ' + R.pick(Z.GRAY_NOTES) + (k >= 12 ? ' Прошло больше года.' : '') });
         t.q = t.q.concat(Z.forced(s, taken));
         var life = Z.pickRandom(s, 1, taken);
@@ -404,10 +433,11 @@
       if (forced.length) n = Math.max(0, n - forced.length);
       if (n) t.q = t.q.concat(Z.pickRandom(s, n, taken));
       if (t.q.length) break;
-      if (quietFrom == null) quietFrom = s.m;
-      Z.tick(s);
+      if (quietFrom == null) quietFrom = s.m - (s.lastStep || 1) + 1;
+      adv();
     }
     if (quietFrom != null && quietFrom < s.m) t.notes.push(Z.quietNote(s, quietFrom, s.m - 1));
+    t.to = s.m; t.span = s.lastStep || 1;
     s.turn = t;
     return t;
   };
@@ -421,8 +451,43 @@
     }
   };
 
-  Z.choicesOf = function (s, e, ctx) {
-    var list = typeof e.choices === 'function' ? e.choices(s, ctx) : e.choices;
+  // Варианты события: каждый раз — другой текст. Использованные запоминаются, пока не кончатся все.
+  Z.varsOf = function (s, e, ctx) {
+    var v = typeof e.vars === 'function' ? e.vars(s, ctx || {}) : e.vars;
+    return v || null;
+  };
+  Z.pickVar = function (s, inst) {
+    var e = Z.EV[inst.id]; if (inst.v != null || !e.vars) return inst.v;
+    var ctx = inst.ctx || {}, list = Z.varsOf(s, e, ctx);
+    if (!list || !list.length) return null;
+    var key = Z.key(e, ctx); s.vu = s.vu || {};
+    var used = s.vu[key] || [];
+    var ok = list.map(function (v, i) { return i; }).filter(function (i) { var v = list[i]; return !v.if || v.if(s, ctx); });
+    if (!ok.length) ok = list.map(function (v, i) { return i; });
+    var fresh = ok.filter(function (i) { return used.indexOf(i) < 0; });
+    if (!fresh.length) { used = used.filter(function (i) { return ok.indexOf(i) < 0; }); fresh = ok; }
+    var v = R.pick(fresh);
+    used.push(v); s.vu[key] = used; inst.v = v;
+    return v;
+  };
+  // Всё, что нужно показать карточке
+  Z.view = function (s, inst) {
+    var e = Z.EV[inst.id], ctx = inst.ctx || {};
+    // Прожитая карточка показывается такой, какой была (состояние с тех пор изменилось)
+    if (inst.done && inst.cache) return { e: e, ctx: ctx, title: inst.cache.title, text: inst.cache.text, choices: [] };
+    var v = Z.pickVar(s, inst), V = v != null ? (Z.varsOf(s, e, ctx) || [])[v] : null;
+    var out = {
+      e: e, ctx: ctx,
+      title: Z.t((V && V.title) || e.title || '', s, ctx),
+      text: Z.t((V && V.t) || e.text, s, ctx),
+      choices: Z.choicesOf(s, e, ctx, V)
+    };
+    inst.cache = { title: out.title, text: out.text };
+    return out;
+  };
+  Z.choicesOf = function (s, e, ctx, V) {
+    var src = V && V.c ? V.c : e.choices;
+    var list = typeof src === 'function' ? src(s, ctx) : src;
     list = (list || []).filter(function (c) { return !c.if || c.if(s, ctx); });
     return list.length ? list : [{ t: 'Дальше', res: '' }];
   };
@@ -446,7 +511,8 @@
   // Применить выбор
   Z.apply = function (s, ci, input) {
     var t = s.turn, inst = t.q[t.i], e = Z.EV[inst.id], ctx = inst.ctx || {};
-    var c = Z.choicesOf(s, e, ctx)[ci];
+    var c = Z.view(s, inst).choices[ci];
+    if (!c) c = { t: 'Дальше', res: '' };
     s.seen[Z.key(e, ctx)] = s.m;
     var snap = Z.snapshot(s);
     if (c.fx) Z.fx(s, c.fx, ctx);

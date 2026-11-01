@@ -63,14 +63,11 @@
   };
 
   // ---------- Работа ----------
-  Z.JOB_I = { prog: 'программистом', eng: 'инженером', arch: 'архитектором', design: 'дизайнером', doctor: 'врачом', psych: 'психологом',
-    teacher: 'учителем', journ: 'журналистом', writer: 'писателем', lawyer: 'юристом', account: 'финансистом', sales: 'менеджером по продажам',
-    marketing: 'маркетологом', biz: 'предпринимателем', science: 'учёным', music: 'музыкантом', cook: 'поваром', photo: 'фотографом',
-    rescue: 'спасателем', builder: 'прорабом' };
   Z.jobOpen = function (s, id) {
     var J = Z.JOBS[id];
     if (id === 'biz') return false; // только через своё дело
-    if (id === 'rescue' && s.st.hp < 60) return false;
+    if (['rescue', 'police', 'officer', 'coach'].indexOf(id) >= 0 && s.st.hp < 60) return false;
+    if (id === 'pilot' && s.st.hp < 70) return false;
     if (id === 'science') return !!s.f.grad;
     if (J.edu.length && s.degree && J.edu.indexOf(s.edu) >= 0) return true;
     if (J.fit && (s.fit[id] || 0) >= J.fit) return true;
@@ -80,17 +77,69 @@
   Z.openJobs = function (s) {
     return Object.keys(Z.JOBS).filter(function (id) { return id !== s.job && Z.jobOpen(s, id); });
   };
+  // ---------- Карьерный трек ----------
+  // s.career: [{ j, from, to, lvl }] — все профессии этой жизни по порядку. s.xp[j] — мастерство в каждой.
+  Z.famShare = function (a, b) {
+    var A = Z.JOBS[a].fam || [], B = Z.JOBS[b].fam || [];
+    return A.some(function (x) { return B.indexOf(x) >= 0; });
+  };
+  // Мастерство, с которым ты придёшь в профессию id: своё прошлое в ней, опыт смежных дел, учёба.
+  Z.skillFor = function (s, id) {
+    var J = Z.JOBS[id], xp = s.xp || {};
+    if (xp[id] != null) return xp[id];
+    var cur = s.job ? s.st.sk : null, best = 12;
+    if (s.degree && J.edu.indexOf(s.edu) >= 0) best = Math.max(best, s.job ? 30 : s.st.sk);
+    Object.keys(xp).concat(s.job ? [s.job] : []).forEach(function (j) {
+      var v = j === s.job ? cur : xp[j];
+      best = Math.max(best, v * (Z.famShare(j, id) ? 0.6 : 0.25));
+    });
+    if (!s.job && !Object.keys(xp).length) best = Math.max(best, s.st.sk * (s.degree && J.edu.indexOf(s.edu) >= 0 ? 1 : 0.6));
+    best += Math.min(20, (s.fit[id] || 0) * 0.3);
+    return Math.round(Z.clamp(best, 5, 90));
+  };
+  Z.prevJob = function (s) {
+    var c = s.career || [];
+    for (var i = c.length - 1; i >= 0; i--) if (c[i].j !== s.job) return c[i].j;
+    return null;
+  };
+  Z.trackStr = function (s) {
+    var seq = [];
+    (s.career || []).forEach(function (c) { if (seq[seq.length - 1] !== c.j) seq.push(c.j); });
+    return seq.map(function (j) { return Z.JOBS[j].n; }).join(' → ');
+  };
   Z.setJob = function (s, id, lvl) {
-    if (s.job && s.job !== id) s.jobsHad.push(s.job);
+    s.career = s.career || []; s.xp = s.xp || {};
+    var prev = s.job;
+    if (prev && prev !== id) { s.jobsHad.push(prev); Z.closeCareer(s); }
+    var sk = Z.skillFor(s, id);
+    if (prev && prev !== id) s.xp[prev] = Math.round(s.st.sk);
+    if (s.lvlOf && s.lvlOf[id] != null && lvl == null) lvl = Math.max(0, s.lvlOf[id] - 1);
     s.job = id; s.lvl = lvl || 0; s.jobM = 0; s.lvlM = 0;
+    if (!s.student || Z.age(s) > 22.5) s.st.sk = sk;
     if (Z.age(s) > 22.5) s.student = false;
-    Z.logLine(s, 'Новая работа: ' + Z.JOBS[id].t[s.lvl] + '.', 'work');
+    s.career.push({ j: id, from: s.m, to: null, lvl: s.lvl });
+    if (prev && prev !== id && !Z.famShare(prev, id)) {
+      s.f.switched_field = true;
+      Z.schedule(s, 'w_switch_doubt', 5, { J: id, O: prev });
+    }
+    Z.logLine(s, (prev && prev !== id ? 'Смена профессии: ' + Z.JOBS[prev].n + ' → ' + Z.JOBS[id].t[s.lvl] : 'Новая работа: ' + Z.JOBS[id].t[s.lvl]) + '.', 'work');
+  };
+  Z.closeCareer = function (s) {
+    var c = s.career && s.career[s.career.length - 1];
+    if (c && c.to == null) { c.to = s.m; c.lvl = s.lvl; }
+    s.lvlOf = s.lvlOf || {}; if (s.job) s.lvlOf[s.job] = s.lvl;
   };
   Z.quitJob = function (s, why) {
     if (!s.job) return;
     s.jobsHad.push(s.job);
+    s.xp = s.xp || {}; s.xp[s.job] = Math.round(s.st.sk);
+    Z.closeCareer(s);
     Z.logLine(s, (why || 'Ты ушёл с работы') + ' (' + Z.JOBS[s.job].n + ').', 'work');
     s.job = null; s.lvl = 0; s.jobM = 0; s.lvlM = 0;
+  };
+  // Сколько лет в профессии за всю жизнь
+  Z.yearsIn = function (s, j) {
+    return (s.career || []).filter(function (c) { return c.j === j; }).reduce(function (a, c) { return a + ((c.to == null ? s.m : c.to) - c.from) / 12; }, 0);
   };
   Z.promote = function (s) {
     if (!s.job || s.lvl >= 3) return;
@@ -112,14 +161,22 @@
     opts = opts || {};
     var list = (opts.ids || Z.offerJobs(s, opts.n || 3)).map(function (id) {
       var J = Z.JOBS[id], past = s.setup.job === id;
-      var lvl = opts.lvl != null ? opts.lvl : (s.st.sk >= 55 && Z.age(s) > 28 ? 1 : 0);
+      var sk = Z.skillFor(s, id);
+      var lvl = opts.lvl != null ? opts.lvl : (sk >= 55 && Z.age(s) > 28 ? 1 : 0);
+      if (s.lvlOf && s.lvlOf[id] != null && opts.lvl == null) lvl = Math.max(0, s.lvlOf[id] - 1);
       if (J.fit && !(J.edu.length && J.edu.indexOf(s.edu) >= 0 && s.degree)) lvl = Math.min(lvl, 1);
+      var back = s.xp && s.xp[id] != null && s.job !== id;
+      var note = past ? ' (знакомая дорога)' : back ? ' (вернуться в профессию)' : (s.job && Z.famShare(s.job, id) ? ' (опыт пригодится)' : (s.job ? ' (с нуля)' : ''));
       return {
-        t: Z.cap(J.t[lvl]) + (past ? ' (знакомая дорога)' : ''),
+        t: Z.cap(J.t[lvl]) + note,
         run: function (st) {
           Z.setJob(st, id, lvl);
           var fitTxt = (st.fit[id] || 0) >= 25 ? ' С первых дней чувствуешь: это — твоё.' : '';
           var pastTxt = past ? ' Ты уже был ' + Z.JOB_I[id] + ' в прошлой жизни — руки помнят, но смотришь ты теперь иначе.' : '';
+          var pj = Z.prevJob(st);
+          if (back) pastTxt += ' Ты возвращаешься в профессию, которую когда-то оставил. Многое изменилось — но не всё.';
+          else if (pj && Z.famShare(pj, id)) pastTxt += ' Опыт ' + Z.JOBS[pj].ng + ' здесь очень кстати.';
+          else if (pj) pastTxt += ' Раньше ты был ' + Z.JOB_I[pj] + '. Здесь ты новичок — и это непривычно.';
           st.st.joy = clamp(st.st.joy + 6, 0, 100);
           return 'Ты выходишь на новое место: ' + J.t[lvl] + '.' + pastTxt + fitTxt;
         }

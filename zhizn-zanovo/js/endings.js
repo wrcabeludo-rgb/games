@@ -42,6 +42,7 @@
     f.sameJob = s.job && s.job === s.setup.job;
     f.wifeSame = s.f.pastwife && s.partner === s.f.pastwife;
     f.savedWife = s.setup.married === 'widow' && s.f.pastwife && s.pp[s.f.pastwife].alive && s.partner === s.f.pastwife;
+    if (!s.job && Z.age(s) >= 63) s.f.retired = true;
     f.hp = s.st.hp; f.joy = s.st.joy; f.money = s.st.money;
     return f;
   };
@@ -75,11 +76,11 @@
     var sc = {};
     sc.family = (f.married && f.P.rel >= 60 ? 3 : 0) + (f.kids.length && f.kidRel >= 60 ? 3 : 0);
     sc.calling = f.fit >= 30 ? 2 + f.lvl : 0;
-    sc.artist = ['writer', 'music', 'photo', 'design'].indexOf(f.job) >= 0 && f.fit >= 35 ? 6 : 0;
+    sc.artist = ['writer', 'music', 'photo', 'design', 'actor', 'carpenter'].indexOf(f.job) >= 0 && f.fit >= 35 ? 6 : 0;
     sc.builder = (s.f.ownbiz || s.f.ownjob) && f.money >= 55 ? 5 : 0;
     sc.friend = (f.savedFriend && s.risk.friend ? 4 : 0) + (f.close.length >= 2 ? 2 : 0);
     sc.son = f.savedParents.length * 3 + (f.parRel >= 75 ? 2 : 0);
-    sc.healer = (['doctor', 'psych', 'rescue', 'teacher'].indexOf(f.job) >= 0 && f.fit >= 25 ? 3 : 0) + (s.f.volunteer ? 2 : 0) + (s.f.mentor ? 1 : 0);
+    sc.healer = (['doctor', 'psych', 'rescue', 'teacher', 'nurse', 'social', 'vet', 'coach'].indexOf(f.job) >= 0 && f.fit >= 25 ? 3 : 0) + (s.f.volunteer ? 2 : 0) + (s.f.mentor ? 1 : 0);
     sc.free = !s.partner && s.f.content_alone && f.joy >= 55 ? 5 : 0;
     sc.worker = f.lvl >= 3 && (!f.P || f.P.rel < 45) ? 5 : 0;
     sc.lonely = f.joy < 35 && !s.partner && f.close.length === 0 ? 7 : 0;
@@ -104,7 +105,9 @@
     if (s.over === 'death') {
       P.push('Жизнь оборвалась в ' + f.age + '. Раньше, чем хотелось. Здоровье — то, что в обеих жизнях откладывалось «на потом».');
     } else {
-      P.push(ARCH[arch].d);
+      var d = ARCH[arch].d;
+      if (arch === 'friend' && !(f.savedFriend && s.risk.friend)) d = 'Ты сберёг дружбу, которая выдержала годы. Рядом люди, которые придут по первому звонку — и к которым придёшь ты.';
+      P.push(d);
     }
     // Любовь
     if (f.married) P.push(Z.t('{P} рядом уже ' + Z.yearsStr(Math.max(1, Math.floor(Z.yearsMarried(s)))) + '.', s) + (f.wifeSame ? ' Ты снова выбрал её — и на этот раз сумел сберечь.' : (s.f.pastwife ? ' В этой жизни ты выбрал другую дорогу.' : '')) + (f.savedWife ? ' Она жива. Ты успел.' : ''));
@@ -126,7 +129,9 @@
     if (f.close.length >= 2) P.push(Z.t('Самые близкие друзья — {C1} и {C2}. Двое, на кого можно положиться всегда.', s));
     else if (f.close.length === 1) P.push(Z.t('Рядом остал{C1~ся|ась} {C1} — друг на всю жизнь.', s));
     // Работа
-    if (s.job) P.push('Работа: ' + Z.jobTitle(s) + '. ' + (f.fit >= 30 ? 'Ты её любишь.' : f.fit >= 15 ? 'Она тебе нравится.' : 'Она кормит, но не греет.'));
+    var track = Z.trackStr(s), nJobs = (track.match(/→/g) || []).length + 1;
+    if (s.job) P.push('Работа: ' + Z.jobTitle(s) + '. ' + (f.fit >= 30 ? 'Ты её любишь.' : f.fit >= 15 ? 'Она тебе нравится.' : 'Она кормит, но не греет.') + (nJobs > 1 ? ' Твой путь: ' + track + '. ' + (s.f.switched_field ? 'Ты не побоялся начать с нуля — и опыт прежних дел остался с тобой.' : '') : ''));
+    else if (nJobs > 1 || (s.career || []).length) P.push('Твой путь в работе: ' + track + '.');
     else if (s.f.retired) P.push('Ты на пенсии. У тебя наконец есть время.');
 
     var goals = Z.goals(s, f).map(function (g) { g.t = Z.t(g.t, s); return g; });
@@ -138,7 +143,7 @@
       ['Родители', { both: 'Оба живы', mom: 'Жива мама', dad: 'Жив папа', none: 'Их уже нет' }[su.parents] || '—',
         f.parents.length === 2 ? 'Оба живы' : f.parents.length ? (f.parents[0] === 'mom' ? 'Жива мама' : 'Жив папа') : 'Их уже нет'],
       ['Друзья', su.lostFriend ? 'Потерял друга' : 'Все рядом', f.riskFriend ? (f.savedFriend ? Z.t('{X} — рядом', s, { X: f.riskFriend.id }) : 'Не удержал') : (f.close.length + ' ' + Z.plural(f.close.length, 'близкий', 'близких', 'близких'))],
-      ['Работа', su.job && Z.JOBS[su.job] ? Z.cap(Z.JOBS[su.job].n) : 'Другое', s.job ? Z.cap(Z.JOBS[s.job].n) : (s.f.retired ? 'Пенсия' : 'Без работы')]
+      ['Работа', su.job && Z.JOBS[su.job] ? Z.cap(Z.JOBS[su.job].n) : 'Другое', Z.trackStr(s) ? Z.cap(Z.trackStr(s)) + (s.job ? '' : s.f.retired ? ' (пенсия)' : ' (сейчас без работы)') : (s.f.retired ? 'Пенсия' : 'Без работы')]
     ];
 
     // Что взять в настоящую жизнь
