@@ -1,5 +1,5 @@
 // Сервис-воркер: сначала сеть (чтобы новые версии приходили сразу), без сети — из кэша.
-const CACHE = 'zhizn-zanovo-v0.3.0';
+const CACHE = 'zhizn-zanovo-v0.4.0';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/style.css',
   'js/data/people.js', 'js/engine.js', 'js/life.js', 'js/data/ev_youth.js', 'js/data/ev_love.js',

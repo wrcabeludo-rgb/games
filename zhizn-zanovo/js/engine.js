@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var Z = window.Z = window.Z || {};
-  Z.VERSION = '0.3.0';
+  Z.VERSION = '0.4.0';
   Z.EV = {};
   Z.evList = [];
 
@@ -204,7 +204,7 @@
         case 'edu': return s.edu ? Z.EDU[s.edu].n.toLowerCase() : '';
       }
       var p = Z.who(s, ctx, parts[0]);
-      if (!p && parts[0] === 'P') p = { n: 'жена', fem: true, forms: Z.decl('жена', true) };
+      if (!p && parts[0] === 'P') { if (Z.STRICT) return '{P — нет жены}'; p = { n: 'жена', fem: true, forms: Z.decl('жена', true) }; }
       if (!p) return all;
       var f = p.forms || Z.decl(p.n, p.fem);
       return f[parts[1] || 'n'] || f.n;
@@ -510,8 +510,23 @@
     used.push(v); s.vu[key] = used; inst.v = v;
     return v;
   };
+  // Детерминированный генератор: случайности внутри карточки (какие варианты выбора показать) зависят только
+  // от самой карточки — иначе на экране одни варианты, а при нажатии пересчитываются другие.
+  Z.seeded = function (str) {
+    var h = 1779033703 ^ str.length;
+    for (var i = 0; i < str.length; i++) { h = Math.imul(h ^ str.charCodeAt(i), 3432918353); h = (h << 13) | (h >>> 19); }
+    return function () { h = Math.imul(h ^ (h >>> 16), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+  };
+  Z.withSeed = function (seed, fn) {
+    var old = R.rnd; R.rnd = Z.seeded(seed);
+    try { return fn(); } finally { R.rnd = old; }
+  };
   // Всё, что нужно показать карточке
   Z.view = function (s, inst) {
+    if (inst.seed == null) inst.seed = s.m + ':' + Math.floor(R.rnd() * 1e9);
+    return Z.withSeed(inst.id + '|' + inst.seed + '|' + JSON.stringify(inst.ctx || {}), function () { return Z.view0(s, inst); });
+  };
+  Z.view0 = function (s, inst) {
     var e = Z.EV[inst.id], ctx = inst.ctx || {};
     // Прожитая карточка показывается такой, какой была (состояние с тех пор изменилось)
     if (inst.done && inst.cache) return { e: e, ctx: ctx, title: inst.cache.title, text: inst.cache.text, choices: [] };

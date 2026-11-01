@@ -116,7 +116,7 @@
     if (s.lvlOf && s.lvlOf[id] != null && lvl == null) lvl = Math.max(0, s.lvlOf[id] - 1);
     s.job = id; s.lvl = lvl || 0; s.jobM = 0; s.lvlM = 0;
     if (!s.student || Z.age(s) > 22.5) s.st.sk = sk;
-    if (Z.age(s) > 22.5) s.student = false;
+    if (Z.age(s) > 22.5) { s.student = false; delete s.f.gradschool; delete s.f.parttime; }
     s.career.push({ j: id, from: s.m, to: null, lvl: s.lvl });
     if (prev && prev !== id && !Z.famShare(prev, id)) {
       s.f.switched_field = true;

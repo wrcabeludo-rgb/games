@@ -26,6 +26,7 @@
       '<p class="tag">Ты просыпаешься в восемнадцать. Родители живы. Всё ещё впереди.<br>Что ты сделаешь иначе?</p>' +
       (saved && !saved.over ? '<button class="btn primary" id="cont">Продолжить жизнь<small>' + esc(saved.setup.name) + ', ' + Z.ageInt(saved) + ' ' + Z.plural(Z.ageInt(saved), 'год', 'года', 'лет') + '</small></button>' : '') +
       '<button class="btn ' + (saved && !saved.over ? '' : 'primary') + '" id="new">Новая жизнь</button>' +
+      '<p class="fine">Версия ' + Z.VERSION + '</p>' +
       '<p class="fine">Это игра о втором шансе. Она не заменяет помощь специалиста — но может помочь задуматься о главном.</p>' +
       '</div>';
     if (h('#cont')) h('#cont').onclick = function () { S = saved; migrate(S); view = 'life'; render(); };
@@ -128,7 +129,7 @@
     if (!S) return title();
     if (S.over) return endScreen();
     var body = view === 'people' ? peopleView() : view === 'log' ? logView() : lifeView();
-    app.innerHTML = header() + '<main>' + body + '</main>' + nav();
+    app.innerHTML = header() + '<main>' + body + '<p class="ver">Жизнь заново · версия ' + Z.VERSION + '</p></main>' + nav();
     h('#menu').onclick = menu;
     h('#focus').onclick = focusPicker;
     app.querySelectorAll('.tabs button').forEach(function (b) { b.onclick = function () { view = b.dataset.v; render(); scrollTop(); }; });
@@ -151,7 +152,7 @@
     var inst = t.q[t.i];
     if (!inst) {
       html += '<div class="card calm"><p>Месяц прошёл спокойно.</p></div>';
-      html += '<button class="btn primary next" id="next">Следующий месяц →</button>';
+      html += '<button class="btn primary next" id="next">' + nextLabel() + '</button>';
       return html;
     }
     var V = Z.view(S, inst), e = V.e, ctx = V.ctx;
@@ -172,10 +173,44 @@
         return '<span class="' + (x.d > 0 ? 'up' : 'down') + '">' + (x.rel ? '♥ ' : '') + esc(x.n) + ' ' + (x.d > 0 ? '+' : '−') + Math.abs(x.d) + '</span>';
       }).join('') + '</div>';
       var more = t.i + 1 < t.q.length;
-      html += '<button class="btn primary next" id="next">' + (S.over ? 'Итоги жизни' : more ? 'Дальше' : 'Следующий месяц →') + '</button>';
+      html += '<button class="btn primary next" id="next">' + (S.over ? 'Итоги жизни' : more ? 'Дальше' : nextLabel()) + '</button>';
     }
     html += '</article>';
     return html;
+  }
+
+  function nextLabel() { var n = Z.step(S); return n === 1 ? 'Следующий месяц →' : 'Следующие ' + n + ' ' + Z.plural(n, 'месяц', 'месяца', 'месяцев') + ' →'; }
+
+  // ---------- Переход хода: солнце встаёт и садится, месяцы листаются ----------
+  function passage(from, to, gray, done) {
+    var months = Math.max(1, to - from);
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || from === to) return done();
+    var shown = Math.min(months, 4), per = months > 4 ? 520 : 720, total = shown * per;
+    var el = document.createElement('div');
+    el.className = 'passage' + (gray ? ' gray' : '');
+    el.innerHTML = '<div class="sky"></div><div class="sun"></div><div class="ground"></div><div class="plabel"><b></b><span></span></div>';
+    document.body.appendChild(el);
+    var sky = el.querySelector('.sky'), sun = el.querySelector('.sun'), lb = el.querySelector('.plabel b'), sub = el.querySelector('.plabel span');
+    sub.textContent = months > 4 ? 'прошло ' + (months >= 12 ? Z.yearsStr(Math.round(months / 12)) : months + ' ' + Z.plural(months, 'месяц', 'месяца', 'месяцев')) : '';
+    var t0 = null, finished = false;
+    function end() { if (finished) return; finished = true; el.classList.add('out'); setTimeout(function () { el.remove(); }, 260); done(); }
+    el.onclick = end;
+    function frame(ts) {
+      if (finished) return;
+      if (t0 == null) t0 = ts;
+      var e = ts - t0, k = Math.min(shown - 1e-6, e / per), i = Math.floor(k), p = k - i;
+      var W = el.clientWidth, H = el.clientHeight, hz = H * 0.62;
+      var x = -40 + p * (W + 80), y = hz - Math.sin(p * Math.PI) * H * 0.42;
+      sun.style.transform = 'translate(' + (x - 35) + 'px,' + (y - 35) + 'px)';
+      var light = Math.sin(p * Math.PI);
+      sky.style.opacity = String(0.15 + light * 0.85);
+      var m = Math.round(from + (i + 1) * months / shown);
+      lb.textContent = Z.cap(Z.dateStr(S, Math.min(to, m)));
+      if (e >= total) return setTimeout(end, 120);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
   }
 
   function bindLife() {
@@ -192,8 +227,10 @@
     if (nx) nx.onclick = function () {
       var t = S.turn;
       if (S.over) { save(); return render(); }
-      if (!(t.q[t.i] && Z.next(S))) Z.newTurn(S);
-      save(); render(); scrollTop();
+      if (t.q[t.i] && Z.next(S)) { save(); render(); scrollTop(); return; }
+      var from = S.m;
+      Z.newTurn(S); save();
+      passage(from, S.m, S.turn.notes.some(function (n) { return n && n.gray; }), function () { render(); scrollTop(); });
     };
   }
 
@@ -217,7 +254,7 @@
     }
     var ws = Object.keys(Z.PARTNERS).filter(function (id) { return s.pp[id].met && id !== s.partner; });
     if (ws.length) html += '<h4>Они</h4><ul>' + ws.map(function (id) { var p = s.pp[id]; return personRow(p, (s.exes.indexOf(id) >= 0 ? 'бывшая · ' : s.f['taken_' + id] ? 'замужем · ' : '') + Z.PARTNERS[id].desc); }).join('') + '</ul>';
-    html += '<h4>Дело</h4><ul><li><div><b>' + (s.student ? 'Студент' : s.job ? Z.cap(Z.jobTitle(s)) : 'Без работы') + '</b><small>' +
+    html += '<h4>Дело</h4><ul><li><div><b>' + (s.student ? (s.f.gradschool ? 'Аспирант' : 'Студент') : s.job ? Z.cap(Z.jobTitle(s)) : 'Без работы') + '</b><small>' +
       (s.edu ? Z.EDU[s.edu].n + ' факультет' + (s.degree ? ', диплом' : s.f.dropout ? ', без диплома' : '') : '') +
       (s.job && !s.student ? ' · ' + (s.fit[s.job] >= 30 ? 'любимая работа' : s.fit[s.job] >= 15 ? 'нравится' : 'просто работа') : '') + '</small></div></li>' +
       ((s.career || []).length ? '<li><div><b>Путь</b><small>' + (s.career || []).map(function (c) { var y = Math.max(0, Math.round(((c.to == null ? s.m : c.to) - c.from) / 12)); return esc(Z.cap(Z.JOBS[c.j].n)) + ' — ' + (y ? Z.yearsStr(y) : 'меньше года') + (c.to == null ? ' (сейчас)' : ''); }).join('<br>') + '</small></div></li>' : '') +
@@ -300,7 +337,7 @@
     var gotSet = {}; got.forEach(function (id) { gotSet[id] = 1; });
     if (got.length) html += '<h4>Достижения этой жизни · ' + got.length + '</h4>' + achList(gotSet, fresh, true);
     html += '<h4>Что взять с собой в настоящую жизнь</h4><ul class="refl">' + E.refl.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>';
-    html += '<button class="btn" id="achall">Все достижения</button><button class="btn" id="chron">Летопись этой жизни</button><button class="btn primary" id="again">Прожить ещё раз</button></div>';
+    html += '<p class="ver">Жизнь заново · версия ' + Z.VERSION + '</p><button class="btn" id="achall">Все достижения</button><button class="btn" id="chron">Летопись этой жизни</button><button class="btn primary" id="again">Прожить ещё раз</button></div>';
     app.innerHTML = html; scrollTop();
     h('#achall').onclick = achScreen;
     h('#again').onclick = function () { clearSave(); S = null; su = { regrets: {} }; stepI = 0; setupScreen(); };

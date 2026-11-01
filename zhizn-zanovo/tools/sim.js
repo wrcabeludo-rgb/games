@@ -14,6 +14,7 @@ ctx.window = ctx;
 vm.createContext(ctx);
 for (const f of files) vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx, { filename: f });
 const Z = ctx.Z;
+Z.STRICT = true; // текст про жену, когда жены нет, — ошибка
 
 const N = Number(process.argv[2] || 600);
 const VERBOSE = process.argv.includes('--verbose');
@@ -42,6 +43,12 @@ function randomSetup() {
   return su;
 }
 
+const WORK_ONLY = ['w_overtime', 'w_daily', 'w_dilemma', 'w_first_day', 'w_boss', 'w_burnout', 'w_headhunt', 'w_layoff', 'w_promo', 'w_mentor', 'w_ownbiz_solo', 'w_synergy', 'w_old_call', 'w_retire', 'fam_wife_career'].filter(id => id !== 'fam_wife_career');
+const EMPLOYED_ONLY = ['w_boss', 'w_headhunt', 'w_layoff', 'w_ownbiz_solo', 'p_olga_meet'];
+const KIDS_RE = /(твои дети|твоих детей|ваши дети|Дети |дети |детьми|внуков|внуки|внука |внучк|правнук|Ваш ребёнок)/;
+const KIDS_OK = ['y_summer1', 'pa_anniv', 'y_internship', 'w_daily', 'w_dilemma', 'w_first_day', 'g_teach', 'fr_godparent', 'fr_serega_dad', 'f_help', 'f_reunion', 'k_birth', 'p_kids_talk', 'fam_empty', 'fa_pasha_debt', 'f_crisis', 'pa_story', 'o_great_grand'];
+const YEARS = { 'пять': 5, 'десять': 10, 'пятнадцать': 15, 'двадцать': 20, 'тридцать': 30, 'сорок': 40 };
+const YEARS_RE = /(пять|десять|пятнадцать|двадцать|тридцать|сорок) лет (назад|вместе|не виделись|не разговаривали)/gi;
 function problem(msg) { problems.push(msg); }
 function check(text, where) {
   if (/\{[^}]*\}/.test(text)) problem(where + ': незаполненный шаблон ' + text.match(/\{[^}]*\}/)[0] + ' — ' + text.slice(0, 80));
@@ -103,6 +110,20 @@ for (let n = 0; n < N; n++) {
         // Работа: карточки про профессию — только про нынешнюю
         if (c.J && ['w_switch_doubt', 'w_retrain_done'].indexOf(inst.id) < 0 && c.J !== s.job) problem(`${inst.id}: карточка про «${Z.JOBS[c.J].n}», а работа сейчас «${s.job ? Z.JOBS[s.job].n : 'нет'}»`);
         if (inst.id === 'w_promo' && !V.text.includes(Z.JOBS[s.job].t[s.lvl + 1])) problem('w_promo: повышение не по нынешней профессии');
+        // Варианты выбора не меняются между показом и нажатием
+        const again = Z.view(s, inst).choices.map(ch => Z.t(ch.t, s, c)).join('|');
+        if (again !== V.choices.map(ch => Z.t(ch.t, s, c)).join('|')) problem(inst.id + ': варианты выбора меняются между показом и нажатием');
+        // Рабочие карточки — только когда работаешь (аспирантура — это учёба)
+        if (WORK_ONLY.indexOf(inst.id) >= 0 && !Z.working(s)) problem(`${inst.id}: рабочая карточка, а работы нет (${s.f.gradschool ? 'аспирант' : s.student ? 'студент' : 'без работы'})`);
+        if (EMPLOYED_ONLY.indexOf(inst.id) >= 0 && !Z.employed(s)) problem(`${inst.id}: карточка про начальство, а ты ${s.job ? Z.JOBS[s.job].n : 'без работы'}`);
+        if (inst.id === 'w_offer' && s.job) problem('w_offer: поиск работы, а работа уже есть');
+        // Дети и внуки в тексте, когда детей нет
+        const kidsFree = Z.kids(s).length === 0;
+        const kidsText = t => kidsFree && KIDS_RE.test(t) && KIDS_OK.indexOf(inst.id) < 0;
+        if (kidsText(V.text)) problem(`${inst.id}: про детей/внуков, а детей нет — ${V.text.slice(0, 90)}`);
+        // Сроки: «десять лет назад» в двадцать
+        const yrs = (V.text.match(YEARS_RE) || []).map(w => YEARS[w.split(' ')[0].toLowerCase()]).filter(Boolean);
+        yrs.forEach(n => { if (Z.age(s) - 18 < n) problem(`${inst.id}: «${n} лет» в тексте, а с восемнадцати прошло ${Math.floor(Z.age(s) - 18)} — ${V.text.slice(0, 80)}`); });
         // Повторы текста
         const key = inst.id + '|' + V.text;
         texts[key] = (texts[key] || 0) + 1;
@@ -110,7 +131,14 @@ for (let n = 0; n < N; n++) {
         if (inst.id === 'final_now') ci = Math.random() < 0.3 && V.choices.length > 1 ? 1 : 0;
         const input = V.e.ask ? pick(Z.KID_NAMES_M.concat(Z.KID_NAMES_F, ['Женя', 'Лука', 'Любовь'])) : null;
         const before = s.job, skBefore = s.st.sk;
+        const label = Z.t(V.choices[ci].t, s, c);
         const d = Z.apply(s, ci, input);
+        if (kidsText(d.res)) problem(`${inst.id} результат: про детей/внуков, а детей нет — ${d.res.slice(0, 90)}`);
+        // Выбранная работа — та, что была написана на кнопке
+        if ((inst.id === 'w_offer' || inst.id === 'y_internship') && s.job && inst.id === 'w_offer' && !/Подождать/.test(label)) {
+          const want = label.replace(/ \(.*\)$/, '').toLowerCase();
+          if (Z.JOBS[s.job].t[s.lvl].toLowerCase() !== want) problem(`w_offer: на кнопке «${label}», а получилась работа «${Z.JOBS[s.job].t[s.lvl]}»`);
+        }
         check(d.res, inst.id + ' результат');
         // Как в интерфейсе: после выбора заново рисуются все карточки хода
         for (let j = 0; j <= t.i; j++) Z.view(s, t.q[j]);

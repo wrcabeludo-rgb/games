@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var Z = window.Z, R = Z.R;
-  var A = Z.age;
+  var A = Z.age, C = Z.C;
 
   function memory(s) {
     var L = [];
@@ -18,7 +18,43 @@
     return L.join(' ');
   }
 
+  var grad = function (s) { return !!s.f.gradschool && s.student; };
   Z.def([
+    // ---------- Аспирантура (учёба, а не работа) ----------
+    {
+      id: 'g_lab', w: 20, if: grad, title: 'Аспирантура',
+      text: 'Профессор сваливает на тебя половину своей работы: «Это же для твоей диссертации, коллега». Ты сидишь в лаборатории до полуночи третью неделю.',
+      choices: [
+        C('Делать — опыт не купишь', 'sk+6 hp-2 fit.science+6', 'Ты разбираешься в том, чего не знает никто на кафедре. Профессор начинает спрашивать твоё мнение.'),
+        C('Мягко отстоять своё время', 'joy+3 sk+2', 'Профессор хмыкает, но уважительно. Ты успеваешь и диссертацию, и жизнь.')
+      ]
+    },
+    {
+      id: 'g_teach', w: 16, if: grad, title: 'Первый семинар',
+      text: 'Тебя ставят вести семинары у первокурсников. Ты входишь в аудиторию и видишь себя — восемнадцатилетнего, растерянного, с облупленным потолком общаги в голове.',
+      choices: [
+        C('Учить так, как хотел бы, чтобы учили тебя', 'joy+6 sk+3 hobby.help+8 fit.teacher+8', 'Студенты ходят на твои семинары даже с похмелья. Один потом пишет: «Вы первый, кто объяснил, зачем это всё».'),
+        C('Отчитать программу — и в лабораторию', 'sk+2', 'Семинары проходят. Ты их не запоминаешь. Они тебя тоже.')
+      ]
+    },
+    {
+      id: 'g_money', w: 14, if: grad, title: 'На стипендию',
+      text: 'Однокурсники уже работают, покупают машины, снимают квартиры. А ты считаешь копейки до стипендии и ешь гречку. «Может, бросить?» — шепчет голос.',
+      choices: [
+        C('Подрабатывать репетитором', 'money+8 hp-1 +parttime', 'Вечерами — ученики, днём — лаборатория. Тяжело, но хватает и на жизнь, и на книги.'),
+        C('Терпеть — это вложение в себя', 'joy-2 sk+3', 'Гречка, наука, гордость. Ты знаешь, ради чего.'),
+        { t: 'Бросить аспирантуру и пойти работать', run: function (s) { s.student = false; delete s.f.gradschool; delete s.f.parttime; s.queue = s.queue.filter(function (q) { return q.id !== 'g_defense'; }); Z.logLine(s, 'Ушёл из аспирантуры.', 'life'); Z.chain(s, 'w_offer'); return 'Ты забираешь документы. Профессор долго молчит, потом жмёт руку: «Жаль. Но жизнь — твоя».'; } }
+      ]
+    },
+    {
+      id: 'g_defense', manual: true, if: grad, title: 'Защита',
+      text: 'Защита диссертации. Учёный совет, пожилые профессора, твой голос немного дрожит. Последний вопрос — и тишина. Потом председатель говорит: «Единогласно».',
+      choices: [
+        { t: 'Остаться в науке', run: function (s) { s.student = false; delete s.f.gradschool; delete s.f.parttime; s.f.grad = true; Z.setJob(s, 'science', 1); Z.fx(s, 'joy+10'); Z.logLine(s, 'Защитил диссертацию. Кандидат наук.', 'work'); return 'Кандидат наук. Тебе дают место научного сотрудника в лаборатории. Зарплата скромная. Счастье — нет.'; } },
+        { t: 'С учёной степенью — искать работу где угодно', run: function (s) { s.student = false; delete s.f.gradschool; delete s.f.parttime; s.f.grad = true; Z.fx(s, 'joy+8 sk+4'); Z.logLine(s, 'Защитил диссертацию.', 'work'); Z.chain(s, 'w_offer'); return 'Степень в кармане. Теперь — на свободу, искать своё.'; } }
+      ]
+    },
+
     {
       id: 'y_start', manual: true, title: 'Пробуждение',
       text: function (s) {
@@ -304,7 +340,7 @@
       choices: [
         { t: 'Остаться в городе и искать работу', run: function (s) { s.degree = true; s.student = false; delete s.f.parttime; Z.logLine(s, 'Получил диплом.', 'life'); Z.chain(s, 'w_offer'); return 'Город, который стал твоим. Первым делом — работа.'; } },
         { t: 'Вернуться в родной город, к родителям', if: function (s) { return Z.parentsAlive(s).length; }, run: function (s) { s.degree = true; s.student = false; s.f.hometown = true; Z.fx(s, '@parents+15 @vitya+10 @lena+8'); Z.logLine(s, 'Получил диплом и вернулся в родной город.', 'life'); Z.chain(s, 'w_offer'); return 'Родной город встречает тебя тем же вокзалом. Мама плачет на перроне. Работы здесь меньше, но здесь — свои.'; } },
-        { t: 'Остаться в аспирантуре', if: function (s) { return s.f.sci || s.st.sk >= 45; }, run: function (s) { s.degree = true; s.student = false; s.f.grad = true; Z.fx(s, 'sk+6 money-4'); Z.setJob(s, 'science', 0); Z.logLine(s, 'Диплом и аспирантура.', 'life'); return 'Профессор жмёт руку: «Я на тебя рассчитывал». Денег мало, задач много — и все интересные.'; } },
+        { t: 'Остаться в аспирантуре', if: function (s) { return s.f.sci || s.st.sk >= 45; }, run: function (s) { s.degree = true; s.student = true; s.f.gradschool = true; Z.fx(s, 'sk+6 money-4'); Z.schedule(s, 'g_defense', 36); Z.logLine(s, 'Диплом. Поступил в аспирантуру.', 'life'); return 'Профессор жмёт руку: «Я на тебя рассчитывал». Ещё три года учёбы: стипендия смешная, задачи интересные.'; } },
         { t: 'Уехать в большой город — рискнуть', run: function (s) { s.degree = true; s.student = false; s.f.bigcity = true; Z.fx(s, '+brave joy+6 money-6 @parents-4 @friends-4'); Z.logLine(s, 'Уехал в большой город.', 'life'); Z.chain(s, 'w_offer'); return 'Плацкарт, чемодан, адрес съёмной комнаты на бумажке. Страшно и восхитительно.'; } }
       ]
     },

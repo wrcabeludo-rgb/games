@@ -40,7 +40,7 @@ p { line-height: 1.55; }
 @keyframes rise { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
 
 /* Анкета */
-.setup { padding: 28px 0 40px; animation: fade .35s ease both; }
+.setup { padding: calc(28px + env(safe-area-inset-top)) 0 40px; animation: fade .35s ease both; }
 .setup h2 { font-family: var(--serif); font-weight: 400; font-size: 28px; margin: 6px 0 8px; line-height: 1.2; }
 .kicker { text-transform: uppercase; letter-spacing: .12em; font-size: 11px; color: var(--acc); margin: 18px 0 0; }
 .hint { color: var(--dim); font-size: 14.5px; margin: 0 0 16px; }
@@ -59,7 +59,7 @@ p { line-height: 1.55; }
 @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
 /* Шапка */
-.top { display: flex; align-items: center; justify-content: space-between; padding: 14px 0 8px; position: sticky; top: 0; background: var(--bg); z-index: 5; }
+.top { display: flex; align-items: center; justify-content: space-between; padding: calc(14px + env(safe-area-inset-top)) 0 8px; position: sticky; top: 0; background: var(--bg); z-index: 5; }
 .when b { display: block; font-family: var(--serif); font-size: 21px; font-weight: 400; }
 .when span { color: var(--dim); font-size: 13px; }
 .when em { color: var(--gray); font-style: normal; }
@@ -121,7 +121,7 @@ main { padding-top: 14px; }
 .sheet h3 { margin: 0 0 6px; font-family: var(--serif); font-weight: 400; font-size: 23px; }
 
 /* Итоги */
-.ending { padding: 34px 0 40px; animation: fade .8s ease both; }
+.ending { padding: calc(34px + env(safe-area-inset-top)) 0 40px; animation: fade .8s ease both; }
 .ending h1 { font-family: var(--serif); font-weight: 400; font-size: 38px; line-height: 1.1; margin: 6px 0 18px; }
 .ending > p { font-family: var(--serif); font-size: 17.5px; }
 .ending.death h1 { color: var(--dim); }
@@ -156,3 +156,17 @@ body[data-style="markers"] { --acc: #ff7aa8; --acc2: #ffb347; }
 body[data-style="acrylic"] { --acc: #e8c547; --acc2: #d9534f; }
 body[data-style="watercolor"] { --acc: #b9a7e0; --acc2: #8fc9c0; }
 body[data-style="graphite"] { --acc: #c9c4bd; --acc2: #8d8794; }
+
+.ver { text-align: center; color: var(--gray); font-size: 11.5px; margin: 26px 0 6px; opacity: .8; }
+
+/* Переход хода: восход и закат */
+.passage { position: fixed; inset: 0; z-index: 40; background: #0e0c14; overflow: hidden; cursor: pointer; animation: fade .25s ease both; }
+.passage.out { opacity: 0; transition: opacity .25s; }
+.passage .sky { position: absolute; inset: 0; background: linear-gradient(#5d7fb8 0%, #e8a46a 52%, #f6c98a 62%, #2a2233 62.2%); transition: opacity .1s linear; }
+.passage.gray .sky { background: linear-gradient(#6f6f78 0%, #9a979c 55%, #b0aaa6 62%, #2a2830 62.2%); }
+.passage .sun { position: absolute; left: 0; top: 0; width: 70px; height: 70px; border-radius: 50%; background: radial-gradient(circle, #fff3c4 0%, #ffd08a 40%, #f0a65a 68%, rgba(240,166,90,0) 72%); box-shadow: 0 0 60px rgba(255,200,120,.6); }
+.passage.gray .sun { background: radial-gradient(circle, #f2f0ea 0%, #d8d4cc 55%, rgba(200,200,200,0) 72%); box-shadow: 0 0 40px rgba(220,220,220,.35); }
+.passage .ground { position: absolute; left: 0; right: 0; top: 62%; bottom: 0; background: linear-gradient(#241d2c, #120f18); }
+.passage .plabel { position: absolute; left: 0; right: 0; bottom: calc(18% + env(safe-area-inset-bottom)); text-align: center; color: #f3e7d6; }
+.passage .plabel b { display: block; font-family: var(--serif); font-weight: 400; font-size: 30px; }
+.passage .plabel span { display: block; margin-top: 6px; font-size: 14px; color: #b9aec4; }
