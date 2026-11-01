@@ -14,6 +14,8 @@
     list.forEach(function (e) {
       if (Z.EV[e.id]) throw new Error('Повтор события ' + e.id);
       if (e.once === undefined) e.once = !e.rep && !e.manual;
+      // События про нынешнюю жену/девушку: если она сменилась в этом же ходу — карточку пропускаем
+      if (e.ctx && /P: s\.partner|curP/.test(String(e.ctx))) e.samep = true;
       Z.EV[e.id] = e;
       Z.evList.push(e);
     });
@@ -365,6 +367,7 @@
     if (e.once && s.seen[k] != null) return false;
     if (e.rep && s.seen[k] != null && s.m - s.seen[k] < e.rep) return false;
     if (e.gray && !Z.gray(s)) return false;
+    if (e.samep && ctx && ctx.P && ctx.P !== s.partner) return false;
     if (s.f.inarmy && !e.army && !e.manual && Z.ARMY_OK.indexOf(e.id) < 0) return false;
     if (e.uni && !Z.uni(s)) return false;
     if (e.army && !s.f.inarmy) return false;
@@ -611,6 +614,7 @@
     var t = s.turn; t.i++;
     while (t.i < t.q.length) {
       var inst = t.q[t.i], e = Z.EV[inst.id];
+      if (e.samep && inst.ctx && inst.ctx.P && inst.ctx.P !== s.partner) { t.i++; continue; }
       var armyBlock = (s.f.inarmy && !e.army && !e.manual && Z.ARMY_OK.indexOf(e.id) < 0) || (e.uni && !Z.uni(s));
       if (!armyBlock && (!e.if || e.if(s, inst.ctx || {}))) break;
       t.i++;
