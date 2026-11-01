@@ -72,7 +72,12 @@
     if (h('#back')) h('#back').onclick = function () { stepI--; setupScreen(); };
     if (st.type === 'text') {
       var inp = h('#ti');
-      var go = function () { su[st.k] = inp.value.trim() || st.ph; if (st.k === 'name' && su[st.k] === 'Андрей' && !inp.value.trim()) su.name = 'Андрей'; stepI++; setupScreen(); };
+      var go = function () {
+        var v = inp.value.trim();
+        // Пустое имя — не «Имя», а случайное настоящее имя
+        if (!v) v = st.k === 'wifeName' ? Z.R.pick(Z.WIFE_NAMES) : st.k === 'lostName' ? '' : st.ph;
+        su[st.k] = v; stepI++; setupScreen();
+      };
       h('#tn').onclick = go; inp.onkeydown = function (e) { if (e.key === 'Enter') go(); };
       setTimeout(function () { inp.focus(); }, 50);
     } else {
@@ -152,6 +157,7 @@
       if (typeof n === 'string') html += '<div class="note">' + esc(n) + '</div>';
       else if (n.news) html += '<div class="note news"><b>Тем временем</b>' + esc(n.t.replace(/^Тем временем: /, '')) + '</div>';
       else if (n.era) html += '<div class="note era">' + esc(n.t) + '</div>';
+      else if (n.kids) html += '<div class="note kids">🎂 ' + esc(n.t) + '</div>';
       else html += '<div class="note gray">' + esc(n.t) + '</div>';
     });
     // уже прожитые карточки этого хода — свернуты
@@ -170,7 +176,8 @@
     save();
     var art = Z.artFor(S, inst.id);
     var cls = e.map ? ' chapend' : e.chapter ? ' chapter' : e.pause ? ' pause' : inst.id === 'stranger' || inst.id === 'stranger_reveal' ? ' stranger' : '';
-    html += '<article class="card' + cls + '">' + (art && !e.pause && !e.map ? '<img class="illus" src="' + art + '" alt="" loading="lazy">' : '') + (V.title ? '<h3>' + esc(V.title) + '</h3>' : '') + paras(V.text);
+    var kidTag = ctx.K && S.pp[ctx.K] ? '<span class="kidtag">' + esc(S.pp[ctx.K].n) + ' · ' + kidAgeStr(Z.kidAge(S, S.pp[ctx.K])) + '</span>' : '';
+    html += '<article class="card' + cls + '">' + (art && !e.pause && !e.map ? '<img class="illus" src="' + art + '" alt="" loading="lazy">' : '') + (V.title ? '<h3>' + esc(V.title) + kidTag + '</h3>' : '') + paras(V.text);
     if (e.map) html += mapHtml(S, ctx.C);
     if (!inst.done) {
       if (e.ask) {
@@ -193,16 +200,18 @@
     return html;
   }
 
+  function kidAgeStr(a) { if (a < 1) { var m = Math.max(1, Math.round(a * 12)); return m + ' ' + Z.plural(m, 'месяц', 'месяца', 'месяцев'); } return Z.yearsStr(Math.floor(a)); }
   function nextLabel() { var n = Z.step(S); return n === 1 ? 'Следующий месяц →' : 'Следующие ' + n + ' ' + Z.plural(n, 'месяц', 'месяца', 'месяцев') + ' →'; }
 
   // ---------- Переход хода: солнце встаёт и садится, месяцы листаются ----------
   function passage(from, to, gray, done) {
     var months = Math.max(1, to - from);
+    // При «Уменьшении движения» в настройках телефона — без летящего солнца, но со сменой месяцев
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce || from === to) return done();
+    if (from === to) return done();
     var shown = Math.min(months, 4), per = months > 4 ? 520 : 720, total = shown * per;
     var el = document.createElement('div');
-    el.className = 'passage' + (gray ? ' gray' : '');
+    el.className = 'passage' + (gray ? ' gray' : '') + (reduce ? ' calm' : '');
     el.innerHTML = '<div class="sky"></div><div class="sun"></div><div class="ground"></div><div class="plabel"><b></b><span></span></div>';
     document.body.appendChild(el);
     var sky = el.querySelector('.sky'), sun = el.querySelector('.sun'), lb = el.querySelector('.plabel b'), sub = el.querySelector('.plabel span');
@@ -231,21 +240,26 @@
 
   // ---------- Карта судьбы ----------
   function mapHtml(s, ch) {
-    var list = Z.forkMap(s, ch);
-    if (!list.length) return '';
-    return '<div class="fmap">' + list.map(function (f) {
-      if (!f.reached) return '<div class="fork un"><b>' + esc(f.n) + '</b><small>' + (f.opts.length ? 'Не случилось в этой жизни. Варианты из прошлых жизней: ' + f.opts.length : 'Не случилось в этой жизни') + '</small></div>';
-      return '<div class="fork"><b>' + esc(f.n) + '</b>' + f.opts.map(function (o) {
-        return '<div class="fo' + (o.taken ? ' taken' : '') + '"><span>' + (o.taken ? '●' : o.known ? '○' : '?') + '</span><div>' + esc(o.t) +
-          (o.taken && o.r ? '<small>' + esc(o.r) + '</small>' : !o.taken && o.known ? '<small>В другой жизни: ' + esc(o.r) + '</small>' : '') + '</div></div>';
-      }).join('') + '</div>';
-    }).join('') + '</div>';
+    var M = Z.forkMap(s, ch);
+    if (!M.nodes.length && !M.missed.length && !M.lead.length) return '';
+    var html = '<div class="flow"><div class="fstat">Дорог этой главы открыто за все жизни: <b>' + M.open + '</b> из ' + M.all + '</div>';
+    M.lead.forEach(function (t) { html += '<div class="fled">' + esc(t) + '</div>'; });
+    M.nodes.forEach(function (n) {
+      html += '<div class="fnode' + (n.xr ? ' xr' : '') + '"><div class="fh"><b>' + esc(n.n.replace('★ ', '')) + '</b><small>' + n.age + ' ' + Z.plural(n.age, 'год', 'года', 'лет') + '</small></div><div class="fbrs">' +
+        n.opts.map(function (o) {
+          return '<div class="fbr' + (o.taken ? ' taken' : o.known ? ' known' : '') + '"><span>' + (o.taken ? '●' : o.known ? '○' : '?') + '</span><div>' + esc(o.t) +
+            (o.taken && o.r ? '<small>' + esc(o.r) + '</small>' : o.known ? '<small>В другой жизни: ' + esc(o.r) + '</small>' : '') + '</div></div>';
+        }).join('') + '</div>' +
+        (n.led.length ? '<div class="fleds">' + n.led.map(function (t) { return '<div class="fled">→ ' + esc(t) + '</div>'; }).join('') + '</div>' : '') + '</div>';
+    });
+    if (M.missed.length) html += '<div class="fmiss"><b>Развилки, мимо которых ты прошёл</b>' + M.missed.map(function (m) { return '<div class="fnode un"><div class="fh"><b>' + esc(m.n.replace('★ ', '')) + '</b></div><small>' + (m.known ? 'Пройдено в других жизнях: ' + m.known + ' ' + Z.plural(m.known, 'путь', 'пути', 'путей') : '???') + '</small></div>'; }).join('') + '</div>';
+    return html + '</div>';
   }
   function mapScreen() {
     var upto = S ? (S.chI || 0) : 6, html = '';
     for (var c = 0; c <= upto; c++) html += '<h4>Глава ' + Z.ROMAN[c] + ' · ' + esc(Z.CHAPTERS[c].n) + '</h4>' + (mapHtml(S, c) || '<p class="hint">Развилок пока нет.</p>');
     var box = document.createElement('div');
-    box.innerHTML = '<div class="modal"><div class="sheet tall"><h3>Карта судьбы</h3><p class="hint">● — твой выбор, ○ — дорога, пройденная в другой жизни, ? — ещё не пройденная.</p>' + html + '<button class="btn" id="cl">Закрыть</button></div></div>';
+    box.innerHTML = '<div class="modal"><div class="sheet tall"><h3>Карта судьбы</h3><p class="hint">● — твой выбор, ○ — дорога, пройденная в другой жизни, ? — ещё не пройденная. → — к чему привёл выбор. Звёздочкой отмечены самые трудные развилки.</p>' + html + '<button class="btn" id="cl">Закрыть</button></div></div>';
     document.body.appendChild(box.firstChild);
     document.querySelector('#cl').onclick = function () { document.querySelector('.modal').remove(); };
   }
@@ -363,7 +377,7 @@
     var html = '<div class="modal"><div class="sheet"><h3>Меню</h3>' +
       '<p class="hint">Темп жизни</p><div class="opts">' + [['slow', 'Подробно'], ['normal', 'Обычно'], ['fast', 'Быстро']].map(function (o) { return '<button class="opt' + (S.tempo === o[0] ? ' on' : '') + '" data-t="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>' +
       '<div class="opts"><button class="opt' + (S.opt.sound !== false ? ' on' : '') + '" id="snd">🎵 Звук: ' + (S.opt.sound !== false ? 'вкл' : 'выкл') + '</button>' +
-      '<button class="opt' + (S.opt.stranger !== false ? ' on' : '') + '" id="strg">🕯 Незнакомец (тест): ' + (S.opt.stranger !== false ? 'вкл' : 'выкл') + '</button></div>' +
+      '</div>' +
       '<button class="btn" id="fmapb">Карта судьбы</button>' +
       '<button class="btn" id="ach">Достижения</button>' +
       (Z.album().length ? '<button class="btn" id="albm">Альбом жизней</button>' : '') +
@@ -379,7 +393,7 @@
     md.querySelector('#fmapb').onclick = function () { md.remove(); mapScreen(); };
     if (md.querySelector('#albm')) md.querySelector('#albm').onclick = function () { md.remove(); albumScreen(); };
     md.querySelector('#snd').onclick = function () { S.opt.sound = S.opt.sound === false; save(); sound(); md.remove(); menu(); };
-    md.querySelector('#strg').onclick = function () { S.opt.stranger = S.opt.stranger === false; save(); md.remove(); menu(); };
+
     md.querySelector('#reset').onclick = function () { if (confirm('Стереть эту жизнь и начать новую?')) { clearSave(); S = null; md.remove(); su = { regrets: {} }; stepI = 0; setupScreen(); } };
   }
 
@@ -412,7 +426,7 @@
     got.forEach(function (id) { if (!have[id]) have[id] = Date.now(); }); Z.achSave(have);
     var gotSet = {}; got.forEach(function (id) { gotSet[id] = 1; });
     if (got.length) html += '<h4>Достижения этой жизни · ' + got.length + '</h4>' + achList(gotSet, fresh, true);
-    if ((S.diary || []).length) html += '<h4>Ты сам сказал</h4><ul class="diary">' + S.diary.map(function (d) { return '<li>' + esc(d.t) + '</li>'; }).join('') + '</ul>';
+    if ((S.diary || []).length) html += '<h4>Твои ответы</h4><ul class="diary">' + S.diary.map(function (d) { return '<li><span>' + esc(Z.PAUSES[d.q] ? Z.PAUSES[d.q](S) : '') + '</span>' + esc(d.t) + '</li>'; }).join('') + '</ul>';
     html += '<h4>Что взять с собой в настоящую жизнь</h4><ul class="refl">' + E.refl.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>';
     html += '<p class="ver">Жизнь заново · версия ' + Z.VERSION + '</p><button class="btn" id="mape">Карта судьбы</button><button class="btn" id="albe">Альбом жизней</button><button class="btn" id="achall">Все достижения</button><button class="btn" id="chron">Летопись этой жизни</button><button class="btn primary" id="again">Прожить ещё раз</button></div>';
     Z.albumAdd(S, E);

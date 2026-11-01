@@ -45,6 +45,7 @@ function randomSetup() {
   return su;
 }
 
+const SEASON = [[/Картошку копать/, [7, 8]], [/Пасх/, [3, 4]], [/^Осень\./, [8, 9, 10]], [/^Весна\./, [2, 3, 4]], [/^Лето\./, [5, 6, 7]], [/Ночь, мороз/, [11, 0, 1, 2]]];
 const WORK_ONLY = ['w_overtime', 'w_daily', 'w_dilemma', 'w_first_day', 'w_boss', 'w_burnout', 'w_headhunt', 'w_layoff', 'w_promo', 'w_mentor', 'w_ownbiz_solo', 'w_synergy', 'w_old_call', 'w_retire', 'fam_wife_career'].filter(id => id !== 'fam_wife_career');
 const EMPLOYED_ONLY = ['w_boss', 'w_headhunt', 'w_layoff', 'w_ownbiz_solo', 'p_olga_meet'];
 const KIDS_RE = /(твои дети|твоих детей|ваши дети|Дети |дети |детьми|внуков|внуки|внука |внучк|правнук|Ваш ребёнок)/;
@@ -120,7 +121,15 @@ for (let n = 0; n < N; n++) {
         if (inst.id === 'ch_start') stat.chapters++;
         // В армии — только армейское и самое важное
         const ev = Z.EV[inst.id];
-        if (s.f.inarmy && !ev.army && !ev.prio && !ev.manual && Z.ARMY_OK.indexOf(inst.id) < 0) problem(`${inst.id}: обычная карточка во время армии`);
+        if (s.f.inarmy && !ev.army && !ev.manual && Z.ARMY_OK.indexOf(inst.id) < 0) problem(`${inst.id}: обычная карточка во время армии`);
+        // Студенческая жизнь — только в институте; времена года; неуместные знакомства
+        if (ev.uni && !Z.uni(s)) problem(`${inst.id}: студенческое событие, а ты не в институте`);
+        const mons = []; for (let k = 0; k < (s.lastStep || 1); k++) mons.push(Z.cal(s, s.m - k).mon);
+        SEASON.forEach(([re, ok]) => { if (re.test(V.text) && !mons.some(m => ok.indexOf(m) >= 0)) problem(`${inst.id}: «${V.text.match(re)[0]}» в ${Z.MONTHS[mons[0]]}`); });
+        if (inst.id === 'p_meet_parents' && Z.married(s)) problem('p_meet_parents: знакомство с родителями после свадьбы');
+        if (inst.id === 'pa_single_worry' && (s.partner || s.f.divorced)) problem('pa_single_worry: мама сватает при жене или после развода');
+        if (inst.id === 'mem_back' && s.pp[c.X] && s.pp[c.X].kind === 'partner' && s.partner && c.X !== s.partner) problem('mem_back: воспоминание другой женщины при жене');
+        if (inst.id === 'w_first_day' && s.jobAlt) problem('w_first_day: общий первый день вместо своего');
         // Варианты выбора не меняются между показом и нажатием
         const again = Z.view(s, inst).choices.map(ch => Z.t(ch.t, s, c)).join('|');
         if (again !== V.choices.map(ch => Z.t(ch.t, s, c)).join('|')) problem(inst.id + ': варианты выбора меняются между показом и нажатием');
@@ -195,7 +204,7 @@ for (let n = 0; n < N; n++) {
   }
 }
 
-const never = Z.evList.map(e => e.id).filter(id => !seen[id]);
+const never = Z.evList.filter(e => !e.off).map(e => e.id).filter(id => !seen[id]);
 console.log(`Жизней: ${N}, ходов в среднем: ${(turns / N).toFixed(0)}, карточек: ${(cards / N).toFixed(0)}, смертей: ${deaths}`);
 console.log('Карточек за жизнь по возрасту игрока: ' + Object.keys(cardsByTarget).sort().map(a => `${a} лет — ${(cardsByTarget[a].reduce((x, y) => x + y, 0) / cardsByTarget[a].length).toFixed(0)}`).join(', '));
 console.log(`Цели: исправлено ${fixedGoals} из ${totalGoals}. Смен профессии: ${switches}, «старый опыт пригодился»: ${synergy}`);

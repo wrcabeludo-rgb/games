@@ -61,6 +61,7 @@
       id: 'w_promo', rep: 6, w: 22, if: function (s) { return Z.canPromote(s) && s.job !== 'biz' && Z.working(s); }, title: 'Повышение',
       text: function (s) {
         var k = Z.jobKind(s), next = Z.JOBS[s.job].t[s.lvl + 1];
+        if (s.jobAlt) return 'Хозяин, у которого ты начинал, предлагает расти: «Хватит стоять за прилавком. Будешь ' + next + ' — поведёшь людей». Больше денег, больше ответственности.';
         if (k === 'free') return 'Тебя замечают: больше заказов, больше денег, твоё имя начинают узнавать. Ещё шаг — и ты ' + next + '. Но и работы станет вдвое больше.';
         if (k === 'own') return 'Дело растёт. Можно расшириться и стать — ' + next + '. Больше денег и людей, меньше сна.';
         return 'Начальство предлагает повышение: ' + next + '. Больше денег, больше ответственности — и меньше вечеров дома.';
@@ -72,7 +73,7 @@
     },
 
     {
-      id: 'w_dilemma', per: 'J', w: 14, ctx: function (s) { return s.job && working(s) && s.jobM > 6 ? { J: s.job } : null; }, if: function (s, c) { return s.job === c.J; }, title: 'Выбор',
+      id: 'w_dilemma', per: 'J', w: 14, ctx: function (s) { return s.job && working(s) && s.jobM > 6 && !s.jobAlt ? { J: s.job } : null; }, if: function (s, c) { return s.job === c.J && !s.jobAlt; }, title: 'Выбор',
       text: function (s, c) { return Z.JOBS[c.J].dl.q; },
       choices: function (s, c) {
         var d = Z.JOBS[c.J].dl;

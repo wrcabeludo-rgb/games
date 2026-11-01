@@ -180,7 +180,7 @@
     },
 
     {
-      id: 'p_meet_parents', per: 'P', ctx: curP, w: 20, if: function (s) { return s.pMonths > 4 && Z.parentsAlive(s).length; }, title: 'Знакомство с родителями',
+      id: 'p_meet_parents', per: 'P', ctx: curP, w: 20, if: function (s) { return Z.dating(s) && !Z.kids(s).length && s.pMonths > 4 && Z.parentsAlive(s).length; }, title: 'Знакомство с родителями',
       text: 'Пора познакомить {P.a} с родителями. Мама уже третий раз спрашивает, «когда привезёшь».',
       choices: [
         { t: 'Привезти её на выходные', fx: '@P+8 @parents+8 parentvisit++', res: 'Мама достаёт парадный сервиз. Папа пытается быть строгим и сдаётся через пять минут. {P} уезжает с банкой варенья и рецептом пирога.' },

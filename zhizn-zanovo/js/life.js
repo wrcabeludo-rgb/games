@@ -105,24 +105,24 @@
   Z.trackStr = function (s) {
     var seq = [];
     (s.career || []).forEach(function (c) { if (seq[seq.length - 1] !== c.j) seq.push(c.j); });
-    return seq.map(function (j) { return Z.JOBS[j].n; }).join(' → ');
+    return seq.map(function (j) { var c = (s.career || []).filter(function (x) { return x.j === j && x.alt; })[0]; return c ? c.alt : Z.JOBS[j].n; }).join(' → ');
   };
-  Z.setJob = function (s, id, lvl) {
+  Z.setJob = function (s, id, lvl, alt) {
     s.career = s.career || []; s.xp = s.xp || {};
     var prev = s.job;
     if (prev && prev !== id) { s.jobsHad.push(prev); Z.closeCareer(s); }
     var sk = Z.skillFor(s, id);
     if (prev && prev !== id) s.xp[prev] = Math.round(s.st.sk);
     if (s.lvlOf && s.lvlOf[id] != null && lvl == null) lvl = Math.max(0, s.lvlOf[id] - 1);
-    s.job = id; s.lvl = lvl || 0; s.jobM = 0; s.lvlM = 0;
+    s.job = id; s.lvl = lvl || 0; s.jobM = 0; s.lvlM = 0; s.jobAlt = alt || null;
     if (!s.student || Z.age(s) > 22.5) s.st.sk = sk;
     if (Z.age(s) > 22.5) { s.student = false; delete s.f.gradschool; delete s.f.parttime; }
-    s.career.push({ j: id, from: s.m, to: null, lvl: s.lvl });
+    s.career.push({ j: id, from: s.m, to: null, lvl: s.lvl, alt: alt || null });
     if (prev && prev !== id && !Z.famShare(prev, id)) {
       s.f.switched_field = true;
       Z.schedule(s, 'w_switch_doubt', 5, { J: id, O: prev });
     }
-    Z.logLine(s, (prev && prev !== id ? 'Смена профессии: ' + Z.JOBS[prev].n + ' → ' + Z.JOBS[id].t[s.lvl] : 'Новая работа: ' + Z.JOBS[id].t[s.lvl]) + '.', 'work');
+    Z.logLine(s, (prev && prev !== id ? 'Смена профессии: ' + Z.JOBS[prev].n + ' → ' + Z.jobTitle(s) : 'Новая работа: ' + Z.jobTitle(s)) + '.', 'work');
   };
   Z.closeCareer = function (s) {
     var c = s.career && s.career[s.career.length - 1];
@@ -134,16 +134,18 @@
     s.jobsHad.push(s.job);
     s.xp = s.xp || {}; s.xp[s.job] = Math.round(s.st.sk);
     Z.closeCareer(s);
-    Z.logLine(s, (why || 'Ты ушёл с работы') + ' (' + Z.JOBS[s.job].n + ').', 'work');
-    s.job = null; s.lvl = 0; s.jobM = 0; s.lvlM = 0;
+    Z.logLine(s, (why || 'Ты ушёл с работы') + ' (' + (s.jobAlt || Z.JOBS[s.job].n) + ').', 'work');
+    s.job = null; s.lvl = 0; s.jobM = 0; s.lvlM = 0; s.jobAlt = null;
   };
+  // Первый день уже показан своей сценой — общий «первый день» не нужен
+  Z.firstShown = function (s, id) { s.seen['w_first_day:' + id] = s.m; };
   // Сколько лет в профессии за всю жизнь
   Z.yearsIn = function (s, j) {
     return (s.career || []).filter(function (c) { return c.j === j; }).reduce(function (a, c) { return a + ((c.to == null ? s.m : c.to) - c.from) / 12; }, 0);
   };
   Z.promote = function (s) {
     if (!s.job || s.lvl >= 3) return;
-    s.lvl++; s.lvlM = 0;
+    s.lvl++; s.lvlM = 0; s.jobAlt = null;
     Z.logLine(s, 'Повышение: ' + Z.JOBS[s.job].t[s.lvl] + '.', 'work');
   };
   Z.canPromote = function (s) {

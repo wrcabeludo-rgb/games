@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var Z = window.Z = window.Z || {};
-  Z.VERSION = '0.5.0';
+  Z.VERSION = '0.6.0';
   Z.EV = {};
   Z.evList = [];
   // Крючки: после выбора (s, e, choice, ctx, inst, done) и после сборки хода (s, turn)
@@ -95,6 +95,7 @@
   };
 
   // Пол по имени: true — женское, false — мужское, null — непонятно (Саша, Женя…)
+  Z.WIFE_NAMES = ['Наташа', 'Света', 'Юля', 'Таня', 'Вика', 'Настя', 'Люда', 'Галя', 'Вера', 'Полина'];
   Z.AMBIG = ['саша', 'женя', 'валя', 'слава', 'шура', 'сева'];
   Z.MALE_A = ['миша', 'никита', 'илья', 'ваня', 'даня', 'дима', 'лёша', 'леша', 'алёша', 'алеша', 'паша', 'петя', 'серёжа', 'сережа', 'костя', 'вова', 'гоша',
     'лёва', 'лева', 'федя', 'яша', 'тёма', 'тема', 'гриша', 'боря', 'митя', 'коля', 'толя', 'юра', 'кузьма', 'фома', 'лука', 'савва', 'сеня', 'стёпа', 'степа',
@@ -135,7 +136,7 @@
   Z.kidAge = function (s, k) { return (s.m - k.born) / 12; };
   Z.parentsAlive = function (s) { return ['mom', 'dad'].filter(function (id) { return s.pp[id].alive; }); };
   Z.jobName = function (s) { return s.job ? Z.JOBS[s.job].n : ''; };
-  Z.jobTitle = function (s) { return s.job ? Z.JOBS[s.job].t[s.lvl] : ''; };
+  Z.jobTitle = function (s) { return s.job ? (s.jobAlt || Z.JOBS[s.job].t[s.lvl]) : ''; };
   Z.working = function (s) { return !!s.job && !s.student; };
   Z.gray = function (s) { return s.st.joy < 30; };
 
@@ -158,6 +159,9 @@
     // Прошлое: потерянные родители, друг, жена.
     if (setup.parents === 'mom' || setup.parents === 'none') s.risk.dad = Z.RISK_AGE[setup.dadAge || 'b'];
     if (setup.parents === 'dad' || setup.parents === 'none') s.risk.mom = Z.RISK_AGE[setup.momAge || 'c'];
+    if (setup.lostFriend && !setup.lostName) setup.lostName = R.pick(setup.lostFem ? ['Света', 'Оля', 'Таня', 'Наташа'] : ['Вова', 'Коля', 'Женя', 'Сашка', 'Игорь']);
+    if (setup.married && setup.married !== 'never' && (!setup.wifeName || setup.wifeName === 'Имя')) setup.wifeName = R.pick(Z.WIFE_NAMES);
+    if (setup.lostName === 'Имя') setup.lostName = R.pick(setup.lostFem ? ['Света', 'Оля'] : ['Вова', 'Коля']);
     if (setup.lostFriend) {
       var map = { crash: 'max', ill: 'zhenya', drink: 'serega', depr: 'dima', lost: 'vitya' };
       var fid = setup.lostFem && setup.lostCause === 'ill' ? 'ira' : map[setup.lostCause] || 'zhenya';
@@ -177,7 +181,7 @@
     s.pdeath = { mom: R.int(85, 97), dad: R.int(82, 94) };
     s.wifeEnd = R.int(80, 97);
     s.id = Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36);
-    s.opt = { stranger: setup.stranger !== false, sound: true };
+    s.opt = { stranger: false, sound: true };
     s.queue.push({ id: 'y_start', at: 0 });
     return s;
   };
@@ -361,7 +365,8 @@
     if (e.once && s.seen[k] != null) return false;
     if (e.rep && s.seen[k] != null && s.m - s.seen[k] < e.rep) return false;
     if (e.gray && !Z.gray(s)) return false;
-    if (s.f.inarmy && !e.army && !e.prio && !e.manual && Z.ARMY_OK.indexOf(e.id) < 0) return false;
+    if (s.f.inarmy && !e.army && !e.manual && Z.ARMY_OK.indexOf(e.id) < 0) return false;
+    if (e.uni && !Z.uni(s)) return false;
     if (e.army && !s.f.inarmy) return false;
     if (e.if && !e.if(s, ctx || {})) return false;
     return true;
@@ -566,7 +571,10 @@
     var r = {}; Object.keys(s.pp).forEach(function (id) { var p = s.pp[id]; if (p.met && p.alive) r[id] = p.rel; });
     return { st: JSON.parse(JSON.stringify(s.st)), r: r };
   };
-  Z.ARMY_OK = ['pa_call', 'p_romance', 'f_invite'];
+  // В армии из обычной жизни доходит только это: звонки из дома и беды близких
+  Z.ARMY_OK = ['pa_call', 'pa_dad_check', 'pa_dad_heart', 'pa_mom_sign', 'pa_mom_ill', 'p_breakup', 'p_wife_sign', 'p_wife_ill', 'o_parent_passing', 'fa_crash2', 'fa_depr2', 'fa_drink3', 'fa_ill2', 'fa_lost2', 'c_close'];
+  // Студенческая жизнь в институте (не колледж, не армия, не аспирантура, не «забрал документы»)
+  Z.uni = function (s) { return !!s.student && !s.f.noinst && !s.f.college && !s.f.gradschool && !s.f.inarmy; };
   Z.STAT_N = { hp: 'Здоровье', joy: 'Счастье', money: 'Достаток', sk: 'Мастерство' };
   Z.diff = function (s, a) {
     var out = [];
@@ -603,7 +611,7 @@
     var t = s.turn; t.i++;
     while (t.i < t.q.length) {
       var inst = t.q[t.i], e = Z.EV[inst.id];
-      var armyBlock = s.f.inarmy && !e.army && !e.prio && !e.manual && Z.ARMY_OK.indexOf(e.id) < 0;
+      var armyBlock = (s.f.inarmy && !e.army && !e.manual && Z.ARMY_OK.indexOf(e.id) < 0) || (e.uni && !Z.uni(s));
       if (!armyBlock && (!e.if || e.if(s, inst.ctx || {}))) break;
       t.i++;
     }

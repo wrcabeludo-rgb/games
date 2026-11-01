@@ -29,7 +29,10 @@
     [3, 'l_midlife', 'Середина пути'], [3, 'pa_old', 'Родители стареют'], [3, 'l_trip', 'Мечта о путешествии'], [3, 'pa_parents_fight', 'Ссора родителей'],
     [4, 'pa_house', 'Родительский дом'], [4, 'l_meaning', 'Зачем всё это'], [4, 'fam_empty', 'Пустое гнездо'],
     [5, 'o_pension', 'Пенсия'], [5, 'o_youth_trip', 'Туда, где всё началось'], [5, 'o_letters', 'Письма детям'], [5, 'o_alone', 'Одному'],
-    [6, 'o_fall', 'Упал'], [6, 'o_memory', 'Память'], [6, 'o_dog', 'Старый пёс']
+    [6, 'o_fall', 'Упал'], [6, 'o_memory', 'Память'], [6, 'o_dog', 'Старый пёс'],
+    [0, 'ni_army', 'Повестка'], [0, 'ar_end', 'Дембель'], [0, 'ni_first', 'Без диплома'], [1, 'ab_arrive', 'Чужая страна'],
+    [1, 'xr_city_love', '★ Другой город'], [1, 'xr_dream', '★ Две дороги'], [2, 'xr_dad_project', '★ Один день'], [2, 'xr_kid_year', '★ Два года'],
+    [3, 'xr_friend_kid', '★ Один вечер'], [3, 'xr_truth', '★ Сказать или нет'], [3, 'xr_north', '★ Полгода']
   ].map(function (r) { return { ch: r[0], ev: r[1], n: r[2] }; });
   var FORK_BY_EV = {}; Z.FORKS.forEach(function (f) { FORK_BY_EV[f.ev] = f; });
   var SEEN_KEY = 'zhizn_zanovo_forks_v1';
@@ -43,20 +46,34 @@
     s.forks[e.id] = { t: label, r: String(done.res || '').split('\n')[0].slice(0, 160), m: s.m, all: (inst.opts || []) };
     var seen = Z.forksSeen(); seen[e.id] = seen[e.id] || {}; seen[e.id][label] = s.forks[e.id].r; Z.forksSave(seen);
   });
+  // Карта главы как в Detroit: развилки по времени, у каждой — что выбрал, что ещё можно было, и к чему это привело.
+  Z.chRange = function (ch) { var a = (Z.CHAPTERS[ch].from - 18) * 12, b = Z.CHAPTERS[ch + 1] ? (Z.CHAPTERS[ch + 1].from - 18) * 12 : 1e9; return [a, b]; };
   Z.forkMap = function (s, ch) {
-    var seen = Z.forksSeen();
-    return Z.FORKS.filter(function (f) { return f.ch === ch; }).map(function (f) {
-      var mine = s.forks && s.forks[f.ev];
-      var opts = mine && mine.all && mine.all.length ? mine.all.slice() : [];
-      Object.keys(seen[f.ev] || {}).forEach(function (t) { if (opts.indexOf(t) < 0) opts.push(t); });
+    var seen = Z.forksSeen(), rg = Z.chRange(ch), forks = s.forks || {};
+    var mine = Object.keys(forks).filter(function (ev) { return forks[ev].m >= rg[0] && forks[ev].m < rg[1] && FORK_BY_EV[ev]; })
+      .sort(function (a, b) { return forks[a].m - forks[b].m; });
+    var logs = (s.log || []).filter(function (l) { return l.m >= rg[0] && l.m < rg[1]; });
+    var nodes = mine.map(function (ev, i) {
+      var f = forks[ev], next = i + 1 < mine.length ? forks[mine[i + 1]].m : rg[1];
+      var opts = f.all && f.all.length ? f.all.slice() : [f.t];
+      Object.keys(seen[ev] || {}).forEach(function (t) { if (opts.indexOf(t) < 0) opts.push(t); });
       return {
-        n: f.n, reached: !!mine,
-        opts: opts.map(function (t) {
-          var taken = mine && mine.t === t;
-          return { t: t, taken: taken, known: !!(seen[f.ev] && seen[f.ev][t]), r: taken ? mine.r : (seen[f.ev] && seen[f.ev][t]) || '' };
-        })
+        n: FORK_BY_EV[ev].n, xr: /★/.test(FORK_BY_EV[ev].n), age: Math.floor(18 + f.m / 12), reached: true,
+        opts: opts.map(function (t) { var taken = f.t === t, kn = !!(seen[ev] && seen[ev][t]) && !taken; return { t: t, taken: taken, known: kn, r: taken ? f.r : (kn ? seen[ev][t] : '') }; }),
+        led: logs.filter(function (l) { return l.m >= f.m && l.m < next; }).map(function (l) { return l.t; }).slice(0, 4)
       };
     });
+    var lead = logs.filter(function (l) { return !mine.length || l.m < forks[mine[0]].m; }).map(function (l) { return l.t; }).slice(0, 4);
+    var missed = Z.FORKS.filter(function (f) { return f.ch === ch && !forks[f.ev]; }).map(function (f) {
+      return { n: f.n, xr: /★/.test(f.n), reached: false, known: Object.keys(seen[f.ev] || {}).length };
+    });
+    // Сколько дорог главы открыто за все жизни
+    var all = 0, open = 0;
+    Z.FORKS.filter(function (f) { return f.ch === ch; }).forEach(function (f) {
+      var sv = Object.keys(seen[f.ev] || {}).length, mineOpts = forks[f.ev] && forks[f.ev].all ? forks[f.ev].all.length : 0;
+      var total = Math.max(sv, mineOpts, 2); all += total; open += Math.min(sv, total);
+    });
+    return { nodes: nodes, lead: lead, missed: missed, open: open, all: all };
   };
 
   // ================= АЛЬБОМ ЖИЗНЕЙ =================
@@ -81,18 +98,20 @@
   };
 
   // ================= ПАУЗЫ (обращение к игроку) =================
+  // Три тихих вопроса за игру — уже не герою, а тебе. Коротко, без объяснений.
   Z.PAUSES = [
-    function (s) { return 'Это уже не про героя. Про тебя.\n\nВспомни себя в двадцать. Чего ты тогда хотел больше всего? Осталось ли это в тебе — хотя бы немного?'; },
+    function (s) { return 'А ты в двадцать — чего хотел?'; },
     function (s) {
       var p = s.setup.parents;
-      if (p === 'both') return 'Остановимся на минуту. Это вопрос не герою — тебе.\n\nТвои настоящие родители живы. Когда ты последний раз говорил с ними не по делу? Что ты хотел бы им сказать, пока можно?';
-      if (p === 'none') return 'Остановимся на минуту. Это вопрос не герою — тебе.\n\nВспомни одну минуту с мамой или папой, которую ты хотел бы прожить ещё раз. Какая она? Что бы ты сказал в ней?';
-      return 'Остановимся на минуту. Это вопрос не герою — тебе.\n\nУ тебя есть ' + (p === 'mom' ? 'мама' : 'папа') + '. Когда ты последний раз говорил с ' + (p === 'mom' ? 'ней' : 'ним') + ' не по делу? И что ты носишь в себе о том, кого уже нет?';
+      if (p === 'both') return 'Когда ты в последний раз звонил родителям просто так?';
+      if (p === 'none') return 'Чей голос ты хотел бы услышать ещё раз?';
+      return 'Когда ты в последний раз звонил ' + (p === 'mom' ? 'маме' : 'папе') + ' просто так?';
     },
-    function (s) { return 'Игра почти закончилась. Последний вопрос — тебе, не герою.\n\nКакой один шаг из этой жизни ты можешь сделать в своей — на этой неделе? Маленький. Настоящий.'; }
+    function (s) { return 'Что из этой жизни ты возьмёшь в свою?'; }
   ];
 
-  // ================= НЕЗНАКОМЕЦ (тест) =================
+  // ================= НЕЗНАКОМЕЦ (выключен: Z.STRANGER_ON) =================
+  Z.STRANGER_ON = false;
   Z.STRANGER = [
     { a: 18.15, t: 'Ночь, коридор общаги. У окна курит старик в длинном пальто — откуда он здесь? Он смотрит на тебя так, будто знает давно. «Ну что, второй раз? — говорит он тихо. — Не торопись исправлять. Сначала поживи».' },
     { a: 24.5, t: 'Вокзал, электричка опаздывает. Рядом на скамейке садится тот самый старик из общаги. Он не постарел ни на день. «Ты так боишься повторить ошибки, — говорит он, — что забываешь совершать новые. Новые — это и есть жизнь».' },
@@ -114,14 +133,14 @@
     var mid = Math.max(30, Math.round((23 + s.setup.age) / 2));
     if (!s.f.pz2 && s.f.pz1 && a >= mid) { s.f.pz2 = true; head.push({ id: 'pause', ctx: { N: 1 } }); }
     // Незнакомец
-    if (s.opt && s.opt.stranger === false) { /* выключен в настройках */ }
+    if (!Z.STRANGER_ON || (s.opt && s.opt.stranger === false)) { /* незнакомец выключен (решение владельца после 0.5.0) */ }
     else Z.STRANGER.forEach(function (st, i) { if (!s.f['st' + i] && a >= st.a && a < st.a + 6) { s.f['st' + i] = true; t.q.push({ id: 'stranger', ctx: { N: i } }); } });
     // Перед итогом — последняя пауза и встреча с незнакомцем лицом к лицу
     var fi = -1; t.q.forEach(function (q, i) { if (q.id === 'final_now' && fi < 0) fi = i; });
     if (fi >= 0) {
       var pre = [];
       if (!s.f.pz3) { s.f.pz3 = true; pre.push({ id: 'pause', ctx: { N: 2 } }); }
-      if (!s.f.st_reveal && !(s.opt && s.opt.stranger === false) && s.f.st0) { s.f.st_reveal = true; pre.push({ id: 'stranger_reveal', ctx: {} }); }
+      if (Z.STRANGER_ON && !s.f.st_reveal && !(s.opt && s.opt.stranger === false) && s.f.st0) { s.f.st_reveal = true; pre.push({ id: 'stranger_reveal', ctx: {} }); }
       t.q.splice.apply(t.q, [fi, 0].concat(pre));
     }
     if (head.length) t.q = head.concat(t.q);
@@ -130,26 +149,34 @@
   Z.def([
     {
       id: 'ch_start', manual: true, chapter: true, title: function (s, c) { return 'Глава ' + Z.ROMAN[c.C]; },
-      text: function (s, c) { var C0 = Z.CHAPTERS[c.C]; return '«' + C0.n + '»\n\n' + C0.d; },
-      choices: [{ t: 'Начать', res: '' }]
+      text: function (s, c) { var C0 = Z.CHAPTERS[c.C]; return '«' + C0.n + '»\n\n' + C0.d + ((s.setup.values || []).length ? '\n\nЧем ты хочешь, чтобы была наполнена эта глава?' : ''); },
+      choices: function (s, c) {
+        var list = (s.setup.values || []).map(function (k) { return { t: Z.VALUES[k].n, run: function (st) { st.intent = { k: k, ch: c.C, hits: 0 }; return ''; } }; });
+        list.push({ t: list.length ? 'Просто жить' : 'Начать', run: function (st) { st.intent = null; return ''; } });
+        return list;
+      }
     },
     {
       id: 'ch_end', manual: true, chapter: true, map: true, title: function (s, c) { return 'Глава ' + Z.ROMAN[c.C] + ' закончилась'; },
-      text: function (s, c) { return '«' + Z.CHAPTERS[c.C].n + '» позади. Вот развилки этой главы: пройденные дороги светятся, непройденные — серые. Какие-то из них ты, может быть, пройдёшь в другой жизни.'; },
+      text: function (s, c) {
+        var t = '«' + Z.CHAPTERS[c.C].n + '» позади.';
+        var it = s.intent && s.intent.ch === c.C ? s.intent : null;
+        if (it) t += ' Ты хотел, чтобы эта глава была про «' + Z.VALUES[it.k].n.toLowerCase() + '». ' + (it.hits >= 6 ? 'Так и вышло: ' + it.hits + ' ' + Z.plural(it.hits, 'шаг', 'шага', 'шагов') + ' в эту сторону.' : it.hits >= 2 ? 'Получилось отчасти: ' + it.hits + ' ' + Z.plural(it.hits, 'шаг', 'шага', 'шагов') + '.' : 'Жизнь повела в другую сторону.');
+        return t;
+      },
       choices: [{ t: 'Дальше', res: '' }]
     },
     {
-      id: 'pause', manual: true, pause: true, title: 'Вопрос к тебе',
-      ask: function () { return { ph: 'Можно написать пару слов — они останутся только на этом телефоне', label: '', multi: true }; },
+      id: 'pause', manual: true, pause: true, title: '',
+      ask: function () { return { ph: 'можно не отвечать', label: '', multi: true }; },
       text: function (s, c) { return Z.PAUSES[c.N](s); },
       choices: [
-        { t: 'Записать', run: function (s, c, input) { var v = (input || '').trim(); if (!v) return 'Ничего страшного. Иногда ответ — это молчание.'; s.diary = s.diary || []; s.diary.push({ m: s.m, q: c.N, t: v }); return 'Записано. В конце игры ты сможешь это перечитать.'; } },
-        { t: 'Подумать молча', res: 'Ты закрываешь глаза на минуту. Этого достаточно.' },
-        { t: 'Пропустить вопрос', res: 'Хорошо. Вернёмся к жизни.' }
+        { t: 'Записать', run: function (s, c, input) { var v = (input || '').trim(); if (v) { s.diary = s.diary || []; s.diary.push({ m: s.m, q: c.N, t: v }); } return ''; } },
+        { t: 'Помолчать', res: '' }
       ]
     },
     {
-      id: 'stranger', manual: true, title: 'Незнакомец',
+      id: 'stranger', manual: true, off: true, title: 'Незнакомец',
       text: function (s, c) { return Z.STRANGER[c.N].t; },
       choices: function (s, c) {
         var a = [
@@ -161,7 +188,7 @@
       }
     },
     {
-      id: 'stranger_reveal', manual: true, title: 'Лицом к лицу',
+      id: 'stranger_reveal', manual: true, off: true, title: 'Лицом к лицу',
       text: function (s) { return 'Он приходит в последний раз — садится рядом, на край кровати, как на скамейку в парке. Свет из окна падает на его лицо, и ты наконец видишь его ясно.\n\nЭто ты. Тот, прошлый. Которому было ' + s.setup.age + '. С теми же морщинами, с той же усталостью — и с теми же ошибками.\n\n«Я пришёл не исправлять, — говорит он. — Я хотел посмотреть, каким ты можешь быть. И попросить прощения — у себя самого. Я был не таким уж плохим. Просто очень уставшим».'; },
       choices: [
         C('Простить его — себя прежнего', 'joy+10 +forgave', 'Ты берёшь его руку — свою руку — и говоришь: «Я тебя прощаю». Он закрывает глаза, будто наконец выдохнул впервые за много лет. Когда ты открываешь свои, его нет. А на душе — тихо и светло.', { log: 'Простил себя прежнего.' }),

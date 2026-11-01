@@ -225,3 +225,42 @@ body[data-style="oneline"] { --acc: #e3b15a; --acc2: #c99545; }
 .card.chapend h3 { letter-spacing: .2em; }
 .card.chapend > p { font-size: 16px; color: var(--dim); }
 .card.chapter .illus { width: 100%; margin: 0 0 22px; border-radius: 14px; }
+
+.note.kids { border-color: #f0c35a; color: var(--text); }
+.kidtag { float: right; text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--dim); background: var(--bg2); border-radius: 12px; padding: 2px 9px; font-size: 12px; margin-top: -3px; }
+
+/* Пауза: тихий вопрос, без лишнего */
+.card.pause { text-align: center; padding: 38px 22px 24px; }
+.card.pause > p { font-size: 22px; line-height: 1.4; margin: 0 0 22px; }
+.card.pause .choices { flex-direction: row; justify-content: center; }
+.card.pause .choice { flex: 1; text-align: center; max-width: 160px; }
+.diary li span { display: block; font-style: normal; font-family: var(--sans); font-size: 12.5px; color: var(--gray); margin-bottom: 2px; }
+
+/* Карта судьбы: поток развилок */
+.flow { position: relative; margin: 16px 0 6px; padding-left: 16px; border-left: 2px solid var(--line); font-family: var(--sans); }
+.fstat { font-size: 12.5px; color: var(--dim); margin: 0 0 12px; }
+.fstat b { color: var(--acc); }
+.fnode { position: relative; margin: 0 0 16px; }
+.fnode::before { content: ''; position: absolute; left: -23px; top: 5px; width: 10px; height: 10px; border-radius: 50%; background: var(--acc); border: 2px solid var(--card); }
+.fnode.xr::before { background: #ffd36b; box-shadow: 0 0 10px #ffd36b; }
+.fnode.un::before { background: var(--line); }
+.fh { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+.fh b { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--acc); }
+.fnode.xr .fh b { color: #ffd36b; }
+.fnode.xr .fh b::before { content: '★ '; }
+.fh small { color: var(--gray); font-size: 12px; }
+.fbrs { display: flex; flex-direction: column; gap: 4px; }
+.fbr { display: flex; gap: 8px; font-size: 14px; color: var(--gray); padding: 6px 10px; border-radius: 10px; border: 1px dashed #3a3346; }
+.fbr span { width: 12px; flex: none; }
+.fbr small { display: block; font-size: 12.5px; margin-top: 3px; font-style: italic; color: var(--gray); }
+.fbr.taken { color: var(--text); border: 1px solid var(--acc); background: rgba(240,166,90,.08); }
+.fbr.taken span { color: var(--acc); }
+.fbr.taken small { color: var(--dim); }
+.fbr.known { color: var(--dim); border-style: solid; }
+.fleds { margin-top: 6px; }
+.fled { font-size: 13px; color: var(--dim); padding: 2px 0 2px 2px; }
+.fmiss { margin-top: 18px; }
+.fmiss > b { display: block; font-size: 12px; color: var(--gray); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .08em; }
+.fnode.un .fh b { color: var(--gray); }
+.fnode.un small { color: var(--gray); font-size: 12.5px; }
+.passage.calm .sun { display: none; }
