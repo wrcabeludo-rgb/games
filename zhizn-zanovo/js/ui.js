@@ -124,6 +124,7 @@
   }
 
   function render() {
+    document.body.dataset.style = S && !S.over ? Z.styleFor(S).id : '';
     if (!S) return title();
     if (S.over) return endScreen();
     var body = view === 'people' ? peopleView() : view === 'log' ? logView() : lifeView();
@@ -155,7 +156,8 @@
     }
     var V = Z.view(S, inst), e = V.e, ctx = V.ctx;
     save();
-    html += '<article class="card">' + (V.title ? '<h3>' + esc(V.title) + '</h3>' : '') + paras(V.text);
+    var art = Z.artFor(S, inst.id);
+    html += '<article class="card">' + (art ? '<img class="illus" src="' + art + '" alt="" loading="lazy">' : '') + (V.title ? '<h3>' + esc(V.title) + '</h3>' : '') + paras(V.text);
     if (!inst.done) {
       if (e.ask) {
         var a = e.ask(S, ctx); inst.ph = inst.ph || a.ph;
@@ -258,6 +260,7 @@
   function menu() {
     var html = '<div class="modal"><div class="sheet"><h3>Меню</h3>' +
       '<p class="hint">Темп жизни</p><div class="opts">' + [['slow', 'Подробно'], ['normal', 'Обычно'], ['fast', 'Быстро']].map(function (o) { return '<button class="opt' + (S.tempo === o[0] ? ' on' : '') + '" data-t="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>' +
+      '<button class="btn" id="ach">Достижения</button>' +
       '<button class="btn" id="home">На главный экран</button>' +
       '<button class="btn danger" id="reset">Начать жизнь заново</button>' +
       '<p class="fine">Версия ' + Z.VERSION + '. Прогресс сохраняется на этом устройстве.</p></div></div>';
@@ -266,19 +269,40 @@
     md.onclick = function (e) { if (e.target === md) md.remove(); };
     md.querySelectorAll('[data-t]').forEach(function (b) { b.onclick = function () { S.tempo = b.dataset.t; save(); md.remove(); }; });
     md.querySelector('#home').onclick = function () { md.remove(); title(); };
+    md.querySelector('#ach').onclick = function () { md.remove(); achScreen(); };
     md.querySelector('#reset').onclick = function () { if (confirm('Стереть эту жизнь и начать новую?')) { clearSave(); S = null; md.remove(); su = { regrets: {} }; stepI = 0; setupScreen(); } };
+  }
+
+  // ---------- Достижения ----------
+  function achList(have, fresh, onlyHave) {
+    return '<ul class="ach">' + Z.ACH.filter(function (a) { return !onlyHave || have[a.id]; }).map(function (a) {
+      var on = !!have[a.id], nw = fresh && fresh.indexOf(a.id) >= 0;
+      return '<li class="' + (on ? 'on' : '') + (nw ? ' new' : '') + '"><span>' + (on ? a.i : '·') + '</span><div><b>' + esc(a.n) + (nw ? ' <em>впервые</em>' : '') + '</b><small>' + esc(a.d) + '</small></div></li>';
+    }).join('') + '</ul>';
+  }
+  function achScreen() {
+    var have = Z.achLoad(), n = Object.keys(have).length;
+    var box = document.createElement('div');
+    box.innerHTML = '<div class="modal"><div class="sheet tall"><h3>Достижения · ' + n + ' из ' + Z.ACH.length + '</h3><p class="hint">Копятся через все прожитые жизни на этом устройстве.</p>' + achList(have) + '<button class="btn" id="cl">Закрыть</button></div></div>';
+    document.body.appendChild(box.firstChild);
+    document.querySelector('#cl').onclick = function () { document.querySelector('.modal').remove(); };
   }
 
   // ---------- Итоги ----------
   function endScreen() {
     var E = Z.ending(S);
-    var html = '<div class="ending' + (E.death ? ' death' : '') + '"><p class="kicker">' + (E.death ? 'Итог' : 'Итог жизни · ' + E.age + ' ' + Z.plural(E.age, 'год', 'года', 'лет')) + '</p><h1>' + esc(E.title) + '</h1>' +
+    var html = '<div class="ending' + (E.death ? ' death' : '') + '"><p class="kicker">' + (E.death ? 'Итог' : (E.old ? 'Итог долгой жизни · ' : 'Итог жизни · ') + E.age + ' ' + Z.plural(E.age, 'год', 'года', 'лет')) + '</p><h1>' + esc(E.title) + '</h1>' +
       E.paragraphs.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('');
     if (E.goals.length) html += '<h4>Что ты хотел изменить · ' + E.fixed + ' из ' + E.goals.length + '</h4><ul class="goals res">' + E.goals.map(function (g) { return '<li class="' + (g.ok ? 'ok' : 'no') + '"><b>' + (g.ok ? '✓ ' : '○ ') + esc(g.n) + '</b><span>' + esc(g.t) + '</span></li>'; }).join('') + '</ul>';
     html += '<h4>Тогда и сейчас</h4><table class="cmp"><tr><th></th><th>Прошлая жизнь</th><th>Новая жизнь</th></tr>' + E.compare.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td><td>' + esc(r[2]) + '</td></tr>'; }).join('') + '</table>';
+    var got = Z.achCheck(S, E), have = Z.achLoad(), fresh = got.filter(function (id) { return !have[id]; });
+    got.forEach(function (id) { if (!have[id]) have[id] = Date.now(); }); Z.achSave(have);
+    var gotSet = {}; got.forEach(function (id) { gotSet[id] = 1; });
+    if (got.length) html += '<h4>Достижения этой жизни · ' + got.length + '</h4>' + achList(gotSet, fresh, true);
     html += '<h4>Что взять с собой в настоящую жизнь</h4><ul class="refl">' + E.refl.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>';
-    html += '<button class="btn" id="chron">Летопись этой жизни</button><button class="btn primary" id="again">Прожить ещё раз</button></div>';
+    html += '<button class="btn" id="achall">Все достижения</button><button class="btn" id="chron">Летопись этой жизни</button><button class="btn primary" id="again">Прожить ещё раз</button></div>';
     app.innerHTML = html; scrollTop();
+    h('#achall').onclick = achScreen;
     h('#again').onclick = function () { clearSave(); S = null; su = { regrets: {} }; stepI = 0; setupScreen(); };
     h('#chron').onclick = function () { var box = document.createElement('div'); box.innerHTML = '<div class="modal"><div class="sheet tall">' + logView() + '<button class="btn" id="cl">Закрыть</button></div></div>'; document.body.appendChild(box.firstChild); document.querySelector('#cl').onclick = function () { document.querySelector('.modal').remove(); }; };
   }

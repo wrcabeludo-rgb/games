@@ -136,3 +136,23 @@ main { padding-top: 14px; }
 .cmp td:first-child { color: var(--dim); }
 .cmp td:last-child { color: var(--acc); }
 .refl { padding-left: 18px; } .refl li { margin: 0 0 12px; line-height: 1.5; font-family: var(--serif); font-size: 16.5px; }
+
+/* Иллюстрации */
+.illus { display: block; width: calc(100% + 36px); margin: -20px -18px 16px; border-radius: 18px 18px 0 0; aspect-ratio: 3 / 2; object-fit: cover; background: var(--bg2); }
+
+/* Достижения */
+.ach { list-style: none; padding: 0; margin: 0; }
+.ach li { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid #2b2533; opacity: .45; }
+.ach li.on { opacity: 1; }
+.ach li span { width: 34px; height: 34px; flex: none; border-radius: 50%; background: var(--bg2); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.ach li b { display: block; font-weight: 500; }
+.ach li small { display: block; color: var(--dim); font-size: 13px; margin-top: 2px; line-height: 1.35; }
+.ach li em { font-style: normal; font-size: 11px; color: #241812; background: var(--acc); border-radius: 10px; padding: 1px 7px; margin-left: 6px; vertical-align: 2px; }
+
+/* Акцент по стилю возраста: карандаши → ручки → фломастеры → акрил → акварель → простой карандаш */
+body[data-style="pencils"] { --acc: #f0a65a; --acc2: #e0725a; }
+body[data-style="gel"] { --acc: #6fb4ff; --acc2: #8a7cff; }
+body[data-style="markers"] { --acc: #ff7aa8; --acc2: #ffb347; }
+body[data-style="acrylic"] { --acc: #e8c547; --acc2: #d9534f; }
+body[data-style="watercolor"] { --acc: #b9a7e0; --acc2: #8fc9c0; }
+body[data-style="graphite"] { --acc: #c9c4bd; --acc2: #8d8794; }

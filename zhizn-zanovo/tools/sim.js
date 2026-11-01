@@ -19,6 +19,7 @@ const N = Number(process.argv[2] || 600);
 const VERBOSE = process.argv.includes('--verbose');
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const seen = {}, endings = {}, problems = [];
+const achCount = {}; let cont = 0, to100 = 0; const oldAges = [];
 let turns = 0, cards = 0, deaths = 0, totalGoals = 0, fixedGoals = 0, switches = 0, synergy = 0;
 const repeatWorst = {}; // событие → худшее число повторов одного и того же текста в одной жизни
 const cardsByTarget = {};
@@ -138,6 +139,9 @@ for (let n = 0; n < N; n++) {
     E.goals.forEach(g => check(g.t, 'цель'));
     E.compare.forEach(r => r.forEach(x => check(String(x), 'сравнение')));
     endings[E.title] = (endings[E.title] || 0) + 1;
+    if (s.endAge === 100) { cont++; if (s.f.age100) to100++; else if (s.over === 'old' || s.over === 'death') oldAges.push(Z.ageInt(s)); }
+    if (s.over === 'death' && Z.age(s) >= 70) problem('смерть после 70 должна быть «своей смертью», а не «оборвалась»');
+    Z.achCheck(s, E).forEach(a => achCount[a] = (achCount[a] || 0) + 1);
     if (E.death) deaths++;
     totalGoals += E.goals.length; fixedGoals += E.fixed;
     (cardsByTarget[su.age] = cardsByTarget[su.age] || []).push(lifeCards);
@@ -152,6 +156,8 @@ const never = Z.evList.map(e => e.id).filter(id => !seen[id]);
 console.log(`Жизней: ${N}, ходов в среднем: ${(turns / N).toFixed(0)}, карточек: ${(cards / N).toFixed(0)}, смертей: ${deaths}`);
 console.log('Карточек за жизнь по возрасту игрока: ' + Object.keys(cardsByTarget).sort().map(a => `${a} лет — ${(cardsByTarget[a].reduce((x, y) => x + y, 0) / cardsByTarget[a].length).toFixed(0)}`).join(', '));
 console.log(`Цели: исправлено ${fixedGoals} из ${totalGoals}. Смен профессии: ${switches}, «старый опыт пригодился»: ${synergy}`);
+console.log(`Жили дальше: ${cont}, дожили до 100: ${to100}, остальные ушли в среднем в ${(oldAges.reduce((a, b) => a + b, 0) / Math.max(1, oldAges.length)).toFixed(0)} (от ${Math.min(...oldAges)} до ${Math.max(...oldAges)})`);
+console.log('Достижения (сколько жизней получили): ' + Z.ACH.map(a => `${a.n} ${achCount[a.id] || 0}`).join(', '));
 console.log('Концовки:', Object.entries(endings).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(', '));
 console.log(`Событий: ${Z.evList.length}, ни разу не выпали (${never.length}): ${never.join(', ')}`);
 // Семейные и дружеские события не должны повторять один и тот же текст больше двух раз за жизнь

@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var Z = window.Z = window.Z || {};
-  Z.VERSION = '0.2.0';
+  Z.VERSION = '0.3.0';
   Z.EV = {};
   Z.evList = [];
 
@@ -40,6 +40,35 @@
   };
   Z.yearsStr = function (n) { return n + ' ' + Z.plural(n, 'год', 'года', 'лет'); };
 
+  // ---------- Иллюстрации: стиль по возрасту ----------
+  Z.STYLES = [
+    { max: 30, id: 'pencils', n: 'цветные карандаши' },
+    { max: 40, id: 'gel', n: 'гелевые ручки' },
+    { max: 50, id: 'markers', n: 'фломастеры' },
+    { max: 60, id: 'acrylic', n: 'акриловые краски' },
+    { max: 70, id: 'watercolor', n: 'пастельная акварель' },
+    { max: 101, id: 'graphite', n: 'простой карандаш' }
+  ];
+  Z.styleFor = function (s) { var a = Z.age(s); for (var i = 0; i < Z.STYLES.length; i++) if (a < Z.STYLES[i].max) return Z.STYLES[i]; return Z.STYLES[Z.STYLES.length - 1]; };
+  // Тема картинки по событию: родители, друзья, любовь, семья, работа, юность, серый период, старость, жизнь
+  Z.themeOf = function (id) {
+    var e = Z.EV[id]; if (e && e.img) return e.img;
+    if (/^l_gray|^f_gray/.test(id)) return 'gray';
+    if (/^pa_/.test(id)) return 'parents';
+    if (/^(f_|fr_|fa_|c_)/.test(id)) return 'friends';
+    if (/^p_/.test(id)) return 'love';
+    if (/^(k_|fam_)/.test(id)) return 'family';
+    if (/^w_/.test(id)) return 'work';
+    if (/^y_/.test(id)) return 'youth';
+    if (/^o_/.test(id)) return 'old';
+    return 'life';
+  };
+  // Путь к картинке: сначала картинка темы в стиле возраста, иначе обложка периода. Z.ART — список готовых файлов (js/data/art.js).
+  Z.artFor = function (s, id) {
+    var st = Z.styleFor(s).id, A = (Z.ART || {})[st] || {};
+    return A[Z.themeOf(id)] || A.stage || null;
+  };
+
   // ---------- Склонение имён (эвристика для русских имён) ----------
   Z.decl = function (name, fem) {
     var n = String(name || '').trim() || '?';
@@ -49,6 +78,7 @@
     if (/ия$/.test(low)) { f.g = st + 'и'; f.d = st + 'и'; f.a = st + 'ю'; f.i = st + 'ей'; f.p = st + 'и'; }
     else if (last === 'а') { f.g = st + (hush ? 'и' : 'ы'); f.d = st + 'е'; f.a = st + 'у'; f.i = st + (sib ? 'ей' : 'ой'); f.p = st + 'е'; }
     else if (last === 'я') { f.g = st + 'и'; f.d = st + 'е'; f.a = st + 'ю'; f.i = st + (pre === 'ь' ? 'ёй' : 'ей'); f.p = st + 'е'; }
+    else if (fem && last === 'ь') { f.g = st + 'и'; f.d = st + 'и'; f.i = n + 'ю'; f.p = st + 'и'; }
     else if (!fem) {
       if (last === 'й' || last === 'ь') { f.g = st + 'я'; f.d = st + 'ю'; f.a = st + 'я'; f.i = st + 'ем'; f.p = st + 'е'; }
       else if (/[бвгджзклмнпрстфхцчшщ]/.test(last)) { f.g = n + 'а'; f.d = n + 'у'; f.a = n + 'а'; f.i = n + ('жчшщц'.indexOf(last) >= 0 ? 'ем' : 'ом'); f.p = n + 'е'; }
@@ -134,6 +164,10 @@
       if (setup.married === 'widow') s.risk.wife = { id: wid, age: Z.RISK_AGE[setup.wifeAge || 'c'] };
     }
     if (setup.job && Z.JOBS[setup.job] && !setup.regrets.calling) s.fit[setup.job] = 15;
+    // Сколько лет будет родителям, когда они уйдут своей смертью (если игра пойдёт так далеко), и разница в возрасте с тобой
+    s.pgap = { mom: 25 + R.int(0, 4), dad: 27 + R.int(0, 4) };
+    s.pdeath = { mom: R.int(85, 97), dad: R.int(82, 94) };
+    s.wifeEnd = R.int(80, 97);
     s.queue.push({ id: 'y_start', at: 0 });
     return s;
   };
@@ -262,12 +296,17 @@
     // Здоровье
     var dh = 0.03;
     if (a > 30) dh -= (a - 30) * 0.0045;
+    if (a > 70) dh -= (a - 70) * 0.004;
     if (f.smoke) dh -= 0.12;
     if (f.drinks) dh -= 0.15;
     if (has('health')) dh += 0.35;
     if (f.sport) dh += 0.1;
     if (has('work') && s.job && Z.JOBS[s.job].stress >= 12) dh -= 0.06;
     st.hp = clamp(st.hp + dh, 0, 100);
+    if (f.smoke) f.eversmoke = true;
+    if (f.drinks) f.everdrink = true;
+    // После 75 жизнь может тихо закончиться: чем старше и чем хуже здоровье, тем вероятнее
+    if (a >= 75 && R.chance(0.0005 * (a - 74) + Math.max(0, 50 - st.hp) * 0.0004)) f.oldDeath = true;
     // Мастерство
     var cap = s.student ? 60 : 100;
     var dsk = has('work') ? 0.7 : 0.15;
@@ -444,7 +483,8 @@
 
   Z.checkEnd = function (s) {
     if (s.over) return;
-    if (s.st.hp <= 0) { s.over = 'death'; return; }
+    if (s.st.hp <= 0) { s.over = Z.age(s) >= 70 ? 'old' : 'death'; return; }
+    if (s.f.oldDeath) { s.over = 'old'; return; }
     if (Z.age(s) >= s.endAge && !s.f['end_' + s.endAge]) {
       s.f['end_' + s.endAge] = true;
       s.queue.unshift({ id: 'final_now', at: s.m });
