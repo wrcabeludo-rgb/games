@@ -1,0 +1,45 @@
+# «Жизнь заново»: публикация PWA на GitHub Pages при каждом пуше изменений игры.
+name: Жизнь заново — Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "zhizn-zanovo/**"
+      - ".github/workflows/zhizn-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: zhizn-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Автотест (600 случайных жизней)
+        run: node zhizn-zanovo/tools/sim.js 600
+      - name: Сборка сайта
+        run: |
+          mkdir -p _site
+          cp -r zhizn-zanovo/index.html zhizn-zanovo/manifest.webmanifest zhizn-zanovo/sw.js zhizn-zanovo/css zhizn-zanovo/js zhizn-zanovo/icons _site/
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

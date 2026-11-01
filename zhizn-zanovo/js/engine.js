@@ -1,0 +1,475 @@
+// Движок «Жизни заново»: состояние, месяцы, выбор событий, эффекты, шаблоны текста.
+(function () {
+  'use strict';
+  var Z = window.Z = window.Z || {};
+  Z.VERSION = '0.1.0';
+  Z.EV = {};
+  Z.evList = [];
+
+  // Регистрация событий. once — по умолчанию одноразовое; rep: N — повторяется не чаще раза в N месяцев.
+  Z.def = function (list) {
+    list.forEach(function (e) {
+      if (Z.EV[e.id]) throw new Error('Повтор события ' + e.id);
+      if (e.once === undefined) e.once = !e.rep && !e.manual;
+      Z.EV[e.id] = e;
+      Z.evList.push(e);
+    });
+  };
+
+  var R = Z.R = {
+    rnd: Math.random,
+    int: function (a, b) { return a + Math.floor(R.rnd() * (b - a + 1)); },
+    chance: function (p) { return R.rnd() < p; },
+    pick: function (arr) { return arr[Math.floor(R.rnd() * arr.length)]; },
+    shuffle: function (arr) { arr = arr.slice(); for (var i = arr.length - 1; i > 0; i--) { var j = Math.floor(R.rnd() * (i + 1)); var t = arr[i]; arr[i] = arr[j]; arr[j] = t; } return arr; }
+  };
+  var clamp = Z.clamp = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
+
+  Z.MONTHS = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'];
+  Z.age = function (s) { return 18 + s.m / 12; };
+  Z.ageInt = function (s) { return Math.floor(Z.age(s) + 1e-9); };
+  Z.cal = function (s, m) { m = m == null ? s.m : m; var i = 8 + m; return { mon: i % 12, year: s.y0 + Math.floor(i / 12) }; };
+  Z.dateStr = function (s, m) { var c = Z.cal(s, m); return Z.MONTHS[c.mon] + ' ' + c.year; };
+  Z.plural = function (n, one, few, many) {
+    var a = Math.abs(n) % 100, b = a % 10;
+    if (a > 10 && a < 20) return many;
+    if (b > 1 && b < 5) return few;
+    if (b === 1) return one;
+    return many;
+  };
+  Z.yearsStr = function (n) { return n + ' ' + Z.plural(n, 'год', 'года', 'лет'); };
+
+  // ---------- Склонение имён (эвристика для русских имён) ----------
+  Z.decl = function (name, fem) {
+    var n = String(name || '').trim() || '?';
+    var low = n.toLowerCase(), last = low.slice(-1), pre = low.slice(-2, -1), st = n.slice(0, -1);
+    var f = { n: n, g: n, d: n, a: n, i: n, p: n };
+    var hush = 'гкхжчшщ'.indexOf(pre) >= 0, sib = 'жчшщц'.indexOf(pre) >= 0;
+    if (/ия$/.test(low)) { f.g = st + 'и'; f.d = st + 'и'; f.a = st + 'ю'; f.i = st + 'ей'; f.p = st + 'и'; }
+    else if (last === 'а') { f.g = st + (hush ? 'и' : 'ы'); f.d = st + 'е'; f.a = st + 'у'; f.i = st + (sib ? 'ей' : 'ой'); f.p = st + 'е'; }
+    else if (last === 'я') { f.g = st + 'и'; f.d = st + 'е'; f.a = st + 'ю'; f.i = st + (pre === 'ь' ? 'ёй' : 'ей'); f.p = st + 'е'; }
+    else if (!fem) {
+      if (last === 'й' || last === 'ь') { f.g = st + 'я'; f.d = st + 'ю'; f.a = st + 'я'; f.i = st + 'ем'; f.p = st + 'е'; }
+      else if (/[бвгджзклмнпрстфхцчшщ]/.test(last)) { f.g = n + 'а'; f.d = n + 'у'; f.a = n + 'а'; f.i = n + ('жчшщц'.indexOf(last) >= 0 ? 'ем' : 'ом'); f.p = n + 'е'; }
+    }
+    return f;
+  };
+
+  // ---------- Люди ----------
+  Z.person = function (s, id) { return s.pp[id]; };
+  Z.addPerson = function (s, id, o) {
+    var p = { id: id, n: o.n, fem: !!o.fem, kind: o.kind, rel: o.rel || 0, met: !!o.met, alive: true };
+    p.forms = Z.decl(p.n, p.fem);
+    s.pp[id] = p;
+    return p;
+  };
+  Z.rename = function (s, id, name, fem) {
+    var p = s.pp[id]; if (!p || !name) return;
+    p.n = name.trim(); if (fem != null) p.fem = fem; p.forms = Z.decl(p.n, p.fem);
+  };
+  Z.meet = function (s, id, rel) { var p = s.pp[id]; if (!p) return; if (!p.met) { p.met = true; p.metM = s.m; } if (rel) p.rel = clamp(p.rel + rel, 0, 100); };
+  Z.rel = function (s, id) { var p = s.pp[id]; return p && p.met && p.alive ? p.rel : 0; };
+  Z.alive = function (s, id) { var p = s.pp[id]; return !!(p && p.alive); };
+  Z.friendIds = function (s) { return Object.keys(Z.FRIENDS).filter(function (id) { var p = s.pp[id]; return p.met && p.alive && !p.gone; }); };
+  Z.isClose = function (s, id) { return s.close.indexOf(id) >= 0; };
+  Z.P = function (s) { return s.partner ? s.pp[s.partner] : null; };
+  Z.married = function (s) { return !!s.partner && s.pst === 'married'; };
+  Z.dating = function (s) { return !!s.partner && s.pst === 'dating'; };
+  Z.single = function (s) { return !s.partner; };
+  Z.kids = function (s) { return s.kids.map(function (id) { return s.pp[id]; }).filter(function (k) { return k.alive; }); };
+  Z.kidAge = function (s, k) { return (s.m - k.born) / 12; };
+  Z.parentsAlive = function (s) { return ['mom', 'dad'].filter(function (id) { return s.pp[id].alive; }); };
+  Z.jobName = function (s) { return s.job ? Z.JOBS[s.job].n : ''; };
+  Z.jobTitle = function (s) { return s.job ? Z.JOBS[s.job].t[s.lvl] : ''; };
+  Z.working = function (s) { return !!s.job && !s.student; };
+  Z.gray = function (s) { return s.st.joy < 30; };
+
+  // ---------- Новая жизнь ----------
+  Z.RISK_AGE = { a: 22, b: 30, c: 40, d: 48 };
+  Z.newLife = function (setup) {
+    var now = new Date().getFullYear();
+    var s = {
+      v: 1, ver: Z.VERSION, setup: setup, y0: now - setup.age + 18, m: 0, target: setup.age, endAge: setup.age,
+      st: { hp: 85, joy: 62, money: 15, sk: 15 },
+      pp: {}, f: {}, seen: {}, queue: [], log: [], kids: [], close: [], exes: [], cnt: {},
+      focus: ['work', 'friends'], tempo: setup.tempo || 'normal',
+      edu: null, student: true, degree: false, job: null, lvl: 0, jobM: 0, lvlM: 0, jobsHad: [],
+      partner: null, pst: null, pSince: 0, wedM: null, fit: {}, grief: 0, risk: {}, started: false, over: null, turn: null
+    };
+    Z.addPerson(s, 'mom', { n: 'мама', fem: true, kind: 'parent', rel: 70, met: true });
+    Z.addPerson(s, 'dad', { n: 'папа', kind: 'parent', rel: 60, met: true });
+    Object.keys(Z.FRIENDS).forEach(function (id) { var d = Z.FRIENDS[id]; Z.addPerson(s, id, { n: d.n, fem: d.fem, kind: 'friend', rel: 0 }); });
+    Object.keys(Z.PARTNERS).forEach(function (id) { Z.addPerson(s, id, { n: Z.PARTNERS[id].n, fem: true, kind: 'partner', rel: 0 }); });
+    // Прошлое: потерянные родители, друг, жена.
+    if (setup.parents === 'mom' || setup.parents === 'none') s.risk.dad = Z.RISK_AGE[setup.dadAge || 'b'];
+    if (setup.parents === 'dad' || setup.parents === 'none') s.risk.mom = Z.RISK_AGE[setup.momAge || 'c'];
+    if (setup.lostFriend) {
+      var map = { crash: 'max', ill: 'zhenya', drink: 'serega', depr: 'dima', lost: 'vitya' };
+      var fid = setup.lostFem && setup.lostCause === 'ill' ? 'ira' : map[setup.lostCause] || 'zhenya';
+      Z.rename(s, fid, setup.lostName || s.pp[fid].n, setup.lostFem ? true : (fid === 'ira' ? true : false));
+      var la = { crash: 26, ill: 38, drink: 36, depr: 31, lost: 30 }[setup.lostCause] || 33;
+      s.risk.friend = { id: fid, age: la, cause: setup.lostCause };
+    }
+    if (setup.married && setup.married !== 'never' && setup.wifeType) {
+      var wid = setup.wifeType;
+      if (setup.wifeName) Z.rename(s, wid, setup.wifeName, true);
+      s.f.pastwife = wid;
+      if (setup.married === 'widow') s.risk.wife = { id: wid, age: Z.RISK_AGE[setup.wifeAge || 'c'] };
+    }
+    if (setup.job && Z.JOBS[setup.job] && !setup.regrets.calling) s.fit[setup.job] = 15;
+    s.queue.push({ id: 'y_start', at: 0 });
+    return s;
+  };
+
+  // ---------- Шаблоны текста ----------
+  // {hero}, {hero.d} — герой; {P}, {P.a} — текущая девушка/жена; {F} {K} — друг/ребёнок события;
+  // {mom.d}, {anya.i} — любой человек по id; {F~пришёл|пришла} — по полу; {job}, {jobt}, {age}, {year}, {pastjob}.
+  Z.who = function (s, ctx, key) {
+    if (key === 'hero') return { forms: Z.decl(s.setup.name, false), fem: false };
+    if (key === 'P') return s.pp[(ctx && ctx.P) || s.partner];
+    if (ctx && ctx[key] && s.pp[ctx[key]]) return s.pp[ctx[key]];
+    if (key === 'C1' || key === 'C2') return s.pp[s.close[key === 'C1' ? 0 : 1]];
+    if (key === 'W') return s.pp[s.f.pastwife];
+    return s.pp[key];
+  };
+  Z.t = function (str, s, ctx) {
+    if (str == null) return '';
+    if (typeof str === 'function') str = str(s, ctx || {});
+    return String(str).replace(/\{([^{}]+)\}/g, function (all, key) {
+      var m = key.match(/^(\w+)~([^|]*)\|(.*)$/);
+      if (m) { var w = Z.who(s, ctx, m[1]); return w && w.fem ? m[3] : m[2]; }
+      var parts = key.split('.');
+      switch (parts[0]) {
+        case 'job': return Z.jobName(s);
+        case 'jobt': return Z.jobTitle(s);
+        case 'age': return String(Z.ageInt(s));
+        case 'year': return String(Z.cal(s).year);
+        case 'pastjob': return s.setup.job && Z.JOBS[s.setup.job] ? Z.JOBS[s.setup.job].n : 'тем, кем ты был';
+        case 'pastjobi': return s.setup.job && Z.JOB_I[s.setup.job] ? Z.JOB_I[s.setup.job] : 'тем, кем был';
+        case 'jobi': return s.job ? Z.JOB_I[s.job] : '';
+        case 'pastage': return String(s.setup.age);
+        case 'edu': return s.edu ? Z.EDU[s.edu].n.toLowerCase() : '';
+      }
+      var p = Z.who(s, ctx, parts[0]);
+      if (!p && parts[0] === 'P') p = { n: 'жена', fem: true, forms: Z.decl('жена', true) };
+      if (!p) return all;
+      var f = p.forms || Z.decl(p.n, p.fem);
+      return f[parts[1] || 'n'] || f.n;
+    });
+  };
+  Z.cap = function (str) { return str ? str.charAt(0).toUpperCase() + str.slice(1) : str; };
+
+  // ---------- Эффекты (мини-язык) ----------
+  // hp+5 joy-3 money+10 sk+2 | @mom+5 @P-3 @F+4 @K+5 @kids+3 @friends+2 | +flag -flag cnt++ | >event@6 >event@3-9 | fit.prog+5 | met:serega
+  Z.relId = function (s, ctx, key) {
+    if (key === 'P') return (ctx && ctx.P) || s.partner;
+    if (ctx && ctx[key]) return ctx[key];
+    return key;
+  };
+  Z.addRel = function (s, id, d) { var p = s.pp[id]; if (!p || !p.alive) return; if (!p.met) Z.meet(s, id); p.rel = clamp(p.rel + d, 0, 100); };
+  Z.fx = function (s, str, ctx) {
+    if (!str) return;
+    str.trim().split(/\s+/).forEach(function (tok) {
+      var m;
+      if ((m = tok.match(/^(hp|joy|money|sk)([+-]\d+)$/))) { s.st[m[1]] = clamp(s.st[m[1]] + Number(m[2]), 0, 100); return; }
+      if ((m = tok.match(/^@(\w+)([+-]\d+)$/))) {
+        var d = Number(m[2]), k = m[1];
+        if (k === 'kids') Z.kids(s).forEach(function (p) { Z.addRel(s, p.id, d); });
+        else if (k === 'friends') Z.friendIds(s).forEach(function (id) { Z.addRel(s, id, d); });
+        else if (k === 'parents') Z.parentsAlive(s).forEach(function (id) { Z.addRel(s, id, d); });
+        else if (k === 'close') s.close.forEach(function (id) { Z.addRel(s, id, d); });
+        else { var id = Z.relId(s, ctx, k); if (id) Z.addRel(s, id, d); }
+        return;
+      }
+      if ((m = tok.match(/^fit\.(\w+)([+-]\d+)$/))) { s.fit[m[1]] = clamp((s.fit[m[1]] || 0) + Number(m[2]), 0, 100); return; }
+      if ((m = tok.match(/^hobby\.(\w+)([+-]\d+)$/))) { (Z.HOBBY[m[1]].jobs).forEach(function (j) { s.fit[j] = clamp((s.fit[j] || 0) + Number(m[2]), 0, 100); }); s.f['h_' + m[1]] = true; return; }
+      if ((m = tok.match(/^met:(\w+)$/))) { Z.meet(s, Z.relId(s, ctx, m[1]), 15); return; }
+      if ((m = tok.match(/^>(\w+)(?:@(\d+)(?:-(\d+))?)?$/))) {
+        var a = m[2] ? Number(m[2]) : 1, b = m[3] ? Number(m[3]) : a;
+        Z.schedule(s, m[1], R.int(a, b), ctx); return;
+      }
+      if ((m = tok.match(/^(\w+)\+\+$/))) { s.cnt[m[1]] = (s.cnt[m[1]] || 0) + 1; return; }
+      if ((m = tok.match(/^\+(\w+)$/))) { s.f[m[1]] = true; return; }
+      if ((m = tok.match(/^-(\w+)$/))) { delete s.f[m[1]]; return; }
+      if (window.console) console.warn('Непонятный эффект: ' + tok);
+    });
+  };
+  Z.schedule = function (s, id, inMonths, ctx) {
+    if (!Z.EV[id]) { console.warn('Нет события ' + id); return; }
+    s.queue.push({ id: id, at: s.m + Math.max(0, inMonths), ctx: ctx ? JSON.parse(JSON.stringify(ctx)) : undefined });
+  };
+  Z.logLine = function (s, text, kind) { s.log.push({ m: s.m, t: text, k: kind || '' }); };
+
+  // ---------- Доход и счастье ----------
+  Z.income = function (s) {
+    var v;
+    if (s.student) v = 12 + (Z.alive(s, 'mom') || Z.alive(s, 'dad') ? 6 : 0) + (s.f.parttime ? 8 : 0);
+    else if (s.job) v = Z.JOBS[s.job].pay[s.lvl];
+    else v = 8;
+    if (Z.married(s) && !s.f.p_home) v += 14;
+    Z.kids(s).forEach(function (k) { if (Z.kidAge(s, k) < 22) v -= 6; });
+    if (s.f.mortgage) v -= 8;
+    if (s.f.debt) v -= 12;
+    if (s.f.savings) v += 4;
+    return clamp(v, 2, 100);
+  };
+  Z.joyBase = function (s) {
+    var a = Z.age(s), b = 14;
+    var P = Z.P(s);
+    if (P) b += (P.rel - 50) * 0.3;
+    else if (a > 27 && !s.f.content_alone) b -= 6;
+    var fr = Z.friendIds(s).map(function (id) { return s.pp[id].rel; }).sort(function (x, y) { return y - x; });
+    b += (((fr[0] || 0) + (fr[1] || 0)) / 2 - 40) * 0.15;
+    Z.parentsAlive(s).forEach(function (id) { b += (s.pp[id].rel - 50) * 0.04; });
+    Z.kids(s).forEach(function (k) { b += 2 + (k.rel - 50) * 0.06; });
+    if (s.job && !s.student) {
+      var J = Z.JOBS[s.job]; b += Math.min(40, s.fit[s.job] || 0) * 0.3 - J.stress * 0.5 + s.lvl;
+    } else if (!s.student && a > 23 && !s.f.retired) b -= 10;
+    b += (s.st.hp - 60) * 0.15 + (s.st.money - 35) * 0.12;
+    if (s.f.hobby) b += 4;
+    if (s.focus.indexOf('self') >= 0) b += 3;
+    if (s.f.dog) b += 3;
+    if (s.f.drinks) b -= 4;
+    if (s.f.debt) b -= 4;
+    if (s.grief > 0) b -= 14 * s.grief / 12;
+    return clamp(b, 5, 95);
+  };
+
+  // ---------- Месяц жизни ----------
+  Z.tick = function (s) {
+    s.m++;
+    var a = Z.age(s), st = s.st, f = s.f;
+    var has = function (k) { return s.focus.indexOf(k) >= 0; };
+    // Здоровье
+    var dh = 0.03;
+    if (a > 30) dh -= (a - 30) * 0.0045;
+    if (f.smoke) dh -= 0.12;
+    if (f.drinks) dh -= 0.15;
+    if (has('health')) dh += 0.35;
+    if (f.sport) dh += 0.1;
+    if (has('work') && s.job && Z.JOBS[s.job].stress >= 12) dh -= 0.06;
+    st.hp = clamp(st.hp + dh, 0, 100);
+    // Мастерство
+    var cap = s.student ? 60 : 100;
+    var dsk = has('work') ? 0.7 : 0.15;
+    if (st.sk < cap) st.sk = clamp(st.sk + dsk, 0, cap);
+    // Увлечение растит призвание
+    if (has('self')) Object.keys(Z.HOBBY).forEach(function (h) { if (f['h_' + h]) Z.HOBBY[h].jobs.forEach(function (j) { s.fit[j] = clamp((s.fit[j] || 0) + 0.25, 0, 100); }); });
+    // Достаток
+    st.money = clamp(st.money + (Z.income(s) - st.money) * 0.06, 0, 100);
+    // Отношения
+    Object.keys(s.pp).forEach(function (id) {
+      var p = s.pp[id]; if (!p.alive || !p.met) return;
+      var d = 0;
+      if (p.kind === 'parent') d = has('parents') ? 1.2 : -0.22;
+      else if (p.kind === 'kid') d = has('love') ? 1.0 : (has('work') ? -0.5 : -0.3);
+      else if (p.kind === 'friend') {
+        var close = Z.isClose(s, id);
+        d = has('friends') ? (close ? 0.9 : 0.4) : (close ? -0.12 : -0.28);
+        if (s.close.length >= 2 && !close && a > 26) d -= 0.1;
+      } else if (p.kind === 'partner' && id === s.partner) {
+        d = has('love') ? 1.0 : -0.45;
+        if (has('work') && !has('love') && Z.married(s)) d -= 0.2;
+        if (f.affair) d -= 0.4;
+      }
+      p.rel = clamp(p.rel + d, 0, 100);
+    });
+    // Счастье тянется к «базе», которую задают люди, работа, здоровье
+    var base = Z.joyBase(s);
+    st.joy = clamp(st.joy + (base - st.joy) * 0.1 + (R.rnd() - 0.5) * 1.6, 0, 100);
+    if (s.grief > 0) s.grief--;
+    if (s.job && !s.student) { s.jobM++; s.lvlM++; }
+    if (s.partner) s.pMonths = (s.pMonths || 0) + 1;
+  };
+
+  // ---------- Выбор событий ----------
+  Z.key = function (e, ctx) { return e.per ? e.id + ':' + (ctx && ctx[e.per]) : e.id; };
+  Z.ok = function (s, e, ctx) {
+    var a = Z.age(s);
+    if (e.age && (a < e.age[0] || a >= e.age[1])) return false;
+    var k = Z.key(e, ctx);
+    if (e.once && s.seen[k] != null) return false;
+    if (e.rep && s.seen[k] != null && s.m - s.seen[k] < e.rep) return false;
+    if (e.gray && !Z.gray(s)) return false;
+    if (e.if && !e.if(s, ctx || {})) return false;
+    return true;
+  };
+  Z.ctxs = function (s, e) {
+    if (!e.ctx) return [{}];
+    var c = e.ctx(s);
+    if (!c) return [];
+    return Array.isArray(c) ? c : [c];
+  };
+  Z.candidates = function (s, e) {
+    var all = Z.ctxs(s, e);
+    return all.filter(function (c) { return Z.ok(s, e, c); });
+  };
+  Z.weight = function (s, e, ctx) {
+    var w = typeof e.w === 'function' ? e.w(s, ctx) : (e.w == null ? 10 : e.w);
+    if (e.gray) w *= 3;
+    return w;
+  };
+  Z.density = function (s) {
+    var a = Z.age(s);
+    var d = a < 23 ? 0.75 : a < 35 ? 0.5 : a < 50 ? 0.4 : 0.33;
+    d *= { slow: 1.25, normal: 1, fast: 0.6 }[s.tempo] || 1;
+    return d;
+  };
+  Z.pickRandom = function (s, n, taken) {
+    var out = [];
+    for (var k = 0; k < n; k++) {
+      var pool = [], total = 0;
+      Z.evList.forEach(function (e) {
+        if (e.prio || e.manual) return;
+        if (taken[e.id]) return;
+        var cs = Z.candidates(s, e);
+        if (!cs.length) return;
+        var w = Z.weight(s, e, cs[0]);
+        if (w <= 0) return;
+        pool.push({ e: e, cs: cs, w: w }); total += w;
+      });
+      if (!pool.length) break;
+      var r = R.rnd() * total, it = pool[0];
+      for (var i = 0; i < pool.length; i++) { r -= pool[i].w; if (r <= 0) { it = pool[i]; break; } }
+      taken[it.e.id] = true;
+      out.push({ id: it.e.id, ctx: R.pick(it.cs) });
+    }
+    return out;
+  };
+  Z.forced = function (s, taken) {
+    var out = [];
+    // Запланированные
+    var due = s.queue.filter(function (q) { return q.at <= s.m; });
+    s.queue = s.queue.filter(function (q) { return q.at > s.m; });
+    due.forEach(function (q) {
+      var e = Z.EV[q.id]; if (!e) return;
+      var ctx = q.ctx || (e.ctx ? Z.ctxs(s, e)[0] : {});
+      if (!ctx) return;
+      if (e.if && !e.if(s, ctx)) return;
+      out.push({ id: q.id, ctx: ctx }); taken[q.id] = true;
+    });
+    // Обязательные (prio), самые важные первыми, не больше двух за месяц
+    var pr = Z.evList.filter(function (e) { return e.prio && !taken[e.id]; })
+      .map(function (e) { var cs = Z.candidates(s, e); return cs.length ? { e: e, c: cs[0] } : null; })
+      .filter(Boolean).sort(function (x, y) { return y.e.prio - x.e.prio; }).slice(0, 2);
+    pr.forEach(function (x) { out.push({ id: x.e.id, ctx: x.c }); taken[x.e.id] = true; });
+    return out;
+  };
+
+  // Фраза о тихих месяцах
+  Z.quietNote = function (s, from, to) {
+    var a = Z.dateStr(s, from), b = Z.dateStr(s, to);
+    var span = from === to ? Z.cap(a) : Z.cap(a) + ' — ' + b;
+    var notes = s.focus.map(function (k) { return Z.FOCUS[k].note; }).join(', ');
+    return span + ': жизнь идёт своим чередом — ' + notes + '.';
+  };
+  Z.GRAY_NOTES = [
+    'Месяцы слиплись в один. Утро, дорога, вечер, экран, сон.',
+    'Время шло мимо тебя, как поезд мимо полустанка.',
+    'Ты почти не помнишь эти месяцы. Серое небо, серые дни.',
+    'Ты жил на автопилоте. Звонки оставались без ответа.',
+    'Дни были похожи друг на друга, как капли за окном.'
+  ];
+
+  // Новый ход: продвигаем время, собираем события месяца.
+  Z.newTurn = function (s) {
+    var t = { from: s.m, notes: [], q: [], i: 0 };
+    var taken = {};
+    if (s.started) Z.tick(s);
+    s.started = true;
+    var quietFrom = null;
+    for (var guard = 0; guard < 40 && !s.over; guard++) {
+      Z.checkEnd(s);
+      if (s.over) break;
+      var forced = Z.forced(s, taken);
+      if (forced.length) { t.q = t.q.concat(forced); }
+      // Серый период — проматываем месяцы
+      if (!forced.length && Z.gray(s) && !s.f.noskip && s.m > 6) {
+        if (quietFrom != null) { t.notes.push(Z.quietNote(s, quietFrom, s.m - 1)); quietFrom = null; }
+        var k = s.st.joy < 15 ? R.int(6, 18) : R.int(2, 6);
+        if (Z.age(s) + k / 12 > s.endAge) k = Math.max(1, Math.floor((s.endAge - Z.age(s)) * 12));
+        var from = s.m;
+        for (var i = 0; i < k && !s.over; i++) { Z.tick(s); Z.checkEnd(s); }
+        t.notes.push({ gray: true, t: Z.cap(Z.dateStr(s, from)) + ' — ' + Z.dateStr(s, s.m) + '. ' + R.pick(Z.GRAY_NOTES) + (k >= 12 ? ' Прошло больше года.' : '') });
+        t.q = t.q.concat(Z.forced(s, taken));
+        var life = Z.pickRandom(s, 1, taken);
+        t.q = t.q.concat(life);
+        if (t.q.length) break;
+        continue;
+      }
+      // Сколько событий в этом месяце
+      var n = 0;
+      if (R.chance(Z.density(s))) n = 1;
+      if (s.st.joy > 70 && R.chance(0.3)) n++;
+      if (forced.length) n = Math.max(0, n - forced.length);
+      if (n) t.q = t.q.concat(Z.pickRandom(s, n, taken));
+      if (t.q.length) break;
+      if (quietFrom == null) quietFrom = s.m;
+      Z.tick(s);
+    }
+    if (quietFrom != null && quietFrom < s.m) t.notes.push(Z.quietNote(s, quietFrom, s.m - 1));
+    s.turn = t;
+    return t;
+  };
+
+  Z.checkEnd = function (s) {
+    if (s.over) return;
+    if (s.st.hp <= 0) { s.over = 'death'; return; }
+    if (Z.age(s) >= s.endAge && !s.f['end_' + s.endAge]) {
+      s.f['end_' + s.endAge] = true;
+      s.queue.unshift({ id: 'final_now', at: s.m });
+    }
+  };
+
+  Z.choicesOf = function (s, e, ctx) {
+    var list = typeof e.choices === 'function' ? e.choices(s, ctx) : e.choices;
+    list = (list || []).filter(function (c) { return !c.if || c.if(s, ctx); });
+    return list.length ? list : [{ t: 'Дальше', res: '' }];
+  };
+
+  Z.snapshot = function (s) {
+    var r = {}; Object.keys(s.pp).forEach(function (id) { var p = s.pp[id]; if (p.met && p.alive) r[id] = p.rel; });
+    return { st: JSON.parse(JSON.stringify(s.st)), r: r };
+  };
+  Z.STAT_N = { hp: 'Здоровье', joy: 'Счастье', money: 'Достаток', sk: 'Мастерство' };
+  Z.diff = function (s, a) {
+    var out = [];
+    Object.keys(Z.STAT_N).forEach(function (k) { var d = Math.round(s.st[k] - a.st[k]); if (d) out.push({ n: Z.STAT_N[k], d: d }); });
+    Object.keys(s.pp).forEach(function (id) {
+      var p = s.pp[id]; if (!p.met || !p.alive) return;
+      var was = a.r[id] == null ? 0 : a.r[id];
+      var d = Math.round(p.rel - was); if (d) out.push({ n: Z.cap(p.n), d: d, rel: true });
+    });
+    return out;
+  };
+
+  // Применить выбор
+  Z.apply = function (s, ci, input) {
+    var t = s.turn, inst = t.q[t.i], e = Z.EV[inst.id], ctx = inst.ctx || {};
+    var c = Z.choicesOf(s, e, ctx)[ci];
+    s.seen[Z.key(e, ctx)] = s.m;
+    var snap = Z.snapshot(s);
+    if (c.fx) Z.fx(s, c.fx, ctx);
+    var r = c.run ? c.run(s, ctx, input) : null;
+    var res = Z.t(r != null && r !== true ? r : c.res, s, ctx);
+    if (c.log) Z.logLine(s, Z.t(c.log, s, ctx), c.lk);
+    if (c.go) t.q.splice(t.i + 1, 0, { id: c.go, ctx: ctx });
+    Z.checkEnd(s);
+    inst.done = { res: res, d: Z.diff(s, snap), ci: ci };
+    return inst.done;
+  };
+
+  // Перейти к следующей карточке хода, пропуская ставшие неактуальными (например, после увольнения)
+  Z.next = function (s) {
+    var t = s.turn; t.i++;
+    while (t.i < t.q.length) {
+      var inst = t.q[t.i], e = Z.EV[inst.id];
+      if (!e.if || e.if(s, inst.ctx || {})) break;
+      t.i++;
+    }
+    return t.i < t.q.length;
+  };
+
+  // Отложенный вызов событий (для арок): после этой карточки показать ещё одну
+  Z.chain = function (s, id, ctx) { var t = s.turn; if (t) t.q.splice(t.i + 1, 0, { id: id, ctx: ctx || {} }); };
+})();

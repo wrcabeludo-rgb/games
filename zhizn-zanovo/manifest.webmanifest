@@ -1,0 +1,17 @@
+{
+  "name": "Жизнь заново",
+  "short_name": "Жизнь заново",
+  "description": "Текстовая игра о втором шансе: проснись в 18 и проживи жизнь заново.",
+  "lang": "ru",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#16131b",
+  "theme_color": "#16131b",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
