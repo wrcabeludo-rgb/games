@@ -1,9 +1,9 @@
 // Сервис-воркер: сначала сеть (чтобы новые версии приходили сразу), без сети — из кэша.
-const CACHE = 'zhizn-zanovo-v0.7.1';
+const CACHE = 'zhizn-zanovo-v0.8.0';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/style.css',
   'js/data/people.js', 'js/engine.js', 'js/life.js', 'js/world.js', 'js/story.js', 'js/heart.js', 'js/data/ev_youth.js', 'js/data/ev_love.js',
-  'js/data/ev_family.js', 'js/data/ev_friends.js', 'js/data/ev_work.js', 'js/data/ev_life.js', 'js/data/ev_variety.js', 'js/data/ev_deep.js', 'js/data/ev_old.js', 'js/data/ev_paths.js', 'js/data/ev_crossroads.js', 'js/data/ev_heart.js', 'js/data/art.js', 'js/achievements.js', 'js/sound.js',
+  'js/data/ev_family.js', 'js/data/ev_friends.js', 'js/data/ev_work.js', 'js/data/ev_life.js', 'js/data/ev_variety.js', 'js/data/ev_deep.js', 'js/data/ev_old.js', 'js/data/ev_paths.js', 'js/data/ev_crossroads.js', 'js/data/ev_heart.js', 'js/data/ev_yard.js', 'js/data/art.js', 'js/achievements.js', 'js/sound.js',
   'js/endings.js', 'js/setup.js', 'js/ui.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png'
 ];

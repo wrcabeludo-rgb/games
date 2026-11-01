@@ -87,7 +87,7 @@
   Z.ritOn = function (s, k) { var r = s.rit && s.rit[k]; return !!(r && r.ended == null); };
   Z.ritWho = function (s, k) {
     var w = Z.RITUALS[k].who;
-    return w === 'parents' ? Z.parentsAlive(s).length > 0 : Z.alive(s, w);
+    return w === 'parents' ? Z.parentsAlive(s).length > 0 : Z.alive(s, w) && !s.pp[w].gone;
   };
 
   // ================= НЕСКАЗАННОЕ =================
@@ -130,7 +130,7 @@
     var title = (inst.cache && inst.cache.title) || e.title || '';
     var r = firstSentence(done.res);
     s.lastWith = s.lastWith || {};
-    ids.forEach(function (id) { if (s.pp[id] && s.pp[id].alive && close(s, id) && r) s.lastWith[id] = { m: s.m, t: typeof title === 'string' ? title : '', r: r }; });
+    ids.forEach(function (id) { if (s.pp[id] && s.pp[id].alive && (close(s, id) || s.pp[id].kind === 'friend') && r) s.lastWith[id] = { m: s.m, t: typeof title === 'string' ? title : '', r: r }; });
   });
 
   // Утрата: через несколько месяцев — «последний обычный день», потом письмо, если есть несказанное.

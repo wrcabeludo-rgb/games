@@ -358,6 +358,8 @@
     if (TH.length) html += '<h4>Коробка с памятным</h4><ul>' + TH.map(function (k) { return '<li><div><b>' + esc(Z.THINGS[k].n) + '</b><small>' + esc(Z.THINGS[k].d) + '</small></div></li>'; }).join('') + '</ul>';
     var RI = Object.keys(s.rit || {});
     if (RI.length) html += '<h4>Наши традиции</h4><ul>' + RI.map(function (k) { var r = s.rit[k]; return '<li><div><b>' + esc(Z.cap(Z.RITUALS[k].n)) + '</b><small>' + (r.ended != null ? 'Кончилась' + (r.last != null ? '. Последний раз — ' + Z.dateStr(s, r.last) : '') : r.n ? Z.cap(r.n + ' ' + Z.plural(r.n, 'раз', 'раза', 'раз')) + ' — и дальше' : 'Только началась') + '</small></div></li>'; }).join('') + '</ul>';
+    var Y = s.yard && s.yard.told ? s.yard.kids.slice(0, s.yard.told) : [];
+    if (Y.length) html += '<h4>Наш двор</h4><ul>' + Y.map(function (k) { var K = Z.YARD_KIDS[k.i]; return '<li><div><b>' + esc(Z.cap(K.n)) + '</b><small>' + esc(Z.YARD_FATES[k.f][K.fem ? 1 : 0]) + '</small></div></li>'; }).join('') + '</ul>';
     var R = s.setup.regrets || {};
     if (Object.keys(R).length) html += '<h4>Что я хочу изменить</h4><ul class="goals">' + Object.keys(R).map(function (k) { return '<li>' + esc(Z.REGRETS[k]) + '</li>'; }).join('') + '</ul>';
     return html + '</section>';

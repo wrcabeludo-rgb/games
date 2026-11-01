@@ -48,13 +48,13 @@
 
     // ---------- Сами традиции ----------
     {
-      id: 'ri', per: 'R', rep: 9, w: 30, age: [18.3, 100],
+      id: 'ri', per: 'R', rep: 9, prio: 2, age: [18.3, 100],
       ctx: function (s) {
         return Object.keys(s.rit || {}).filter(function (k) {
-          if (!Z.ritOn(s, k) || !Z.ritWho(s, k)) return false;
-          if (k === 'fish') return Z.inMonth(s, [10, 11]) && dadA(s) && home(s);
-          if (k === 'ny') return Z.inMonth(s, [11]) && home(s);
-          return true;
+          if (/^f_/.test(k) || !Z.ritOn(s, k) || !Z.ritWho(s, k)) return false;
+          if (k === 'fish') return Z.inMonth(s, [10, 11]) && dadA(s) && home(s) && R.chance(0.7);
+          if (k === 'ny') return Z.inMonth(s, [11]) && home(s) && R.chance(0.7);
+          return R.chance(0.12);
         }).map(function (k) { return { R: k }; });
       },
       title: function (s, c) { return { sunday: 'Воскресенье', fish: 'Первый лёд', ny: 'Новый год у родителей' }[c.R]; },
