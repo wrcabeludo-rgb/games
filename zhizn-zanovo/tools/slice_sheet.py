@@ -23,13 +23,13 @@ def bands(profile, thr, min_gap):
             if gap > min_gap: out.append((start, i - gap + 1)); inside = False
     return out
 
-def cells(img):
+def cells(img, gap_div=80):
     g = ImageOps.grayscale(img); W, H = g.size; px = g.load()
     dark = lambda x, y: px[x, y] < 200
     cols = [sum(1 for y in range(0, H, 2) if dark(x, y)) for x in range(W)]
     rows = [sum(1 for x in range(0, W, 2) if dark(x, y)) for y in range(H)]
-    xs = [b for b in bands(cols, 1, W // 80) if b[1] - b[0] > W // 8]
-    ys = [b for b in bands(rows, 1, H // 80) if b[1] - b[0] > H // 8]
+    xs = [b for b in bands(cols, 1, W // gap_div) if b[1] - b[0] > W // 8]
+    ys = [b for b in bands(rows, 1, H // gap_div) if b[1] - b[0] > H // 8]
     return [(x0, y0, x1, y1) for (y0, y1) in ys for (x0, x1) in xs]
 
 def fit32(im):
@@ -44,6 +44,8 @@ def main():
     keys = SHEETS[sheet]
     img = Image.open(src).convert('RGB')
     cs = cells(img)
+    if len(cs) != len(keys):
+        cs = cells(img, 400)  # ChatGPT иногда сводит промежутки до 3–4 px — ищем и узкие белые полосы
     print('найдено ячеек:', len(cs))
     if len(cs) != len(keys):
         print('Ожидалось %d. Лист не режется ровно — проверьте сетку (лучше перегенерировать).' % len(keys)); sys.exit(1)
