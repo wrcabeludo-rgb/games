@@ -71,7 +71,28 @@
     return 'life';
   };
   // Путь к картинке: сначала картинка темы в стиле возраста, иначе обложка периода. Z.ART — список готовых файлов (js/data/art.js).
+  // Сцены-линер (листы-раскадровки): событие → ключ сцены. Сцена — в любом возрасте, приоритетнее обложки.
+  Z.SCENE_RULES = [
+    [/^(pa_call|pa_mom_bday|l_gray_mom|pa_tech|pa_single_worry)$/, 'mom_phone'], [/^(pa_visit|pa_dacha|pa_recipe|pa_house|pa_story|pa_letters|pa_money)$/, 'dacha'],
+    [/^(pa_garage|pa_dad_regret|pa_retire|pa_dad_bday|pa_dad_smoke\d?|y_dad_smoke1|xr_dad_after)$/, 'garage'],
+    [/^(pa_dad_heart|pa_mom_ill|pa_hospital|o_hospital|l_heart|fa_ill2|p_wife_ill|l_hp_crisis|pa_dad_check|pa_mom_sign|l_checkup|xr_dad_project)$/, 'hospital'],
+    [/^(k_birth|k_night|k_word|p_early_born|ed_exams)$/, 'newborn'], [/^(k_school|k_play|k_bully|k_dad_job|k_sick|k_hobby)$/, 'school'],
+    [/^(k_teen|k_secret|k_dark|k_tattoo|k_gap|k_career)$/, 'teen_door'], [/^(fam_dinner|fam_inlaws|pa_anniv|fam_wife_bday|fam_siblings|fam_empty|l_b\d+)$/, 'family_table'],
+    [/^(k_grand|o_teach|o_great_grand|k_grandweek|pa_grandkid|pa_grandkids_summer)$/, 'grandkid'],
+    [/^(y_party_katya|y_band|y_birthday|f_reunion|fr_photo|ni_students)$/, 'dorm'], [/^(f_crisis|f_gray|fr_secret|f_help|fa_depr1|fa_depr2|fa_drink2|fr_lyokha_envy|xr_friend_kid|xr_truth)$/, 'kitchen_night'],
+    [/^(fa_crash1|fa_crash2|fr_max_road|y_max)$/, 'moto'], [/^(p_ask_out|p_first_date|p_romance|p_late|p_anya_1|p_lena_1|p_propose)$/, 'couple_walk'],
+    [/^(p_wedding|f_wedding|k_wedding|o_golden|fr_stag)$/, 'wedding'], [/^(p_quarrel|p_crisis|p_divorce|p_breakup|p_affair_found|p_routine)$/, 'quarrel'],
+    [/^(p_lena_2|p_katya_2|k_leave|ar_start|ar_end|xr_city_love|xr_city_after|fr_abroad)$/, 'station'],
+    [/^(w_overtime|w_promo|w_boss|w_dilemma|w_headhunt|w_burnout|w_first_day|w_offer|w_daily|w_mentor|w_synergy|w_old_call|w_switch_doubt)$/, 'office'],
+    [/^(l_gray_\w+|p_lonely|o_alone|w_unemployed)$/, 'rain_window'],
+    [/^(ar_hard|ar_letter|ar_skill|ni_army)$/, 'army'], [/^(ni_first|ni_first_pay|ni_master)$/, 'market'], [/^(l_newyear|y_newyear|ni_newyear)$/, 'newyear'],
+    [/^(ab_arrive|ab_parents|ab_homesick|ab_friend)$/, 'airport'], [/^(y_hike|y_sea2|y_summer1)$/, 'campfire'], [/^(y_grad|g_defense|ni_late_done)$/, 'graduation'],
+    [/^(o_parent_passing|o_friend_passing|o_wife_passing|pa_after)$/, 'cemetery'], [/^(p_anniv|fam_empty)$/, 'old_dance'], [/^(l_vacation|pa_trip)$/, 'sea']
+  ];
+  Z.sceneOf = function (id) { for (var i = 0; i < Z.SCENE_RULES.length; i++) if (Z.SCENE_RULES[i][0].test(id)) return Z.SCENE_RULES[i][1]; return null; };
   Z.artFor = function (s, id) {
+    var sc = Z.sceneOf(id);
+    if (sc && Z.SCENES && Z.SCENES[sc]) return Z.SCENES[sc];
     var st = Z.styleFor(s).id, A = (Z.ART || {})[st] || {}, a = Z.age(s);
     var stage = A.stage;
     if (A[Z.themeOf(id)]) return A[Z.themeOf(id)];

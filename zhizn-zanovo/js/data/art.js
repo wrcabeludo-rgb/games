@@ -13,4 +13,6 @@
     liner: { stage: 'art/liner/stage.webp' },        // 80–89 — тонкий линер, только контуры
     oneline: { stage: 'art/oneline/stage.webp' }     // 90–100 — одна непрерывная линия
   };
+  // Сцены-линер из листов-раскадровок (tools/slice_sheet.py дописывает сюда сам)
+  Z.SCENES = {};
 })();
