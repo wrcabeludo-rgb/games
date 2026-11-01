@@ -16,6 +16,8 @@
   события — через `Z.inMonth`. Незнакомец выключен (`Z.STRANGER_ON = false`) по решению владельца.
 - Перекрёстки (`ev_crossroads.js`, ★ на карте судьбы) — выбор с ценой: что-то приобретаешь, что-то теряешь, последствия через месяцы.
 - Картинки — `art/<стиль>/stage.webp` (1200×800), список — `js/data/art.js`, исходники — `art_src/stage/`.
+  Сцены (стиль линера, в любом возрасте) — `art/scenes/<ключ>.webp`, листы 3×3 из ChatGPT (`docs/ART_SHEETS.md`) режет
+  `tools/slice_sheet.py`, привязка к событиям — `Z.SCENE_RULES` (`engine.js`). Генерировать через Chrome умеет только сессия на Маке.
 - Публикация — GitHub Actions `.github/workflows/zhizn-pages.yml` при пуше в `main`:
   https://wrcabeludo-rgb.github.io/games/ — **всегда давать владельцу ссылку.**
 
