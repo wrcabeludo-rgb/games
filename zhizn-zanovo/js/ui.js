@@ -191,9 +191,10 @@
       }).join('') + '</div>';
     } else {
       if (inst.done.res || inst.done.ff) html += '<div class="result">' + paras(inst.done.res || '') + (inst.done.ff ? '<p class="ff">' + esc(inst.done.ff) + '</p>' : '') + '</div>';
-      if (inst.done.d.length) html += '<div class="deltas">' + inst.done.d.map(function (x) {
-        return '<span class="' + (x.d > 0 ? 'up' : 'down') + '">' + (x.rel ? '♥ ' : '') + esc(x.n) + ' ' + (x.d > 0 ? '+' : '−') + Math.abs(x.d) + '</span>';
-      }).join('') + '</div>';
+      // Без цифр (решение владельца): только тихая строка, кто стал ближе или дальше
+      var up = inst.done.d.filter(function (x) { return x.rel && x.d >= 6; }).map(function (x) { return x.n; }),
+        dn = inst.done.d.filter(function (x) { return x.rel && x.d <= -4; }).map(function (x) { return x.n; });
+      if (up.length || dn.length) html += '<div class="deltas">' + (up.length ? '<span class="up">♥ ' + esc(up.join(', ')) + ' — ближе</span>' : '') + (dn.length ? '<span class="down">' + esc(dn.join(', ')) + ' — чуть дальше</span>' : '') + '</div>';
       var more = t.i + 1 < t.q.length;
       html += '<button class="btn primary next" id="next">' + (S.over ? 'Итоги жизни' : more ? 'Дальше' : nextLabel()) + '</button>';
     }
