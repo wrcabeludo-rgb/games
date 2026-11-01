@@ -50,8 +50,11 @@ function check(text, where) {
 const MASC = /^[а-яё]{2,}(л|лся)$/i, FEM = /^[а-яё]{2,}(ла|лась)$/i;
 const NOT_VERB = /^(стол|пол|посол|котёл|орёл|осёл|угол|зал|вокзал|сигнал|канал|финал|бал|идеал|материал|шла|пила|сила|мила|тела|дела|села|игла|скала|мгла|стрела|юла|была|мала|цела|бела|смела|весела|ила|гола|школа)$/i;
 function genderCheck(text, s, c, where) {
-  ['K', 'F', 'P', 'X', 'C1', 'C2'].forEach(k => {
+  const keys = ['K', 'F', 'P', 'X', 'C1', 'C2'];
+  const all = keys.map(k => Z.who(s, c, k)).filter(p => p && p.n);
+  keys.forEach(k => {
     const p = Z.who(s, c, k); if (!p || !p.n) return;
+    if (all.some(q => q !== p && q.n === p.n && q.fem !== p.fem)) return; // тёзки разного пола — не понять, о ком глагол
     const name = p.n; if (name.length < 2) return;
     const re = new RegExp('(^|[^А-Яа-яЁё])' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s+([а-яё]+)', 'g');
     let m;

@@ -32,7 +32,7 @@
       ]
     },
     {
-      id: 'w_first_day', per: 'J', ctx: function (s) { return s.job ? { J: s.job } : null; }, w: 40, if: function (s) { return working(s) && s.jobM < 4; }, title: 'Новенький',
+      id: 'w_first_day', per: 'J', ctx: function (s) { return s.job ? { J: s.job } : null; }, w: 40, if: function (s, c) { return working(s) && s.jobM < 4 && s.job === c.J; }, title: 'Новенький',
       text: function (s) { return 'Новое место: ' + Z.jobTitle(s) + '. Коллеги присматриваются. В курилке тебя рассматривает ироничный парень: «Новенький? Я Лёха. Совет: никогда не соглашайся на первое задание шефа после обеда».'; },
       choices: [
         { t: 'Посмеяться и подружиться', fx: 'met:lyokha @lyokha+12 joy+3', res: 'С Лёхой работать веселее. Он знает всё про всех и ничего не принимает всерьёз.' },
