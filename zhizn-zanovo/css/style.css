@@ -264,3 +264,11 @@ body[data-style="oneline"] { --acc: #e3b15a; --acc2: #c99545; }
 .fnode.un .fh b { color: var(--gray); }
 .fnode.un small { color: var(--gray); font-size: 12.5px; }
 .passage.calm .sun { display: none; }
+
+/* 0.7: звонок с таймером, строка из будущего, коробка с памятным */
+.timer { height: 4px; border-radius: 2px; background: rgba(255,255,255,.12); margin: 14px 0 4px; overflow: hidden; }
+.timer i { display: block; height: 100%; width: 100%; background: #e9a26b; transform-origin: left; animation: tdrain linear forwards; }
+@keyframes tdrain { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+@media (prefers-reduced-motion: reduce) { .timer i { animation-name: tdrain; } }
+.result p.ff { font-style: italic; color: var(--gray); font-size: 14px; border-left: 2px solid rgba(233,162,107,.5); padding-left: 10px; margin-top: 12px; }
+.box { list-style: none; padding: 0; } .box li { margin-bottom: 10px; } .box li b { display: block; color: #f6dcc0; } .box li span { font-size: 13.5px; color: var(--gray); font-style: italic; }

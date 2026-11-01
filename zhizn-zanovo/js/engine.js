@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var Z = window.Z = window.Z || {};
-  Z.VERSION = '0.6.1';
+  Z.VERSION = '0.7.0';
   Z.EV = {};
   Z.evList = [];
   // Крючки: после выбора (s, e, choice, ctx, inst, done) и после сборки хода (s, turn)

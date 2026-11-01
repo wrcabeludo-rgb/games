@@ -157,11 +157,17 @@
       }
     },
     {
-      id: 'ch_end', manual: true, chapter: true, map: true, title: function (s, c) { return 'Глава ' + Z.ROMAN[c.C] + ' закончилась'; },
+      id: 'ch_end', manual: true, chapter: true, title: function (s, c) { return '«' + Z.CHAPTERS[c.C].n + '»'; },
+      // Коротко, без итогов: одна строка о том, что запомнится из главы
       text: function (s, c) {
-        var t = '«' + Z.CHAPTERS[c.C].n + '» позади.';
+        var rg = Z.chRange(c.C), logs = (s.log || []).filter(function (l) { return l.m >= rg[0] && l.m < rg[1]; });
+        var best = null, PR = ['love', 'kid', 'loss', 'family', 'thing'];
+        PR.some(function (k) { var x = logs.filter(function (l) { return l.k === k; }); if (x.length) { best = R.pick(x); return true; } return false; });
+        if (!best && logs.length) best = R.pick(logs);
+        var t = R.pick(['Глава закрылась тихо, как дверь в подъезде.', 'Эти годы прошли — как проходят все: незаметно, а потом сразу.', 'Страница перевёрнута.']);
+        if (best) t += '\n\nИз этих лет останется: ' + best.t.charAt(0).toLowerCase() + best.t.slice(1);
         var it = s.intent && s.intent.ch === c.C ? s.intent : null;
-        if (it) t += ' Ты хотел, чтобы эта глава была про «' + Z.VALUES[it.k].n.toLowerCase() + '». ' + (it.hits >= 6 ? 'Так и вышло: ' + it.hits + ' ' + Z.plural(it.hits, 'шаг', 'шага', 'шагов') + ' в эту сторону.' : it.hits >= 2 ? 'Получилось отчасти: ' + it.hits + ' ' + Z.plural(it.hits, 'шаг', 'шага', 'шагов') + '.' : 'Жизнь повела в другую сторону.');
+        if (it) t += '\n\n' + (it.hits >= 4 ? 'Ты хотел, чтобы эта глава была про «' + Z.VALUES[it.k].n.toLowerCase() + '». Так и вышло.' : 'Ты хотел — про «' + Z.VALUES[it.k].n.toLowerCase() + '». Жизнь повела иначе.');
         return t;
       },
       choices: [{ t: 'Дальше', res: '' }]

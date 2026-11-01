@@ -185,11 +185,12 @@
         if (a.multi) html += '<textarea class="inp area" id="askv" maxlength="600" rows="4" placeholder="' + esc(a.ph) + '"></textarea>';
         else html += '<label class="ask">' + esc(a.label) + '<input class="inp" id="askv" maxlength="20" placeholder="' + esc(inst.ph) + '"></label>';
       }
+      if (e.timer) html += '<div class="timer"><i style="animation-duration:' + e.timer + 's"></i></div>';
       html += '<div class="choices">' + V.choices.map(function (c, i) {
-        return '<button class="choice" data-i="' + i + '">' + esc(Z.t(c.t, S, ctx)) + '</button>';
+        return c.late ? '' : '<button class="choice" data-i="' + i + '">' + esc(Z.t(c.t, S, ctx)) + '</button>';
       }).join('') + '</div>';
     } else {
-      if (inst.done.res) html += '<div class="result">' + paras(inst.done.res) + '</div>';
+      if (inst.done.res || inst.done.ff) html += '<div class="result">' + paras(inst.done.res || '') + (inst.done.ff ? '<p class="ff">' + esc(inst.done.ff) + '</p>' : '') + '</div>';
       if (inst.done.d.length) html += '<div class="deltas">' + inst.done.d.map(function (x) {
         return '<span class="' + (x.d > 0 ? 'up' : 'down') + '">' + (x.rel ? '♥ ' : '') + esc(x.n) + ' ' + (x.d > 0 ? '+' : '−') + Math.abs(x.d) + '</span>';
       }).join('') + '</div>';
@@ -287,9 +288,23 @@
     draw();
   }
 
+  var tmr = null;
   function bindLife() {
+    if (tmr) { clearTimeout(tmr); tmr = null; }
+    var tc = S.turn && S.turn.q[S.turn.i], te = tc && !tc.done && Z.EV[tc.id];
+    if (te && te.timer) {
+      var lateI = Z.view(S, tc).choices.findIndex(function (c) { return c.late; });
+      var startT = Date.now();
+      var fire = function () {
+        if (document.hidden) { tmr = setTimeout(fire, 500); return; }
+        tmr = null; if (S.turn.q[S.turn.i] !== tc || tc.done || lateI < 0) return;
+        Z.apply(S, lateI, null); Z.buzz([60, 40, 60]); sound(); save(); render();
+      };
+      tmr = setTimeout(fire, te.timer * 1000);
+    }
     app.querySelectorAll('.choice').forEach(function (b) {
       b.onclick = function () {
+        if (tmr) { clearTimeout(tmr); tmr = null; }
         var t = S.turn, inst = t.q[t.i];
         var inp = h('#askv'), multi = inp && inp.tagName === 'TEXTAREA';
         var val = inp ? (inp.value.trim() || (multi ? '' : inst.ph)) : null;
@@ -338,6 +353,10 @@
       (s.job && !s.student ? ' · ' + (s.fit[s.job] >= 30 ? 'любимая работа' : s.fit[s.job] >= 15 ? 'нравится' : 'просто работа') : '') + '</small></div></li>' +
       ((s.career || []).length ? '<li><div><b>Путь</b><small>' + (s.career || []).map(function (c) { var y = Math.max(0, Math.round(((c.to == null ? s.m : c.to) - c.from) / 12)); return esc(Z.cap(Z.JOBS[c.j].n)) + ' — ' + (y ? Z.yearsStr(y) : 'меньше года') + (c.to == null ? ' (сейчас)' : ''); }).join('<br>') + '</small></div></li>' : '') +
       '<li><div><b>Мастерство</b><small>' + (s.job && !s.student ? 'В нынешней профессии. В каждой профессии оно своё: опыт смежных дел частично переносится.' : 'Учёба и общие навыки.') + '</small></div></li></ul>';
+    var TH = Object.keys(s.things || {}).sort(function (a, b) { return s.things[a] - s.things[b]; });
+    if (TH.length) html += '<h4>Коробка с памятным</h4><ul>' + TH.map(function (k) { return '<li><div><b>' + esc(Z.THINGS[k].n) + '</b><small>' + esc(Z.THINGS[k].d) + '</small></div></li>'; }).join('') + '</ul>';
+    var RI = Object.keys(s.rit || {});
+    if (RI.length) html += '<h4>Наши традиции</h4><ul>' + RI.map(function (k) { var r = s.rit[k]; return '<li><div><b>' + esc(Z.cap(Z.RITUALS[k].n)) + '</b><small>' + (r.ended != null ? 'Кончилась' + (r.last != null ? '. Последний раз — ' + Z.dateStr(s, r.last) : '') : r.n ? Z.cap(r.n + ' ' + Z.plural(r.n, 'раз', 'раза', 'раз')) + ' — и дальше' : 'Только началась') + '</small></div></li>'; }).join('') + '</ul>';
     var R = s.setup.regrets || {};
     if (Object.keys(R).length) html += '<h4>Что я хочу изменить</h4><ul class="goals">' + Object.keys(R).map(function (k) { return '<li>' + esc(Z.REGRETS[k]) + '</li>'; }).join('') + '</ul>';
     return html + '</section>';
@@ -426,6 +445,9 @@
     got.forEach(function (id) { if (!have[id]) have[id] = Date.now(); }); Z.achSave(have);
     var gotSet = {}; got.forEach(function (id) { gotSet[id] = 1; });
     if (got.length) html += '<h4>Достижения этой жизни · ' + got.length + '</h4>' + achList(gotSet, fresh, true);
+    var TH = Object.keys(S.things || {});
+    if (TH.length) html += '<h4>Что осталось в коробке</h4><ul class="box">' + TH.map(function (k) { return '<li><b>' + esc(Z.THINGS[k].n) + '</b><span>' + esc(Z.THINGS[k].d) + '</span></li>'; }).join('') + '</ul>';
+    if ((S.letters || []).length) html += '<h4>Письма, которые некуда отправить</h4><ul class="diary">' + S.letters.map(function (l) { return '<li><span>' + esc(Z.cap(S.pp[l.to].forms.d)) + ' · ' + Z.dateStr(S, l.m) + '</span>' + esc(l.t) + '</li>'; }).join('') + '</ul>';
     if ((S.diary || []).length) html += '<h4>Твои ответы</h4><ul class="diary">' + S.diary.map(function (d) { return '<li><span>' + esc(Z.PAUSES[d.q] ? Z.PAUSES[d.q](S) : '') + '</span>' + esc(d.t) + '</li>'; }).join('') + '</ul>';
     html += '<h4>Что взять с собой в настоящую жизнь</h4><ul class="refl">' + E.refl.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>';
     html += '<p class="ver">Жизнь заново · версия ' + Z.VERSION + '</p><button class="btn" id="mape">Карта судьбы</button><button class="btn" id="albe">Альбом жизней</button><button class="btn" id="achall">Все достижения</button><button class="btn" id="chron">Летопись этой жизни</button><button class="btn primary" id="again">Прожить ещё раз</button></div>';

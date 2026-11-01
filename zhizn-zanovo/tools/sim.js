@@ -49,7 +49,7 @@ const SEASON = [[/Картошку копать/, [7, 8]], [/Пасх/, [3, 4]],
 const WORK_ONLY = ['w_overtime', 'w_daily', 'w_dilemma', 'w_first_day', 'w_boss', 'w_burnout', 'w_headhunt', 'w_layoff', 'w_promo', 'w_mentor', 'w_ownbiz_solo', 'w_synergy', 'w_old_call', 'w_retire', 'fam_wife_career'].filter(id => id !== 'fam_wife_career');
 const EMPLOYED_ONLY = ['w_boss', 'w_headhunt', 'w_layoff', 'w_ownbiz_solo', 'p_olga_meet'];
 const KIDS_RE = /(твои дети|твоих детей|ваши дети|Дети |дети |детьми|внуков|внуки|внука |внучк|правнук|Ваш ребёнок)/;
-const KIDS_OK = ['y_summer1', 'pa_anniv', 'y_internship', 'w_daily', 'w_dilemma', 'w_first_day', 'g_teach', 'fr_godparent', 'fr_serega_dad', 'f_help', 'f_reunion', 'k_birth', 'p_kids_talk', 'fam_empty', 'fa_pasha_debt', 'f_crisis', 'pa_story', 'o_great_grand'];
+const KIDS_OK = ['he_last', 'y_summer1', 'pa_anniv', 'y_internship', 'w_daily', 'w_dilemma', 'w_first_day', 'g_teach', 'fr_godparent', 'fr_serega_dad', 'f_help', 'f_reunion', 'k_birth', 'p_kids_talk', 'fam_empty', 'fa_pasha_debt', 'f_crisis', 'pa_story', 'o_great_grand'];
 const YEARS = { 'пять': 5, 'десять': 10, 'пятнадцать': 15, 'двадцать': 20, 'тридцать': 30, 'сорок': 40 };
 const YEARS_RE = /(пять|десять|пятнадцать|двадцать|тридцать|сорок) лет (назад|вместе|не виделись|не разговаривали)/gi;
 function problem(msg) { problems.push(msg); }
