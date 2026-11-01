@@ -70,7 +70,9 @@
   Z.artFor = function (s, id) {
     var st = Z.styleFor(s).id, A = (Z.ART || {})[st] || {}, a = Z.age(s);
     var stage = (a >= 90 && A.stage_90) || (a >= 80 && A.stage_80) || A.stage;
-    return A[Z.themeOf(id)] || stage || null;
+    if (A[Z.themeOf(id)]) return A[Z.themeOf(id)];
+    // Обложка десятилетия — только на ключевых карточках, чтобы не повторяться
+    return /^(ch_start|y_start|final_now|l_b\d+)$/.test(id) ? stage || null : null;
   };
 
   // ---------- Склонение имён (эвристика для русских имён) ----------

@@ -222,3 +222,4 @@ body[data-style="graphite"] { --acc: #c9c4bd; --acc2: #8d8794; }
 
 .card.chapend h3 { letter-spacing: .2em; }
 .card.chapend > p { font-size: 16px; color: var(--dim); }
+.card.chapter .illus { width: 100%; margin: 0 0 22px; border-radius: 14px; }

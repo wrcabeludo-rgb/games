@@ -34,7 +34,7 @@ jobs:
       - name: Сборка сайта
         run: |
           mkdir -p _site
-          cp -r zhizn-zanovo/index.html zhizn-zanovo/manifest.webmanifest zhizn-zanovo/sw.js zhizn-zanovo/css zhizn-zanovo/js zhizn-zanovo/icons _site/
+          cp -r zhizn-zanovo/index.html zhizn-zanovo/manifest.webmanifest zhizn-zanovo/sw.js zhizn-zanovo/css zhizn-zanovo/js zhizn-zanovo/icons zhizn-zanovo/art _site/
       - uses: actions/configure-pages@v5
         with:
           enablement: true

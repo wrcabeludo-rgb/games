@@ -170,7 +170,7 @@
     save();
     var art = Z.artFor(S, inst.id);
     var cls = e.map ? ' chapend' : e.chapter ? ' chapter' : e.pause ? ' pause' : inst.id === 'stranger' || inst.id === 'stranger_reveal' ? ' stranger' : '';
-    html += '<article class="card' + cls + '">' + (art && !e.chapter && !e.pause ? '<img class="illus" src="' + art + '" alt="" loading="lazy">' : '') + (V.title ? '<h3>' + esc(V.title) + '</h3>' : '') + paras(V.text);
+    html += '<article class="card' + cls + '">' + (art && !e.pause && !e.map ? '<img class="illus" src="' + art + '" alt="" loading="lazy">' : '') + (V.title ? '<h3>' + esc(V.title) + '</h3>' : '') + paras(V.text);
     if (e.map) html += mapHtml(S, ctx.C);
     if (!inst.done) {
       if (e.ask) {
